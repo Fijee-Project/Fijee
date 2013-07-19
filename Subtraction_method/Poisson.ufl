@@ -1,0 +1,40 @@
+#
+# Functions space
+#
+cell    = triangle
+element = FiniteElement("Lagrange", cell, 1)
+
+#
+# Function definition
+#
+
+# Trial and test functions
+Phi_s   = TrialFunction(element)
+v       = TestFunction(element)
+n       = cell.n
+#n       = FacetNormal(mesh)
+#n       = VectorConstant(cell)
+#
+a_inf   = Constant(cell)
+a_1     = Constant(cell)
+a_2     = Constant(cell)
+a_3     = Constant(cell)
+a_4     = Constant(cell)
+Phi_0   = Coefficient(element)
+
+#
+# Weak variational form
+#
+
+# Bilinear form
+a  = inner( a_1 * grad(Phi_s), grad(v) ) * dx(1) 
+a += inner( a_2 * grad(Phi_s), grad(v) ) * dx(2)
+a += inner( a_3 * grad(Phi_s), grad(v) ) * dx(3)
+a += inner( a_4 * grad(Phi_s), grad(v) ) * dx(4)
+
+# Linear form
+L  = (a_inf - a_1)*inner( grad(Phi_0), grad(v) ) * dx(1)
+L += (a_inf - a_2)*inner( grad(Phi_0), grad(v) ) * dx(2) 
+L += (a_inf - a_3)*inner( grad(Phi_0), grad(v) ) * dx(3) 
+L += (a_inf - a_4)*inner( grad(Phi_0), grad(v) ) * dx(4) 
+L -= a_inf * v * inner(grad(Phi_0), n) * ds(0)

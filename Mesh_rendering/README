@@ -1,0 +1,3 @@
+export LD_LIBRARY_PATH=/home/cobigo/devel/C++/CGAL/install/lib:/home/cobigo/devel/C++/VTK/install/lib/vtk-5.10/:$LD_LIBRARY_PATH
+export SUBJECTS_DIR=/home/cobigo/subjects
+export SUBJECT=GazzDCS0004mgh
