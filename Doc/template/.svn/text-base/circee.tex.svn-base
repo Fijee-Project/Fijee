@@ -1,0 +1,152 @@
+\documentclass[a4paper]{book}
+\usepackage{makeidx}
+\usepackage{graphicx}
+\usepackage{multicol}
+\usepackage{float}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{ifthen}
+\usepackage[table]{xcolor}
+\usepackage{textcomp}
+\usepackage{alltt}
+\usepackage{ifpdf}
+\ifpdf
+\usepackage[pdftex,
+            pagebackref=true,
+            colorlinks=true,
+            linkcolor=blue,
+            unicode
+           ]{hyperref}
+\else
+\usepackage[ps2pdf,
+            pagebackref=true,
+            colorlinks=true,
+            linkcolor=blue,
+            unicode
+           ]{hyperref}
+\usepackage{pspicture}
+\fi
+\usepackage[utf8]{inputenc}
+\usepackage{mathptmx}
+\usepackage[scaled=.90]{helvet}
+\usepackage{courier}
+\usepackage{doxygen}
+\lstset{language=C++,inputencoding=utf8,basicstyle=\footnotesize,breaklines=true,breakatwhitespace=true,tabsize=8,numbers=left }
+
+\usepackage[OT1]{fontenc}
+\usepackage{lastpage}
+%\usepackage{draftcopy}
+
+%%
+%% informations AQ
+%%
+\newcommand{\titre}{Validation/qualification code Monte-Carlo
+  Tripoli4~: r\'esultats} 
+\newcommand{\auteur}{\mbox{Yann Cobigo}}
+\newcommand{ \Page}{\thepage/\pageref{LastPage}}
+\newcommand{ \Date}{\today}
+\newcommand{\numserma}{00-0000}
+\newcommand{\indicerapport}{A}
+\newcommand{\LABORATOIRE}{CP2C}
+\newcommand{\Tripoli}{$\times$}
+\newcommand{\Darwin}{}
+\newcommand{\Narmer}{}
+\newcommand{\Minutes}{}
+\newcommand{\Releve}{$\times$}
+%
+% titre  LaTeX :  si on decommante  les trois lignes  suivantes, il
+%  faut  decommanter la ligne maketitle qq lignes suivantes.
+%
+\newcommand{\Nom}{\titre}
+\newcommand{\AUTEUR}{\auteur}
+\newcommand{\PAGE}{\Page}
+\newcommand{\DATE}{\Date}
+\newcommand{\NUMRAPPORT}{\numserma}
+\newcommand{\INDICERAPPORT}{\indicerapport}
+\newcommand{\SERVICE}{SERMA}
+\newcommand{\TRIPOLI}{\Tripoli}
+\newcommand{\DARWIN}{\Darwin}
+\newcommand{\NARMER}{\Narmer}
+\newcommand{\MINUTES}{\Minutes}
+%
+%%
+%%
+\usepackage{graphics}
+%
+% index information
+\makeindex
+\setcounter{tocdepth}{3}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\begin{document}
+%\maketitle
+\begin{quote}
+%
+\begin{picture}(19.1,3.5)(0,0)
+         \put(0.14,3.0){\framebox(8.0,0.5){}}
+         \put(0.5,3.1){\bf \large Client~: CEA Saclay}
+         \put(0.14,1.99){\framebox(8.0,1.0){}}
+         \put(0.5,2.55){\bf \large Objet~: CIRCEE software overview}
+         \put(0.5,2.09){\bf \large Lieu~~~: Saclay, \Date}
+         \put(9,3.0) {\framebox(8.6,0.5){\bf R\'ef\'erence~: CIRCEE/TECH/001/A}}
+         \put(9,2.52) {\framebox(0.3,0.3){}}
+         \put(9.,2.57){\Minutes}
+         \put(9.5,2.52){\bf Minutes de la r\'eunion}
+         \put(9,2.06) {\framebox(0.3,0.3){}}
+         \put(9.,2.11){\Releve}
+         \put(9.5,2.06){\bf Relev\'e des d\'ecisions et des actions}
+\end{picture}
+%
+%\vspace*{2cm}
+%
+\begin{center}
+\textsc{\textbf{\LARGE Prestation pour la r\'e\'ecriture du code CIRCEE de Calculs d'iso-doses appliqu\'es au risque de Criticit\'e en Environnement Evolutif}}
+\end{center}
+
+\vspace*{2cm}
+
+Diffusion:\\\hspace*{4cm}
+\begin{tabular}{l}
+V. Mass\'e (CEA)\\
+A. Gagnier (CEA)\\
+C. Magnaud (CEA)\\
+F. Ab\'egil\'e(C-S)\\
+M. Gonzal\`es(C-S)\\
+\end{tabular}
+\vspace*{1cm}
+
+R\'edacteur:\\\hspace*{4cm}
+\begin{tabular}{l}
+Y. Cobigo (C-S)\\
+\end{tabular}
+
+\vspace*{2cm}
+\begin{center}
+\textsc{\textbf{\large Historique des versions}}
+\end{center}
+
+\vspace*{1cm}
+\begin{center}
+  \begin{tabular}{|c|c|c|c|} \hline
+    Date & Indice & R\'edacteur de la version & Objet des modifications \\ \hline
+    12/11/2008 & A & Y. Cobigo & Cr\'eation de la premi\`ere version \\ \hline
+  \end{tabular}
+\end{center}
+
+\newpage
+
+\vspace*{3cm}
+\hypersetup{pageanchor=false}
+\pagenumbering{roman}
+\tableofcontents
+\clearemptydoublepage
+\pagenumbering{arabic}
+\hypersetup{pageanchor=true}
+
+
+%--------------------- here copy the content ---------------------%
+%-----------------------------------------------------------------%
+
+
+\end{quote}
+\end{document}
