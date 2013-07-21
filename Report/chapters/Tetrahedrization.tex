@@ -1,0 +1,68 @@
+A mesh is a representation of an object (a volume or shape in the plane) by a finite number of simple elements. Among meshes, simplicial meshes\index{simplicial meshes} are built from simplices. A simplicial mesh is a collection of simplices, with disjoint interiors, such as the intersection of two simplices is either empty or a simplex with lower dimension. \\
+The simplicial meshes are very popular for representing surfaces, volumes. They are suitable for numerical simulation. For instance, the finite element method allows the approximate solution of systems of partial differential equations ({\it c.f.} section~\ref{FEM}).
+
+
+\section{Mathematical background}
+
+Voronoi diagrams are versatile structures which encode proximity relationships between objects. Delaunay triangulations, which are geometrically dual to Voronoi diagrams, are a classical tool in the field of mesh generation and mesh processing due to its optimality properties.
+
+\subsection{Voronoi Diagram}
+
+A Voronoi diagram is a way of dividing space into a number of regions. The regions are called Voronoi cells.
+
+\paragraph{Definition:}
+          {\it 
+            lala
+          }
+
+\subsection{Delaunay Triangulation}
+
+The Delaunay triangulation of a space $E$ is defined as the geometric dual of the Voronoi diagram: there is an edge between two points $p_{i}$ and $p_{j}$ in the Delaunay triangulation if and only if their Voronoi cells $V(p_{i})$ and $V(p_{j})$ have a non-empty intersection. It yields a triangulation of the space $E$, that is to say a partition of the convex hull of $E$ into $d$-dimensional simplices (i.e. into triangles in 2D, into tetrahedra in 3D and so on). The fundamental property of the Delaunay triangulation is called the empty circle (empty sphere in 3D) property: in 2D (resp. in 3D), a triangle (resp. tetrahedron) belongs to the Delaunay triangulation if and only if its circumcircle (resp. circumsphere) does not contain any other points of E in its interior.
+
+
+\paragraph{Definition:}
+          {\it 
+            lala
+          }
+
+\subsection{Restricted Delaunay triangulation}
+
+
+
+\paragraph{Meshing Volumes Bounded by Piecewise Smooth Surfaces~\cite{LRineau2007}}{
+
+
+
+
+Les maillages simpliciaux sont un outil de choix pour la méthode des éléments finis, et plus généralement pour beaucoup des méthodes de calcul modélisant des systèmes physiques. Cependant, la création de tels maillages est parfois problématique. En effet, la génération d'un maillage représentant une forme continue, et approprié pour une simulation numérique ou une visualisation, peut consommer beaucoup de ressources de temps, ou de mémoire. Dans les cas compliqués, il peut être impossible de générer sans intervention manuelle un maillage répondant aux besoins du calcul. Ceci explique pourquoi la génération automatique de maillages a donné lieu à une littérature fournie. 
+
+La modélisation inforamtique de la tête d'un patient (cerveau, cr\^ane, scalp, ...) est l'union d'union de surface lisses. Un maillage polyhédrique, aussi fin soit-il, sera une approximation de la surface cible. Nous pouvons mesurer cette approximation. 
+
+Aproximation topologique~: il convient de déterminer une topologie de maillage semblable à celle de l'objet cible. Le bord d'un objet volumique doit correspondre à un sous-ensemble de triangles du maillage, homéomorphe lui-même au bord de l'objet. De plus, si l'objet a des cloisons intérieures, pour séparer diférentes zones, le maillage doit représenter ces cloisons.
+
+En plus de l'approximation topologique, un deuxième critère de qualité d'un maillage est l'approximation des caractéristiques géométriques de l'objet.
+
+ - Les maillages produits par la méthode de génération de maillages doivent être proches, en distance, des objets de départ. La distance de Hausdorf donne un moyen de quantifer la qualité de l'approximation géométrique.
+ - Quand l'objet étudié est volumique, le volume du maillage doit être proche du volume de l'objet.
+
+
+
+Dans les applications de calcul, du type éléments finis, plus le maillage est dense plus la précision du calcul augmente. Cependant, la quantité de temps nécessaire à l'accomplissement d'un calcul basé sur un maillage est souvent proportionnelle au nombre d'éléments du maillage. Un compromis doit donc être trouvé entre la précision et le temps de calcul. La meilleure façon d'améliorer ce compromis est de créer un maillage avec des tailles d'éléments localement adaptés à la précision nécessaire. La forme des éléments d'un maillage simplicial est capitale, pour les applications de calcul. Dans les méthodes de résolution approchée d'équations différentielles, à la fois les grands angles et les petits angles doivent être évités [She02b, She]. L'erreur d'approximation de la solution dépend principalement de la taille des éléments. Cependant, pour une taille d'éléments donnée, la présence de grands angles dans le maillage augmente l'erreur d'approximation du gradient de la solution. Si certains angles sont proches de 180°, il se peut aussi que la méthode de calcul ne converge pas vers la solution [BA76]. Les petits angles, ainsi que les grands angles, dégradent le conditionnement du problème numérique, c'est-à-dire la stabilité de la solution par rapport aux erreurs d'arrondis du calcul. 
+
+\subsection{G\'en\'eration de maillages par raffinement de triangulations de Delaunay}
+
+La génération de maillages simpliciaux, par des méthodes automatisées, est une t\^ache ardue, et ce sujet a donné lieu à une importante littérature. Pour de larges références bibliographiques, le lecteur pourra se référer aux ouvrages [GF99] et [Geo01], aux articles de revue [Owe98] et [DW06], et à la thèse de Jonathan Richard Shewchuk [She97]. Cette section constitue un tour d'horizon des différentes méthodes de génération automatisée de maillages simpliciaux. Ces méthodes se classent principalement en trois catégories : les méthodes qui utilisent des grilles, celles qui fonctionnent par l'avancée d'un front, et celles qui utilisent les triangulations de Delaunay. Naturellement, cette classiffcation n'est pas exacte, et l'on verra que des méthodes hybrides ont aussi été développées.
+
+La troisième catégorie d'algorithmes de génération de maillage est constituée par tous les algorithmes qui raffinent une triangulation de Delaunay. Dans ce genre de méthode, un maillage initial est construit, en calculant simplement la triangulation Delaunay d'un ensemble de points. Ce maillage grossier est ensuite modifié itérativement, en ajoutant un sommet à la fois. L'intérêt de la communauté des maillages pour la triangulation de Delaunay tient à deux faits :
+ 
+ - premièrement, la triangulation de Delaunay donne une manière canonique de connecter les sommets d'un maillage, d'après le critère de la sphère vide (voir section 2.5 o\`u les propriétés des triangulations de Delaunay sont rappelées),
+ - deuxièmement, l'algorithme de Bowyer-Watson, qui tient son nom des auteurs de deux articles simultanés présentant le même algorithme [Bow81, Wat81], fournit une méthode efficace pour calculer des triangulations de Delaunay, en dimension quelconque et de manière incrémentale. Cette algorithme décrit comment mettre à jour une triangulation de Delaunay en dimension d : chacun des d-simplexes de la triangulation dont la sphère circonscrite contient le sommet v est retiré de la triangulation, ce qui crée une cavité polygonale en dimension d, lors de l'insertion d'un nouveau sommet (en dimension 2) ou polyédrique (en dimension 3 ou plus) dans la triangulation. Celle-ci est mise à jour en connectant chacun des sommets de la cavité au nouveau sommet v. L'algorithme de Bowyer-Watson décrit une méthode pour calculer cette cavité de manière efficace.
+L'idée d'utiliser la triangulation de Delaunay elle-même pour guider le choix du placement des sommets vient de François Hermeline [Her82], et William Frey [Fre87]. Ces deux articles posent les bases des méthodes de raffinement de Delaunay. Dans un premier temps, des sommets sont insérés sur le bord de l'objet à mailler, suffisamment rapprochés pour que les éléments du bord de l'objet soient représentés dans la triangulation de Delaunay par une union de simplexes. Puis, dans un deuxième temps, les simplexes de l'intérieur de l'objet qui ne satisfont pas les critères de taille ou de forme sont détruits par l'insertion d'un point, à leur barycentre ou au centre de leur sphère circonscrite.
+
+En dimension 3, le raffinement d'une triangulation de Delaunay ne permet pas de contrôler entièrement la forme des tétraèdres, mais seulement le rapport rayon-arête, qui est le rapport entre la longueur de la plus petite arête du tétraèdre et le rayon de la sphère circonscrite au tétraèdre. Le contrôle de ce rapport permet d'éliminer du maillage tous les tétraèdres mal formés, sauf une catégorie d'entre eux, que l'on appelle des slivers. Un sliver est un tétraèdre  ayant ses quatre sommets proches d'un cercle équatorial de sa sphère circonscrite, et espacés de manière uniforme le long de cercle équatorial. Un sliver a quatre angles dièdres très petits, et ses deux autres angles dièdres sont très grands. Siu-Wing Cheng et Tamal Dey ont proposé des algorithmes [CDE+00, CD02] qui permettent de retirer les slivers du maillage, dans une phase de post-traitement, en changeant la triangulation de Delaunay en une triangulation régulière, et en assignant des petits poids bien choisis au sommets. Li et Teng [LT01] ont proposé un algorithme de raffinement de Delaunay modifié, afin d'éviter la création de slivers pendant le raffinement de la triangulation de Delaunay.
+
+}
+
+\section{}
+
+
