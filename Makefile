@@ -2,7 +2,7 @@
 ## CONFIGURE ##
 ###############
 export PREFIX =
-DEBUG         = no
+DEBUG         = yes
 VERSION       = 1.0
 DIST          = fijee
 

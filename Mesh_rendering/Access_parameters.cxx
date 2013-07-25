@@ -129,10 +129,10 @@ DAp::Access_parameters():
 
   //
   // All segmentation nifti file (aseg.nii)
-  std::string nifti_eigen_values  = files_path_ + "/Diffusion_tensor.fsl2ascii/MoveToOrig/eigvals_aseg_ref.nii";
-  std::string nifti_eigen_vector1 = files_path_ + "/Diffusion_tensor.fsl2ascii/MoveToOrig/eigvec1_aseg_ref.nii";
-  std::string nifti_eigen_vector2 = files_path_ + "/Diffusion_tensor.fsl2ascii/MoveToOrig/eigvec2_aseg_ref.nii";
-  std::string nifti_eigen_vector3 = files_path_ + "/Diffusion_tensor.fsl2ascii/MoveToOrig/eigvec3_aseg_ref.nii";
+  std::string nifti_eigen_values  = files_path_ + "/Diffusion_tensor.fsl2ascii/eigvals.nii";
+  std::string nifti_eigen_vector1 = files_path_ + "/Diffusion_tensor.fsl2ascii/eigvec1.nii";
+  std::string nifti_eigen_vector2 = files_path_ + "/Diffusion_tensor.fsl2ascii/eigvec2.nii";
+  std::string nifti_eigen_vector3 = files_path_ + "/Diffusion_tensor.fsl2ascii/eigvec3.nii";
 
   //
   // nifti headers and files
@@ -284,56 +284,75 @@ DAp::Access_parameters():
 
   //
   // Allocate buffer and read 4D volume from data file
-  data_eigen_values_ = new float[ number_of_pixels_x_ * number_of_pixels_y_ * number_of_pixels_z_ * eigenvalues_number_of_layers_ ];
+  data_eigen_values_ = new float[ eigenvalues_number_of_pixels_x_ * 
+				  eigenvalues_number_of_pixels_y_ * 
+				  eigenvalues_number_of_pixels_z_ * 
+				  eigenvalues_number_of_layers_ ];
   if ( data_eigen_values_ == nullptr ) {
     fprintf(stderr, "\nError allocating data buffer for %s\n", nifti_eigen_values.c_str());
     exit(1);
   }
-  data_eigen_vector1_ = new float[ number_of_pixels_x_ * number_of_pixels_y_ * number_of_pixels_z_ * eigenvalues_number_of_layers_ ];
+  data_eigen_vector1_ = new float[ eigenvalues_number_of_pixels_x_ * 
+				   eigenvalues_number_of_pixels_y_ * 
+				   eigenvalues_number_of_pixels_z_ * 
+				   eigenvalues_number_of_layers_ ];
   if ( data_eigen_vector1_ == nullptr ) {
     fprintf(stderr, "\nError allocating data buffer for %s\n", nifti_eigen_vector1.c_str());
     exit(1);
   }
-  data_eigen_vector2_ = new float[ number_of_pixels_x_ * number_of_pixels_y_ * number_of_pixels_z_ * eigenvalues_number_of_layers_ ];
+  data_eigen_vector2_ = new float[ eigenvalues_number_of_pixels_x_ * 
+				   eigenvalues_number_of_pixels_y_ * 
+				   eigenvalues_number_of_pixels_z_ * 
+				   eigenvalues_number_of_layers_ ];
   if ( data_eigen_vector2_ == nullptr ) {
     fprintf(stderr, "\nError allocating data buffer for %s\n", nifti_eigen_vector2.c_str());
     exit(1);
   }
-  data_eigen_vector3_ = new float[ number_of_pixels_x_ * number_of_pixels_y_ * number_of_pixels_z_ * eigenvalues_number_of_layers_ ];
+  data_eigen_vector3_ = new float[ eigenvalues_number_of_pixels_x_ * 
+				   eigenvalues_number_of_pixels_y_ * 
+				   eigenvalues_number_of_pixels_z_ * 
+				   eigenvalues_number_of_layers_ ];
   if ( data_eigen_vector3_ == nullptr ) {
     fprintf(stderr, "\nError allocating data buffer for %s\n", nifti_eigen_vector3.c_str());
     exit(1);
   }
   //
   ret_eigenvalues = fread( data_eigen_values_, sizeof(float), 
-	       number_of_pixels_x_ * number_of_pixels_y_ * number_of_pixels_z_ * eigenvalues_number_of_layers_, 
-	       file_eigen_values);
-  if ( ret_eigenvalues != number_of_pixels_x_ * number_of_pixels_y_ * number_of_pixels_z_ * eigenvalues_number_of_layers_ ) {
-    fprintf(stderr, "\nError reading volume 1 from %s (%d)\n", nifti_eigen_values.c_str(), ret_eigenvalues);
+			   eigenvalues_number_of_pixels_x_ * 
+			   eigenvalues_number_of_pixels_y_ * 
+			   eigenvalues_number_of_pixels_z_ * 
+			   eigenvalues_number_of_layers_, file_eigen_values);
+  if ( ret_eigenvalues != eigenvalues_number_of_pixels_x_ * eigenvalues_number_of_pixels_y_ * eigenvalues_number_of_pixels_z_ * eigenvalues_number_of_layers_ ) {
+    fprintf(stderr, "\nError reading volume 1 from %s (%d) \n", nifti_eigen_values.c_str(), ret_eigenvalues);
     exit(1);
   }
   ret_eigenvector1 = fread( data_eigen_vector1_, sizeof(float), 
-	       number_of_pixels_x_ * number_of_pixels_y_ * number_of_pixels_z_ * eigenvalues_number_of_layers_, 
-	       file_eigen_vector1);
-  if ( ret_eigenvector1 != number_of_pixels_x_ * number_of_pixels_y_ * number_of_pixels_z_ * eigenvalues_number_of_layers_ ) {
+			    eigenvalues_number_of_pixels_x_ * 
+			    eigenvalues_number_of_pixels_y_ * 
+			    eigenvalues_number_of_pixels_z_ * 
+			    eigenvalues_number_of_layers_, file_eigen_vector1);
+  if ( ret_eigenvector1 != eigenvalues_number_of_pixels_x_ * eigenvalues_number_of_pixels_y_ * eigenvalues_number_of_pixels_z_ * eigenvalues_number_of_layers_ ) {
     fprintf(stderr, "\nError reading volume 1 from %s (%d)\n", nifti_eigen_vector1.c_str(), ret_eigenvector1);
     exit(1);
   }
   ret_eigenvector2 = fread( data_eigen_vector2_, sizeof(float), 
-	       number_of_pixels_x_ * number_of_pixels_y_ * number_of_pixels_z_ * eigenvalues_number_of_layers_, 
-	       file_eigen_vector2);
-  if ( ret_eigenvector2 != number_of_pixels_x_ * number_of_pixels_y_ * number_of_pixels_z_ * eigenvalues_number_of_layers_ ) {
+			    eigenvalues_number_of_pixels_x_ * 
+			    eigenvalues_number_of_pixels_y_ * 
+			    eigenvalues_number_of_pixels_z_ * 
+			    eigenvalues_number_of_layers_, file_eigen_vector2);
+  if ( ret_eigenvector2 != eigenvalues_number_of_pixels_x_ * eigenvalues_number_of_pixels_y_ * eigenvalues_number_of_pixels_z_ * eigenvalues_number_of_layers_ ) {
     fprintf(stderr, "\nError reading volume 1 from %s (%d)\n", nifti_eigen_vector2.c_str(), ret_eigenvector2);
     exit(1);
   }
   ret_eigenvector3 = fread( data_eigen_vector3_, sizeof(float), 
-	       number_of_pixels_x_ * number_of_pixels_y_ * number_of_pixels_z_ * eigenvalues_number_of_layers_, 
-	       file_eigen_vector3);
-  if ( ret_eigenvector3 != number_of_pixels_x_ * number_of_pixels_y_ * number_of_pixels_z_ * eigenvalues_number_of_layers_ ) {
+			    eigenvalues_number_of_pixels_x_ * 
+			    eigenvalues_number_of_pixels_y_ * 
+			    eigenvalues_number_of_pixels_z_ * 
+			    eigenvalues_number_of_layers_, file_eigen_vector3);
+  if ( ret_eigenvector3 != eigenvalues_number_of_pixels_x_ * eigenvalues_number_of_pixels_y_ * eigenvalues_number_of_pixels_z_ * eigenvalues_number_of_layers_ ) {
     fprintf(stderr, "\nError reading volume 1 from %s (%d)\n", nifti_eigen_vector3.c_str(), ret_eigenvector3);
     exit(1);
-  }
-
+  }  
 
   //
   // Clean up

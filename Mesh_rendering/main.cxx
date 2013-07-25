@@ -45,36 +45,36 @@ main()
   // Diffusion tensor
   timerLog->MarkEvent("Diffusion tensor");
   Domains::Conductivity_tensor tensor;
-  //  tensor.VTK_visualization();
+  tensor.VTK_visualization();
 
-  //
-  // Tetrahedrization
-  timerLog->MarkEvent("Build the mesh");
-  Domains::Build_mesh tetrahedrization;
-  //
-#ifdef DEBUG
-  //
-  timerLog->MarkEvent("write Outputs");
-  //
-  tetrahedrization.Output_mesh_format();
-  //
-  timerLog->MarkEvent("write FEniCS mesh");
-  tetrahedrization.Output_FEniCS_xml();
-  tetrahedrization.Output_VTU_xml();
-  //
-  timerLog->MarkEvent("write mesh conductivity");
-  tetrahedrization.Output_mesh_conductivity_xml();
-#else
-  std::thread output(std::ref(tetrahedrization), MESH_OUTPUT);
-  std::thread subdomains(std::ref(tetrahedrization), MESH_SUBDOMAINS);
-  std::thread vtu(std::ref(tetrahedrization), MESH_VTU);
-  std::thread conductivity(std::ref(tetrahedrization), MESH_CONDUCTIVITY);
-  //
-  output.join();
-  subdomains.join();
-  vtu.join();
-  conductivity.join();
-#endif
+//  //
+//  // Tetrahedrization
+//  timerLog->MarkEvent("Build the mesh");
+//  Domains::Build_mesh tetrahedrization;
+//  //
+//#ifdef DEBUG
+//  //
+//  timerLog->MarkEvent("write Outputs");
+//  //
+//  tetrahedrization.Output_mesh_format();
+//  //
+//  timerLog->MarkEvent("write FEniCS mesh");
+//  tetrahedrization.Output_FEniCS_xml();
+//  tetrahedrization.Output_VTU_xml();
+//  //
+//  timerLog->MarkEvent("write mesh conductivity");
+//  tetrahedrization.Output_mesh_conductivity_xml();
+//#else
+//  std::thread output(std::ref(tetrahedrization), MESH_OUTPUT);
+//  std::thread subdomains(std::ref(tetrahedrization), MESH_SUBDOMAINS);
+//  std::thread vtu(std::ref(tetrahedrization), MESH_VTU);
+//  std::thread conductivity(std::ref(tetrahedrization), MESH_CONDUCTIVITY);
+//  //
+//  output.join();
+//  subdomains.join();
+//  vtu.join();
+//  conductivity.join();
+//#endif
   //
   // Time log 
   timerLog->MarkEvent("Stop the process");

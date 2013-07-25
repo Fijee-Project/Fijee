@@ -398,9 +398,9 @@ DCt::Conductivity_tensor()
 
   //
   // 
-  (DAp::get_instance())->set_conductivity_tensors_array_( &conductivity_tensors_array_ );
-  (DAp::get_instance())->set_positions_array_( &positions_array_ );
-  (DAp::get_instance())->set_Do_we_have_conductivity_( &Do_we_have_conductivity_ );
+//  (DAp::get_instance())->set_conductivity_tensors_array_( &conductivity_tensors_array_ );
+//  (DAp::get_instance())->set_positions_array_( &positions_array_ );
+//  (DAp::get_instance())->set_Do_we_have_conductivity_( &Do_we_have_conductivity_ );
 
   //
   // Clean up memory
@@ -593,7 +593,8 @@ DCt::VTK_visualization()
 //    for ( int dim2 = 39 ; dim2 < 40/*number_of_pixels_y_*/ ; dim2++ /*= dim2 + 2*/ )
 //      for ( int dim1 = 44 ; dim1 < 45/*number_of_pixels_x_*/ ; dim1++ /*= dim1  + 2*/ )
   for ( int dim3 = 0 ; dim3 < number_of_pixels_z_ ; dim3 = dim3 + 2 )
-    for ( int dim2 = 90 ; dim2 < 91 /*number_of_pixels_y_*/ ; dim2 = dim2 + 2 ) // Up
+    //    for ( int dim2 = 90 ; dim2 < 91 /*number_of_pixels_y_*/ ; dim2 = dim2 + 2 ) // Up
+    for ( int dim2 = 50 ; dim2 < 51 /*number_of_pixels_y_*/ ; dim2 = dim2 + 2 ) // Up
       for ( int dim1 = 0 ; dim1 < number_of_pixels_x_ ; dim1 = dim1  + 2 ) // Right
 	{
 	  index_val = dim1 + dim2 * number_of_pixels_x_ + dim3 * number_of_pixels_x_ * number_of_pixels_y_;
