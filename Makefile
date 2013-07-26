@@ -2,7 +2,7 @@
 ## CONFIGURE ##
 ###############
 export PREFIX =
-DEBUG         = yes
+DEBUG         = no
 VERSION       = 1.0
 DIST          = fijee
 
@@ -55,11 +55,11 @@ EXEC = $(MESH_RENDERING)/build_inrimage  $(SUBTRACTION_METHOD_DIR)/Poisson
 all: $(EXEC)
 
 $(EXEC):
-	( cd $(SUBTRACTION_METHOD_DIR) && $(MAKE) )
+#	( cd $(SUBTRACTION_METHOD_DIR) && $(MAKE) )
 	( cd $(MESH_RENDERING_DIR) && $(MAKE) )
 
 clean:
-	( cd $(SUBTRACTION_METHOD_DIR) && $(MAKE) $@ )
+#	( cd $(SUBTRACTION_METHOD_DIR) && $(MAKE) $@ )
 	( cd $(MESH_RENDERING_DIR) && $(MAKE) $@ )
 
 distclean: clean
@@ -67,6 +67,7 @@ distclean: clean
 	find . -name *.xml -exec rm {} \;
 	find . -name *.mesh -exec rm {} \;
 	find . -name *.vtu -exec rm {} \;
+	find . -name *.inr -exec rm {} \;
 
 #check:
 #	

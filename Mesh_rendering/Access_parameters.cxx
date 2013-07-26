@@ -107,7 +107,8 @@ DAp::Access_parameters():
 #if ( TRACE == 1 )
   /********** print a little header information */
   fprintf(stderr, "\n %s header information for:", check_header.c_str() );
-  fprintf(stderr, "\n XYZT dimensions: %d %d %d %d", number_of_pixels_x_,number_of_pixels_y_,number_of_pixels_z_,aseg_header_nifti.dim[4]);
+  fprintf(stderr, "\n XYZT dimensions: %d %d %d %d", 
+	  number_of_pixels_x_,number_of_pixels_y_,number_of_pixels_z_,aseg_header_nifti.dim[4]);
   fprintf(stderr, "\n Datatype code and bits/pixel: %d %d",aseg_header_nifti.datatype,aseg_header_nifti.bitpix);
   fprintf(stderr, "\n Scaling slope and intercept: %.6f %.6f",aseg_header_nifti.scl_slope,aseg_header_nifti.scl_inter);
   fprintf(stderr, "\n Byte offset to data in datafile: %ld",(long)(aseg_header_nifti.vox_offset));
@@ -129,10 +130,10 @@ DAp::Access_parameters():
 
   //
   // All segmentation nifti file (aseg.nii)
-  std::string nifti_eigen_values  = files_path_ + "/Diffusion_tensor.fsl2ascii/eigvals.nii";
-  std::string nifti_eigen_vector1 = files_path_ + "/Diffusion_tensor.fsl2ascii/eigvec1.nii";
-  std::string nifti_eigen_vector2 = files_path_ + "/Diffusion_tensor.fsl2ascii/eigvec2.nii";
-  std::string nifti_eigen_vector3 = files_path_ + "/Diffusion_tensor.fsl2ascii/eigvec3.nii";
+  std::string nifti_eigen_values  = files_path_ + "/Diffusion_tensor/eigvals.nii";
+  std::string nifti_eigen_vector1 = files_path_ + "/Diffusion_tensor/eigvec1.nii";
+  std::string nifti_eigen_vector2 = files_path_ + "/Diffusion_tensor/eigvec2.nii";
+  std::string nifti_eigen_vector3 = files_path_ + "/Diffusion_tensor/eigvec3.nii";
 
   //
   // nifti headers and files
@@ -263,22 +264,26 @@ DAp::Access_parameters():
   // open the datafile, jump to data offset
   ret_eigenvalues = fseek(file_eigen_values, (long)(header_eigenvalues.vox_offset), SEEK_SET);
   if (ret_eigenvalues != 0) {
-    fprintf(stderr, "\nError doing fseek() to %ld in data file %s\n",(long)(header_eigenvalues.vox_offset), nifti_eigen_values.c_str());
+    fprintf(stderr, "\nError doing fseek() to %ld in data file %s\n",
+	    (long)(header_eigenvalues.vox_offset), nifti_eigen_values.c_str());
     exit(1);
   }
   ret_eigenvector1 = fseek(file_eigen_vector1, (long)(header_eigenvector1.vox_offset), SEEK_SET);
   if (ret_eigenvector1 != 0) {
-    fprintf(stderr, "\nError doing fseek() to %ld in data file %s\n",(long)(header_eigenvector1.vox_offset), nifti_eigen_vector1.c_str());
+    fprintf(stderr, "\nError doing fseek() to %ld in data file %s\n",
+	    (long)(header_eigenvector1.vox_offset), nifti_eigen_vector1.c_str());
     exit(1);
   }
   ret_eigenvector2 = fseek(file_eigen_vector2, (long)(header_eigenvector2.vox_offset), SEEK_SET);
   if (ret_eigenvector2 != 0) {
-    fprintf(stderr, "\nError doing fseek() to %ld in data file %s\n",(long)(header_eigenvector2.vox_offset), nifti_eigen_vector2.c_str());
+    fprintf(stderr, "\nError doing fseek() to %ld in data file %s\n",
+	    (long)(header_eigenvector2.vox_offset), nifti_eigen_vector2.c_str());
     exit(1);
   }
   ret_eigenvector3 = fseek(file_eigen_vector3, (long)(header_eigenvector3.vox_offset), SEEK_SET);
   if (ret_eigenvector3 != 0) {
-    fprintf(stderr, "\nError doing fseek() to %ld in data file %s\n",(long)(header_eigenvector3.vox_offset), nifti_eigen_vector3.c_str());
+    fprintf(stderr, "\nError doing fseek() to %ld in data file %s\n",
+	    (long)(header_eigenvector3.vox_offset), nifti_eigen_vector3.c_str());
     exit(1);
   }
 
@@ -395,13 +400,13 @@ DAp::~Access_parameters(){
       delete [] data_eigen_vector3_;
       data_eigen_vector3_ = nullptr;
     }
-  // Conductivity tensors array
+  //
   if ( conductivity_tensors_array_ != nullptr )
     {
       delete [] conductivity_tensors_array_;
       conductivity_tensors_array_ = nullptr;
     }
-  // positions array
+  //
   if ( positions_array_ != nullptr )
     {
       delete [] positions_array_;

@@ -1,4 +1,10 @@
-CXXFLAGS += -DTRACE=1 
+#
+# TRACE:
+# 1, 2, 3, ... printout
+# 100 R statistical software studies
+# 200 VTK visualization
+#
+CXXFLAGS += -DTRACE=0 
 INC       = -I$(NIFTI)/include/nifti/ -I$(VTK)/include/vtk-5.10/ -I/$(CGAL)/include/ -I$(EIGEN3)/include/eigen3/ #-I/usr/include/taucs/ #
 LIBS      = -L/$(CGAL)/lib/ -lCGAL -lCGAL_ImageIO -lgmp -lboost_thread-mt -lmpfr #-lgsl -lgslcblas -lm -L$(CGAL)/lib/ 
 # Taucs
