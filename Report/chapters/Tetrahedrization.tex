@@ -4,41 +4,112 @@ The simplicial meshes are very popular for representing surfaces, volumes. They 
 
 \section{Mathematical background}
 
-Voronoi diagrams are versatile structures which encode proximity relationships between objects. Delaunay triangulations, which are geometrically dual to Voronoi diagrams, are a classical tool in the field of mesh generation and mesh processing due to its optimality properties.
+Voronoi diagrams are structures encoding the proximity relationships between objects. Delaunay triangulations, which are geometrically dual to Voronoi diagrams, are a classical tool in the field of mesh generation and mesh processing due to its optimality properties.\\
+We now turn to the following problem: $E$ is a set of points in the plane or space, {\it what is the best triangulation of E?} The answer to this question obviously depends on our goal, but generally three properties of the triangulation are particularly sought: \\
+
+\begin {itemize}
+\item the algorithm must be robust (adding or deleting a point of $E$ does not require a complete change in the triangulation);
+\item the algorithm must be fast to compute;
+\item the algorithm must contain a minimum of elongated triangles (slivers). \\
+\end {itemize}
+
+I will restrict the case of discrete surfaces, that is to say, defined from a finite number of points.
+
+\paragraph{Definition - Simplex}
+{
+\it Let $\{e_{0},~e_{1}, \dots,~ e_{n} \}$ be a set of $n+1$ linearly independent points in a Euclidean space $\mathbb{E}^{m}$ where $m \ge n \ge 0$. A $n$-simplex with vertices $e_{0},~e_ {1},~\dots, e_{n}$ the hull $\sigma $ of these convex points. $n$ is the dimension of $\sigma$. The set $-1$-simplex is the empty set.
+}
+
+\paragraph{Example}
+{
+In $\mathbb{R}^{3}$, a $0$-simplex is a vertex, a $1$-simplex is an edge, a $2$-simplex is a triangle and a $3$-simplex is a tetrahedron.
+}
+
 
 \subsection{Voronoi Diagram}
 
-A Voronoi diagram is a way of dividing space into a number of regions. The regions are called Voronoi cells.
+The Voronoi diagram also called {\it Dirichlet tessellation} is practical geometric structures, with the convex hull. It was introduced in  $\mathbb {R}^{2}$ and $\mathbb{R}^{3}$ by the German mathematician Johann Peter Gustav Lejeune Dirichlet (1805-1859) in 1850. The Russian-Ukrainian mathematician Georgy Voronoi (1868-1908) formalized this notion in the general case in 1908.\\
 
-\paragraph{Definition:}
-          {\it 
-            lala
-          }
+$E$ is a Euclidean vector space. Let $ P = \{p_{i}, 1 \le i \le n\} $ be a finite set of points of $E$.
+
+\paragraph{Definition - Voronoi cell}
+{
+\it A Voronoi cell of the point $p_{i} \in P$, denoted $C_{i}$, is the set of points of $E$ the closest to $p_ {i}$ than any other point of $P$:
+$$
+C_{i} = \{q \in E,~\forall j \ne i~~/~~ \| qp_{i} \| \le \| qp_{j} \| \}
+$$
+
+The point $p_{i}$ associated to the cell $C_{i}$ is called the site of the cell.
+}       
+
+\paragraph{Definition - Voronoi Diagram}
+{
+\it A Voronoi diagram of the $P$, denoted $Vor (P)$, is the subdivision of $E$ in $C_{i}$ cells associated with points $p_{i}$ of $P$:
+
+$
+Vor (P) = \bigcup_{p_{i} \ in P} C_{i}
+$
+}
+
+\paragraph{Definition - vertex, edge and face of Voronoi}
+{
+\it Let $d$ the dimension of $E$. The intersection of $d + 1$ Voronoi cells, if not empty, is called a Voronoi vertex. The intersection of $d$ Voronoi cells, if not empty, is called Voronoi edge. The intersection $i$ Voronoi cells, $ 2 \le i \le d - 1$, if it is not empty, is called Voronoi face.
+}
+
+\paragraph{Properties}
+{
+\begin {itemize}
+\item A Voronoi's edge separating two cells $C_{i}$ and $C_{j}$ is given by the bisection of the segment $p_{i}p_{j}$.
+\item The Voronoi's vertex separating three cells $C_{i}$, $C_{j}$ and $C_{k}$ is the center of the circle circumscribing the triangle with vertices $p_{i}$, $p_{j}$ and $p_{k}$.
+\item A Voronoi cell, if it is bounded, is a convex polygon.
+\end {itemize}
+}
+
 
 \subsection{Delaunay Triangulation}
 
-The Delaunay triangulation of a space $E$ is defined as the geometric dual of the Voronoi diagram: there is an edge between two points $p_{i}$ and $p_{j}$ in the Delaunay triangulation if and only if their Voronoi cells $V(p_{i})$ and $V(p_{j})$ have a non-empty intersection. It yields a triangulation of the space $E$, that is to say a partition of the convex hull of $E$ into $d$-dimensional simplices (i.e. into triangles in 2D, into tetrahedra in 3D and so on). The fundamental property of the Delaunay triangulation is called the empty circle (empty sphere in 3D) property: in 2D (resp. in 3D), a triangle (resp. tetrahedron) belongs to the Delaunay triangulation if and only if its circumcircle (resp. circumsphere) does not contain any other points of E in its interior.
+The notion of Delaunay triangulation was proposed in 1934 by a student, Boris Delaunay, of Russian mathematician Georgy Voronoi. \\
+The Delaunay triangulation of a space $E$ is defined as the geometric dual of the Voronoi diagram: there is an edge between two points $p_{i}$ and $p_{j}$ in the Delaunay triangulation if and only if their Voronoi cells $V(p_{i})$ and $V(p_{j})$ have a non-empty intersection. It yields a triangulation of the space $E$, that is to say a partition of the convex hull of $E$ into $d$-dimensional simplices (i.e. into triangles in 2D, into tetrahedra in 3D and so on). The fundamental property of the Delaunay triangulation is called the empty circle (empty sphere in 3D) property: in 2D (resp. in 3D), a triangle (resp. tetrahedron) belongs to the Delaunay triangulation if and only if its circumcircle (resp. circumsphere) does not contain any other points of $E$ in its interior. \\
+
+\paragraph{Definition - Delaunay Triangulation}
+{
+\it A Delaunay triangulation of the set $P$, denoted $Del(P)$, is the dual of the Voronoi diagram of $P$: vertices of the Delaunay triangulation are the points $p_{i} \in P$, and two vertices are connected by an edge in triangulation if the corresponding Voronoi cells are adjacent.
+}
+
+\paragraph{Note:}
+{
+Although this definition is valid in the case of a Euclidean space $E$ of any dimension, the term triangulation refers to the case plan. In the case of $\mathbb{R}^{3}$, sometimes called Delaunay tetrahedralization.
+}
+
+\paragraph{Definition - Vertex, edge of Delaunay}
+{
+\it The vertices of a Delaunay triangulation are called vertices of Delaunay. If $E = \mathbb{R}^{2}$, the edges of a Delaunay triangulation is called Delaunay edges.
+}
+
+\paragraph{Properties}
+{
+The cercle centered on a Voronoi site and passing through the three neighboring sites $p_{i}$, $p_{j}$ and $p_{k}$ is the circumcircle of the Delaunay triangle $p_{i}p_{j}p_{k}$.
+}
 
 
-\paragraph{Definition:}
-          {\it 
-            lala
-          }
+\paragraph{Theorem - Characterization of Delaunay triangulations}
+{
+\it Let $p_{i}$, $p_{j}$ and $p_{k}$ three points $P$. Then the triangle with vertices $p_{i}$, $p_{j}$ and $p_{k}$ is a triangle of the Delaunay triangulation of $P$ if and only if the circumcircle of a triangle that contains no another point of $P$.
+}
+
+\paragraph{Properties}
+{
+Let $p_{i}$ and $p_{j}$ two points $P$. Then $p_{i}p_{j}$ segment is an edge of the Delaunay triangulation of $P$ if and only if there is a circle passing through $p_{i}$ and $p_{j}$ such that the corresponding disc contains no other point $P$.
+}
 
 \subsection{Restricted Delaunay triangulation}
 
+\section{CGAL - Computational Geometry Algorithms Library}
 
+The simplicial meshes are good tools for the finite element method, and more generally for many computational methods for modeling physical systems. However, the creation of such meshes is sometimes problematic. Indeed, the generation of a mesh representing a continuous and appropriate form for numerical simulation or visualization, can be demanding for time and memory resources. In complicated cases, it may be impossible to generate a mesh without manual intervention to meet the needs of the calculation. This explains why the automatic mesh generation has given rise to a literature provided.\\
+Topological aproximation~: it is necessary to determine a mesh topology similar to the target object. The edge of a solid object must be a subset of triangles of the mesh, homeomorphic itself at the edge of the object. In addition, if the object has internal partitions to separate out different areas, the mesh must represent these partitions.\\
 
 \paragraph{Meshing Volumes Bounded by Piecewise Smooth Surfaces~\cite{LRineau2007}}{
-
-
-
-
-Les maillages simpliciaux sont un outil de choix pour la méthode des éléments finis, et plus généralement pour beaucoup des méthodes de calcul modélisant des systèmes physiques. Cependant, la création de tels maillages est parfois problématique. En effet, la génération d'un maillage représentant une forme continue, et approprié pour une simulation numérique ou une visualisation, peut consommer beaucoup de ressources de temps, ou de mémoire. Dans les cas compliqués, il peut être impossible de générer sans intervention manuelle un maillage répondant aux besoins du calcul. Ceci explique pourquoi la génération automatique de maillages a donné lieu à une littérature fournie. 
-
-La modélisation inforamtique de la tête d'un patient (cerveau, cr\^ane, scalp, ...) est l'union d'union de surface lisses. Un maillage polyhédrique, aussi fin soit-il, sera une approximation de la surface cible. Nous pouvons mesurer cette approximation. 
-
-Aproximation topologique~: il convient de déterminer une topologie de maillage semblable à celle de l'objet cible. Le bord d'un objet volumique doit correspondre à un sous-ensemble de triangles du maillage, homéomorphe lui-même au bord de l'objet. De plus, si l'objet a des cloisons intérieures, pour séparer diférentes zones, le maillage doit représenter ces cloisons.
 
 En plus de l'approximation topologique, un deuxième critère de qualité d'un maillage est l'approximation des caractéristiques géométriques de l'objet.
 
@@ -63,6 +134,5 @@ En dimension 3, le raffinement d'une triangulation de Delaunay ne permet pas de 
 
 }
 
-\section{}
 
 
