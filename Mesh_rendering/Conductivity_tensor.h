@@ -40,8 +40,6 @@ namespace Domains
     Eigen::Matrix< float, 3, 3> rotation_mesh_framework_;
     //! Translation vector from diffusion framework to aseg/orig framework
     Eigen::Matrix< float, 3, 1> translation_mesh_framework_;
-    //! Mapping between nifti diffusion data index and aseg nifti data index
-    int* nifti_data_to_diffusion_mapping_array_;
 
     //
     // Nifti image information

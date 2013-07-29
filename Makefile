@@ -61,7 +61,12 @@ $(EXEC):
 clean:
 	( cd $(SUBTRACTION_METHOD_DIR) && $(MAKE) $@ )
 	( cd $(MESH_RENDERING_DIR) && $(MAKE) $@ )
+
+distclean: clean
 	find . -name *~ -exec rm {} \;
+	find . -name *.xml -exec rm {} \;
+	find . -name *.mesh -exec rm {} \;
+	find . -name *.vtu -exec rm {} \;
 
 #check:
 #	

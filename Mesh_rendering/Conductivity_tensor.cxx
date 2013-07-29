@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <sstream>
 #include <algorithm> // std::for_each()
 //
 // UCSF
@@ -37,14 +38,24 @@
 #include <vtkDataSetMapper.h>
 //
 // Conversion diffusion to conductivity
+// Diffusion dimension
+// [D] = m^{2}.s^{-1}
+// Diffusion dimension in articles
+// [D] = 10^{-3} x mm^{2}.s^{-1} = 10^{-9} x m^{2}.s^{-1}
+//
 // "Conductivity tensor mapping of the human brain using diffusion tensor MRI" 
 // (David S. Tuch et al)
 // sig_{nu} = k(d_{nu} -  d_{eps})
-// [sig_{nu}] = 10^{-3} S/m
-// k       = 0.844 pm 0.0545 S.s / mm^{3}
-// d_{eps} = 0.124 pm 0.0540 µm^{2} / ms
-#define K_MAPPING 0.844 // S.s / mm^{3}
-#define D_EPS     0.000124 // mm^{2} / s
+// 
+// k   = 0.844 pm 0.0545 S.s / mm^{3}
+// [k] = 10^{9} S.s.m^{-3}
+// d_{eps}   = 0.124 pm 0.0540 µm^{2} / ms
+// [d_{eps}] = 10^{-9} m^{2}.s^{-1}
+//
+// [sig_{nu}] = S/m
+//
+#define K_MAPPING 0.844 // 10^{9} S.s . m^{-3}
+#define D_EPS     0.124 // 10^{-9} m^{2} ; s^{-1}
 //
 // We give a comprehensive type name
 //
@@ -55,32 +66,6 @@ typedef Domains::Access_parameters DAp;
 //
 DCt::Conductivity_tensor()
 {
-//  //
-//  // Mapping from aseg framework to aseg nifti data
-//  //
-//
-//  //
-//  // Rotation R^{-1}
-//  Eigen::Matrix< float, 3, 3 >
-//    aseg_nifti_study_to_data_matrix,
-//    aseg_nifti_study_to_data_matrix_inv;
-//  //
-//  aseg_nifti_study_to_data_matrix = (DAp::get_instance())->get_rotation_();
-//  //
-//  aseg_nifti_study_to_data_matrix_inv = 
-//    aseg_nifti_study_to_data_matrix.inverse();
-//
-//  //
-//  // Translation
-//  Eigen::Matrix< float, 3, 1 > aseg_nifti_study_to_data_vector;
-//  aseg_nifti_study_to_data_vector = (DAp::get_instance())->get_translation_();
-//  
-//  //
-//  // Mapping between nifti diffusion data index and aseg nifti data index
-//  nifti_data_to_diffusion_mapping_array_ = new int[256 * 256 * 256];
-//  for ( int i = 0 ; i < 256 * 256 * 256 ; i++ )
-//    nifti_data_to_diffusion_mapping_array_[i] = -1;
-
   //
   // Header image's information MUST be the same for eigen values et vectores
   number_of_pixels_x_ = (DAp::get_instance())->get_eigenvalues_number_of_pixels_x_();
@@ -167,14 +152,19 @@ DCt::Conductivity_tensor()
   Do_we_have_conductivity_     = new bool [ number_of_pixels_x_ 
 					  * number_of_pixels_y_ 
 					  * number_of_pixels_z_ ];
+#ifdef TRACE
+#if ( TRACE == 100 )
+  std::stringstream err;
+  err << "l1 true \t l2 true \t l3 true \t l1 \t l2 \t l3 \t delta12 \t delta13 \t delta23 \n";
+#endif
+#endif
   //
   for ( int dim3 = 0 ; dim3 < number_of_pixels_z_ ; dim3++)
     for ( int dim2 = 0 ; dim2 < number_of_pixels_y_ ; dim2++)
       for ( int dim1 = 0 ; dim1 < number_of_pixels_x_ ; dim1++)
 	{
 	  //
-	  // Eigen values and vectord from nifti file
-	  // We have 3 frames with x = 100 x y = 100 x z = 60 eigen values
+	  // Eigen values and vectors from nifti file
 	  // All the frames are transfered in aseg referential
 	  //
 
@@ -202,33 +192,51 @@ DCt::Conductivity_tensor()
 	  
 	  //
 	  // eigen value 1: l1
-	  l1 = data_eigen_values[ index_val1 ];
-	  l1 = K_MAPPING * (l1 - D_EPS) * 0.001;
-	  // eigen value 2: l2
-	  l2 = data_eigen_values[ index_val2 ];
-	  l2 = K_MAPPING * (l2 - D_EPS) * 0.001;
-	  // eigen value 3: l3
-	  l3 = data_eigen_values[ index_val3 ];
-	  l3 = K_MAPPING * (l3 - D_EPS) * 0.001;
+	  l1 = 1000 * data_eigen_values[ index_val1 ];
+	  if ( l1 < D_EPS )
+	    l1 = l2 = l3 = 0.f;
+	  else
+	    {
+	      l1 = K_MAPPING * (l1  - D_EPS);
+	      // eigen value 2: l2
+	      l2 = 1000 * data_eigen_values[ index_val2 ];
+	      l2 = ( l2 < D_EPS ? 0.f : K_MAPPING * (l2 - D_EPS) );
+	      // eigen value 3: l3
+	      l3 = 1000 * data_eigen_values[ index_val3 ];
+	      l3 = ( l3 < D_EPS ? 0.f : K_MAPPING * (l3 - D_EPS) );
+	    }
 
 	  //
-	  // Diffusion eigenvalues == conductivity eigenvalues
+	  // Diffusion eigenvextors == conductivity eigenvectors
+	  //
+	  
 	  // eigen vector 1:
-	  v1x = data_eigen_vector1[ index_val1 ];
-	  v1y = data_eigen_vector1[ index_val2 ];
-	  v1z = data_eigen_vector1[ index_val3 ];
-
-	  //
+	  if ( l1 != 0.f )
+	    {
+	      v1x = data_eigen_vector1[ index_val1 ];
+	      v1y = data_eigen_vector1[ index_val2 ];
+	      v1z = data_eigen_vector1[ index_val3 ];
+	    }
+	  else
+	    v1x = v1y = v1z = 0.f;
 	  // eigen vector 2:
-	  v2x = data_eigen_vector2[ index_val1 ];
-	  v2y = data_eigen_vector2[ index_val2 ];
-	  v2z = data_eigen_vector2[ index_val3 ];
-
-	  //
+	  if ( l2 != 0.f )
+	    {
+	      v2x = data_eigen_vector2[ index_val1 ];
+	      v2y = data_eigen_vector2[ index_val2 ];
+	      v2z = data_eigen_vector2[ index_val3 ];
+	    }
+	  else
+	    v2x = v2y = v2z = 0.f;
 	  // eigen vector 3:
-	  v3x = data_eigen_vector3[ index_val1 ];
-	  v3y = data_eigen_vector3[ index_val2 ];
-	  v3z = data_eigen_vector3[ index_val3 ];
+	  if ( l3 != 0.f )
+	    {
+	      v3x = data_eigen_vector3[ index_val1 ];
+	      v3y = data_eigen_vector3[ index_val2 ];
+	      v3z = data_eigen_vector3[ index_val3 ];
+	    }
+	  else
+	    v3x = v3y = v3z = 0.f;
 	  
 	  //
 	  // Fill up arrays
@@ -245,21 +253,23 @@ DCt::Conductivity_tensor()
 	  //
 	  // Eigen values matrices
 	  Eigen::Matrix <float, 3, 3> D;
-	  D << l1, 0.f, 0.f,
-	       0.f, l2, 0.f,
-	       0.f, 0.f, l3;
+	  D << 
+	    l1, 0.f, 0.f,
+	    0.f, l2, 0.f,
+	    0.f, 0.f, l3;
 	  //
 	  eigen_values_matrices_array_[ index_val ] = D;
 
 	  //
 	  //  Change of basis matrices
 	  Eigen::Matrix <float, 3, 3> P;
-	  P << v1x, v2x, v3x,
-	       v1y, v2y, v3y,
-	       v1z, v2z, v3z;
+	  P << 
+	    v1x, v2x, v3x,
+	    v1y, v2y, v3y,
+	    v1z, v2z, v3z;
 	  //
 	  P_matrices_array_[ index_val ] = P;
-	  
+	 
 	  //
 	  //  Conductivity tensor
 	  //
@@ -283,58 +293,6 @@ DCt::Conductivity_tensor()
 	  //
 	  conductivity_tensors_array_[ index_val ] = conductivity_tensor;
 
-	  //
-	  // Mapping of nifti diffusion data to aseg nifti data 
-	  // (i,j,k) = R^{-1} [(x,y,z) - translation]
-	  // aseg voxel size is 1*1*1 mm^3
-	  //
-
-//	  if( Do_we_have_conductivity_[index_val] )
-//	    {
-//	      //
-//	      // index (i,j,k) of aseg's nifti data 
-//	      index_mapping = 
-//		aseg_nifti_study_to_data_matrix_inv * 
-//		( positions_array_[ index_val ] - aseg_nifti_study_to_data_vector );
-//	      //
-////	      std::cout <<  std::endl;
-////	      std::cout << index_mapping(0,0) << std::endl;
-////	      std::cout << index_mapping(1,0) << std::endl;
-////	      std::cout << index_mapping(2,0) << std::endl;
-//
-//	      index_mapping_i = (int) index_mapping(0,0);
-//	      index_mapping_j = (int) index_mapping(1,0); 
-//	      index_mapping_k = (int) index_mapping(2,0);
-//
-////	      std::cout <<  std::endl;
-////	      std::cout << index_mapping_i << std::endl;
-////	      std::cout << index_mapping_j << std::endl;
-////	      std::cout << index_mapping_k << std::endl;
-//
-//	      //
-//	      for( int ii = 0 ; ii < 3 ; ii++ )
-//		for( int jj = 0 ; jj < 3 ; jj++ )
-//		  for( int kk = 0 ; kk < 3 ; kk++ )
-//		    if( index_mapping_i + ii < 256 && 
-//			index_mapping_j + jj < 256 && 
-//			index_mapping_k + kk < 256  )
-//		      {
-//			// 
-//			nifti_data_to_diffusion_mapping_array_[ (index_mapping_i + ii) + 
-//								256 * (index_mapping_j + jj) + 
-//								256 * 256 * (index_mapping_k + kk) ] = index_val;
-////			// We check if we didn't forget values
-////			if (nifti_data_to_diffusion_mapping_array_[ (index_mapping_i + ii - 2) + 
-////								    256 * (index_mapping_j + jj - 2) + 
-////								    256 * 256 * (index_mapping_k + kk - 2) ] == -1)
-////			  nifti_data_to_diffusion_mapping_array_[ (index_mapping_i + ii) + 
-////								  256 * (index_mapping_j + jj) + 
-////								  256 * 256 * (index_mapping_k + kk) ] = index_val;
-//		      }
-//	    }
-	  //
-	  //
-	  //
 #ifdef TRACE
 #if ( TRACE == 2 )
 	  // 
@@ -393,53 +351,31 @@ DCt::Conductivity_tensor()
 		   << "corresponding to these eigenvalues:\n"
 		   << eigensolver.eigenvectors() << endl;
 	    }
-	  
-//	  //
-//	  // Check the mapping between a mesh vertex position
-//	  // and the position tensor
-//	  Eigen::Matrix < float, 3, 1> vertex_position;
-//	  Eigen::Matrix < int, 3, 1>   vertex_index;
-//	  vertex_position <<
-//	    135.2084, 
-//	    146.6336, 
-//	    125.1374;
-//	  // Amigdala: PROBLEM
-//	  //	    118.614255,
-//	  //	    147.820329,
-//	  //	    52.8906246;
-//	  std::cout << std::endl;
-//	  std::cout << "Vertex position: " << endl;
-//	  std::cout << vertex_position << std::endl;
-//	  //
-////	  vertex_position = aseg_nifti_study_to_data_matrix_inv * 
-////	    (vertex_position - aseg_nifti_study_to_data_vector);
-//	  //
-//	  vertex_index =  vertex_position.cast<int>();
-//	  std::cout << std::endl;
-//	  std::cout << "Vertex index: " << endl;
-//	  std::cout << vertex_index << std::endl;
-//	  // 
-//	  std::cout << std::endl;
-//	  std::cout << "Index of the eigenvalues: " << endl;
-//	  std::cout << 
-//	    nifti_data_to_diffusion_mapping_array_[
-//						   vertex_index(0,0) +
-//						   255 * vertex_index(1,0) +
-//						   255 * 255 * vertex_index(2,0)
-//						   ]
-//		    << std::endl;
-//	  //
-//	  std::cout << std::endl;
-//	  std::cout << "Position of the eigenvalues: " << endl;
-//	  std::cout << 
-//	    positions_array_[
-//			     nifti_data_to_diffusion_mapping_array_[
-//								    vertex_index(0,0) +
-//								    255 * vertex_index(1,0) +
-//								    255 * 255 * vertex_index(2,0)
-//								    ]
-//			     ]
-//		    << std::endl;
+#endif
+#endif
+#ifdef TRACE
+#if ( TRACE == 100 )
+	  //
+	  // Check the solution
+	  Eigen::Matrix<float, 3, 3> tensor = 
+	    conductivity_tensors_array_[ index_val ];
+	  //
+	  if ( P.determinant() != 0.f )
+	    {
+	      Eigen::SelfAdjointEigenSolver< Eigen::Matrix<float, 3, 3> > eigensolver( tensor );
+	      if (eigensolver.info() != Eigen::Success) 
+		abort();
+	      err 
+		<< eigen_values_matrices_array_[ index_val ](0,0) << " "
+		<< eigen_values_matrices_array_[ index_val ](1,1) << " "
+		<< eigen_values_matrices_array_[ index_val ](2,2) << " ";
+	      err << eigensolver.eigenvalues()(2) << " " << eigensolver.eigenvalues()(1) << " " << eigensolver.eigenvalues()(0) << " ";
+	      err 
+		<< conductivity_tensors_array_[ index_val ](0,1) - conductivity_tensors_array_[ index_val ](1,0) << " " 
+		<< conductivity_tensors_array_[ index_val ](0,2) - conductivity_tensors_array_[ index_val ](2,0) << " " 
+		<< conductivity_tensors_array_[ index_val ](1,2) - conductivity_tensors_array_[ index_val ](2,1) << std::endl;
+	      //
+	    }
 #endif
 #endif
 #ifdef TRACE
@@ -476,6 +412,17 @@ DCt::Conductivity_tensor()
   data_eigen_vector2 = nullptr;
   delete [] data_eigen_vector3;
   data_eigen_vector3 = nullptr;
+
+  //
+  // 
+#ifdef TRACE
+#if ( TRACE == 100 )
+  std::ofstream outFile;
+  outFile.open("Data.frame");
+  outFile << err.rdbuf();
+  outFile.close();  
+#endif
+#endif
 }
 ////
 ////
@@ -539,9 +486,6 @@ DCt::~Conductivity_tensor()
       delete [] Do_we_have_conductivity_;
       Do_we_have_conductivity_ = nullptr;
     }
-//  //
-//  delete [] nifti_data_to_diffusion_mapping_array_;
-//  nifti_data_to_diffusion_mapping_array_ = nullptr;
 }
 ////
 ////
@@ -902,7 +846,7 @@ DCt::INRIMAGE_image_of_conductivity_anisotropy()
       for ( int dim1 = 0 ; dim1 < 256 ; dim1++ )
 	{
 	  index_val = dim1 + 256 * dim2 + 256 * 256 * dim3;
-	  index_mapping = nifti_data_to_diffusion_mapping_array_[ index_val ];
+	  //	  index_mapping = nifti_data_to_diffusion_mapping_array_[ index_val ];
 	  //
 	  if ( index_mapping  != -1 )
 	    {
