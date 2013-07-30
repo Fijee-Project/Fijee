@@ -126,14 +126,16 @@ DCt::Conductivity_tensor()
     index_val  = 0, 
     index_val1 = 0, 
     index_val2 = 0, 
-    index_val3 = 0,
-    index_mapping_i = 0, 
-    index_mapping_j = 0, 
-    index_mapping_k = 0;
+    index_val3 = 0;
   //
   Eigen::Matrix < float, 3, 1 > index_mapping;
   //
   Eigen::Matrix < float, 3, 1 > position;
+  Eigen::Matrix < float, 3, 1 > move_to_cell_center;
+  move_to_cell_center <<
+    size_of_pixel_size_x_ / 2.,
+    size_of_pixel_size_y_ / 2.,
+    size_of_pixel_size_z_ / 2.;
 
   //
   // initialization
@@ -220,53 +222,6 @@ DCt::Conductivity_tensor()
 	  v3x = data_eigen_vector3[ index_val1 ];
 	  v3y = data_eigen_vector3[ index_val2 ];
 	  v3z = data_eigen_vector3[ index_val3 ];
-//	  //
-//	  // eigen value 1: l1
-//	  l1 = 1000 * data_eigen_values[ index_val1 ];
-//	  if ( l1 < D_EPS )
-//	    l1 = l2 = l3 = 0.f;
-//	  else
-//	    {
-//	      l1 = K_MAPPING * (l1  - D_EPS);
-//	      // eigen value 2: l2
-//	      l2 = 1000 * data_eigen_values[ index_val2 ];
-//	      l2 = ( l2 < D_EPS ? 0.f : K_MAPPING * (l2 - D_EPS) );
-//	      // eigen value 3: l3
-//	      l3 = 1000 * data_eigen_values[ index_val3 ];
-//	      l3 = ( l3 < D_EPS ? 0.f : K_MAPPING * (l3 - D_EPS) );
-//	    }
-//
-//	  //
-//	  // Diffusion eigenvextors == conductivity eigenvectors
-//	  //
-//	  
-//	  // eigen vector 1:
-//	  if ( l1 != 0.f )
-//	    {
-//	      v1x = data_eigen_vector1[ index_val1 ];
-//	      v1y = data_eigen_vector1[ index_val2 ];
-//	      v1z = data_eigen_vector1[ index_val3 ];
-//	    }
-//	  else
-//	    v1x = v1y = v1z = 0.f;
-//	  // eigen vector 2:
-//	  if ( l2 != 0.f )
-//	    {
-//	      v2x = data_eigen_vector2[ index_val1 ];
-//	      v2y = data_eigen_vector2[ index_val2 ];
-//	      v2z = data_eigen_vector2[ index_val3 ];
-//	    }
-//	  else
-//	    v2x = v2y = v2z = 0.f;
-//	  // eigen vector 3:
-//	  if ( l3 != 0.f )
-//	    {
-//	      v3x = data_eigen_vector3[ index_val1 ];
-//	      v3y = data_eigen_vector3[ index_val2 ];
-//	      v3z = data_eigen_vector3[ index_val3 ];
-//	    }
-//	  else
-//	    v3x = v3y = v3z = 0.f;
 	  
 	  //
 	  // Fill up arrays
@@ -275,6 +230,7 @@ DCt::Conductivity_tensor()
 	  //
 	  // Position of the eigenvalues in the orig/aseg framework
 	  position  << dim1, dim2, dim3;
+	  position += move_to_cell_center;
 	  // nifti data to study frame work
 	  position = rotation_ * position + translation_;
 	  // Mesh rendering framework (aseg/orig framework)
@@ -427,7 +383,7 @@ DCt::Conductivity_tensor()
 	}
 
   //
-  // 
+  // Transfer the address of data
   (DAp::get_instance())->set_conductivity_tensors_array_( &conductivity_tensors_array_ );
   (DAp::get_instance())->set_positions_array_( &positions_array_ );
   (DAp::get_instance())->set_Do_we_have_conductivity_( &Do_we_have_conductivity_ );

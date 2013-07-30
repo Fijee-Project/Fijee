@@ -31,15 +31,15 @@ main()
   // Access parameters
   Domains::Access_parameters* parameters = Domains::Access_parameters::get_instance();
   
-  // 
-  // Create the INRIMAGE
-  Domains::Build_labeled_domain labeled_image;
-  // Head segmentation
-  timerLog->MarkEvent("Head segmentation");
-  labeled_image.Head_model_segmentation();
-  // Write Inrimage
-  timerLog->MarkEvent("Write Inrimage");
-  labeled_image.Write_inrimage_file();
+//  // 
+//  // Create the INRIMAGE
+//  Domains::Build_labeled_domain labeled_image;
+//  // Head segmentation
+//  timerLog->MarkEvent("Head segmentation");
+//  labeled_image.Head_model_segmentation();
+//  // Write Inrimage
+//  timerLog->MarkEvent("Write Inrimage");
+//  labeled_image.Write_inrimage_file();
 
   //
   // Diffusion tensor
@@ -65,13 +65,13 @@ main()
   timerLog->MarkEvent("write mesh conductivity");
   tetrahedrization.Output_mesh_conductivity_xml();
 #else
-  std::thread output(std::ref(tetrahedrization), MESH_OUTPUT);
-  std::thread subdomains(std::ref(tetrahedrization), MESH_SUBDOMAINS);
+//  std::thread output(std::ref(tetrahedrization), MESH_OUTPUT);
+//  std::thread subdomains(std::ref(tetrahedrization), MESH_SUBDOMAINS);
 //  std::thread vtu(std::ref(tetrahedrization), MESH_VTU);
   std::thread conductivity(std::ref(tetrahedrization), MESH_CONDUCTIVITY);
   //
-  output.join();
-  subdomains.join();
+//  output.join();
+//  subdomains.join();
 //  vtu.join();
   conductivity.join();
 #endif
