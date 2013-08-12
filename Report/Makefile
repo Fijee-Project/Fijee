@@ -32,7 +32,7 @@ all: $(TARGET)
 	@echo $(PARAM)
 
 Fijee.ps: Fijee.dvi
-	dvips Fijee -o Fijee.ps
+	dvips -t letter Fijee -o Fijee.ps
 
 Fijee.dvi: Fijee.tex
 	$(LATEX) $(LATEX_ARGS) Fijee

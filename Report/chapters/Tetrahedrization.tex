@@ -4,8 +4,8 @@ The simplicial meshes are very popular for representing surfaces, volumes. They 
 
 \section{Mathematical background}
 
-Voronoi diagrams are structures encoding the proximity relationships between objects. Delaunay triangulations, which are geometrically dual to Voronoi diagrams, are a classical tool in the field of mesh generation and mesh processing due to its optimality properties.\\
-We now turn to the following problem: $E$ is a set of points in the plane or space, {\it what is the best triangulation of E?} The answer to this question obviously depends on our goal, but generally three properties of the triangulation are particularly sought: \\
+Voronoi diagrams are structures encoding the proximity relationships between objects. Delaunay triangulations, which are geometrically dual to Voronoi diagrams, are a classical tool of computational geometry\index{computational geometry}, in the field of mesh generation\index{mesh generation} and mesh processing due to its optimality properties.\\
+We now turn to the following problem: $E$ is a set of points in the plane or space, {\it what is the best triangulation of E?} The answer this question three properties of the triangulation are particularly sought: \\
 
 \begin {itemize}
 \item the algorithm must be robust (adding or deleting a point of $E$ does not require a complete change in the triangulation);
@@ -13,11 +13,29 @@ We now turn to the following problem: $E$ is a set of points in the plane or spa
 \item the algorithm must contain a minimum of elongated triangles (slivers). \\
 \end {itemize}
 
-I will restrict the case of discrete surfaces, that is to say, defined from a finite number of points.
+%I will restrict the case of discrete surfaces, that is to say, defined from a finite number of points.
 
-\paragraph{Definition - Simplex}
+\subsection{Topological space}
+
+Topological aproximation~: it is necessary to determine a mesh topology similar to the target object. The edge of a solid object must be a subset of triangles of the mesh, homeomorphic itself at the edge of the object. In addition, if the object has internal partitions to separate out different areas, the mesh must represent these partitions.\\
+
+In this section we summarize some mathematical definitions allowing us to understand the world of mesh generation.
+
+\paragraph{Definition - Topological space}\index{topological space}
 {
-\it Let $\{e_{0},~e_{1}, \dots,~ e_{n} \}$ be a set of $n+1$ linearly independent points in a Euclidean space $\mathbb{E}^{m}$ where $m \ge n \ge 0$. A $n$-simplex with vertices $e_{0},~e_ {1},~\dots, e_{n}$ the hull $\sigma $ of these convex points. $n$ is the dimension of $\sigma$. The set $-1$-simplex is the empty set.
+\it A topological space is a set $\mathbb{X}$ and a system $X$ of subsets of $\mathbb{X}$ such that:
+\begin{itemize}
+\item  $\varnothing$, $X \in \mathbb{X}$;
+\item  a union of elements of $X$ is in $\mathbb{X}$ ;
+\item  a finite intersection of elements in $X$ is in $\mathbb{X}$.
+\end{itemize}
+
+$X$ is called a topology and elements of $X$ are called open set in $\mathbb{X}$. A topological subspace ($Y$, $\mathbb{Y}$) of ($X$, $\mathbb {X}$) consists of a subset of $\mathbb{Y} \subset \mathbb{X}$ and the topology of the subspace defined by $Y = \{\mathbb{Y} \cap A, A \in X \}$
+}
+
+\paragraph{Definition - Simplex}\index{simplex}
+{
+\it Let $\{e_{0},~e_{1}, \dots,~ e_{n} \}$ be a set of $n+1$ linearly independent points in a Euclidean space\footnote{the concept of an Euclidean space encompasses Euclidean plane and the three-dimensional space of Euclidean geometry as spaces of dimensions 2 and 3 respectively.}\index{Euclidean space} $\mathbb{E}^{m}$ where $m \ge n \ge 0$. We call a $n$-simplex, with vertices $e_{0},~e_ {1},~\dots, e_{n}$, the hull $\sigma $ of these convex points. $n$ is the dimension of $\sigma$. The set $-1$-simplex is the empty set.
 }
 
 \paragraph{Example}
@@ -25,12 +43,33 @@ I will restrict the case of discrete surfaces, that is to say, defined from a fi
 In $\mathbb{R}^{3}$, a $0$-simplex is a vertex, a $1$-simplex is an edge, a $2$-simplex is a triangle and a $3$-simplex is a tetrahedron.
 }
 
+\paragraph{Definition - Face}\index{face}
+{
+\it Let $S$ be a set of linearly independent points and $\sigma$ its convex hull. Then the convex hull of $\tau$ any subset $T$ of $S$ is a simplex subset of $\sigma$. We say that $\tau$ is a face of $\sigma$, and we write $\tau \le \sigma$.
+}
+
+\paragraph{Definition - Simplicial complex}\index{simplicial complex}
+{
+\it A simplicial complex $K$ is a collection of faces of a finite number of simplices, such as: if $\sigma$ is in $K$ then any face of $\sigma$ is in $K$, and if $\sigma$ and $\nu$ are in $K$ then theire intersection is a face of both $\sigma$ and $\nu$. The dimension of a simplicial complex is the size of the largest simplex.
+}
+
+In other words, a simplicial complex is a geometric object describing some topological spaces by generalizing the concept of triangulation of a surface. Such an object is presented as a graph with vertices connected by edges, which can be attached on the triangular faces.
+
+\paragraph{Definition - Polyhedron}\index{polyhedron}
+{
+\it Let $K$ be a simplicial complex in $\mathbb{R}^{n}$. The union $|K|$ of all simplices of $K$ with the topology of subspace of $\mathbb{R}^{n}$ is called the polyhedron $K$.
+}
+
+\paragraph{Definition - Triangulation}\index{Triangulation}
+{
+\it The triangulation of a topological space $X$ is a simplicial complex $K$ whose polyhedron $|K|$ is homeomorphic\footnote{A homeomorphism, or topological isomorphism or bicontinuous function, is a continuous function between topological spaces that has a continuous inverse function.} to $X$. If a simplicial complex exists, we say that $X$ is triangulated.
+}
 
 \subsection{Voronoi Diagram}
 
-The Voronoi diagram also called {\it Dirichlet tessellation} is practical geometric structures, with the convex hull. It was introduced in  $\mathbb {R}^{2}$ and $\mathbb{R}^{3}$ by the German mathematician Johann Peter Gustav Lejeune Dirichlet (1805-1859) in 1850. The Russian-Ukrainian mathematician Georgy Voronoi (1868-1908) formalized this notion in the general case in 1908.\\
+The Voronoi diagram\index{Voronoi diagram}, also called {\it Dirichlet tessellation}\index{Dirichlet tessellation}, with the convex hull are a practical geometric structures. It was introduced in  $\mathbb {R}^{2}$ and $\mathbb{R}^{3}$ by the German mathematician Johann Peter Gustav Lejeune Dirichlet (1805-1859) in 1850. The Russian-Ukrainian mathematician Georgy Voronoi (1868-1908) formalized this notion in the general case in 1908.\\
 
-$E$ is a Euclidean vector space. Let $ P = \{p_{i}, 1 \le i \le n\} $ be a finite set of points of $E$.
+Let $E$ be a Euclidean vector space and $P = \{p_{i}, 1 \le i \le n\} $ be a finite set of points of $E$.
 
 \paragraph{Definition - Voronoi cell}
 {
@@ -53,7 +92,7 @@ $
 
 \paragraph{Definition - vertex, edge and face of Voronoi}
 {
-\it Let $d$ the dimension of $E$. The intersection of $d + 1$ Voronoi cells, if not empty, is called a Voronoi vertex. The intersection of $d$ Voronoi cells, if not empty, is called Voronoi edge. The intersection $i$ Voronoi cells, $ 2 \le i \le d - 1$, if it is not empty, is called Voronoi face.
+\it Let $d$ be the dimension of $E$. The intersection of $d + 1$ Voronoi cells, if not empty, is called a Voronoi vertex. The intersection of $d$ Voronoi cells, if not empty, is called Voronoi edge. The intersection $i$ Voronoi cells, $ 2 \le i \le d - 1$, if it is not empty, is called Voronoi face.
 }
 
 \paragraph{Properties}
@@ -106,31 +145,48 @@ Let $p_{i}$ and $p_{j}$ two points $P$. Then $p_{i}p_{j}$ segment is an edge of 
 
 \section{CGAL - Computational Geometry Algorithms Library}
 
-The simplicial meshes are good tools for the finite element method, and more generally for many computational methods for modeling physical systems. However, the creation of such meshes is sometimes problematic. Indeed, the generation of a mesh representing a continuous and appropriate form for numerical simulation or visualization, can be demanding for time and memory resources. In complicated cases, it may be impossible to generate a mesh without manual intervention to meet the needs of the calculation. This explains why the automatic mesh generation has given rise to a literature provided.\\
-Topological aproximation~: it is necessary to determine a mesh topology similar to the target object. The edge of a solid object must be a subset of triangles of the mesh, homeomorphic itself at the edge of the object. In addition, if the object has internal partitions to separate out different areas, the mesh must represent these partitions.\\
+The simplicial meshes are good tools for the finite element method, and more generally for many computational methods for modeling physical systems. However, the creation of such meshes is sometimes problematic. Indeed, the generation of a mesh representing a continuous and appropriate form for numerical simulation or visualization, can be demanding for time and memory resources. In complicated cases, it may be impossible to generate a mesh without manual intervention to meet the needs of the calculation.\\
+
+
+\paragraph{To review - High-Quality Consistent Meshing of Multi-Label Datasets}
+{
+The generation of realistic geometric patient models from high-resolution medical images is of great significance in many clinical and research applications. 
+
+require geometrically-accurate and topologically-correct models. 
+
+The latter consist either of surface meshes representing boundaries between different anatomical parts, or of volume meshes. However, due to the lack of reliable fully-automated tools for the unstructured discretization of medical datasets, simplistic geometric models are still of wide use. 
+
+for which finite element methods (FEM) on unstructured grids conforming to anatomical structures would be desirable.
+ Similarly, in the EEG/MEG source localization problem using the boundary element method (BEM), as pointed out in [2], popular simplistic head models consisting of nested tissue layers may yield a significantly lower accuracy than realistic models featuring multiple junctions.  
+
+While different strategies can be used to obtain realistic geometric models from labeled medical datasets, few of them offer sufficient flexibility: handling of data coming from different sources, control over the density and quality of the mesh elements. Also, most existing approaches have been designed to extract surface meshes corresponding to boundaries between labeled anatomical structures, hence necessitating post-processing steps to generate volume meshes needed by finite element methods.
+
+Delaunay-based meshing is recognized as one of the most powerful techniques for generating surface and volume meshes with guaranteed quality. It offers easy control over the size and shape of mesh elements, for instance through a (possibly non-uniform) sizing field.
+
+Our work builds on some recent provably correct Delaunay-based algorithms for meshing smooth surfaces [14] and volumes bounded by such surfaces [15]. These two algorithms are proven to terminate and to construct good-quality meshes, while offering bounds on the approximation accuracy of the original boundary and on the size of the output mesh. The refinement process is controlled by highly customizable quality criteria on triangular facets and on tetrahedra. A notable feature of the method of Boissonnat and Oudot [14] is that the surface needs only to be known through an {\it oracle}\footnote{The domain is input to the mesh generation function, as a domain class, often called the oracle, that provides predicates and constructors related to the domain, the subdomains, the boundary surface patches and also the 0 and 1-dimensional exposed features, if any. Mainly, the oracle provides a predicate to test if a given query point belongs to the domain or not and to find in which subdomain it lies in the affirmative case.} that, given a line segment, detects whether the segment intersects the surface and, in the affirmative, returns an intersection point. This makes the algorithm useful in a wide variety of contexts and for a large class of surfaces. Very recently, Oudot, Rineau and Yvinec [15] have proposed to combine the latter Delaunay-based surface mesher with a Delaunay refinement volume mesher [16].
+
+Our work extends the method of Boissonnat and Oudot [14] and the method of Oudot, Rineau and Yvinec [15] to the case of multi-label partitions, so that they can be applied to the generation of high-quality geometric models from labeled medical datasets. To that end, we define a partition of Delaunay tetrahedra induced by a space subdivision. It is related to the concept of restricted Delaunay triangulation, borrowed from computational geometry. In our approach, the subdivision of the domain of interest is approximated by a discrete partition of the Delaunay tetrahedralization of a point set: each Delaunay tetrahedron is labeled with one adequate tissue type. Output surface meshes are composed of the triangular facets adjacent to two tetrahedra having different labels. The point set is iteratively refined until it forms a good sample of the boundaries between the different anatomical structures, and, if a quality volume mesh is desired, a good sample of their interior.
+
+Another notable feature of our approach is that the continuous partition need not to be represented explicitly. It is known only through a {\it labeling oracle} that, given a point in space, answers which tissue it belongs to. This makes our approach applicable to virtually any combination of data sources, including labeled 3D images, polyhedral surfaces, unstructured volume meshes, fuzzy membership functions, possibly having different resolutions and different coordinate systems. The different data sources may even be inconsistent with each other due to noise or discretization artefacts. In this case, the {\it labeling oracle} has the responsibility of resolving the conflicts using some user defined rules. As a result, our meshing algorithm is not affected by the heterogeneity and possible inconsistency of the input datasets. Finally, another major advantage of our approach is that the customizable quality criteria on boundary facets and/or on tetrahedra can be tuned independently for the different anatomical structures.
+
+Sliver Removal
+While Delaunay refinement techniques can be proven to generate tetrahedra with a good radius-edge ratio (ratio between tetrahedron circumradius and shortest edge length), they cannot guarantee against badly-shaped tetrahedra of a special type called slivers. A sliver is a tetrahedron whose four vertices lie close to a plane and whose projection to that plane is a quadrilateral with no short edge. Such tetrahedra have a good radiusedge ratio but a very poor radius-radius ratio (ratio between circumradius and radius of largest contained sphere). Unfortunately, the latter measure typically influences the numerical conditioning of finite element methods. In order to remove slivers from our volume meshes, we use a post processing step called sliver exudation [21]. This algorithm is efficient in practice and generates almost sliver-free meshes.
+
+Experiment 2: Non-uniform surface meshing. In the three following experiments, we use some segmented brain data which were automatically generated from a T1-weighted magnetic resonance (MR) image using FreeSurfer's Whole Brain Segmentation tool [25]. The second experiment demonstrates the ability of our algorithm to produce surface meshes with non-uniform resolution (Fig. 3-Right). The facet size criterion was chosen to be spatially-varying so that the occipital cortex would be more finely sampled than the frontal cortex. Although for clarity, only four surfaces are displayed (for each hemisphere, the cortical and cerebellum surfaces), a total number of 72 tissues were meshed using the aforementioned criteria.
+
+}
+
+
+
+\section{To review}
 
 \paragraph{Meshing Volumes Bounded by Piecewise Smooth Surfaces~\cite{LRineau2007}}{
 
-En plus de l'approximation topologique, un deuxième critère de qualité d'un maillage est l'approximation des caractéristiques géométriques de l'objet.
 
- - Les maillages produits par la méthode de génération de maillages doivent être proches, en distance, des objets de départ. La distance de Hausdorf donne un moyen de quantifer la qualité de l'approximation géométrique.
- - Quand l'objet étudié est volumique, le volume du maillage doit être proche du volume de l'objet.
+Dans les applications de calcul, du type éléments finis, plus le maillage est dense plus la précision du calcul augmente. Cependant, la quantité de temps nécessaire à l'accomplissement d'un calcul basé sur un maillage est souvent proportionnelle au nombre d'éléments du maillage. Un compromis doit donc être trouvé entre la précision et le temps de calcul. 
 
+La meilleure façon d'améliorer ce compromis est de créer un maillage avec des tailles d'éléments localement adaptés à la précision nécessaire. La forme des éléments d'un maillage simplicial est capitale, pour les applications de calcul. Dans les méthodes de résolution approchée d'équations différentielles, à la fois les grands angles et les petits angles doivent être évités [She02b, She]. L'erreur d'approximation de la solution dépend principalement de la taille des éléments. Cependant, pour une taille d'éléments donnée, la présence de grands angles dans le maillage augmente l'erreur d'approximation du gradient de la solution. Si certains angles sont proches de 180°, il se peut aussi que la méthode de calcul ne converge pas vers la solution [BA76]. Les petits angles, ainsi que les grands angles, dégradent le conditionnement du problème numérique, c'est-à-dire la stabilité de la solution par rapport aux erreurs d'arrondis du calcul. 
 
-
-Dans les applications de calcul, du type éléments finis, plus le maillage est dense plus la précision du calcul augmente. Cependant, la quantité de temps nécessaire à l'accomplissement d'un calcul basé sur un maillage est souvent proportionnelle au nombre d'éléments du maillage. Un compromis doit donc être trouvé entre la précision et le temps de calcul. La meilleure façon d'améliorer ce compromis est de créer un maillage avec des tailles d'éléments localement adaptés à la précision nécessaire. La forme des éléments d'un maillage simplicial est capitale, pour les applications de calcul. Dans les méthodes de résolution approchée d'équations différentielles, à la fois les grands angles et les petits angles doivent être évités [She02b, She]. L'erreur d'approximation de la solution dépend principalement de la taille des éléments. Cependant, pour une taille d'éléments donnée, la présence de grands angles dans le maillage augmente l'erreur d'approximation du gradient de la solution. Si certains angles sont proches de 180°, il se peut aussi que la méthode de calcul ne converge pas vers la solution [BA76]. Les petits angles, ainsi que les grands angles, dégradent le conditionnement du problème numérique, c'est-à-dire la stabilité de la solution par rapport aux erreurs d'arrondis du calcul. 
-
-\subsection{G\'en\'eration de maillages par raffinement de triangulations de Delaunay}
-
-La génération de maillages simpliciaux, par des méthodes automatisées, est une t\^ache ardue, et ce sujet a donné lieu à une importante littérature. Pour de larges références bibliographiques, le lecteur pourra se référer aux ouvrages [GF99] et [Geo01], aux articles de revue [Owe98] et [DW06], et à la thèse de Jonathan Richard Shewchuk [She97]. Cette section constitue un tour d'horizon des différentes méthodes de génération automatisée de maillages simpliciaux. Ces méthodes se classent principalement en trois catégories : les méthodes qui utilisent des grilles, celles qui fonctionnent par l'avancée d'un front, et celles qui utilisent les triangulations de Delaunay. Naturellement, cette classiffcation n'est pas exacte, et l'on verra que des méthodes hybrides ont aussi été développées.
-
-La troisième catégorie d'algorithmes de génération de maillage est constituée par tous les algorithmes qui raffinent une triangulation de Delaunay. Dans ce genre de méthode, un maillage initial est construit, en calculant simplement la triangulation Delaunay d'un ensemble de points. Ce maillage grossier est ensuite modifié itérativement, en ajoutant un sommet à la fois. L'intérêt de la communauté des maillages pour la triangulation de Delaunay tient à deux faits :
- 
- - premièrement, la triangulation de Delaunay donne une manière canonique de connecter les sommets d'un maillage, d'après le critère de la sphère vide (voir section 2.5 o\`u les propriétés des triangulations de Delaunay sont rappelées),
- - deuxièmement, l'algorithme de Bowyer-Watson, qui tient son nom des auteurs de deux articles simultanés présentant le même algorithme [Bow81, Wat81], fournit une méthode efficace pour calculer des triangulations de Delaunay, en dimension quelconque et de manière incrémentale. Cette algorithme décrit comment mettre à jour une triangulation de Delaunay en dimension d : chacun des d-simplexes de la triangulation dont la sphère circonscrite contient le sommet v est retiré de la triangulation, ce qui crée une cavité polygonale en dimension d, lors de l'insertion d'un nouveau sommet (en dimension 2) ou polyédrique (en dimension 3 ou plus) dans la triangulation. Celle-ci est mise à jour en connectant chacun des sommets de la cavité au nouveau sommet v. L'algorithme de Bowyer-Watson décrit une méthode pour calculer cette cavité de manière efficace.
-L'idée d'utiliser la triangulation de Delaunay elle-même pour guider le choix du placement des sommets vient de François Hermeline [Her82], et William Frey [Fre87]. Ces deux articles posent les bases des méthodes de raffinement de Delaunay. Dans un premier temps, des sommets sont insérés sur le bord de l'objet à mailler, suffisamment rapprochés pour que les éléments du bord de l'objet soient représentés dans la triangulation de Delaunay par une union de simplexes. Puis, dans un deuxième temps, les simplexes de l'intérieur de l'objet qui ne satisfont pas les critères de taille ou de forme sont détruits par l'insertion d'un point, à leur barycentre ou au centre de leur sphère circonscrite.
-
-En dimension 3, le raffinement d'une triangulation de Delaunay ne permet pas de contrôler entièrement la forme des tétraèdres, mais seulement le rapport rayon-arête, qui est le rapport entre la longueur de la plus petite arête du tétraèdre et le rayon de la sphère circonscrite au tétraèdre. Le contrôle de ce rapport permet d'éliminer du maillage tous les tétraèdres mal formés, sauf une catégorie d'entre eux, que l'on appelle des slivers. Un sliver est un tétraèdre  ayant ses quatre sommets proches d'un cercle équatorial de sa sphère circonscrite, et espacés de manière uniforme le long de cercle équatorial. Un sliver a quatre angles dièdres très petits, et ses deux autres angles dièdres sont très grands. Siu-Wing Cheng et Tamal Dey ont proposé des algorithmes [CDE+00, CD02] qui permettent de retirer les slivers du maillage, dans une phase de post-traitement, en changeant la triangulation de Delaunay en une triangulation régulière, et en assignant des petits poids bien choisis au sommets. Li et Teng [LT01] ont proposé un algorithme de raffinement de Delaunay modifié, afin d'éviter la création de slivers pendant le raffinement de la triangulation de Delaunay.
 
 }
 
