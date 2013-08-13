@@ -10,6 +10,7 @@
 #include <iostream>
 #include <stdlib.h>     /* getenv */
 #include <string>
+#include <sstream>
 //
 // NIFTI
 //
@@ -134,6 +135,10 @@ namespace Domains
     // Conductivity information
     //! Conductivity tensors array
     Eigen::Matrix <float, 3, 3>* conductivity_tensors_array_;
+    //! Conductivity tensors coefficients array
+    char** conductivity_tensors_coefficients_array_;
+    //! eigen values matrices array
+    Eigen::Matrix <float, 3, 3>* eigen_values_matrices_array_;
     //! Positions array of the conductivity tensor
     Eigen::Matrix <float, 3, 1>* positions_array_;
     //! Speed up: check if we need make any calculation
@@ -381,6 +386,22 @@ namespace Domains
      */
     void get_conductivity_tensors_array_( Eigen::Matrix <float, 3, 3>** Conductivity_Tensors_Array );
     /*!
+     *  \brief Get conductivity_tensors_coefficients_array_
+     *
+     *  This method move the conductivity tensors coefficients array out of the parameters object.
+     *
+     *  \param Conductivity_Tensors_Coefficients_Array: conductivity tensors coefficients array from conductivity tensor object.
+     */
+    void get_conductivity_tensors_coefficients_array_( char*** Conductivity_Tensors_Coefficients_Array );
+    /*!
+     *  \brief Get eigen_values_matrices_array_
+     *
+     *  This method move the eigen values matrices array out of the parameters object.
+     *
+     *  \param Eigen_Values_Matrices_Array: eigen values matrices array from conductivity object.
+     */
+    void get_eigen_values_matrices_array_( Eigen::Matrix <float, 3, 3>** Eigen_Values_Matrices_Array );
+    /*!
      *  \brief Get positions_array_
      *
      *  This method move the positions array out of the parameters object.
@@ -411,6 +432,22 @@ namespace Domains
      *  \param Conductivity_Tensors_Array: conductivity tensors array for mesh rendering object.
      */
     void set_conductivity_tensors_array_( Eigen::Matrix <float, 3, 3>** Conductivity_Tensors_Array );
+    /*!
+     *  \brief Set conductivity_tensors_coefficients_array_
+     *
+     *  This method move the conductivity tensors coefficients array inside the parameters object.
+     *
+     *  \param Conductivity_Tensors_Coefficients_Array: conductivity tensors coefficients array for mesh rendering object.
+     */
+    void set_conductivity_tensors_coefficients_array_( char*** Conductivity_Tensors_Coefficients_Array );
+    /*!
+     *  \brief Set eigen_values_matrices_array_
+     *
+     *  This method move the conductivity tensors array inside the parameters object.
+     *
+     *  \param Eigen_Values_Matrices_Array: conductivity tensors array for mesh rendering object.
+     */
+    void set_eigen_values_matrices_array_( Eigen::Matrix <float, 3, 3>** Eigen_Values_Matrices_Array );
     /*!
      *  \brief Set positions_array_
      *

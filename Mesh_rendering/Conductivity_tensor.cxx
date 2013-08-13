@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <cstdio>
 #include <sstream>
 #include <algorithm> // std::for_each()
 //
@@ -126,7 +127,8 @@ DCt::Conductivity_tensor()
     index_val  = 0, 
     index_val1 = 0, 
     index_val2 = 0, 
-    index_val3 = 0;
+    index_val3 = 0, 
+    index_coeff = 0;
   //
   Eigen::Matrix < float, 3, 1 > index_mapping;
   //
@@ -140,20 +142,26 @@ DCt::Conductivity_tensor()
   //
   // initialization
   eigen_values_matrices_array_ = new Eigen::Matrix < float, 3, 3 > [ number_of_pixels_x_ 
-								   * number_of_pixels_y_ 
-								   * number_of_pixels_z_ ];
+								     * number_of_pixels_y_ 
+								     * number_of_pixels_z_ ];
   P_matrices_array_            = new Eigen::Matrix < float, 3, 3 > [ number_of_pixels_x_ 
-								   * number_of_pixels_y_ 
-								   * number_of_pixels_z_ ];
+								     * number_of_pixels_y_ 
+								     * number_of_pixels_z_ ];
   conductivity_tensors_array_  = new Eigen::Matrix < float, 3, 3 > [ number_of_pixels_x_ 
-								   * number_of_pixels_y_ 
-								   * number_of_pixels_z_ ];
+								     * number_of_pixels_y_ 
+								     * number_of_pixels_z_ ];
   positions_array_             = new Eigen::Matrix < float, 3, 1 > [ number_of_pixels_x_ 
-								   * number_of_pixels_y_ 
-								   * number_of_pixels_z_ ];
-  Do_we_have_conductivity_     = new bool [ number_of_pixels_x_ 
-					  * number_of_pixels_y_ 
-					  * number_of_pixels_z_ ];
+								     * number_of_pixels_y_ 
+								     * number_of_pixels_z_ ];
+  Do_we_have_conductivity_                  = new bool [ number_of_pixels_x_ 
+							 * number_of_pixels_y_ 
+							 * number_of_pixels_z_ ];
+  conductivity_tensors_coefficients_array_  = new char* [ 9 * number_of_pixels_x_ 
+							  * number_of_pixels_y_ 
+							  * number_of_pixels_z_ ];
+  
+  //
+  // Output for R analysis
 #ifdef TRACE
 #if ( TRACE == 100 )
   std::stringstream err;
@@ -173,10 +181,13 @@ DCt::Conductivity_tensor()
 
 	  //
 	  // Select the index
+	  index_coeff = dim1 * 9
+	    + dim2 * 9 * number_of_pixels_x_ 
+	    + dim3 * 9 * number_of_pixels_x_ * number_of_pixels_y_;
+	  // Select the index
 	  index_val = index_val1 = dim1 
 	    + dim2 * number_of_pixels_x_ 
 	    + dim3 * number_of_pixels_x_ * number_of_pixels_y_;
-
 	  //
 	  index_val2 = dim1 
 	    + dim2 * number_of_pixels_x_ 
@@ -278,6 +289,17 @@ DCt::Conductivity_tensor()
 	    }
 	  //
 	  conductivity_tensors_array_[ index_val ] = conductivity_tensor;
+	  //
+	  for ( int coeff = 0 ; coeff < 9 ; coeff++ )
+	    {
+	      conductivity_tensors_coefficients_array_[index_coeff + coeff] = new char[6];
+	      // format %2.3f: (sng + %d . %d %d \0) -> buf[7]
+	      // ex: -0.097
+	      //	    std::sprintf( &(*conductivity_tensors_coefficients_array_ + index_coeff + coeff), 
+	      int n = std::sprintf( conductivity_tensors_coefficients_array_[index_coeff + coeff], 
+				    "%2.3f",
+				    *(conductivity_tensor.data() + coeff) );
+	    }
 
 #ifdef TRACE
 #if ( TRACE == 2 )
@@ -332,13 +354,16 @@ DCt::Conductivity_tensor()
 	      if (eigensolver.info() != Eigen::Success) 
 		abort();
 	      //
-	      cout << "The eigenvalues of A are:\n" << eigensolver.eigenvalues() << endl;
-	      cout << "Here's a matrix whose columns are eigenvectors of A \n"
-		   << "corresponding to these eigenvalues:\n"
-		   << eigensolver.eigenvectors() << endl;
+	      std::cout << "The eigenvalues of A are:\n" << eigensolver.eigenvalues() << std::endl;
+	      std::cout << "Here's a matrix whose columns are eigenvectors of A \n"
+			<< "corresponding to these eigenvalues:\n"
+			<< eigensolver.eigenvectors() << std::endl;
 	    }
 #endif
 #endif
+
+	  //
+	  // Output for R analysis
 #ifdef TRACE
 #if ( TRACE == 100 )
 	  //
@@ -383,12 +408,6 @@ DCt::Conductivity_tensor()
 	}
 
   //
-  // Transfer the address of data
-  (DAp::get_instance())->set_conductivity_tensors_array_( &conductivity_tensors_array_ );
-  (DAp::get_instance())->set_positions_array_( &positions_array_ );
-  (DAp::get_instance())->set_Do_we_have_conductivity_( &Do_we_have_conductivity_ );
-
-  //
   // Clean up memory
   delete [] data_eigen_values;
   data_eigen_values = nullptr;
@@ -400,7 +419,7 @@ DCt::Conductivity_tensor()
   data_eigen_vector3 = nullptr;
 
   //
-  // 
+  // Output for R analysis 
 #ifdef TRACE
 #if ( TRACE == 100 )
   std::ofstream outFile;
@@ -460,6 +479,12 @@ DCt::~Conductivity_tensor()
       delete [] conductivity_tensors_array_;
       conductivity_tensors_array_ = nullptr;
     }
+// TO CHANGE   // Conductivity tensors coefficients array
+// TO CHANGE   if ( conductivity_tensors_coefficients_array_ != nullptr )
+// TO CHANGE     {
+// TO CHANGE       delete [] conductivity_tensors_coefficients_array_;
+// TO CHANGE       conductivity_tensors_coefficients_array_ = nullptr;
+// TO CHANGE     }
   // positions array
   if ( positions_array_ != nullptr )
     {
@@ -535,12 +560,26 @@ DCt::operator ()()
 //
 //
 void 
+DCt::Move_conductivity_array_to_parameters()
+{
+  //
+  // Transfer the address of data
+  (DAp::get_instance())->set_conductivity_tensors_array_( &conductivity_tensors_array_ );
+  (DAp::get_instance())->set_conductivity_tensors_coefficients_array_( &conductivity_tensors_coefficients_array_ );
+  (DAp::get_instance())->set_eigen_values_matrices_array_( &eigen_values_matrices_array_ );
+  (DAp::get_instance())->set_positions_array_( &positions_array_ );
+  (DAp::get_instance())->set_Do_we_have_conductivity_( &Do_we_have_conductivity_ );
+}
+//
+//
+//
+void 
 DCt::VTK_visualization()
 {
   //
   // Create conductivity vector field
   //
-  
+   
   //
   //
   vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();

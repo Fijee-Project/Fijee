@@ -14,7 +14,7 @@ export CXX = g++
 ifeq ($(DEBUG),yes)
 CXXFLAGS_MODE  = -g -DDEBUG
 else
-CXXFLAGS_MODE  = -O3 
+CXXFLAGS_MODE  = -O3
 endif
 #
 export CXXFLAGS += $(CXXFLAGS_MODE) -Wno-deprecated -std=c++0x -frounding-math -DCGAL_EIGEN3_ENABLED -DDEBUG_UCSF #-DDEBUG_TRACE -Wall 

@@ -13,6 +13,8 @@ DAp::parameters_instance_ = NULL;
 //
 DAp::Access_parameters():
   conductivity_tensors_array_(nullptr),
+  conductivity_tensors_coefficients_array_(nullptr),
+  eigen_values_matrices_array_(nullptr),
   positions_array_(nullptr),
   Do_we_have_conductivity_(nullptr)
 {
@@ -407,6 +409,33 @@ DAp::~Access_parameters(){
       conductivity_tensors_array_ = nullptr;
     }
   //
+  if ( conductivity_tensors_coefficients_array_ != nullptr )
+    {
+// TO CHANGE      int index_val = 0;
+// TO CHANGE      for ( int dim3 = 0 ; dim3 < number_of_pixels_z_ ; dim3++)
+// TO CHANGE	for ( int dim2 = 0 ; dim2 < number_of_pixels_y_ ; dim2++)
+// TO CHANGE	  for ( int dim1 = 0 ; dim1 < number_of_pixels_x_ ; dim1++)
+// TO CHANGE	{
+// TO CHANGE	  //
+// TO CHANGE	  // Select the index
+// TO CHANGE	  index_val = dim1 
+// TO CHANGE	    + dim2 * number_of_pixels_x_ 
+// TO CHANGE	    + dim3 * number_of_pixels_x_ * number_of_pixels_y_;
+// TO CHANGE	  //
+// TO CHANGE	  delete conductivity_tensors_coefficients_array_[index_val];
+// TO CHANGE	  conductivity_tensors_coefficients_array_[index_val] = nullptr;
+// TO CHANGE	}
+// TO CHANGE      //
+// TO CHANGE      delete [] conductivity_tensors_coefficients_array_;
+// TO CHANGE      conductivity_tensors_coefficients_array_ = nullptr;
+    }
+  //
+  if ( eigen_values_matrices_array_ != nullptr )
+    {
+      delete [] eigen_values_matrices_array_;
+      eigen_values_matrices_array_ = nullptr;
+    }
+  //
   if ( positions_array_ != nullptr )
     {
       delete [] positions_array_;
@@ -532,6 +561,46 @@ DAp::get_conductivity_tensors_array_(  Eigen::Matrix <float, 3, 3>** Conductivit
 //
 //
 void
+DAp::get_conductivity_tensors_coefficients_array_(  char*** Conductivity_Tensors_Coefficients_Array )
+{
+  if( conductivity_tensors_coefficients_array_ != nullptr )
+    {
+      if( conductivity_tensors_coefficients_array_ != *Conductivity_Tensors_Coefficients_Array )
+	{
+	  *Conductivity_Tensors_Coefficients_Array = conductivity_tensors_coefficients_array_;
+	  conductivity_tensors_coefficients_array_ = nullptr;
+	}
+    }
+  else
+    {
+      std::cerr << "conductivity_tensors_coefficients_array_ is already transfered" << std::endl;
+      abort();
+    }
+}
+//
+//
+//
+void
+DAp::get_eigen_values_matrices_array_(  Eigen::Matrix <float, 3, 3>** Eigen_Values_Matrices_Array )
+{
+  if( eigen_values_matrices_array_ != nullptr )
+    {
+      if( eigen_values_matrices_array_ != *Eigen_Values_Matrices_Array )
+	{
+	  *Eigen_Values_Matrices_Array = eigen_values_matrices_array_;
+	  eigen_values_matrices_array_ = nullptr;
+	}
+    }
+  else
+    {
+      std::cerr << "eigen_values_matrices_array_ is already transfered" << std::endl;
+      abort();
+    }
+}
+//
+//
+//
+void
 DAp::get_positions_array_(  Eigen::Matrix <float, 3, 1>** Positions_Array )
 {
   if( positions_array_ != nullptr )
@@ -598,9 +667,54 @@ DAp::set_conductivity_tensors_array_(  Eigen::Matrix <float, 3, 3>** Conductivit
 //
 //
 void
+DAp::set_conductivity_tensors_coefficients_array_(  char*** Conductivity_Tensors_Coefficients_Array )
+{
+  if ( conductivity_tensors_coefficients_array_ != nullptr )
+    {
+//      int index_val = 0;
+//      for ( int dim3 = 0 ; dim3 < number_of_pixels_z_ ; dim3++)
+//	for ( int dim2 = 0 ; dim2 < number_of_pixels_y_ ; dim2++)
+//	  for ( int dim1 = 0 ; dim1 < number_of_pixels_x_ ; dim1++)
+//	    {
+//	      //
+//	      // Select the index
+//	      index_val = dim1 
+//		+ dim2 * number_of_pixels_x_ 
+//		+ dim3 * number_of_pixels_x_ * number_of_pixels_y_;
+//	      //
+//	      delete conductivity_tensors_coefficients_array_[index_val];
+//	      conductivity_tensors_coefficients_array_[index_val] = nullptr;
+//	    }
+      //
+      delete [] conductivity_tensors_coefficients_array_;
+      conductivity_tensors_coefficients_array_ = nullptr;
+    }
+  //
+  conductivity_tensors_coefficients_array_ = *Conductivity_Tensors_Coefficients_Array;
+  *Conductivity_Tensors_Coefficients_Array = nullptr;
+}
+//
+//
+//
+void
+DAp::set_eigen_values_matrices_array_(  Eigen::Matrix <float, 3, 3>** Eigen_Values_Matrices_Array )
+{
+  if ( eigen_values_matrices_array_ != nullptr )
+    {
+      delete [] eigen_values_matrices_array_;
+      eigen_values_matrices_array_ = nullptr;
+    }
+  //
+  eigen_values_matrices_array_ = *Eigen_Values_Matrices_Array;
+  *Eigen_Values_Matrices_Array = nullptr;
+}
+//
+//
+//
+void
 DAp::set_positions_array_(  Eigen::Matrix <float, 3, 1>** Positions_Array )
 {
-  if ( conductivity_tensors_array_ != nullptr )
+  if ( positions_array_ != nullptr )
     {
       delete [] positions_array_;
       positions_array_ = nullptr;
@@ -615,7 +729,7 @@ DAp::set_positions_array_(  Eigen::Matrix <float, 3, 1>** Positions_Array )
 void
 DAp::set_Do_we_have_conductivity_(  bool** Do_We_Have_Conductivity )
 {
-  if ( conductivity_tensors_array_ != nullptr )
+  if ( Do_we_have_conductivity_ != nullptr )
     {
       delete [] Do_we_have_conductivity_;
       Do_we_have_conductivity_ = nullptr;
