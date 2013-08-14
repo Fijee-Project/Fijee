@@ -73,8 +73,6 @@ namespace Domains
     Eigen::Matrix <float, 3, 3>* P_matrices_array_;
     //! Conductivity tensors array
     Eigen::Matrix <float, 3, 3>* conductivity_tensors_array_;
-    //! Conductivity tensors coefficients array
-    char **conductivity_tensors_coefficients_array_;
     //! Positions array of the conductivity tensor
     Eigen::Matrix <float, 3, 1>* positions_array_;
     //! Speed up: check if we need make any calculation

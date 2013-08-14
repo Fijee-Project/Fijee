@@ -4,6 +4,7 @@
 // UCSF
 //
 #include "enum.h"
+#include "CUDA_Conductivity_matching.h"
 //
 // CGAL
 //
@@ -384,12 +385,19 @@ namespace Domains
      */
     void Output_mesh_conductivity_xml();
     /*!
-     *  \brief Output the XML match between mesh and conductivity
+     *  \brief Matches mesh's cells with conductivity
      *
-     *  This method matches a conductivity tensor for each cell.
+     *  This method matches a conductivity tensor for each tetrahedron of the mesh.
      *
      */
     void Conductivity_matching();
+    /*!
+     *  \brief Matches mesh's cells with conductivity
+     *
+     *  This method matches a conductivity tensor for each tetrahedron of the mesh.
+     *
+     */
+    void Conductivity_matching_gpu();
 
   private:
     /*!

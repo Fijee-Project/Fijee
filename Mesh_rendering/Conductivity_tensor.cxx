@@ -156,9 +156,6 @@ DCt::Conductivity_tensor()
   Do_we_have_conductivity_                  = new bool [ number_of_pixels_x_ 
 							 * number_of_pixels_y_ 
 							 * number_of_pixels_z_ ];
-  conductivity_tensors_coefficients_array_  = new char* [ 9 * number_of_pixels_x_ 
-							  * number_of_pixels_y_ 
-							  * number_of_pixels_z_ ];
   
   //
   // Output for R analysis
@@ -289,17 +286,6 @@ DCt::Conductivity_tensor()
 	    }
 	  //
 	  conductivity_tensors_array_[ index_val ] = conductivity_tensor;
-	  //
-	  for ( int coeff = 0 ; coeff < 9 ; coeff++ )
-	    {
-	      conductivity_tensors_coefficients_array_[index_coeff + coeff] = new char[6];
-	      // format %2.3f: (sng + %d . %d %d \0) -> buf[7]
-	      // ex: -0.097
-	      //	    std::sprintf( &(*conductivity_tensors_coefficients_array_ + index_coeff + coeff), 
-	      int n = std::sprintf( conductivity_tensors_coefficients_array_[index_coeff + coeff], 
-				    "%2.3f",
-				    *(conductivity_tensor.data() + coeff) );
-	    }
 
 #ifdef TRACE
 #if ( TRACE == 2 )
@@ -479,12 +465,6 @@ DCt::~Conductivity_tensor()
       delete [] conductivity_tensors_array_;
       conductivity_tensors_array_ = nullptr;
     }
-// TO CHANGE   // Conductivity tensors coefficients array
-// TO CHANGE   if ( conductivity_tensors_coefficients_array_ != nullptr )
-// TO CHANGE     {
-// TO CHANGE       delete [] conductivity_tensors_coefficients_array_;
-// TO CHANGE       conductivity_tensors_coefficients_array_ = nullptr;
-// TO CHANGE     }
   // positions array
   if ( positions_array_ != nullptr )
     {
@@ -565,7 +545,6 @@ DCt::Move_conductivity_array_to_parameters()
   //
   // Transfer the address of data
   (DAp::get_instance())->set_conductivity_tensors_array_( &conductivity_tensors_array_ );
-  (DAp::get_instance())->set_conductivity_tensors_coefficients_array_( &conductivity_tensors_coefficients_array_ );
   (DAp::get_instance())->set_eigen_values_matrices_array_( &eigen_values_matrices_array_ );
   (DAp::get_instance())->set_positions_array_( &positions_array_ );
   (DAp::get_instance())->set_Do_we_have_conductivity_( &Do_we_have_conductivity_ );

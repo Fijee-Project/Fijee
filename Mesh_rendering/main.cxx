@@ -67,8 +67,11 @@ main()
   //
   // Match conductivity with mesh's cells
   timerLog->MarkEvent("Mesh conductivity matching");
+#ifdef GPU
+  tetrahedrization.Conductivity_matching_gpu();
+#else
   tetrahedrization.Conductivity_matching();
-
+#endif
 
   //
   // Output
