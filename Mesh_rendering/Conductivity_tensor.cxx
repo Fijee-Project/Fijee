@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <cstdio>
 #include <sstream>
 #include <algorithm> // std::for_each()
 //
@@ -126,32 +127,38 @@ DCt::Conductivity_tensor()
     index_val  = 0, 
     index_val1 = 0, 
     index_val2 = 0, 
-    index_val3 = 0,
-    index_mapping_i = 0, 
-    index_mapping_j = 0, 
-    index_mapping_k = 0;
+    index_val3 = 0, 
+    index_coeff = 0;
   //
   Eigen::Matrix < float, 3, 1 > index_mapping;
   //
   Eigen::Matrix < float, 3, 1 > position;
+  Eigen::Matrix < float, 3, 1 > move_to_cell_center;
+  move_to_cell_center <<
+    size_of_pixel_size_x_ / 2.,
+    size_of_pixel_size_y_ / 2.,
+    size_of_pixel_size_z_ / 2.;
 
   //
   // initialization
   eigen_values_matrices_array_ = new Eigen::Matrix < float, 3, 3 > [ number_of_pixels_x_ 
-								   * number_of_pixels_y_ 
-								   * number_of_pixels_z_ ];
+								     * number_of_pixels_y_ 
+								     * number_of_pixels_z_ ];
   P_matrices_array_            = new Eigen::Matrix < float, 3, 3 > [ number_of_pixels_x_ 
-								   * number_of_pixels_y_ 
-								   * number_of_pixels_z_ ];
+								     * number_of_pixels_y_ 
+								     * number_of_pixels_z_ ];
   conductivity_tensors_array_  = new Eigen::Matrix < float, 3, 3 > [ number_of_pixels_x_ 
-								   * number_of_pixels_y_ 
-								   * number_of_pixels_z_ ];
+								     * number_of_pixels_y_ 
+								     * number_of_pixels_z_ ];
   positions_array_             = new Eigen::Matrix < float, 3, 1 > [ number_of_pixels_x_ 
-								   * number_of_pixels_y_ 
-								   * number_of_pixels_z_ ];
+								     * number_of_pixels_y_ 
+								     * number_of_pixels_z_ ];
   Do_we_have_conductivity_     = new bool [ number_of_pixels_x_ 
-					  * number_of_pixels_y_ 
-					  * number_of_pixels_z_ ];
+					    * number_of_pixels_y_ 
+					    * number_of_pixels_z_ ];
+  
+  //
+  // Output for R analysis
 #ifdef TRACE
 #if ( TRACE == 100 )
   std::stringstream err;
@@ -170,10 +177,13 @@ DCt::Conductivity_tensor()
 
 	  //
 	  // Select the index
+	  index_coeff = dim1 * 9
+	    + dim2 * 9 * number_of_pixels_x_ 
+	    + dim3 * 9 * number_of_pixels_x_ * number_of_pixels_y_;
+	  // Select the index
 	  index_val = index_val1 = dim1 
 	    + dim2 * number_of_pixels_x_ 
 	    + dim3 * number_of_pixels_x_ * number_of_pixels_y_;
-
 	  //
 	  index_val2 = dim1 
 	    + dim2 * number_of_pixels_x_ 
@@ -193,50 +203,32 @@ DCt::Conductivity_tensor()
 	  //
 	  // eigen value 1: l1
 	  l1 = 1000 * data_eigen_values[ index_val1 ];
-	  if ( l1 < D_EPS )
-	    l1 = l2 = l3 = 0.f;
-	  else
-	    {
-	      l1 = K_MAPPING * (l1  - D_EPS);
-	      // eigen value 2: l2
-	      l2 = 1000 * data_eigen_values[ index_val2 ];
-	      l2 = ( l2 < D_EPS ? 0.f : K_MAPPING * (l2 - D_EPS) );
-	      // eigen value 3: l3
-	      l3 = 1000 * data_eigen_values[ index_val3 ];
-	      l3 = ( l3 < D_EPS ? 0.f : K_MAPPING * (l3 - D_EPS) );
-	    }
+	  l1 = K_MAPPING * (l1 - D_EPS);
+	  // eigen value 2: l2
+	  l2 = 1000 * data_eigen_values[ index_val2 ];
+	  l2 = K_MAPPING * (l2 - D_EPS);
+	  // eigen value 3: l3
+	  l3 = 1000 * data_eigen_values[ index_val3 ];
+	  l3 = K_MAPPING * (l3 - D_EPS);
 
 	  //
-	  // Diffusion eigenvextors == conductivity eigenvectors
-	  //
-	  
+	  // Diffusion eigenvalues == conductivity eigenvalues
 	  // eigen vector 1:
-	  if ( l1 != 0.f )
-	    {
-	      v1x = data_eigen_vector1[ index_val1 ];
-	      v1y = data_eigen_vector1[ index_val2 ];
-	      v1z = data_eigen_vector1[ index_val3 ];
-	    }
-	  else
-	    v1x = v1y = v1z = 0.f;
+	  v1x = data_eigen_vector1[ index_val1 ];
+	  v1y = data_eigen_vector1[ index_val2 ];
+	  v1z = data_eigen_vector1[ index_val3 ];
+
+	  //
 	  // eigen vector 2:
-	  if ( l2 != 0.f )
-	    {
-	      v2x = data_eigen_vector2[ index_val1 ];
-	      v2y = data_eigen_vector2[ index_val2 ];
-	      v2z = data_eigen_vector2[ index_val3 ];
-	    }
-	  else
-	    v2x = v2y = v2z = 0.f;
+	  v2x = data_eigen_vector2[ index_val1 ];
+	  v2y = data_eigen_vector2[ index_val2 ];
+	  v2z = data_eigen_vector2[ index_val3 ];
+
+	  //
 	  // eigen vector 3:
-	  if ( l3 != 0.f )
-	    {
-	      v3x = data_eigen_vector3[ index_val1 ];
-	      v3y = data_eigen_vector3[ index_val2 ];
-	      v3z = data_eigen_vector3[ index_val3 ];
-	    }
-	  else
-	    v3x = v3y = v3z = 0.f;
+	  v3x = data_eigen_vector3[ index_val1 ];
+	  v3y = data_eigen_vector3[ index_val2 ];
+	  v3z = data_eigen_vector3[ index_val3 ];
 	  
 	  //
 	  // Fill up arrays
@@ -245,6 +237,7 @@ DCt::Conductivity_tensor()
 	  //
 	  // Position of the eigenvalues in the orig/aseg framework
 	  position  << dim1, dim2, dim3;
+	  position += move_to_cell_center;
 	  // nifti data to study frame work
 	  position = rotation_ * position + translation_;
 	  // Mesh rendering framework (aseg/orig framework)
@@ -278,7 +271,7 @@ DCt::Conductivity_tensor()
 	  if ( P.determinant() != 0.f )
 	    {
 	      conductivity_tensor = 
-		rotation_ * (P * D * P.inverse()) * rotation_.transpose();
+		rotation_ * (P * D * P.inverse()) * rotation_.inverse();
 	      Do_we_have_conductivity_[ index_val ] = true;
 	    }
 	  else
@@ -346,13 +339,16 @@ DCt::Conductivity_tensor()
 	      if (eigensolver.info() != Eigen::Success) 
 		abort();
 	      //
-	      cout << "The eigenvalues of A are:\n" << eigensolver.eigenvalues() << endl;
-	      cout << "Here's a matrix whose columns are eigenvectors of A \n"
-		   << "corresponding to these eigenvalues:\n"
-		   << eigensolver.eigenvectors() << endl;
+	      std::cout << "The eigenvalues of A are:\n" << eigensolver.eigenvalues() << std::endl;
+	      std::cout << "Here's a matrix whose columns are eigenvectors of A \n"
+			<< "corresponding to these eigenvalues:\n"
+			<< eigensolver.eigenvectors() << std::endl;
 	    }
 #endif
 #endif
+
+	  //
+	  // Output for R analysis
 #ifdef TRACE
 #if ( TRACE == 100 )
 	  //
@@ -397,12 +393,6 @@ DCt::Conductivity_tensor()
 	}
 
   //
-  // 
-  (DAp::get_instance())->set_conductivity_tensors_array_( &conductivity_tensors_array_ );
-  (DAp::get_instance())->set_positions_array_( &positions_array_ );
-  (DAp::get_instance())->set_Do_we_have_conductivity_( &Do_we_have_conductivity_ );
-
-  //
   // Clean up memory
   delete [] data_eigen_values;
   data_eigen_values = nullptr;
@@ -414,7 +404,7 @@ DCt::Conductivity_tensor()
   data_eigen_vector3 = nullptr;
 
   //
-  // 
+  // Output for R analysis 
 #ifdef TRACE
 #if ( TRACE == 100 )
   std::ofstream outFile;
@@ -549,12 +539,25 @@ DCt::operator ()()
 //
 //
 void 
+DCt::Move_conductivity_array_to_parameters()
+{
+  //
+  // Transfer the address of data
+  (DAp::get_instance())->set_conductivity_tensors_array_( &conductivity_tensors_array_ );
+  (DAp::get_instance())->set_eigen_values_matrices_array_( &eigen_values_matrices_array_ );
+  (DAp::get_instance())->set_positions_array_( &positions_array_ );
+  (DAp::get_instance())->set_Do_we_have_conductivity_( &Do_we_have_conductivity_ );
+}
+//
+//
+//
+void 
 DCt::VTK_visualization()
 {
   //
   // Create conductivity vector field
   //
-  
+   
   //
   //
   vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
@@ -589,21 +592,21 @@ DCt::VTK_visualization()
   double        color[3];
   double        gradiant = 0;
   //
-//  for ( int dim3 = 30 ; dim3 <  31 /*number_of_pixels_z_*/ ; dim3++/* = dim3 + 2*/ )
-//    for ( int dim2 = 39 ; dim2 < 40/*number_of_pixels_y_*/ ; dim2++ /*= dim2 + 2*/ )
-//      for ( int dim1 = 44 ; dim1 < 45/*number_of_pixels_x_*/ ; dim1++ /*= dim1  + 2*/ )
-  for ( int dim3 = 0 ; dim3 < number_of_pixels_z_ ; dim3 = dim3 + 2 )
-    for ( int dim2 = 90 ; dim2 < 91 /*number_of_pixels_y_*/ ; dim2 = dim2 + 2 ) // Up
-      for ( int dim1 = 0 ; dim1 < number_of_pixels_x_ ; dim1 = dim1  + 2 ) // Right
+  for ( int dim3 = 0 ; dim3 < number_of_pixels_z_ ; dim3++ )
+    for ( int dim2 = 0 ; dim2 < number_of_pixels_y_ ; dim2++) // Up
+      for ( int dim1 = 0 ; dim1 < number_of_pixels_x_ ; dim1++ ) // Right
 	{
 	  index_val = dim1 + dim2 * number_of_pixels_x_ + dim3 * number_of_pixels_x_ * number_of_pixels_y_;
 	  if( Do_we_have_conductivity_[ index_val ] )
 	    {
+//	      if( positions_array_[ index_val ](2,0) < 44 &&
+//		  positions_array_[ index_val ](2,0) > 41 )
+//		{
 	      // position
 	      points->InsertNextPoint(positions_array_[ index_val ](0,0), 
 				      positions_array_[ index_val ](1,0), 
 				      positions_array_[ index_val ](2,0));
-	      std::cout << positions_array_[ index_val ] << std::endl;
+//	      std::cout << positions_array_[ index_val ] << std::endl<< std::endl;
 	      //
 	      main_direction << 
 		P_matrices_array_[index_val](0,0),
@@ -619,13 +622,15 @@ DCt::VTK_visualization()
 			    main_direction(2,0)};
 	      vectors->InsertNextTupleValue( v );
 	      // Anisotropy evaluation
-	      gradiant = ( eigen_values_matrices_array_[index_val](2,2) / 
-			   eigen_values_matrices_array_[index_val](0,0) );
+	      gradiant  =      eigen_values_matrices_array_[index_val](1,1);
+	      gradiant +=      eigen_values_matrices_array_[index_val](2,2); 
+	      gradiant /=  2 * eigen_values_matrices_array_[index_val](0,0);
 	      colorLookupTable->GetColor(gradiant, color);
 	      anisotropy_color[0] = static_cast<unsigned char>( color[0] * 255. );
 	      anisotropy_color[1] = static_cast<unsigned char>( color[1] * 255. );
 	      anisotropy_color[2] = static_cast<unsigned char>( color[2] * 255. );
 	      anisotropy->InsertNextTupleValue( anisotropy_color );
+//		}
 	    }
 	}
   //
@@ -641,9 +646,6 @@ DCt::VTK_visualization()
 
   //
   // Create anything you want here
-//  vtkSmartPointer<vtkSphereSource> glyph_shape = 
-//      vtkSmartPointer<vtkSphereSource>::New();
-//  glyph_shape->SetRadius(0.5);
   vtkSmartPointer<vtkArrowSource> glyph_shape = vtkSmartPointer<vtkArrowSource>::New();
   glyph_shape->SetTipResolution( 6 );
   glyph_shape->SetTipRadius( 0.1 );
@@ -731,34 +733,34 @@ DCt::VTK_visualization()
   // Background 
   renderer->SetBackground(.0, .0, .0); 
  
-  //
-  // Mesh import
-  //
-
-// //
-// // Mesh as unscructured data
-// std::string filename = "mesh.vtu";
-//
-// //
-// //read all the data from the file
-// vtkSmartPointer<vtkXMLUnstructuredGridReader> reader =
-//   vtkSmartPointer<vtkXMLUnstructuredGridReader>::New();
-// reader->SetFileName( filename.c_str() );
-// reader->Update();
-//
-// //
-// //Create a mapper and actor
-// vtkSmartPointer<vtkDataSetMapper> mapper_unstructured_data =
-//   vtkSmartPointer<vtkDataSetMapper>::New();
-// mapper_unstructured_data->SetInputConnection(reader->GetOutputPort());
-// //
-// vtkSmartPointer<vtkActor> actor_unstructured_data =
-//   vtkSmartPointer<vtkActor>::New();
-// actor_unstructured_data->SetMapper(mapper_unstructured_data);
-//
-// //
-// //Add the actor to the scene
-// renderer->AddActor( actor_unstructured_data );
+//  //
+//  // Mesh import
+//  //
+// 
+//  //
+//  // Mesh as unscructured data
+//  std::string filename = "mesh.vtu";
+// 
+//  //
+//  //read all the data from the file
+//  vtkSmartPointer<vtkXMLUnstructuredGridReader> reader =
+//    vtkSmartPointer<vtkXMLUnstructuredGridReader>::New();
+//  reader->SetFileName( filename.c_str() );
+//  reader->Update();
+// 
+//  //
+//  //Create a mapper and actor
+//  vtkSmartPointer<vtkDataSetMapper> mapper_unstructured_data =
+//    vtkSmartPointer<vtkDataSetMapper>::New();
+//  mapper_unstructured_data->SetInputConnection(reader->GetOutputPort());
+//  //
+//  vtkSmartPointer<vtkActor> actor_unstructured_data =
+//    vtkSmartPointer<vtkActor>::New();
+//  actor_unstructured_data->SetMapper(mapper_unstructured_data);
+// 
+//  //
+//  //Add the actor to the scene
+//  renderer->AddActor( actor_unstructured_data );
  
   //
   // Render and interact
@@ -818,25 +820,6 @@ DCt::INRIMAGE_image_of_conductivity_anisotropy()
   // Anisotropy
   //
   
-//  //
-//  // Mesh rendering framework
-//  Eigen::Matrix< float, 3, 3> rotation_mesh_framework;
-//  Eigen::Matrix< float, 3, 1> translation_mesh_framework;
-//  //
-//  rotation_mesh_framework <<
-//    1, 0, 0,
-//    0, 0,-1,
-//    0, 1, 0;
-//  // translation 128 / 2.2 ~ 
-//  translation_mesh_framework <<
-//    128.,
-//    128.,
-//    128.;
-  //
-  //
-//  Eigen::Matrix< float, 3, 1 > position;
-//  Eigen::Matrix< float, 3, 1 > position_index;
-//  //
   int    index_val = 0;
   int    index_mapping = 0;
   double gradiant  = 0;

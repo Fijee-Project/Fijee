@@ -9,15 +9,24 @@ DIST          = fijee
 #################
 ## COMPILATION ##
 #################
-export CXX = g++
+export CXX  = g++
+export CUDA = nvcc
+#-lineinfo CUDA
+#  -gencode arch=compute_10,code=sm_10 
+#  -gencode arch=compute_20,code=sm_20 
+#  -gencode arch=compute_30,code=sm_30 
+#  -gencode arch=compute_35,code=sm_35 
 #
 ifeq ($(DEBUG),yes)
 CXXFLAGS_MODE  = -g -DDEBUG
+CUDAFLAGS_MODE = 
 else
-CXXFLAGS_MODE  = -O3 
+CXXFLAGS_MODE  = -O3 #-DGPU
+CUDAFLAGS_MODE = -O3 -m64 -gencode arch=compute_20,code=sm_20 
 endif
 #
-export CXXFLAGS += $(CXXFLAGS_MODE) -Wno-deprecated -std=c++0x -frounding-math -DCGAL_EIGEN3_ENABLED -DDEBUG_UCSF #-DDEBUG_TRACE -Wall 
+export CXXFLAGS  += $(CXXFLAGS_MODE) -Wno-deprecated -std=c++0x -frounding-math -DCGAL_EIGEN3_ENABLED -DDEBUG_UCSF #-DDEBUG_TRACE
+export CUDAFLAGS += $(CUDAFLAGS_MODE)
 export UFL = ffc
 
 # Warning: -Wno-deprecate might cause difficult linking issue difficult to solve
@@ -39,8 +48,9 @@ export NIFTI  += $(NIFTI_DIR)/install
 export VTK    += $(VTK_DIR)/install
 endif
 #
-export EIGEN3 = /home/cobigo/devel/C++/Eigen3/install
-export FENICS = /home/cobigo/Softwares/Fenics
+export EIGEN3   = /home/cobigo/devel/C++/Eigen3/install
+export FENICS   = /home/cobigo/Softwares/Fenics
+export CUDA_LIB = /usr/local/cuda-5.0/lib64
 
 #####################
 ## SUB DIRECTORIES ##
@@ -63,10 +73,12 @@ clean:
 	( cd $(MESH_RENDERING_DIR) && $(MAKE) $@ )
 
 distclean: clean
-	find . -name *~ -exec rm {} \;
-	find . -name *.xml -exec rm {} \;
-	find . -name *.mesh -exec rm {} \;
-	find . -name *.vtu -exec rm {} \;
+	find . -name *~      -exec rm {} \;
+	find . -name *.xml   -exec rm {} \;
+	find . -name *.mesh  -exec rm {} \;
+	find . -name *.vtu   -exec rm {} \;
+	find . -name *.inr   -exec rm {} \;
+	find . -name *.frame -exec rm {} \;
 
 #check:
 #	
@@ -82,6 +94,6 @@ dist:
 	cp $(SUBTRACTION_METHOD_DIR)/Makefile      $(DIST)/$(SUBTRACTION_METHOD_DIR)/
 	cp $(MESH_RENDERING_DIR)/{Makefile,README} $(DIST)/$(MESH_RENDERING_DIR)/      
 	cp $(SUBTRACTION_METHOD_DIR)/*.{h,cxx,ufl} $(DIST)/$(SUBTRACTION_METHOD_DIR)/
-	cp $(MESH_RENDERING_DIR)/*.{h,cxx}         $(DIST)/$(MESH_RENDERING_DIR)/      
+	cp $(MESH_RENDERING_DIR)/*.{h,cxx,cu}      $(DIST)/$(MESH_RENDERING_DIR)/      
 	tar zcvf $(DIST)-$(VERSION).tar.gz $(DIST)
 	rm -rf $(DIST)
