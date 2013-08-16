@@ -1,6 +1,7 @@
 #ifndef CUDA_CONDUCTIVITY_MATCHING_H_
 #define CUDA_CONDUCTIVITY_MATCHING_H_
 #include <iostream>
+#include <stdio.h>
 //
 // UCSF
 //
@@ -42,13 +43,16 @@ namespace Domains
     float *positions_array_y_;
     //! __device__ positions Z of voxel centroid array
     float *positions_array_z_;
+    //! __device__ conductivity in the voxel
+    bool  *do_we_have_conductivity_;
 
   public:
     CUDA_Conductivity_matching();
     CUDA_Conductivity_matching(int, 
 			       float*,
 			       float*,
-			       float*
+			       float*,
+			       bool*
 			       );
 //    CUDA_Conductivity_matching( const Domain& );
 //    CUDA_Conductivity_matching( Domain&& );
@@ -65,20 +69,13 @@ namespace Domains
      *
      *  \param Vertices_position: is a table of 5 x 3 floating points representing the position of vertices and centroid.
      *
-     *  \return vertices_voxel_index: is a 5 integers array with conductivity index for each vertices. i = 0,1,2,3 for the vertices and i = 4 for the centroid.
+     *  \return Vertices_voxel: is a 5 x BLOCKS floating points array with the smallest distance per blocks for each vertices. i = 0,1,2,3 for the vertices and i = 4 for the centroid.
+     *
+     *  \return Vertices_voxel_index: is a 5 x BLOCKS integers array with conductivity index corresponding to the distances  in Vertices_voxel array for each vertices. i = 0,1,2,3 for the vertices and i = 4 for the centroid.
      */
-    int* find_vertices_voxel_index(float* Vertices_position);
-
-// private:
-//   /*!
-//    *  \brief Kernel
-//    *
-//    *  This method return the 
-//    *
-//    *  \param 
-//    *
-//    */
-//   __global__ void process_kernel(){};
+    void find_vertices_voxel_index( float* Vertices_position, 
+				    float* Vertices_voxel, 
+				    int*   Vertices_voxel_index);
   };
   /*!
    *  \brief Dump values for CUDA_Conductivity_matching

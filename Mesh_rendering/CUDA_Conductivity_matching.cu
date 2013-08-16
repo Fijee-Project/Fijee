@@ -2,14 +2,7 @@
 // Project
 //
 #include "CUDA_Conductivity_matching.h"
-//
-//
-//
-__global__ void 
-process_kernel()
-{
-};
-
+#include "CUDA_Conductivity_matching_functions.h"
 //
 //
 //
@@ -23,27 +16,83 @@ Domains::CUDA_Conductivity_matching::CUDA_Conductivity_matching():
 Domains::CUDA_Conductivity_matching::CUDA_Conductivity_matching( int Size_of_array,
 								 float* Voxel_center_pos_x,
 								 float* Voxel_center_pos_y,
-								 float* Voxel_center_pos_z
-								 ):
+								 float* Voxel_center_pos_z,
+								 bool*  Do_we_have_conductivity ):
   size_of_array_( Size_of_array )
 {
+
+  //
+  //
+  cudaError_t err;
+  
   //
   // Memory allocation on CUDA device
-  cudaMalloc( (void**)&positions_array_x_, 
-	      Size_of_array * sizeof(float));
-  cudaMalloc( (void**)&positions_array_y_, 
-	      Size_of_array * sizeof(float));
-  cudaMalloc( (void**)&positions_array_z_, 
-	      Size_of_array * sizeof(float));
+  err = cudaMalloc( (void**)&positions_array_x_, 
+		    Size_of_array * sizeof(float));
+  if( err != cudaSuccess )
+    {
+      printf( "CUDA memory allocation failled: %s", cudaGetErrorString(err) );
+      abort();
+    }
+  //
+  err = cudaMalloc( (void**)&positions_array_y_, 
+		    Size_of_array * sizeof(float));
+  if( err != cudaSuccess )
+    {
+      printf( "CUDA memory allocation failled: %s", cudaGetErrorString(err) );
+      abort();
+    }
+  //
+  err = cudaMalloc( (void**)&positions_array_z_, 
+		    Size_of_array * sizeof(float));
+  if( err != cudaSuccess )
+    {
+      printf( "CUDA memory allocation failled: %s", cudaGetErrorString(err) );
+      abort();
+    }
+  //
+  err = cudaMalloc( (void**)&do_we_have_conductivity_, 
+		    Size_of_array * sizeof(bool));
+  if( err != cudaSuccess )
+    {
+      printf( "CUDA memory allocation failled: %s", cudaGetErrorString(err) );
+      abort();
+    }
+
 
   //
   // Copy the array on GPU
-  cudaMemcpy( positions_array_x_, Voxel_center_pos_x, Size_of_array * sizeof(float),
-	      cudaMemcpyHostToDevice);
-  cudaMemcpy( positions_array_y_, Voxel_center_pos_y, Size_of_array * sizeof(float),
-	      cudaMemcpyHostToDevice);
-  cudaMemcpy( positions_array_z_, Voxel_center_pos_z, Size_of_array * sizeof(float),
-	      cudaMemcpyHostToDevice);
+  err = cudaMemcpy( positions_array_x_, Voxel_center_pos_x, Size_of_array * sizeof(float),
+		    cudaMemcpyHostToDevice);
+  if( err != cudaSuccess )
+    {
+      printf( "CUDA copy failled: %s", cudaGetErrorString(err) );
+      abort();
+    }
+  //
+  err = cudaMemcpy( positions_array_y_, Voxel_center_pos_y, Size_of_array * sizeof(float),
+		    cudaMemcpyHostToDevice);
+  if( err != cudaSuccess )
+    {
+      printf( "CUDA copy failled: %s", cudaGetErrorString(err) );
+      abort();
+    }
+  //
+  err = cudaMemcpy( positions_array_z_, Voxel_center_pos_z, Size_of_array * sizeof(float),
+		    cudaMemcpyHostToDevice);
+  if( err != cudaSuccess )
+    {
+      printf( "CUDA copy failled: %s", cudaGetErrorString(err) );
+      abort();
+    }
+  //
+  err = cudaMemcpy( do_we_have_conductivity_, Do_we_have_conductivity, Size_of_array * sizeof(bool),
+		    cudaMemcpyHostToDevice);
+  if( err != cudaSuccess )
+    {
+      printf( "CUDA copy failled: %s", cudaGetErrorString(err) );
+      abort();
+    }
 }
 // //
 // //
@@ -120,23 +169,190 @@ Domains::CUDA_Conductivity_matching::~CUDA_Conductivity_matching()
 //
 //
 //
-int* 
-Domains::CUDA_Conductivity_matching::find_vertices_voxel_index( float* Vertices_position )
+void
+Domains::CUDA_Conductivity_matching::find_vertices_voxel_index( float* Vertices_position,
+								float* Point_min_distance,
+								int*   Point_min_distance_index)
 {
   //
   //
-  int* vertices_voxel_index = new int[5];
+  cudaError_t err;
+  float *cell_points;
+  float *point_min_distance;
+  int   *point_min_distance_index;
   
+  //
+  // Memory allocation on CUDA device
+  err = cudaMalloc( (void**)&cell_points, 
+		    5 * 3 * sizeof(float));
+  if( err != cudaSuccess )
+    {
+      printf( "CUDA memory allocation failled: %s", cudaGetErrorString(err) );
+      abort();
+    }
+  //
+  err = cudaMalloc( (void**)&point_min_distance, 
+		    (BLOCKS+REMAIN) * 5 * sizeof(float));
+  if( err != cudaSuccess )
+    {
+      printf( "CUDA memory allocation failled: %s", cudaGetErrorString(err) );
+      abort();
+    }
+  //
+  err = cudaMalloc( (void**)&point_min_distance_index, 
+		   (BLOCKS+REMAIN) * 5 * sizeof(int));
+  if( err != cudaSuccess )
+    {
+      printf( "CUDA memory allocation failled: %s", cudaGetErrorString(err) );
+      abort();
+    }
+
+  
+  //
+  // Copy the array on GPU
+  err = cudaMemcpy( cell_points, Vertices_position, 
+		    5 * 3 * sizeof(float),
+		    cudaMemcpyHostToDevice );
+  if( err != cudaSuccess )
+    {
+      printf( "1 - CUDA copy failled: %s", cudaGetErrorString(err) );
+      abort();
+    }
+
+
   //
   // Cuda kernel
   // size_of_array_  = 100 * 100 * 60
   // size_of_array_ /= 64 = 9375
-  process_kernel <<< size_of_array_ / 64, 64 >>> ();
+  process_kernel <<< BLOCKS, THREADS >>> ( cell_points, /* input  */
+					   positions_array_x_,       /* already on GPU */
+					   positions_array_y_,       /* already on GPU */
+					   positions_array_z_,       /* already on GPU */
+					   do_we_have_conductivity_, /* already on GPU */
+					   point_min_distance, /* output */
+					   point_min_distance_index);/* output */
+
+
+  //
+  // Copy the array results from GPU to host
+  err = cudaMemcpy( Point_min_distance, point_min_distance, 
+		    (BLOCKS+REMAIN) * 5 * sizeof(float),
+		    cudaMemcpyDeviceToHost );
+  if( err != cudaSuccess )
+    {
+      printf( "2 - CUDA copy failled: %s", cudaGetErrorString(err) );
+      abort();
+    }
+  //
+  err = cudaMemcpy( Point_min_distance_index, point_min_distance_index, 
+		    (BLOCKS+REMAIN) * 5 * sizeof(int),
+		    cudaMemcpyDeviceToHost );
+  if( err != cudaSuccess )
+    {
+      printf( "3 - CUDA copy failled: %s", cudaGetErrorString(err) );
+      abort();
+    }
+
 
   //
   //
-  return vertices_voxel_index;
+  cudaFree(cell_points);
+  cudaFree(point_min_distance);
+  cudaFree(point_min_distance_index);
 }
+////
+////
+////
+//void
+//Domains::CUDA_Conductivity_matching::find_vertices_voxel_index( float* Vertices_position,
+//								float* Point_min_distance,
+//								int* Point_min_distance_index)
+//{
+//  //
+//  //
+//  cudaError_t err;
+//  float *cell_points;
+//  float *point_min_distance;
+//  int   *point_min_distance_index;
+//  
+//  //
+//  // Memory allocation on CUDA device
+//  err = cudaMalloc( (void**)&cell_points, 
+//		    5 * 3 * sizeof(float));
+//  if( err != cudaSuccess )
+//    {
+//      printf( "CUDA memory allocation failled: %s", cudaGetErrorString(err) );
+//      abort();
+//    }
+//  //
+//  err = cudaMalloc( (void**)&point_min_distance, 
+//		    BLOCKS * 5 * sizeof(float));
+//  if( err != cudaSuccess )
+//    {
+//      printf( "CUDA memory allocation failled: %s", cudaGetErrorString(err) );
+//      abort();
+//    }
+//  //
+//  err = cudaMalloc( (void**)&point_min_distance_index, 
+//		    BLOCKS * 5 * sizeof(int));
+//  if( err != cudaSuccess )
+//    {
+//      printf( "CUDA memory allocation failled: %s", cudaGetErrorString(err) );
+//      abort();
+//    }
+//
+//  
+//  //
+//  // Copy the array on GPU
+//  err = cudaMemcpy( cell_points, Vertices_position, 
+//		    15 * sizeof(float),
+//		    cudaMemcpyHostToDevice );
+//  if( err != cudaSuccess )
+//    {
+//      printf( "1CUDA copy failled: %s", cudaGetErrorString(err) );
+//      abort();
+//    }
+//
+//
+//  //
+//  // Cuda kernel
+//  // size_of_array_  = 100 * 100 * 60
+//  // size_of_array_ /= 64 = 9375
+//  process_kernel <<< BLOCKS, THREADS >>> ( cell_points, /* input  */
+//					   positions_array_x_, /* already on GPU */
+//					   positions_array_y_, /* already on GPU */
+//					   positions_array_z_, /* already on GPU */
+//					   point_min_distance, /* output */
+//					   point_min_distance_index);/* output */
+//
+//
+//  //
+//  // Copy the array results from GPU to host
+//  err = cudaMemcpy( Point_min_distance, point_min_distance, 
+//		    BLOCKS * 5 * sizeof(float),
+//		    cudaMemcpyDeviceToHost );
+//  if( err != cudaSuccess )
+//    {
+//      printf( "2CUDA copy failled: %s", cudaGetErrorString(err) );
+//      abort();
+//    }
+//  //
+//  err = cudaMemcpy( Point_min_distance_index, point_min_distance_index, 
+//		    BLOCKS * 5 * sizeof(int),
+//		    cudaMemcpyDeviceToHost );
+//  if( err != cudaSuccess )
+//    {
+//      printf( "3CUDA copy failled: %s", cudaGetErrorString(err) );
+//      abort();
+//    }
+//
+//
+//  //
+//  //
+//  cudaFree(cell_points);
+//  cudaFree(point_min_distance);
+//  cudaFree(point_min_distance_index);
+//}
 //
 //
 //

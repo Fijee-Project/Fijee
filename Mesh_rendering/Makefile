@@ -4,7 +4,7 @@
 # 100 R statistical software studies
 # 200 VTK visualization
 #
-CXXFLAGS +=  -Wall #-DTRACE=100 
+CXXFLAGS +=  -Wall -DTRACE=4 
 INC       = -I$(NIFTI)/include/nifti/ -I$(VTK)/include/vtk-5.10/ -I/$(CGAL)/include/ -I$(EIGEN3)/include/eigen3/ #-I/usr/include/taucs/ #
 LIBS      = -L/$(CGAL)/lib/ -lCGAL -lCGAL_ImageIO -lgmp -lboost_thread-mt -lmpfr #-lgsl -lgslcblas -lm
 # Taucs
@@ -20,7 +20,7 @@ LIBS += -L$(VTK)/lib/vtk-5.10/ -lvtkCommon -lvtkFiltering -lvtkGenericFiltering 
 ##########
 # CUDA   #
 LIBS += -L$(CUDA_LIB) -lcudart
-INC_CUDA = -I$(NIFTI)/include/nifti/
+INC_CUDA = #-I$(NIFTI)/include/nifti/
 
 ######
 ######
@@ -28,23 +28,23 @@ SRC = main.cxx VTK_implicite_domain.cxx  Build_labeled_domain.cxx Build_mesh.cxx
 OBJ = $(SRC:.cxx=.o)
 #
 SRC_CUDA = CUDA_Conductivity_matching.cu
-OBG_CUDA = $(SRC_CUDA:.cu=.o)
+OBJ_CUDA = $(SRC_CUDA:.cu=.o)
 
 EXEC = build_inrimage
 
 
 all: $(EXEC) 
 
-build_inrimage: $(OBJ) $(OBG_CUDA)
+build_inrimage: $(OBJ) $(OBJ_CUDA)
 	$(CXX) $(CXXFLAGS) $(INC) $(LIBS) $^ -o $@  
 
 %.o: %.cxx
 	$(CXX) $(CXXFLAGS) $(INC) -o $@ -c $<
 
-$(OBG_CUDA): $(SRC_CUDA)
+$(OBJ_CUDA): $(SRC_CUDA)
 	$(CUDA) $(CUDAFLAGS) $(INC_CUDA) -o $@ -c $<
 
 
 
 clean: 
-	rm build_inrimage $(OBJ) $(OBG_CUDA)
+	rm build_inrimage $(OBJ) $(OBJ_CUDA)

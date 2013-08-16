@@ -42,7 +42,7 @@ main()
   // Write Inrimage
   timerLog->MarkEvent("Write Inrimage");
   labeled_image.Write_inrimage_file();
-
+  
 
   //
   // Diffusion tensor

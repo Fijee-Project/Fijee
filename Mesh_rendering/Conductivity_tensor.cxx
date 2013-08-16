@@ -153,9 +153,9 @@ DCt::Conductivity_tensor()
   positions_array_             = new Eigen::Matrix < float, 3, 1 > [ number_of_pixels_x_ 
 								     * number_of_pixels_y_ 
 								     * number_of_pixels_z_ ];
-  Do_we_have_conductivity_                  = new bool [ number_of_pixels_x_ 
-							 * number_of_pixels_y_ 
-							 * number_of_pixels_z_ ];
+  Do_we_have_conductivity_     = new bool [ number_of_pixels_x_ 
+					    * number_of_pixels_y_ 
+					    * number_of_pixels_z_ ];
   
   //
   // Output for R analysis
@@ -165,7 +165,6 @@ DCt::Conductivity_tensor()
   err << "l1 true \t l2 true \t l3 true \t l1 \t l2 \t l3 \t delta12 \t delta13 \t delta23 \n";
 #endif
 #endif
-  int count = 0;
   //
   for ( int dim3 = 0 ; dim3 < number_of_pixels_z_ ; dim3++)
     for ( int dim2 = 0 ; dim2 < number_of_pixels_y_ ; dim2++)
@@ -821,25 +820,6 @@ DCt::INRIMAGE_image_of_conductivity_anisotropy()
   // Anisotropy
   //
   
-//  //
-//  // Mesh rendering framework
-//  Eigen::Matrix< float, 3, 3> rotation_mesh_framework;
-//  Eigen::Matrix< float, 3, 1> translation_mesh_framework;
-//  //
-//  rotation_mesh_framework <<
-//    1, 0, 0,
-//    0, 0,-1,
-//    0, 1, 0;
-//  // translation 128 / 2.2 ~ 
-//  translation_mesh_framework <<
-//    128.,
-//    128.,
-//    128.;
-  //
-  //
-//  Eigen::Matrix< float, 3, 1 > position;
-//  Eigen::Matrix< float, 3, 1 > position_index;
-//  //
   int    index_val = 0;
   int    index_mapping = 0;
   double gradiant  = 0;

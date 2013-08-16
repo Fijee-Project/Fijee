@@ -21,8 +21,8 @@ ifeq ($(DEBUG),yes)
 CXXFLAGS_MODE  = -g -DDEBUG
 CUDAFLAGS_MODE = 
 else
-CXXFLAGS_MODE  = -O3 -DGPU
-CUDAFLAGS_MODE = -m64 -gencode arch=compute_20,code=sm_20 
+CXXFLAGS_MODE  = -O3 #-DGPU
+CUDAFLAGS_MODE = -O3 -m64 -gencode arch=compute_20,code=sm_20 
 endif
 #
 export CXXFLAGS  += $(CXXFLAGS_MODE) -Wno-deprecated -std=c++0x -frounding-math -DCGAL_EIGEN3_ENABLED -DDEBUG_UCSF #-DDEBUG_TRACE
@@ -65,11 +65,11 @@ EXEC = $(MESH_RENDERING)/build_inrimage  $(SUBTRACTION_METHOD_DIR)/Poisson
 all: $(EXEC)
 
 $(EXEC):
-#	( cd $(SUBTRACTION_METHOD_DIR) && $(MAKE) )
+	( cd $(SUBTRACTION_METHOD_DIR) && $(MAKE) )
 	( cd $(MESH_RENDERING_DIR) && $(MAKE) )
 
 clean:
-#	( cd $(SUBTRACTION_METHOD_DIR) && $(MAKE) $@ )
+	( cd $(SUBTRACTION_METHOD_DIR) && $(MAKE) $@ )
 	( cd $(MESH_RENDERING_DIR) && $(MAKE) $@ )
 
 distclean: clean
@@ -94,6 +94,6 @@ dist:
 	cp $(SUBTRACTION_METHOD_DIR)/Makefile      $(DIST)/$(SUBTRACTION_METHOD_DIR)/
 	cp $(MESH_RENDERING_DIR)/{Makefile,README} $(DIST)/$(MESH_RENDERING_DIR)/      
 	cp $(SUBTRACTION_METHOD_DIR)/*.{h,cxx,ufl} $(DIST)/$(SUBTRACTION_METHOD_DIR)/
-	cp $(MESH_RENDERING_DIR)/*.{h,cxx}         $(DIST)/$(MESH_RENDERING_DIR)/      
+	cp $(MESH_RENDERING_DIR)/*.{h,cxx,cu}      $(DIST)/$(MESH_RENDERING_DIR)/      
 	tar zcvf $(DIST)-$(VERSION).tar.gz $(DIST)
 	rm -rf $(DIST)
