@@ -282,6 +282,7 @@ Domains_Build_labeled::Head_model_segmentation()
   Eigen::Matrix< float, 3, 1 > position;
   // speed-up
   bool is_in_CSF = false;
+  //
   // create a data_label_tmp private in the different
  for ( int k = 0; k < 256; k++ )
     for ( int j = 0; j < 256; j++ )
@@ -332,16 +333,18 @@ Domains_Build_labeled::Head_model_segmentation()
 	      if( right_gray_matter.inside_domain( cell_center ) || 
 		  left_gray_matter.inside_domain( cell_center ) )
 		data_label_[ idx ] = GRAY_MATTER;
+	      
 	      //
 	      //	  if( subcortical_brain(cell_center_aseg) == RIGHT_CEREBRAL_CORTEX || 
 	      //	      subcortical_brain(cell_center_aseg) == LEFT_CEREBRAL_CORTEX  )
 	      //	    data_label[ idx ] = GRAY_MATTER;
-
+	      
 	      //
 	      // White matter
 	      if( right_white_matter.inside_domain( cell_center ) || 
 		  left_white_matter.inside_domain( cell_center ) )
 		data_label_[ idx ] = WHITE_MATTER;
+
 	      //
 	      //	  if( subcortical_brain(cell_center_aseg) == WM_HYPOINTENSITIES          || 
 	      //	      subcortical_brain(cell_center_aseg) == RIGHT_CEREBRAL_WHITE_MATTER || 

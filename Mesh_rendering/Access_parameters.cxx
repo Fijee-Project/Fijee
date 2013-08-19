@@ -13,6 +13,7 @@ DAp::parameters_instance_ = NULL;
 //
 DAp::Access_parameters():
   conductivity_tensors_array_(nullptr),
+  eigen_values_matrices_array_(nullptr),
   positions_array_(nullptr),
   Do_we_have_conductivity_(nullptr)
 {
@@ -107,7 +108,8 @@ DAp::Access_parameters():
 #if ( TRACE == 1 )
   /********** print a little header information */
   fprintf(stderr, "\n %s header information for:", check_header.c_str() );
-  fprintf(stderr, "\n XYZT dimensions: %d %d %d %d", number_of_pixels_x_,number_of_pixels_y_,number_of_pixels_z_,aseg_header_nifti.dim[4]);
+  fprintf(stderr, "\n XYZT dimensions: %d %d %d %d", 
+	  number_of_pixels_x_,number_of_pixels_y_,number_of_pixels_z_,aseg_header_nifti.dim[4]);
   fprintf(stderr, "\n Datatype code and bits/pixel: %d %d",aseg_header_nifti.datatype,aseg_header_nifti.bitpix);
   fprintf(stderr, "\n Scaling slope and intercept: %.6f %.6f",aseg_header_nifti.scl_slope,aseg_header_nifti.scl_inter);
   fprintf(stderr, "\n Byte offset to data in datafile: %ld",(long)(aseg_header_nifti.vox_offset));
@@ -129,10 +131,10 @@ DAp::Access_parameters():
 
   //
   // All segmentation nifti file (aseg.nii)
-  std::string nifti_eigen_values  = files_path_ + "/Diffusion_tensor.fsl2ascii/MoveToOrig/eigvals_aseg_ref.nii";
-  std::string nifti_eigen_vector1 = files_path_ + "/Diffusion_tensor.fsl2ascii/MoveToOrig/eigvec1_aseg_ref.nii";
-  std::string nifti_eigen_vector2 = files_path_ + "/Diffusion_tensor.fsl2ascii/MoveToOrig/eigvec2_aseg_ref.nii";
-  std::string nifti_eigen_vector3 = files_path_ + "/Diffusion_tensor.fsl2ascii/MoveToOrig/eigvec3_aseg_ref.nii";
+  std::string nifti_eigen_values  = files_path_ + "/Diffusion_tensor/eigvals.nii";
+  std::string nifti_eigen_vector1 = files_path_ + "/Diffusion_tensor/eigvec1.nii";
+  std::string nifti_eigen_vector2 = files_path_ + "/Diffusion_tensor/eigvec2.nii";
+  std::string nifti_eigen_vector3 = files_path_ + "/Diffusion_tensor/eigvec3.nii";
 
   //
   // nifti headers and files
@@ -263,77 +265,100 @@ DAp::Access_parameters():
   // open the datafile, jump to data offset
   ret_eigenvalues = fseek(file_eigen_values, (long)(header_eigenvalues.vox_offset), SEEK_SET);
   if (ret_eigenvalues != 0) {
-    fprintf(stderr, "\nError doing fseek() to %ld in data file %s\n",(long)(header_eigenvalues.vox_offset), nifti_eigen_values.c_str());
+    fprintf(stderr, "\nError doing fseek() to %ld in data file %s\n",
+	    (long)(header_eigenvalues.vox_offset), nifti_eigen_values.c_str());
     exit(1);
   }
   ret_eigenvector1 = fseek(file_eigen_vector1, (long)(header_eigenvector1.vox_offset), SEEK_SET);
   if (ret_eigenvector1 != 0) {
-    fprintf(stderr, "\nError doing fseek() to %ld in data file %s\n",(long)(header_eigenvector1.vox_offset), nifti_eigen_vector1.c_str());
+    fprintf(stderr, "\nError doing fseek() to %ld in data file %s\n",
+	    (long)(header_eigenvector1.vox_offset), nifti_eigen_vector1.c_str());
     exit(1);
   }
   ret_eigenvector2 = fseek(file_eigen_vector2, (long)(header_eigenvector2.vox_offset), SEEK_SET);
   if (ret_eigenvector2 != 0) {
-    fprintf(stderr, "\nError doing fseek() to %ld in data file %s\n",(long)(header_eigenvector2.vox_offset), nifti_eigen_vector2.c_str());
+    fprintf(stderr, "\nError doing fseek() to %ld in data file %s\n",
+	    (long)(header_eigenvector2.vox_offset), nifti_eigen_vector2.c_str());
     exit(1);
   }
   ret_eigenvector3 = fseek(file_eigen_vector3, (long)(header_eigenvector3.vox_offset), SEEK_SET);
   if (ret_eigenvector3 != 0) {
-    fprintf(stderr, "\nError doing fseek() to %ld in data file %s\n",(long)(header_eigenvector3.vox_offset), nifti_eigen_vector3.c_str());
+    fprintf(stderr, "\nError doing fseek() to %ld in data file %s\n",
+	    (long)(header_eigenvector3.vox_offset), nifti_eigen_vector3.c_str());
     exit(1);
   }
 
   //
   // Allocate buffer and read 4D volume from data file
-  data_eigen_values_ = new float[ number_of_pixels_x_ * number_of_pixels_y_ * number_of_pixels_z_ * eigenvalues_number_of_layers_ ];
+  data_eigen_values_ = new float[ eigenvalues_number_of_pixels_x_ * 
+				  eigenvalues_number_of_pixels_y_ * 
+				  eigenvalues_number_of_pixels_z_ * 
+				  eigenvalues_number_of_layers_ ];
   if ( data_eigen_values_ == nullptr ) {
     fprintf(stderr, "\nError allocating data buffer for %s\n", nifti_eigen_values.c_str());
     exit(1);
   }
-  data_eigen_vector1_ = new float[ number_of_pixels_x_ * number_of_pixels_y_ * number_of_pixels_z_ * eigenvalues_number_of_layers_ ];
+  data_eigen_vector1_ = new float[ eigenvalues_number_of_pixels_x_ * 
+				   eigenvalues_number_of_pixels_y_ * 
+				   eigenvalues_number_of_pixels_z_ * 
+				   eigenvalues_number_of_layers_ ];
   if ( data_eigen_vector1_ == nullptr ) {
     fprintf(stderr, "\nError allocating data buffer for %s\n", nifti_eigen_vector1.c_str());
     exit(1);
   }
-  data_eigen_vector2_ = new float[ number_of_pixels_x_ * number_of_pixels_y_ * number_of_pixels_z_ * eigenvalues_number_of_layers_ ];
+  data_eigen_vector2_ = new float[ eigenvalues_number_of_pixels_x_ * 
+				   eigenvalues_number_of_pixels_y_ * 
+				   eigenvalues_number_of_pixels_z_ * 
+				   eigenvalues_number_of_layers_ ];
   if ( data_eigen_vector2_ == nullptr ) {
     fprintf(stderr, "\nError allocating data buffer for %s\n", nifti_eigen_vector2.c_str());
     exit(1);
   }
-  data_eigen_vector3_ = new float[ number_of_pixels_x_ * number_of_pixels_y_ * number_of_pixels_z_ * eigenvalues_number_of_layers_ ];
+  data_eigen_vector3_ = new float[ eigenvalues_number_of_pixels_x_ * 
+				   eigenvalues_number_of_pixels_y_ * 
+				   eigenvalues_number_of_pixels_z_ * 
+				   eigenvalues_number_of_layers_ ];
   if ( data_eigen_vector3_ == nullptr ) {
     fprintf(stderr, "\nError allocating data buffer for %s\n", nifti_eigen_vector3.c_str());
     exit(1);
   }
   //
   ret_eigenvalues = fread( data_eigen_values_, sizeof(float), 
-	       number_of_pixels_x_ * number_of_pixels_y_ * number_of_pixels_z_ * eigenvalues_number_of_layers_, 
-	       file_eigen_values);
-  if ( ret_eigenvalues != number_of_pixels_x_ * number_of_pixels_y_ * number_of_pixels_z_ * eigenvalues_number_of_layers_ ) {
-    fprintf(stderr, "\nError reading volume 1 from %s (%d)\n", nifti_eigen_values.c_str(), ret_eigenvalues);
+			   eigenvalues_number_of_pixels_x_ * 
+			   eigenvalues_number_of_pixels_y_ * 
+			   eigenvalues_number_of_pixels_z_ * 
+			   eigenvalues_number_of_layers_, file_eigen_values);
+  if ( ret_eigenvalues != eigenvalues_number_of_pixels_x_ * eigenvalues_number_of_pixels_y_ * eigenvalues_number_of_pixels_z_ * eigenvalues_number_of_layers_ ) {
+    fprintf(stderr, "\nError reading volume 1 from %s (%d) \n", nifti_eigen_values.c_str(), ret_eigenvalues);
     exit(1);
   }
   ret_eigenvector1 = fread( data_eigen_vector1_, sizeof(float), 
-	       number_of_pixels_x_ * number_of_pixels_y_ * number_of_pixels_z_ * eigenvalues_number_of_layers_, 
-	       file_eigen_vector1);
-  if ( ret_eigenvector1 != number_of_pixels_x_ * number_of_pixels_y_ * number_of_pixels_z_ * eigenvalues_number_of_layers_ ) {
+			    eigenvalues_number_of_pixels_x_ * 
+			    eigenvalues_number_of_pixels_y_ * 
+			    eigenvalues_number_of_pixels_z_ * 
+			    eigenvalues_number_of_layers_, file_eigen_vector1);
+  if ( ret_eigenvector1 != eigenvalues_number_of_pixels_x_ * eigenvalues_number_of_pixels_y_ * eigenvalues_number_of_pixels_z_ * eigenvalues_number_of_layers_ ) {
     fprintf(stderr, "\nError reading volume 1 from %s (%d)\n", nifti_eigen_vector1.c_str(), ret_eigenvector1);
     exit(1);
   }
   ret_eigenvector2 = fread( data_eigen_vector2_, sizeof(float), 
-	       number_of_pixels_x_ * number_of_pixels_y_ * number_of_pixels_z_ * eigenvalues_number_of_layers_, 
-	       file_eigen_vector2);
-  if ( ret_eigenvector2 != number_of_pixels_x_ * number_of_pixels_y_ * number_of_pixels_z_ * eigenvalues_number_of_layers_ ) {
+			    eigenvalues_number_of_pixels_x_ * 
+			    eigenvalues_number_of_pixels_y_ * 
+			    eigenvalues_number_of_pixels_z_ * 
+			    eigenvalues_number_of_layers_, file_eigen_vector2);
+  if ( ret_eigenvector2 != eigenvalues_number_of_pixels_x_ * eigenvalues_number_of_pixels_y_ * eigenvalues_number_of_pixels_z_ * eigenvalues_number_of_layers_ ) {
     fprintf(stderr, "\nError reading volume 1 from %s (%d)\n", nifti_eigen_vector2.c_str(), ret_eigenvector2);
     exit(1);
   }
   ret_eigenvector3 = fread( data_eigen_vector3_, sizeof(float), 
-	       number_of_pixels_x_ * number_of_pixels_y_ * number_of_pixels_z_ * eigenvalues_number_of_layers_, 
-	       file_eigen_vector3);
-  if ( ret_eigenvector3 != number_of_pixels_x_ * number_of_pixels_y_ * number_of_pixels_z_ * eigenvalues_number_of_layers_ ) {
+			    eigenvalues_number_of_pixels_x_ * 
+			    eigenvalues_number_of_pixels_y_ * 
+			    eigenvalues_number_of_pixels_z_ * 
+			    eigenvalues_number_of_layers_, file_eigen_vector3);
+  if ( ret_eigenvector3 != eigenvalues_number_of_pixels_x_ * eigenvalues_number_of_pixels_y_ * eigenvalues_number_of_pixels_z_ * eigenvalues_number_of_layers_ ) {
     fprintf(stderr, "\nError reading volume 1 from %s (%d)\n", nifti_eigen_vector3.c_str(), ret_eigenvector3);
     exit(1);
-  }
-
+  }  
 
   //
   // Clean up
@@ -376,13 +401,19 @@ DAp::~Access_parameters(){
       delete [] data_eigen_vector3_;
       data_eigen_vector3_ = nullptr;
     }
-  // Conductivity tensors array
+  //
   if ( conductivity_tensors_array_ != nullptr )
     {
       delete [] conductivity_tensors_array_;
       conductivity_tensors_array_ = nullptr;
     }
-  // positions array
+  //
+  if ( eigen_values_matrices_array_ != nullptr )
+    {
+      delete [] eigen_values_matrices_array_;
+      eigen_values_matrices_array_ = nullptr;
+    }
+  //
   if ( positions_array_ != nullptr )
     {
       delete [] positions_array_;
@@ -508,6 +539,26 @@ DAp::get_conductivity_tensors_array_(  Eigen::Matrix <float, 3, 3>** Conductivit
 //
 //
 void
+DAp::get_eigen_values_matrices_array_(  Eigen::Matrix <float, 3, 3>** Eigen_Values_Matrices_Array )
+{
+  if( eigen_values_matrices_array_ != nullptr )
+    {
+      if( eigen_values_matrices_array_ != *Eigen_Values_Matrices_Array )
+	{
+	  *Eigen_Values_Matrices_Array = eigen_values_matrices_array_;
+	  eigen_values_matrices_array_ = nullptr;
+	}
+    }
+  else
+    {
+      std::cerr << "eigen_values_matrices_array_ is already transfered" << std::endl;
+      abort();
+    }
+}
+//
+//
+//
+void
 DAp::get_positions_array_(  Eigen::Matrix <float, 3, 1>** Positions_Array )
 {
   if( positions_array_ != nullptr )
@@ -574,9 +625,24 @@ DAp::set_conductivity_tensors_array_(  Eigen::Matrix <float, 3, 3>** Conductivit
 //
 //
 void
+DAp::set_eigen_values_matrices_array_(  Eigen::Matrix <float, 3, 3>** Eigen_Values_Matrices_Array )
+{
+  if ( eigen_values_matrices_array_ != nullptr )
+    {
+      delete [] eigen_values_matrices_array_;
+      eigen_values_matrices_array_ = nullptr;
+    }
+  //
+  eigen_values_matrices_array_ = *Eigen_Values_Matrices_Array;
+  *Eigen_Values_Matrices_Array = nullptr;
+}
+//
+//
+//
+void
 DAp::set_positions_array_(  Eigen::Matrix <float, 3, 1>** Positions_Array )
 {
-  if ( conductivity_tensors_array_ != nullptr )
+  if ( positions_array_ != nullptr )
     {
       delete [] positions_array_;
       positions_array_ = nullptr;
@@ -591,7 +657,7 @@ DAp::set_positions_array_(  Eigen::Matrix <float, 3, 1>** Positions_Array )
 void
 DAp::set_Do_we_have_conductivity_(  bool** Do_We_Have_Conductivity )
 {
-  if ( conductivity_tensors_array_ != nullptr )
+  if ( Do_we_have_conductivity_ != nullptr )
     {
       delete [] Do_we_have_conductivity_;
       Do_we_have_conductivity_ = nullptr;

@@ -4,6 +4,7 @@
 // UCSF
 //
 #include "enum.h"
+#include "CUDA_Conductivity_matching.h"
 //
 // CGAL
 //
@@ -263,9 +264,42 @@ namespace Domains
    */
   class Build_mesh
   {
+    typedef struct Cell_conductivity_coefficient
+    {
+      // Cell number
+      int   cell_id;
+      //
+      int cell_subdomain;
+      // Conductivity coefficients
+      // 0 -> C00
+      // 1 -> C01
+      // 2 -> C01
+      // 3 -> C11
+      // 4 -> C12
+      // 5 -> C22
+      float conductivity_coefficients[6];
+
+#ifdef TRACE
+#if TRACE == 100
+      //
+      // R studies
+      //
+      // i = 0,1,2,3: VERTICES
+      // i = 4: CENTROID
+      Eigen::Matrix< float, 3, 1 > vertices[5];
+      // l1  l2  l3 l_long l_tang l_mean 
+      // l1_v0 l2_v0 l3_v0 - l1_v1 l2_v1 l3_v1 - l1_v3 l2_v3 l3_v3
+      float eigen_values[18];
+      //
+#endif
+#endif      
+    } Cell_coefficient;
+
   private:
     //! The variable mesh hold the CGAL mesh.
     C3t3 mesh_;
+    //! List of cell with matching conductivity coefficients
+    std::list< Cell_coefficient > list_coefficients_;
 
   public:
     /*!
@@ -350,6 +384,29 @@ namespace Domains
      *
      */
     void Output_mesh_conductivity_xml();
+    /*!
+     *  \brief Matches mesh's cells with conductivity
+     *
+     *  This method matches a conductivity tensor for each tetrahedron of the mesh.
+     *
+     */
+    void Conductivity_matching();
+    /*!
+     *  \brief Matches mesh's cells with conductivity
+     *
+     *  This method matches a conductivity tensor for each tetrahedron of the mesh.
+     *
+     */
+    void Conductivity_matching_gpu();
+
+  private:
+    /*!
+     *  \brief Output the XML match between mesh and conductivity
+     *
+     *  This method matches a conductivity tensor for each cell.
+     *
+     */
+    void Conductivity_matching_analysis();
 
   public:
   };
