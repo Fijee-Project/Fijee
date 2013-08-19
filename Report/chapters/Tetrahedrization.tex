@@ -1,6 +1,10 @@
 A mesh is a representation of an object (a volume or shape in the plane) by a finite number of simple elements. Among meshes, simplicial meshes\index{simplicial meshes} are built from simplices. A simplicial mesh is a collection of simplices, with disjoint interiors, such as the intersection of two simplices is either empty or a simplex with lower dimension. \\
-The simplicial meshes are very popular for representing surfaces, volumes. They are suitable for numerical simulation. For instance, the finite element method allows the approximate solution of systems of partial differential equations ({\it c.f.} section~\ref{FEM}).
+The simplicial meshes are very popular for representing surfaces, volumes. They are suitable for numerical simulation. For instance, the finite element method allows the approximate solution of systems of partial differential equations ({\it c.f.} section~\ref{FEM}) using meshes. \\
+The generation of realistic geometric patient models from high-resolution medical images is of great significance in many clinical and research applications. 
 
+\newpage
+
+%-------------------------------------------------------------------------------
 
 \section{Mathematical background}
 
@@ -13,13 +17,15 @@ We now turn to the following problem: $E$ is a set of points in the plane or spa
 \item the algorithm must contain a minimum of elongated triangles (slivers). \\
 \end {itemize}
 
+A sliver is a tetrahedron whose four vertices lie close to a plane and whose projection to that plane is a quadrilateral with no short edge. Such tetrahedra have a good radiusedge ratio but a very poor radius-radius ratio (ratio between circumradius and radius of largest contained sphere). Unfortunately, the latter measure typically influences the numerical conditioning of finite element methods. In order to remove slivers from our volume meshes, we use a post processing step called sliver exudation [21]. This algorithm is efficient in practice and generates almost sliver-free meshes.
+
 %I will restrict the case of discrete surfaces, that is to say, defined from a finite number of points.
 
 \subsection{Topological space}
 
-Topological aproximation~: it is necessary to determine a mesh topology similar to the target object. The edge of a solid object must be a subset of triangles of the mesh, homeomorphic itself at the edge of the object. In addition, if the object has internal partitions to separate out different areas, the mesh must represent these partitions.\\
+Topological aproximation: it is necessary to determine a mesh topology similar to the target object. The edge of a solid object must be a subset of triangles of the mesh, homeomorphic\footnote{A homeomorphism, or topological isomorphism or bicontinuous function, is a continuous function between topological spaces that has a continuous inverse function.} itself at the edge of the object. In addition, if the object has internal partitions to separate out different areas, the mesh must represent these partitions.\\
 
-In this section we summarize some mathematical definitions allowing us to understand the world of mesh generation.
+In this section we summarize some mathematical definitions of mesh generation.
 
 \paragraph{Definition - Topological space}\index{topological space}
 {
@@ -30,7 +36,7 @@ In this section we summarize some mathematical definitions allowing us to unders
 \item  a finite intersection of elements in $X$ is in $\mathbb{X}$.
 \end{itemize}
 
-$X$ is called a topology and elements of $X$ are called open set in $\mathbb{X}$. A topological subspace ($Y$, $\mathbb{Y}$) of ($X$, $\mathbb {X}$) consists of a subset of $\mathbb{Y} \subset \mathbb{X}$ and the topology of the subspace defined by $Y = \{\mathbb{Y} \cap A, A \in X \}$
+$X$ is called a topology and elements of $X$ are called open set in $\mathbb{X}$. %A topological subspace ($Y$, $\mathbb{Y}$) of ($X$, $\mathbb {X}$) consists of a subset of $\mathbb{Y} \subset \mathbb{X}$ and the topology of the subspace defined by $Y = \{\mathbb{Y} \cap A, A \in X \}$
 }
 
 \paragraph{Definition - Simplex}\index{simplex}
@@ -45,7 +51,7 @@ In $\mathbb{R}^{3}$, a $0$-simplex is a vertex, a $1$-simplex is an edge, a $2$-
 
 \paragraph{Definition - Face}\index{face}
 {
-\it Let $S$ be a set of linearly independent points and $\sigma$ its convex hull. Then the convex hull of $\tau$ any subset $T$ of $S$ is a simplex subset of $\sigma$. We say that $\tau$ is a face of $\sigma$, and we write $\tau \le \sigma$.
+\it Let $S$ be a set of linearly independent points and $\sigma$ its convex hull. Then the convex hull $\tau$ of any subset $T$ of $S$ is a simplex subset of $\sigma$. We say that $\tau$ is a face of $\sigma$, and we write $\tau \le \sigma$.
 }
 
 \paragraph{Definition - Simplicial complex}\index{simplicial complex}
@@ -62,7 +68,7 @@ In other words, a simplicial complex is a geometric object describing some topol
 
 \paragraph{Definition - Triangulation}\index{Triangulation}
 {
-\it The triangulation of a topological space $X$ is a simplicial complex $K$ whose polyhedron $|K|$ is homeomorphic\footnote{A homeomorphism, or topological isomorphism or bicontinuous function, is a continuous function between topological spaces that has a continuous inverse function.} to $X$. If a simplicial complex exists, we say that $X$ is triangulated.
+\it The triangulation of a topological space $X$ is a simplicial complex $K$ whose polyhedron $|K|$ is homeomorphic to $X$. If a simplicial complex exists, we say that $X$ is triangulated.
 }
 
 \subsection{Voronoi Diagram}
@@ -86,7 +92,7 @@ The point $p_{i}$ associated to the cell $C_{i}$ is called the site of the cell.
 \it A Voronoi diagram of the $P$, denoted $Vor (P)$, is the subdivision of $E$ in $C_{i}$ cells associated with points $p_{i}$ of $P$:
 
 $
-Vor (P) = \bigcup_{p_{i} \ in P} C_{i}
+Vor (P) = \bigcup_{p_{i} \in P} C_{i}
 $
 }
 
@@ -98,8 +104,8 @@ $
 \paragraph{Properties}
 {
 \begin {itemize}
-\item A Voronoi's edge separating two cells $C_{i}$ and $C_{j}$ is given by the bisection of the segment $p_{i}p_{j}$.
-\item The Voronoi's vertex separating three cells $C_{i}$, $C_{j}$ and $C_{k}$ is the center of the circle circumscribing the triangle with vertices $p_{i}$, $p_{j}$ and $p_{k}$.
+\item A Voronoi edge separating two cells $C_{i}$ and $C_{j}$ is given by the bisection of the segment $p_{i}p_{j}$.
+\item The Voronoi vertex separating three cells $C_{i}$, $C_{j}$ and $C_{k}$ is the center of the circle circumscribing the triangle with vertices $p_{i}$, $p_{j}$ and $p_{k}$.
 \item A Voronoi cell, if it is bounded, is a convex polygon.
 \end {itemize}
 }
@@ -107,7 +113,7 @@ $
 
 \subsection{Delaunay Triangulation}
 
-The notion of Delaunay triangulation was proposed in 1934 by a student, Boris Delaunay, of Russian mathematician Georgy Voronoi. \\
+Delaunay meshing is recognized as one of the most powerful techniques for generating surface and volume meshes with guaranteed quality. The notion of Delaunay triangulation was proposed in 1934 by a student of Russian mathematician Georgy Voronoi: Boris Delaunay. \\
 The Delaunay triangulation of a space $E$ is defined as the geometric dual of the Voronoi diagram: there is an edge between two points $p_{i}$ and $p_{j}$ in the Delaunay triangulation if and only if their Voronoi cells $V(p_{i})$ and $V(p_{j})$ have a non-empty intersection. It yields a triangulation of the space $E$, that is to say a partition of the convex hull of $E$ into $d$-dimensional simplices (i.e. into triangles in 2D, into tetrahedra in 3D and so on). The fundamental property of the Delaunay triangulation is called the empty circle (empty sphere in 3D) property: in 2D (resp. in 3D), a triangle (resp. tetrahedron) belongs to the Delaunay triangulation if and only if its circumcircle (resp. circumsphere) does not contain any other points of $E$ in its interior. \\
 
 \paragraph{Definition - Delaunay Triangulation}
@@ -143,25 +149,54 @@ Let $p_{i}$ and $p_{j}$ two points $P$. Then $p_{i}p_{j}$ segment is an edge of 
 
 \subsection{Restricted Delaunay triangulation}
 
-\section{CGAL - Computational Geometry Algorithms Library}
+\newpage{}
 
+%-------------------------------------------------------------------------------
+
+\section{\FIJEE{}'s mesh}
+
+However, due to the lack of reliable fully-automated tools for the unstructured discretization of medical datasets, simplistic geometric models are still of wide use. \\
 The simplicial meshes are good tools for the finite element method, and more generally for many computational methods for modeling physical systems. However, the creation of such meshes is sometimes problematic. Indeed, the generation of a mesh representing a continuous and appropriate form for numerical simulation or visualization, can be demanding for time and memory resources. In complicated cases, it may be impossible to generate a mesh without manual intervention to meet the needs of the calculation.\\
+Similarly, in the EEG/MEG source localization problem using the boundary element method (BEM), as pointed out in [2], popular simplistic head models consisting of nested tissue layers may yield a significantly lower accuracy than realistic models featuring multiple junctions.\\
 
+
+\FIJEE{} allows the electric potential mapping at the surface of the skull. This calculation is based on solving the Poisson equation with the \FEM{}. The production of the mesh used by the \FEM{} is achieved by \CGAL{}. Selecting \CGAL{} for this task was based on several criteria:
+
+
+\begin{itemize}
+\item {\bf licence}
+\item sophisticated developpement in C++ language; flexible and easy to link to \FIJEE{};
+\item efficient forum support;
+\item large toolkit available;
+\item mesh production on complexe geometry.
+\end{itemize}
+
+For the latter, \CGAL{} has two very important features used by \FIJEE{}. The first is the ability to create an implicit functions from a set of points and normals. The second is the mesh generation modularity (heterogeneous mesh size control) from the labeled volume image of the head.  It offers easy control over the size and shape of mesh tetrahedra.\\
+
+\subsection{Implicite surface}
+
+{\bf intro from CGAL, voir s'il y a un article}\\
+{\bf Faire le même topo que freesurfer pour le logiciel produisant skull/scalp}\\
+
+\FREESURFER{} is a software known for the studies of \WM{} and \GM{}. \FREESURFER{} provides a detailed \WM{} and \GM{} surface meshes. \texttt{mris\_convert}, tool from \FREESURFER{}'s toolkit, allows the conversion of these meshes in the form \STL{}. From \STL{} format via \CGAL{}, it become possible to build implicite functions in purpose to produice labeled  volumes. \\
+Before selecting \CGAL{} to create implicit surafaces, tests were made with other algorithms. In particular, {\bf give the algorithm} used by \VTK{}. The results, {\bf show results} offer low efficiency and reliability. \\
+
+\subsection{Labeled volumes image}
+
+{\bf intro from CGAL, voir s'il y a un article}\\
+\FIJEE{} offers the possibility to create a representation of labeled volumes of a patient's head, in a completely automatic way. This image, in three dimensions and \INRIMAGE{}\footnote{http://serdis.dis.ulpgc.es/~krissian/InrView1/IOformat.html} format, is produced using implicit surfaces for the sclap, skull, \CSF{}, \GM{} and \WM{}. The subcortical parts of the image are extracted frome \texttt{aseg.nii} (\NIFTI{} format) a \FREESURFER{}'s output. \\
+The image \INRIMAGE{} is provided as input to the \CGAL{}'s {\it oracle} for the production of three-dimensional volume meshes conforming different anatomical parts of the head.
 
 \paragraph{To review - High-Quality Consistent Meshing of Multi-Label Datasets}
 {
-The generation of realistic geometric patient models from high-resolution medical images is of great significance in many clinical and research applications. 
+
 
 require geometrically-accurate and topologically-correct models. 
 
-The latter consist either of surface meshes representing boundaries between different anatomical parts, or of volume meshes. However, due to the lack of reliable fully-automated tools for the unstructured discretization of medical datasets, simplistic geometric models are still of wide use. 
-
-for which finite element methods (FEM) on unstructured grids conforming to anatomical structures would be desirable.
- Similarly, in the EEG/MEG source localization problem using the boundary element method (BEM), as pointed out in [2], popular simplistic head models consisting of nested tissue layers may yield a significantly lower accuracy than realistic models featuring multiple junctions.  
 
 While different strategies can be used to obtain realistic geometric models from labeled medical datasets, few of them offer sufficient flexibility: handling of data coming from different sources, control over the density and quality of the mesh elements. Also, most existing approaches have been designed to extract surface meshes corresponding to boundaries between labeled anatomical structures, hence necessitating post-processing steps to generate volume meshes needed by finite element methods.
 
-Delaunay-based meshing is recognized as one of the most powerful techniques for generating surface and volume meshes with guaranteed quality. It offers easy control over the size and shape of mesh elements, for instance through a (possibly non-uniform) sizing field.
+ It offers easy control over the size and shape of mesh elements, for instance through a (possibly non-uniform) sizing field.
 
 Our work builds on some recent provably correct Delaunay-based algorithms for meshing smooth surfaces [14] and volumes bounded by such surfaces [15]. These two algorithms are proven to terminate and to construct good-quality meshes, while offering bounds on the approximation accuracy of the original boundary and on the size of the output mesh. The refinement process is controlled by highly customizable quality criteria on triangular facets and on tetrahedra. A notable feature of the method of Boissonnat and Oudot [14] is that the surface needs only to be known through an {\it oracle}\footnote{The domain is input to the mesh generation function, as a domain class, often called the oracle, that provides predicates and constructors related to the domain, the subdomains, the boundary surface patches and also the 0 and 1-dimensional exposed features, if any. Mainly, the oracle provides a predicate to test if a given query point belongs to the domain or not and to find in which subdomain it lies in the affirmative case.} that, given a line segment, detects whether the segment intersects the surface and, in the affirmative, returns an intersection point. This makes the algorithm useful in a wide variety of contexts and for a large class of surfaces. Very recently, Oudot, Rineau and Yvinec [15] have proposed to combine the latter Delaunay-based surface mesher with a Delaunay refinement volume mesher [16].
 
@@ -169,21 +204,18 @@ Our work extends the method of Boissonnat and Oudot [14] and the method of Oudot
 
 Another notable feature of our approach is that the continuous partition need not to be represented explicitly. It is known only through a {\it labeling oracle} that, given a point in space, answers which tissue it belongs to. This makes our approach applicable to virtually any combination of data sources, including labeled 3D images, polyhedral surfaces, unstructured volume meshes, fuzzy membership functions, possibly having different resolutions and different coordinate systems. The different data sources may even be inconsistent with each other due to noise or discretization artefacts. In this case, the {\it labeling oracle} has the responsibility of resolving the conflicts using some user defined rules. As a result, our meshing algorithm is not affected by the heterogeneity and possible inconsistency of the input datasets. Finally, another major advantage of our approach is that the customizable quality criteria on boundary facets and/or on tetrahedra can be tuned independently for the different anatomical structures.
 
-Sliver Removal
-While Delaunay refinement techniques can be proven to generate tetrahedra with a good radius-edge ratio (ratio between tetrahedron circumradius and shortest edge length), they cannot guarantee against badly-shaped tetrahedra of a special type called slivers. A sliver is a tetrahedron whose four vertices lie close to a plane and whose projection to that plane is a quadrilateral with no short edge. Such tetrahedra have a good radiusedge ratio but a very poor radius-radius ratio (ratio between circumradius and radius of largest contained sphere). Unfortunately, the latter measure typically influences the numerical conditioning of finite element methods. In order to remove slivers from our volume meshes, we use a post processing step called sliver exudation [21]. This algorithm is efficient in practice and generates almost sliver-free meshes.
 
 Experiment 2: Non-uniform surface meshing. In the three following experiments, we use some segmented brain data which were automatically generated from a T1-weighted magnetic resonance (MR) image using FreeSurfer's Whole Brain Segmentation tool [25]. The second experiment demonstrates the ability of our algorithm to produce surface meshes with non-uniform resolution (Fig. 3-Right). The facet size criterion was chosen to be spatially-varying so that the occipital cortex would be more finely sampled than the frontal cortex. Although for clarity, only four surfaces are displayed (for each hemisphere, the cortical and cerebellum surfaces), a total number of 72 tissues were meshed using the aforementioned criteria.
 
 }
 
+\newpage
 
+%-------------------------------------------------------------------------------
 
 \section{To review}
 
 \paragraph{Meshing Volumes Bounded by Piecewise Smooth Surfaces~\cite{LRineau2007}}{
-
-
-Dans les applications de calcul, du type éléments finis, plus le maillage est dense plus la précision du calcul augmente. Cependant, la quantité de temps nécessaire à l'accomplissement d'un calcul basé sur un maillage est souvent proportionnelle au nombre d'éléments du maillage. Un compromis doit donc être trouvé entre la précision et le temps de calcul. 
 
 La meilleure façon d'améliorer ce compromis est de créer un maillage avec des tailles d'éléments localement adaptés à la précision nécessaire. La forme des éléments d'un maillage simplicial est capitale, pour les applications de calcul. Dans les méthodes de résolution approchée d'équations différentielles, à la fois les grands angles et les petits angles doivent être évités [She02b, She]. L'erreur d'approximation de la solution dépend principalement de la taille des éléments. Cependant, pour une taille d'éléments donnée, la présence de grands angles dans le maillage augmente l'erreur d'approximation du gradient de la solution. Si certains angles sont proches de 180°, il se peut aussi que la méthode de calcul ne converge pas vers la solution [BA76]. Les petits angles, ainsi que les grands angles, dégradent le conditionnement du problème numérique, c'est-à-dire la stabilité de la solution par rapport aux erreurs d'arrondis du calcul. 
 

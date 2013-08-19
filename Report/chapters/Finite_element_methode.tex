@@ -1,1 +1,5 @@
+Dans les applications de calcul, du type éléments finis, plus le maillage est dense plus la précision du calcul augmente. Cependant, la quantité de temps nécessaire à l'accomplissement d'un calcul basé sur un maillage est souvent proportionnelle au nombre d'éléments du maillage. Un compromis doit donc être trouvé entre la précision et le temps de calcul. 
+
+
+
 La méthode des éléments finis permet la résolution approchée de systèmes d'équations aux dérivées partielles, en cherchant une solution approchée du problème qui s'exprime comme combinaison linéaire d'un ensemble de fonctions élémentaires. Le choix de l'ensemble des fonctions élémentaires est très important pour la convergence de cette méthode, et est en général guidé par un maillage du domaine dans lequel on cherche à résoudre le système d'équations. A chaque élément du maillage est associé un petit ensemble de fonctions élémentaires adapté au problème, et la solution approchée est exprimée comme combinaison linéaire des fonctions élémentaires de tous les éléments du maillage. Pour calculer la solution approchée, il suffit alors d'inverser un système d'équations algébriques linéaires.
