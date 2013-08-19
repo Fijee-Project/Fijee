@@ -15,22 +15,35 @@ class Phi : public Expression
     double 
       Q  = 0.000000001 ,
       a0 = 0.33,
-      Cte = - 1. / (4 * DOLFIN_PI * a0);
+      Cte = 1. / (4 * DOLFIN_PI * a0);
     Vector
-      e(2),
-      r0(2), r(2);
+      e(3),
+      r0(3), r(3);
+
     //
+    // Dipole direction
     std::vector<double> e_values;  
-    e_values.push_back( 1. ); e_values.push_back( 0. );
+    e_values.push_back( 1. ); 
+    e_values.push_back( 0. ); 
+    e_values.push_back( 0. );
     e.set_local( e_values );
 
+    //
+    // Dipole position
     std::vector<double> r0_values;  
-    r0_values.push_back( 0.075 ); r0_values.push_back( 0. );
+    r0_values.push_back( 0.1 + 0.077 ); 
+    r0_values.push_back( 0.1 );
+    r0_values.push_back( 0.1 );
     r0.set_local( r0_values );
 
+    //
+    // Mesure position
     std::vector<double> r_values;  
-    r_values.push_back( x[0] ); r_values.push_back( x[1] );
+    r_values.push_back( x[0] ); 
+    r_values.push_back( x[1] );
+    r_values.push_back( x[2] );
     r.set_local( r_values );
+
     //
     Vector dist(r);
     dist -= r0;

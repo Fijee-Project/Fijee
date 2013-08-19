@@ -11,7 +11,9 @@ class Brain : public SubDomain
 {
   bool inside(const Array<double>& x, bool on_boundary) const
   {
-    return ( sqrt( x[0]*x[0] + x[1]*x[1] ) < 0.077 + 0.001  );
+    return ( sqrt( (x[0] - 0.1)*(x[0] - 0.1) + 
+		   (x[1] - 0.1)*(x[1] - 0.1) +
+		   (x[2] - 0.1)*(x[2] - 0.1) ) <= 0.077 + 0.001 );
   }
 };
 
@@ -20,7 +22,12 @@ class CSF : public SubDomain
 {
   bool inside(const Array<double>& x, bool on_boundary) const
   {
-    return ( sqrt( x[0]*x[0] + x[1]*x[1] ) >= 0.077 -0.001   && sqrt( x[0]*x[0] + x[1]*x[1] ) < 0.08 + 0.001 );
+    return ( sqrt( (x[0] - 0.1)*(x[0] - 0.1) + 
+		   (x[1] - 0.1)*(x[1] - 0.1) +
+		   (x[2] - 0.1)*(x[2] - 0.1) ) > 0.077  && 
+	     sqrt( (x[0] - 0.1)*(x[0] - 0.1) + 
+		   (x[1] - 0.1)*(x[1] - 0.1) +
+		   (x[2] - 0.1)*(x[2] - 0.1) ) <= 0.080 + 0.002 );
   }
 };
 
@@ -29,7 +36,12 @@ class Skull : public SubDomain
 {
   bool inside(const Array<double>& x, bool on_boundary) const
   {
-    return ( sqrt( x[0]*x[0] + x[1]*x[1] ) >= 0.080 - 0.001 && sqrt( x[0]*x[0] + x[1]*x[1] ) < 0.086 + 0.001  );
+    return ( sqrt( (x[0] - 0.1)*(x[0] - 0.1) + 
+		   (x[1] - 0.1)*(x[1] - 0.1) +
+		   (x[2] - 0.1)*(x[2] - 0.1)  ) > 0.080 + DOLFIN_EPS && 
+	     sqrt( (x[0] - 0.1)*(x[0] - 0.1) + 
+		   (x[1] - 0.1)*(x[1] - 0.1) +
+		   (x[2] - 0.1)*(x[2] - 0.1) ) <= 0.086  );
   }
 };
 
@@ -38,7 +50,12 @@ class Scalp : public SubDomain
 {
   bool inside(const Array<double>& x, bool on_boundary) const
   {
-    return ( sqrt( x[0]*x[0] + x[1]*x[1] ) >= 0.086 - 0.001 && sqrt( x[0]*x[0] + x[1]*x[1] ) <= 0.092 + 0.002 || on_boundary );
+    return ( sqrt( (x[0] - 0.1)*(x[0] - 0.1) + 
+		   (x[1] - 0.1)*(x[1] - 0.1) +
+		   (x[2] - 0.1)*(x[2] - 0.1) ) > 0.086  && 
+	     sqrt( (x[0] - 0.1)*(x[0] - 0.1) + 
+		   (x[1] - 0.1)*(x[1] - 0.1) +
+		   (x[2] - 0.1)*(x[2] - 0.1) ) <= 0.092 + DOLFIN_EPS || on_boundary );
   }
 };
 

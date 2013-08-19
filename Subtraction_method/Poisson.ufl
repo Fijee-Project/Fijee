@@ -1,40 +1,94 @@
 #
 # Functions space
 #
-cell    = triangle
-element = FiniteElement("Lagrange", cell, 1)
+cell    = tetrahedron
+scalarElement = FiniteElement("Lagrange", cell, 1)
+tensorElement = TensorElement("Lagrange", cell, 1)
+
 
 #
 # Function definition
 #
 
 # Trial and test functions
-Phi_s   = TrialFunction(element)
-v       = TestFunction(element)
-n       = cell.n
-#n       = FacetNormal(mesh)
-#n       = VectorConstant(cell)
-#
-a_inf   = Constant(cell)
-a_1     = Constant(cell)
-a_2     = Constant(cell)
-a_3     = Constant(cell)
-a_4     = Constant(cell)
-Phi_0   = Coefficient(element)
+Phi_s   = TrialFunction(scalarElement)
+v       = TestFunction(scalarElement)
+n       = scalarElement.cell().n
+
+a_inf   = Coefficient(tensorElement)
+a_1     = Coefficient(tensorElement)
+a_2     = Coefficient(tensorElement)
+a_3     = Coefficient(tensorElement)
+a_4     = Coefficient(tensorElement)
+a_5     = Coefficient(tensorElement)
+a_6     = Coefficient(tensorElement)
+a_7     = Coefficient(tensorElement)
+a_8     = Coefficient(tensorElement)
+a_9     = Coefficient(tensorElement)
+a_10    = Coefficient(tensorElement)
+a_11     = Coefficient(tensorElement)
+a_12     = Coefficient(tensorElement)
+a_13     = Coefficient(tensorElement)
+a_14     = Coefficient(tensorElement)
+a_15     = Coefficient(tensorElement)
+a_16     = Coefficient(tensorElement)
+a_17     = Coefficient(tensorElement)
+a_18     = Coefficient(tensorElement)
+a_19     = Coefficient(tensorElement)
+a_20    = Coefficient(tensorElement)
+a_21    = Coefficient(tensorElement)
+#a_22    = Coefficient(tensorElement)
+Phi_0   = Coefficient(scalarElement)
 
 #
 # Weak variational form
 #
 
 # Bilinear form
-a  = inner( a_1 * grad(Phi_s), grad(v) ) * dx(1) 
-a += inner( a_2 * grad(Phi_s), grad(v) ) * dx(2)
-a += inner( a_3 * grad(Phi_s), grad(v) ) * dx(3)
-a += inner( a_4 * grad(Phi_s), grad(v) ) * dx(4)
+a  = inner( a_1   * grad(Phi_s), grad(v) ) * dx(1 ) 
+a += inner( a_2   * grad(Phi_s), grad(v) ) * dx(2 )
+a += inner( a_3   * grad(Phi_s), grad(v) ) * dx(3 )
+a += inner( a_4   * grad(Phi_s), grad(v) ) * dx(4 )
+a += inner( a_5   * grad(Phi_s), grad(v) ) * dx(5 ) 
+a += inner( a_6   * grad(Phi_s), grad(v) ) * dx(6 )
+a += inner( a_7   * grad(Phi_s), grad(v) ) * dx(7 )
+a += inner( a_8   * grad(Phi_s), grad(v) ) * dx(8 )
+a += inner( a_9   * grad(Phi_s), grad(v) ) * dx(9 ) 
+a += inner( a_10  * grad(Phi_s), grad(v) ) * dx(10)
+a += inner( a_11  * grad(Phi_s), grad(v) ) * dx(11) 
+a += inner( a_12  * grad(Phi_s), grad(v) ) * dx(12)
+a += inner( a_13  * grad(Phi_s), grad(v) ) * dx(13)
+a += inner( a_14  * grad(Phi_s), grad(v) ) * dx(14)
+a += inner( a_15  * grad(Phi_s), grad(v) ) * dx(15) 
+a += inner( a_16  * grad(Phi_s), grad(v) ) * dx(16)
+a += inner( a_17  * grad(Phi_s), grad(v) ) * dx(17)
+a += inner( a_18  * grad(Phi_s), grad(v) ) * dx(18)
+a += inner( a_19  * grad(Phi_s), grad(v) ) * dx(19) 
+a += inner( a_20  * grad(Phi_s), grad(v) ) * dx(20)
+a += inner( a_21  * grad(Phi_s), grad(v) ) * dx(21)
+
 
 # Linear form
-L  = (a_inf - a_1)*inner( grad(Phi_0), grad(v) ) * dx(1)
-L += (a_inf - a_2)*inner( grad(Phi_0), grad(v) ) * dx(2) 
-L += (a_inf - a_3)*inner( grad(Phi_0), grad(v) ) * dx(3) 
-L += (a_inf - a_4)*inner( grad(Phi_0), grad(v) ) * dx(4) 
-L -= a_inf * v * inner(grad(Phi_0), n) * ds(0)
+L  = inner( (a_inf - a_1 )*grad(Phi_0), grad(v) ) * dx(1 )
+L += inner( (a_inf - a_2 )*grad(Phi_0), grad(v) ) * dx(2 ) 
+L += inner( (a_inf - a_3 )*grad(Phi_0), grad(v) ) * dx(3 ) 
+L += inner( (a_inf - a_4 )*grad(Phi_0), grad(v) ) * dx(4 )
+L += inner( (a_inf - a_5 )*grad(Phi_0), grad(v) ) * dx(5 ) 
+L += inner( (a_inf - a_6 )*grad(Phi_0), grad(v) ) * dx(6 ) 
+L += inner( (a_inf - a_7 )*grad(Phi_0), grad(v) ) * dx(7 )
+L += inner( (a_inf - a_8 )*grad(Phi_0), grad(v) ) * dx(8 ) 
+L += inner( (a_inf - a_9 )*grad(Phi_0), grad(v) ) * dx(9 ) 
+L += inner( (a_inf - a_10)*grad(Phi_0), grad(v) ) * dx(10)
+L += inner( (a_inf - a_11)*grad(Phi_0), grad(v) ) * dx(11)
+L += inner( (a_inf - a_12)*grad(Phi_0), grad(v) ) * dx(12) 
+L += inner( (a_inf - a_13)*grad(Phi_0), grad(v) ) * dx(13) 
+L += inner( (a_inf - a_14)*grad(Phi_0), grad(v) ) * dx(14)
+L += inner( (a_inf - a_15)*grad(Phi_0), grad(v) ) * dx(15) 
+L += inner( (a_inf - a_16)*grad(Phi_0), grad(v) ) * dx(16) 
+L += inner( (a_inf - a_17)*grad(Phi_0), grad(v) ) * dx(17)
+L += inner( (a_inf - a_18)*grad(Phi_0), grad(v) ) * dx(18) 
+L += inner( (a_inf - a_19)*grad(Phi_0), grad(v) ) * dx(19) 
+L += inner( (a_inf - a_20)*grad(Phi_0), grad(v) ) * dx(20)
+L += inner( (a_inf - a_21)*grad(Phi_0), grad(v) ) * dx(21)
+#
+L -=  v * inner(n, a_inf * grad(Phi_0)) * ds(0)
