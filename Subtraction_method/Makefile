@@ -3,15 +3,15 @@ UFLFLAG = -l dolfin
 # Libraries and includes
 #
 INC     = -I$(FENICS)/include/
-LIB_DIR = -L/usr/lib64/mpich2/lib/ -L$(FENICS)/lib 
-LIBS    = -lboost_mpi -ldolfin
+LIB_DIR = -L$(FENICS)/lib -L/usr/lib64/mpich2/lib/ 
+LIBS    = -ldolfin -lboost_mpi 
 #
 # Sources
 #
 UFL_SRC    = Poisson.ufl
 UFL_HEADER = Poisson.h
-SRC        = 
-OBJ        = 
+SRC        = main.cxx  Conductivity.cxx
+OBJ        = $(SRC:.cxx=.o)
 #
 #
 #
@@ -19,11 +19,19 @@ EXEC = poisson
 #
 #
 #
-all: $(OBJ) $(UFL_HEADER)
-	$(CXX) $(CXXFLAGS) $(INC) main.cxx $(LIB_DIR) $(LIBS) -o $(EXEC)
+all: $(EXEC) 
+
+
+poisson: $(UFL_HEADER) $(OBJ) 
+	$(CXX) $(CXXFLAGS) $(INC) $(LIB_DIR) $(LIBS) $^ -o $@  
+
+
+%.o: %.cxx
+	$(CXX) $(CXXFLAGS) $(INC) -o $@ -c $<
+
 
 $(UFL_HEADER): $(UFL_SRC)
 	$(UFL) $(UFLFLAG) $?
 
 clean:
-	rm $(EXEC) Poisson.h # *.o poisson000000.vtu poisson.pvd
+	rm $(EXEC) Poisson.h $(OBJ) #  poisson000000.vtu poisson.pvd

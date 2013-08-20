@@ -545,32 +545,32 @@ Domains_build_mesh::Output_mesh_conductivity_xml()
   // header
   FEniCS_xml_C00 
     << "<?xml version=\"1.0\"?> \n <dolfin xmlns:dolfin=\"http://www.fenicsproject.org\">\n  "
-    << "<mesh_function>\n    <mesh_value_collection type=\"float\" dim=\"3\" size=\"" 
+    << "<mesh_function>\n    <mesh_value_collection type=\"double\" dim=\"3\" size=\"" 
     << num_of_tetrahedra << "\">\n";
   //
   FEniCS_xml_C01 
     << "<?xml version=\"1.0\"?> \n<dolfin xmlns:dolfin=\"http://www.fenicsproject.org\">\n  "
-    << "<mesh_function>\n    <mesh_value_collection type=\"float\" dim=\"3\" size=\"" 
+    << "<mesh_function>\n    <mesh_value_collection type=\"double\" dim=\"3\" size=\"" 
     << num_of_tetrahedra << "\">\n";
   //
   FEniCS_xml_C02 
     << "<?xml version=\"1.0\"?> \n<dolfin xmlns:dolfin=\"http://www.fenicsproject.org\">\n  "
-    << "<mesh_function>\n    <mesh_value_collection type=\"float\" dim=\"3\" size=\"" 
+    << "<mesh_function>\n    <mesh_value_collection type=\"double\" dim=\"3\" size=\"" 
     << num_of_tetrahedra << "\">\n";
   //
   FEniCS_xml_C11 
     << "<?xml version=\"1.0\"?> \n<dolfin xmlns:dolfin=\"http://www.fenicsproject.org\">\n  "
-    << "<mesh_function>\n    <mesh_value_collection type=\"float\" dim=\"3\" size=\"" 
+    << "<mesh_function>\n    <mesh_value_collection type=\"double\" dim=\"3\" size=\"" 
     << num_of_tetrahedra << "\">\n";
   //
   FEniCS_xml_C12 
     << "<?xml version=\"1.0\"?> \n<dolfin xmlns:dolfin=\"http://www.fenicsproject.org\">\n  "
-    << "<mesh_function>\n    <mesh_value_collection type=\"float\" dim=\"3\" size=\"" 
+    << "<mesh_function>\n    <mesh_value_collection type=\"double\" dim=\"3\" size=\"" 
     << num_of_tetrahedra << "\">\n";
   //
   FEniCS_xml_C22 
     << "<?xml version=\"1.0\"?> \n<dolfin xmlns:dolfin=\"http://www.fenicsproject.org\">\n  "
-    << "<mesh_function>\n    <mesh_value_collection type=\"float\" dim=\"3\" size=\"" 
+    << "<mesh_function>\n    <mesh_value_collection type=\"double\" dim=\"3\" size=\"" 
     << num_of_tetrahedra << "\">\n";
 
   

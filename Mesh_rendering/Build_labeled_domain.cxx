@@ -311,11 +311,11 @@ Domains_Build_labeled::Head_model_segmentation()
 	  
 	  //
 	  // Scalp and skull
-	  if( outside_scalp.inside_domain( cell_center ) ) 
-	    data_label_[ idx ] = OUTSIDE_SCALP; 
-	  //
-	  if( outside_skull.inside_domain( cell_center ) ) 
-	    data_label_[ idx ] = OUTSIDE_SKULL; 
+//	  if( outside_scalp.inside_domain( cell_center ) ) 
+//	    data_label_[ idx ] = OUTSIDE_SCALP; 
+//	  //
+//	  if( outside_skull.inside_domain( cell_center ) ) 
+//	    data_label_[ idx ] = OUTSIDE_SKULL; 
 	  //
 	  if( inside_skull.inside_domain( cell_center ) ||
 	      subcortical_brain(cell_center_aseg) == CSF )

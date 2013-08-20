@@ -2,18 +2,22 @@
 #define _BOUNDARY_H
 #include <dolfin.h>
 
-using namespace dolfin;
+//using namespace dolfin;
 
+/*! \namespace Solver
+ * 
+ * Name space for our new package
+ *
+ */
 //
 // Sub domain for Dirichlet boundary condition
 //
-class Periphery : public SubDomain
+class Periphery : public dolfin::SubDomain
 {
-  bool inside(const Array<double>& x, bool on_boundary) const
+  bool inside(const dolfin::Array<double>& x, bool on_boundary) const
   {
     //    return ( on_boundary );
     return ( on_boundary  );
   }
 };
-
 #endif
