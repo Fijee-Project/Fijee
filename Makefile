@@ -49,7 +49,7 @@ export VTK    += $(VTK_DIR)/install
 endif
 #
 export EIGEN3   = /home/cobigo/devel/C++/Eigen3/install
-export FENICS   = /home/cobigo/Softwares/Fenics
+export FENICS   = /home/cobigo/devel/CPP/FEniCS-project/install/
 export CUDA_LIB = /usr/local/cuda-5.0/lib64
 
 #####################

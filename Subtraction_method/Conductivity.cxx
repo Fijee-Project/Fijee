@@ -7,12 +7,19 @@
 Solver::Tensor_conductivity::Tensor_conductivity( Mesh & Mesh_head ): 
   Expression(3,3)
 {
-  C00_ = MeshFunction< double >(Mesh_head, "../../Bucket/C00.xml");
-  C01_ = MeshFunction< double >(Mesh_head, "../../Bucket/C01.xml");
-  C02_ = MeshFunction< double >(Mesh_head, "../../Bucket/C02.xml");
-  C11_ = MeshFunction< double >(Mesh_head, "../../Bucket/C11.xml");
-  C12_ = MeshFunction< double >(Mesh_head, "../../Bucket/C12.xml");
-  C22_ = MeshFunction< double >(Mesh_head, "../../Bucket/C22.xml");
+//  C00_ = MeshFunction< double >(Mesh_head, "../../Bucket/C00.xml");
+//  C01_ = MeshFunction< double >(Mesh_head, "../../Bucket/C01.xml");
+//  C02_ = MeshFunction< double >(Mesh_head, "../../Bucket/C02.xml");
+//  C11_ = MeshFunction< double >(Mesh_head, "../../Bucket/C11.xml");
+//  C12_ = MeshFunction< double >(Mesh_head, "../../Bucket/C12.xml");
+//  C22_ = MeshFunction< double >(Mesh_head, "../../Bucket/C22.xml");
+
+  C00_ = MeshFunction< double >(Mesh_head, "../Mesh_rendering/C00.xml");
+  C01_ = MeshFunction< double >(Mesh_head, "../Mesh_rendering/C01.xml");
+  C02_ = MeshFunction< double >(Mesh_head, "../Mesh_rendering/C02.xml");
+  C11_ = MeshFunction< double >(Mesh_head, "../Mesh_rendering/C11.xml");
+  C12_ = MeshFunction< double >(Mesh_head, "../Mesh_rendering/C12.xml");
+  C22_ = MeshFunction< double >(Mesh_head, "../Mesh_rendering/C22.xml");
 }
 //
 //
@@ -20,16 +27,16 @@ Solver::Tensor_conductivity::Tensor_conductivity( Mesh & Mesh_head ):
 void 
 Solver::Tensor_conductivity::eval(Array<double>& values, const Array<double>& x, const ufc::cell& cell) const
 {
-  const uint D = cell.topological_dimension;
+  //  const uint D = cell.topological_dimension;
   const uint cell_index = cell.index;
   //
   double
-    C00 = (C00_[cell_index] != 0. ? C00_[cell_index] : 0.0001),
-    C01 = (C01_[cell_index] != 0. ? C01_[cell_index] : 0.0001),
-    C02 = (C02_[cell_index] != 0. ? C02_[cell_index] : 0.0001),
-    C11 = (C11_[cell_index] != 0. ? C11_[cell_index] : 0.0001),
-    C12 = (C12_[cell_index] != 0. ? C12_[cell_index] : 0.0001),
-    C22 = (C22_[cell_index] != 0. ? C22_[cell_index] : 0.0001);
+    C00 = ( C00_[cell_index] != 0. ? C00_[cell_index] : 0.40 ),
+    C01 = ( C01_[cell_index] != 0. ? C01_[cell_index] : 0.40 ),
+    C02 = ( C02_[cell_index] != 0. ? C02_[cell_index] : 0.40 ),
+    C11 = ( C11_[cell_index] != 0. ? C11_[cell_index] : 0.40 ),
+    C12 = ( C12_[cell_index] != 0. ? C12_[cell_index] : 0.40 ),
+    C22 = ( C22_[cell_index] != 0. ? C22_[cell_index] : 0.40 );
   //
   values[0] = C00; values[3] = C01; values[6] = C02;
   values[1] = C01; values[4] = C11; values[7] = C12;

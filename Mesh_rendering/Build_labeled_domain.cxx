@@ -227,9 +227,9 @@ Domains_Build_labeled::Head_model_segmentation()
   Labeled_domain< VTK_implicite_domain, GT::Point_3 > 
     inside_skull( (DAp::get_instance())->get_inner_skull_surface_() );
   //  
-//  outside_scalp( data_position_ );
-//  outside_skull( data_position_ );
-//  inside_skull ( data_position_ );
+  //  outside_scalp( data_position_ );
+  //  outside_skull( data_position_ );
+  //  inside_skull ( data_position_ );
   std::thread outside_scalp_thread(std::ref(outside_scalp), data_position_);
   std::thread outside_skull_thread(std::ref(outside_skull), data_position_);
   std::thread inside_skull_thread (std::ref(inside_skull), data_position_);
@@ -251,10 +251,10 @@ Domains_Build_labeled::Head_model_segmentation()
   Labeled_domain< VTK_implicite_domain, GT::Point_3 > 
     right_white_matter ( (DAp::get_instance())->get_rh_smoothwm_() );
   //
-//  left_gray_matter( data_position_ );
-//  right_gray_matter( data_position_ );
-//  left_white_matter( data_position_ );
-//  right_white_matter( data_position_ );
+  //  left_gray_matter( data_position_ );
+  //  right_gray_matter( data_position_ );
+  //  left_white_matter( data_position_ );
+  //  right_white_matter( data_position_ );
   std::thread left_gray_matter_thread(std::ref(left_gray_matter), data_position_);
   std::thread right_gray_matter_thread(std::ref(right_gray_matter), data_position_);
   std::thread left_white_matter_thread(std::ref(left_white_matter), data_position_);
@@ -284,7 +284,7 @@ Domains_Build_labeled::Head_model_segmentation()
   bool is_in_CSF = false;
   //
   // create a data_label_tmp private in the different
- for ( int k = 0; k < 256; k++ )
+  for ( int k = 0; k < 256; k++ )
     for ( int j = 0; j < 256; j++ )
       for ( int i = 0; i < 256; i++ )
 	{
@@ -311,11 +311,11 @@ Domains_Build_labeled::Head_model_segmentation()
 	  
 	  //
 	  // Scalp and skull
-//	  if( outside_scalp.inside_domain( cell_center ) ) 
-//	    data_label_[ idx ] = OUTSIDE_SCALP; 
-//	  //
-//	  if( outside_skull.inside_domain( cell_center ) ) 
-//	    data_label_[ idx ] = OUTSIDE_SKULL; 
+	  if( outside_scalp.inside_domain( cell_center ) ) 
+	    data_label_[ idx ] = OUTSIDE_SCALP; 
+	  //
+	  if( outside_skull.inside_domain( cell_center ) ) 
+	    data_label_[ idx ] = OUTSIDE_SKULL; 
 	  //
 	  if( inside_skull.inside_domain( cell_center ) ||
 	      subcortical_brain(cell_center_aseg) == CSF )
@@ -329,7 +329,7 @@ Domains_Build_labeled::Head_model_segmentation()
 	  if ( is_in_CSF ) 
 	    {
 	      //
-	      // Cortex
+	      // Gray-matter
 	      if( right_gray_matter.inside_domain( cell_center ) || 
 		  left_gray_matter.inside_domain( cell_center ) )
 		data_label_[ idx ] = GRAY_MATTER;
@@ -340,7 +340,7 @@ Domains_Build_labeled::Head_model_segmentation()
 	      //	    data_label[ idx ] = GRAY_MATTER;
 	      
 	      //
-	      // White matter
+	      // White-matter
 	      if( right_white_matter.inside_domain( cell_center ) || 
 		  left_white_matter.inside_domain( cell_center ) )
 		data_label_[ idx ] = WHITE_MATTER;
@@ -430,12 +430,12 @@ Domains_Build_labeled::Head_model_segmentation()
 	    }
 	}
  
- //
- //
+  //
+  //
 #ifdef DEBUG_UCSF
- //
- // Time log 
- std::cout << "Build_labeled_domain - event log:" << *timerLog << std::endl;
+  //
+  // Time log 
+  std::cout << "Build_labeled_domain - event log:" << *timerLog << std::endl;
 #endif
 }
 //
@@ -452,22 +452,22 @@ std::ostream&
 Domains::operator << ( std::ostream& stream, 
 		       const Domains_Build_labeled& that)
 {
-// std::for_each( that.get_list_position().begin(),
-//		 that.get_list_position().end(),
-//		 [&stream]( int Val )
-//		 {
-//		   stream << "list pos = " << Val << "\n";
-//		 });
-// //
-// stream << "position x = " <<    that.get_pos_x() << "\n";
-// stream << "position y = " <<    that.get_pos_y() << "\n";
-// if ( &that.get_tab() )
-//   {
-//     stream << "tab[0] = "     << ( &that.get_tab() )[0] << "\n";
-//     stream << "tab[1] = "     << ( &that.get_tab() )[1] << "\n";
-//     stream << "tab[2] = "     << ( &that.get_tab() )[2] << "\n";
-//     stream << "tab[3] = "     << ( &that.get_tab() )[3] << "\n";
-//   }
+  // std::for_each( that.get_list_position().begin(),
+  //		 that.get_list_position().end(),
+  //		 [&stream]( int Val )
+  //		 {
+  //		   stream << "list pos = " << Val << "\n";
+  //		 });
+  // //
+  // stream << "position x = " <<    that.get_pos_x() << "\n";
+  // stream << "position y = " <<    that.get_pos_y() << "\n";
+  // if ( &that.get_tab() )
+  //   {
+  //     stream << "tab[0] = "     << ( &that.get_tab() )[0] << "\n";
+  //     stream << "tab[1] = "     << ( &that.get_tab() )[1] << "\n";
+  //     stream << "tab[2] = "     << ( &that.get_tab() )[2] << "\n";
+  //     stream << "tab[3] = "     << ( &that.get_tab() )[3] << "\n";
+  //   }
   //
   return stream;
 };

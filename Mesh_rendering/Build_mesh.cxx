@@ -872,8 +872,12 @@ Domains_build_mesh::Conductivity_matching()
 	    }
 	  else
 	    {/*NO CENTROID NOR VERTICES*/
-	      for ( int i = 0 ; i < 5 ; i++)
-		cell_coeff.conductivity_coefficients[i] = 0.;
+	      //
+	      // Cell caracteristics are moved in the CSF
+	      // Diagonal
+	      cell_coeff.conductivity_coefficients[0] = cell_coeff.conductivity_coefficients[3] = cell_coeff.conductivity_coefficients[5] = 1.79;
+	      // Non diagonal
+	      cell_coeff.conductivity_coefficients[1] = cell_coeff.conductivity_coefficients[2] = cell_coeff.conductivity_coefficients[4] = 0.;
 	      
 	      //
 	      // Output for R analysis
@@ -881,13 +885,45 @@ Domains_build_mesh::Conductivity_matching()
 #if TRACE == 100
 	      for ( int i = 0 ; i < 18 ; i++)
 		cell_coeff.eigen_values[i] = 0.;
+	      //
+	      cell_coeff.eigen_values[0] = cell_coeff.eigen_values[4] = cell_coeff.eigen_values[8] = 1.79;
 #endif
-#endif
+#endif      
+	      
+//	      for ( int i = 0 ; i < 6 ; i++)
+//		cell_coeff.conductivity_coefficients[i] = 0.;
+//	      
+//	      //
+//	      // Output for R analysis
+//#ifdef TRACE
+//#if TRACE == 100
+//	      for ( int i = 0 ; i < 18 ; i++)
+//		cell_coeff.eigen_values[i] = 0.;
+//#endif
+//#endif
 	    }      
 	} /*if( cell_pmap.subdomain_index( cit ) != NO_SEGMENTATION && ... )*/
+      else if ( cell_pmap.subdomain_index( cit ) == CEREBROSPINAL_FLUID )
+	{
+	  // Diagonal
+	  cell_coeff.conductivity_coefficients[0] = cell_coeff.conductivity_coefficients[3] = cell_coeff.conductivity_coefficients[5] = 1.79;
+	  // Non diagonal
+	  cell_coeff.conductivity_coefficients[1] = cell_coeff.conductivity_coefficients[2] = cell_coeff.conductivity_coefficients[4] = 0.;
+
+	  //
+	  // Output for R analysis
+#ifdef TRACE
+#if TRACE == 100
+	  for ( int i = 0 ; i < 18 ; i++)
+	    cell_coeff.eigen_values[i] = 0.;
+	  //
+	  cell_coeff.eigen_values[0] = cell_coeff.eigen_values[4] = cell_coeff.eigen_values[8] = 1.79;
+#endif
+#endif      
+	}
       else
 	{
-	  for ( int i = 0 ; i < 5 ; i++)
+	  for ( int i = 0 ; i < 6 ; i++)
 	    cell_coeff.conductivity_coefficients[i] = 0.;
 
 	  //

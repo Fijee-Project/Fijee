@@ -31,9 +31,9 @@ class Phi : public Expression
     //
     // Dipole position
     std::vector<double> r0_values;  
-    r0_values.push_back( 0.1 + 0.077 ); 
-    r0_values.push_back( 0.1 );
-    r0_values.push_back( 0.1 );
+    r0_values.push_back( 0.1 + 0.010 ); 
+    r0_values.push_back( 0.1 + 0.016 );
+    r0_values.push_back( 0.1 + 0.035 );
     r0.set_local( r0_values );
 
     //
