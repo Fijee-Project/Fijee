@@ -1,3 +1,5 @@
+
+
 Finite element methods (FEM's) are capable of modeling nonhomogeneous and anisotropic conductivities within each tissue and therefore will be dependent upon accurate conductivity values for the whole head, but present FEM models are limited by the paucity of conductivity data.
 
 issue boundaries with high conductivity gradients can cause field distortions and lead to localization errors, if the conductivities are not modeled accurately.
@@ -9,8 +11,33 @@ issue boundaries with high conductivity gradients can cause field distortions an
 
 \section{Electrical conductivity}
 
-\section{Diffusion tensor imaging (DTI)}
+\paragraph{Influence of skull anisotropy for the forward and inverse problem in EEG: simulation studies using FEM on realistic head models~\cite{pmid9704264}}{
 
+{\it is it absolutely necessary to use FEM in order to accurately compute the solution of the EEG inverse problem? Furthermore, under what conditions can BEM provide accurate solutions?  } \\
+Considering this fact, the relevant questions are: is it absolutely necessary to use FEM in order to accurately compute the solution of the EEG inverse problem? Furthermore, under what conditions can BEM provide accurate solutions? The most pertinent way to answer these questions is to evaluate the role of anisotropies in the electrical conductivities of brain tissues [Wikswo et al., 1993] and particularly the bone anisotropy, since the presence of the skull greatly influences the scalp potential distribution. Such influence has been evaluated in the forward and inverse dipolar problem by Peters and de Munck [1990] with analytical methods, and by Thevenet [1992] with FEM in a spherical head model. FEM has also been used with a realistic head model [Haueisen et al., 1997], but those authors only studied the influence of conductivity values on the scalp distribution.
+
+
+
+
+For these reasons, the first proposed and still the most commonly used approach to the inverse problem consists in fitting one or a few equivalent current dipolar sources (ECD) to the potential map by nonlinear estimation techniques [Sherg and Buchner, 1993]. Although this model can well describe the focal activities induced by a simple somatosensory study, it is inadequate to represent complex neural networks or distributed activities along cortical surfaces. In order to overcome these difficulties, different tomographic reconstruction techniques have been proposed which estimate a distribution of current vectors on a regular surface grid [Hamalainen and Ilmoniemi, 1984] or a volume grid [Pascual-Marqui et al., 1994] or cortical surface deduced from MRI images [Dale and Sereno, 1993]. The {\it distributed sources} inverse problem consists in solving a set of linear equations, since the locations of the currents are imposed, but this system is undetermined since there are many more unknowns than the number of data. Then constraints must be introduced in order to limit the set of admissible solutions in a so-called regularization scheme. The most commonly used are minimum norm estimates (Hamalainen and Ilmoniemi, 1994; Wang et al., 1992] or quadratic regularizations that generate smooth distributions, not corresponding to realistic physiological solutions.
+
+Different head models have been used, and the complexity of the corresponding potential calculations increases with the accuracy of the head description. The simplest and the most commonly used is the three or four concentric sphere model with homogeneous conductivity values which represent the skin, the skull, the Cerebrospinal Fluid (CSF), and the brain tissues. In this case, analytical expressions have been derived to calculate the scalp potentials [De Munck, 1988]. Spherical models may take into account anisotropy of the medium by assigning constant radial and tangential conductivities to the skull shell, but they give a poor approximation of head shape. In order to take into account realistic head geometry, Hamalainen and Sarvas [1989] used the boundary element method (BEM), which is adequate for piecewise homogeneous isotropic media. However, BEM cannot be applied when some inhomogeneities are present (such as skull holes) or when the medium has an anisotropic conductivity. Indeed, anisotropy influences the scalp potential distributions [Peters and de Munck, 1990]. In such a case, the finite element method (FEM) allows one to consider accurate inhomogeneous realistic models, since it computes the Maxwell equations very locally. Different authors have developed FEM methods [Yan et al., 1991; Bertrand et al., 1991; Haueisen et al., 1995; Buchner et al., 1997; Awada et al., 1997]. FEM is difficult to implement since it requires volume meshes of the different head tissues, which are more complex to derive than the surface meshes used by BEM. For this reason, FEM is less commonly used than BEM, even though it is more accurate.
+
+
+More precisely, for this study, FEM is implemented and validated in the spherical case in comparison with analytical results, and the optimum characteristics of the numerical methods are derived. Then the influence of skull anisotropy on scalp potential is evaluated by comparing the distributions obtained with and without anisotropy both in a spherical and in a realistic head model. To derive the influence of the skull isotropic conductivity approximation in the inverse problem, the gain matrix is computed with an isotropic forward model and a distributed source model is reconstructed with this matrix from data simulated with FEM and an anisotropic skull model. As for the forward problem, spherical and realistic head models are considered and the reconstructions are computed with the different regularization methods mentioned above. We have checked that each inverse method succeeds at recovering accurately the source distribution when the gain matrix is computed with the right anisotropic model.
+
+{\bf Methods FEM description ...}
+
+
+}
+
+\paragraph{A finite difference method with reciprocity used to incorporate anisotropy in electroencephalogram dipole source localization~\cite{pmid16077227}}{
+EEG dipole source localization consists of two subproblems, i.e., the forward and the inverse problem. The forward problem calculates the electrode potentials in a head model, given the source(s) (usually a current dipole). On the other hand, the inverse problem is solved by finding the dipole which best represents the given potentials at the scalp electrodes. 
+
+The skull consists of three layers: a spongiform layer between two hard layers. The conductivity tangentially to the skull surface is 10~times larger than the radial conductivity. White matter consists of axons, grouped in bundles. The conductivity along the nerve bundle is 9 times larger than perpendicular to the nerve bundle.
+}
+
+\section{Diffusion tensor imaging (DTI)}
 
 \paragraph{Diffusion Tensor Imaging of the Brain~\cite{citeulike:1695483}}{
 Diffusion tensor imaging (DTI)\index{Diffusion tensor imaging} is used to map and characterize the three-dimensional diffusion of water. The diffusion tensor describes the magnitude, the degree of anisotropy, and the orientation of diffusion anisotropy~\cite{citeulike:1695483}.\\

@@ -13,11 +13,12 @@ int main()
   //
   // Parameters
   //
-  //  parameters["num_threads"] = 4;
+  //parameters["num_threads"] = 4;
   // Allowed values are: [PETSc, STL, uBLAS, Epetra, MTL4].
   // Epetra in Trilinos
   // uBLAS needs UMFPACK
-  parameters["linear_algebra_backend"] = "uBLAS";
+  parameters["linear_algebra_backend"] = "PETSc";
+  //  parameters["krylov_solver"].add("maximum_iterations", 20000);
   //  info(solver.parameters,true) ;
   //  info(parameters,true) ;
   //
@@ -105,8 +106,14 @@ int main()
   // Solver
   LinearVariationalProblem problem(a, L, u);
   LinearVariationalSolver  solver(problem);
-  solver.parameters["linear_solver"]  = "cg";
+  // krylov
+  solver.parameters["linear_solver"]  = "gmres";
+  solver.parameters("krylov_solver")["maximum_iterations"] = 20000;
+//  solver.parameters["linear_solver"]  = "bicgstab";
+//  solver.parameters["linear_solver"]  = "cg";
   solver.parameters["preconditioner"] = "ilu";
+  // Cholesky
+//  solver.parameters["linear_solver"]  = "umfpack";
   solver.solve();
 // //  // solve(a == L, u, bc);
 //  solve(a == L, u);

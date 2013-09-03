@@ -29,28 +29,29 @@ class Phi : public Expression
     e.set_local( e_values );
 
     //
-    // Dipole position
+    // Dipole position in [mm]
     std::vector<double> r0_values;  
-    r0_values.push_back( 0.1 + 0.010 ); 
-    r0_values.push_back( 0.1 + 0.016 );
-    r0_values.push_back( 0.1 + 0.035 );
+    r0_values.push_back( 0.0 + 10. ); 
+    r0_values.push_back( 0.0 + 20. );
+    r0_values.push_back( 0.0 + 60. );
     r0.set_local( r0_values );
 
     //
-    // Mesure position
+    // Mesure position in [mm]
     std::vector<double> r_values;  
     r_values.push_back( x[0] ); 
     r_values.push_back( x[1] );
     r_values.push_back( x[2] );
     r.set_local( r_values );
-
-    //
+    // distance in [mm]
     Vector dist(r);
     dist -= r0;
     double norm_dist = dist.norm("l2");
-    //
+
+    // 
+    // 10^-3 / 10^-9 = 10^6 : [mm] -> [m]
     values[0] = ( norm_dist < DOLFIN_EPS ? 0 : 
-		  Cte * Q * e.inner( dist ) / (norm_dist * norm_dist * norm_dist) );
+		  Cte * Q * e.inner( dist ) / (norm_dist * norm_dist * norm_dist) ) * 10^6;
     //    values[0] = Cte * Q * e.inner( dist ) / (norm_dist * norm_dist * norm_dist);
   }
 };
