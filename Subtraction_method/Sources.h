@@ -51,7 +51,7 @@ class Phi : public Expression
     // 
     // 10^-3 / 10^-9 = 10^6 : [mm] -> [m]
     values[0] = ( norm_dist < DOLFIN_EPS ? 0 : 
-		  Cte * Q * e.inner( dist ) / (norm_dist * norm_dist * norm_dist) ) * 10^6;
+		  Cte * Q * e.inner( dist ) / (norm_dist * norm_dist * norm_dist) ) * 1.e+6;
     //    values[0] = Cte * Q * e.inner( dist ) / (norm_dist * norm_dist * norm_dist);
   }
 };

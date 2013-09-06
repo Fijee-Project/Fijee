@@ -13,12 +13,11 @@ int main()
   //
   // Parameters
   //
-  //parameters["num_threads"] = 4;
+  //  parameters["num_threads"] = 4;
   // Allowed values are: [PETSc, STL, uBLAS, Epetra, MTL4].
   // Epetra in Trilinos
   // uBLAS needs UMFPACK
-  parameters["linear_algebra_backend"] = "PETSc";
-  //  parameters["krylov_solver"].add("maximum_iterations", 20000);
+  parameters["linear_algebra_backend"] = "uBLAS";
   //  info(solver.parameters,true) ;
   //  info(parameters,true) ;
   //
@@ -107,7 +106,20 @@ int main()
   LinearVariationalProblem problem(a, L, u);
   LinearVariationalSolver  solver(problem);
   // krylov
-  solver.parameters["linear_solver"]  = "gmres";
+
+//    krylov_solver            |    type  value          range  access  change
+//    ------------------------------------------------------------------------
+//    absolute_tolerance       |  double  1e-15             []       0       0
+//    divergence_limit         |  double  10000             []       0       0
+//    error_on_nonconvergence  |    bool   true  {true, false}       0       0
+//    maximum_iterations       |     int  10000             []       0       0
+//    monitor_convergence      |    bool  false  {true, false}       0       0
+//    nonzero_initial_guess    |    bool  false  {true, false}       0       0
+//    relative_tolerance       |  double  1e-06             []       0       0
+//    report                   |    bool   true  {true, false}       0       0
+//    use_petsc_cusp_hack      |    bool  false  {true, false}       0       0
+//
+  solver.parameters["linear_solver"]  = "cg";
   solver.parameters("krylov_solver")["maximum_iterations"] = 20000;
 //  solver.parameters["linear_solver"]  = "bicgstab";
 //  solver.parameters["linear_solver"]  = "cg";
