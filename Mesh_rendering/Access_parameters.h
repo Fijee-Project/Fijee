@@ -11,6 +11,8 @@
 #include <stdlib.h>     /* getenv */
 #include <string>
 #include <sstream>
+#include <errno.h>    /* builtin errno*/
+#include <sys/stat.h> /*mkdir*/
 //
 // NIFTI
 //
@@ -60,6 +62,7 @@ namespace Domains
     static Access_parameters* parameters_instance_;
     //! Freesurfer path. This path allow the program to reach all files we will need during the execution.
     std::string files_path_;
+    std::string files_path_output_;
 
     //
     // Surface files
