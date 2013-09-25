@@ -414,6 +414,13 @@ DAp::~Access_parameters(){
       eigen_values_matrices_array_ = nullptr;
     }
   //
+  if ( P_matrices_array_ != nullptr )
+    {
+      delete [] P_matrices_array_;
+      P_matrices_array_ = nullptr;
+    }
+  //
+  //
   if ( positions_array_ != nullptr )
     {
       delete [] positions_array_;
@@ -579,6 +586,26 @@ DAp::get_positions_array_(  Eigen::Matrix <float, 3, 1>** Positions_Array )
 //
 //
 void
+DAp::get_P_matrices_array_(  Eigen::Matrix <float, 3, 3>** P_Matrices_Array )
+{
+  if( P_matrices_array_ != nullptr )
+    {
+      if( P_matrices_array_ != *P_Matrices_Array )
+	{
+	  *P_Matrices_Array = P_matrices_array_;
+	  P_matrices_array_ = nullptr;
+	}
+    }
+  else
+    {
+      std::cerr << "P_Matrices_Array_ is already transfered" << std::endl;
+      abort();
+    }
+}
+//
+//
+//
+void
 DAp::get_Do_we_have_conductivity_(  bool** Do_We_Have_Conductivity )
 {
   if( Do_we_have_conductivity_ != nullptr )
@@ -650,6 +677,21 @@ DAp::set_positions_array_(  Eigen::Matrix <float, 3, 1>** Positions_Array )
   //
   positions_array_ = *Positions_Array;
   *Positions_Array = nullptr;
+}
+//
+//
+//
+void
+DAp::set_P_matrices_array_(  Eigen::Matrix <float, 3, 3>** P_Matrices_Array )
+{
+  if ( P_matrices_array_ != nullptr )
+    {
+      delete [] P_matrices_array_;
+      P_matrices_array_ = nullptr;
+    }
+  //
+  P_matrices_array_ = *P_Matrices_Array;
+  *P_Matrices_Array = nullptr;
 }
 //
 //

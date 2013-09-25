@@ -271,6 +271,48 @@ Domain::VTK_implicite_domain( const char* Vtk_Mesh ):
    }
 
   //
+  // Output for R analysis
+#ifdef TRACE
+#if ( TRACE == 100 )
+
+  std::cout << Vtk_Mesh << std::endl;
+
+  std::ofstream* outfile;// ("new.txt");
+  //
+  if( strcmp(Vtk_Mesh,"/home/cobigo/subjects/GazzDCS0004mgh//surf/STL/lh.pial.stl") == 0 )
+    {
+      outfile = new ofstream("lh.pial.frame");
+      *outfile << "X Y Z v11 v12 v13 \n";
+      *outfile << stream.str();
+      outfile->close();
+    }
+  else if ( strcmp(Vtk_Mesh,"/home/cobigo/subjects/GazzDCS0004mgh//surf/STL/rh.pial.stl") == 0 )
+    {
+      outfile = new ofstream("rh.pial.frame");
+      *outfile << "X Y Z v11 v12 v13 \n";
+      *outfile << stream.str();
+      outfile->close();
+    }
+  else if ( strcmp(Vtk_Mesh,"/home/cobigo/subjects/GazzDCS0004mgh//surf/STL/lh.smoothwm.stl") == 0 )
+    {
+      outfile = new ofstream("lh.smoothwm.frame");
+      *outfile << "X Y Z v11 v12 v13 \n";
+      *outfile << stream.str();
+      outfile->close();
+   }
+  else if ( strcmp(Vtk_Mesh,"/home/cobigo/subjects/GazzDCS0004mgh//surf/STL/rh.smoothwm.stl") == 0 )
+    {
+      outfile = new ofstream("rh.smoothwm.frame");
+      *outfile << "X Y Z v11 v12 v13 \n";
+      *outfile << stream.str();
+      outfile->close();
+   }
+  //
+  
+#endif
+#endif
+
+  //
   //
   std::vector<Point_with_normal> Point_normal;
   if (!stream ||

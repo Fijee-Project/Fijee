@@ -690,6 +690,12 @@ Domains_build_mesh::Conductivity_matching()
   Eigen::Matrix <float, 3, 1>* positions_array             = nullptr;
   bool*                        Do_we_have_conductivity     = nullptr; 
   //
+#ifdef TRACE
+#if TRACE == 100
+  Eigen::Matrix <float, 3, 3>* P_matrices_array  = nullptr;
+  (DAp::get_instance())->get_P_matrices_array_( &P_matrices_array );
+#endif
+#endif
   (DAp::get_instance())->get_conductivity_tensors_array_( &conductivity_tensors_array );
   (DAp::get_instance())->get_eigen_values_matrices_array_( &eigen_values_matrices_array );
   (DAp::get_instance())->get_positions_array_( &positions_array );
@@ -820,7 +826,7 @@ Domains_build_mesh::Conductivity_matching()
 	      while( eigen_values_matrices_array[ index_min_distance_v[ ++tetrahedron_vertex ] ](2,2) < 0. )
 		if ( tetrahedron_vertex >= 3 )
 		  {
-		    // we don't have vertices with positiv eigenvalues
+		    // we don't have vertices with positive eigenvalues
 		    tetrahedron_vertex++;
 		    break;
 		  }
@@ -867,6 +873,17 @@ Domains_build_mesh::Conductivity_matching()
 		  cell_coeff.eigen_values[7+i*3] = eigen_values_matrices_array[index_min_distance_v[i]](1,1);
 		  cell_coeff.eigen_values[8+i*3] = eigen_values_matrices_array[index_min_distance_v[i]](2,2);
 		}
+	      //
+	      Eigen::Vector3f vec_tmp;
+	      vec_tmp <<
+		P_matrices_array[index_min_distance](0,0),
+		P_matrices_array[index_min_distance](1,0),
+		P_matrices_array[index_min_distance](2,0);
+	      //
+	      cell_coeff.eigenvector_1  = rotation * vec_tmp;
+	      cell_coeff.eigenvector_1 /= cell_coeff.eigenvector_1.norm();
+	      
+
 #endif
 #endif
 	    }
@@ -887,6 +904,8 @@ Domains_build_mesh::Conductivity_matching()
 		cell_coeff.eigen_values[i] = 0.;
 	      //
 	      cell_coeff.eigen_values[0] = cell_coeff.eigen_values[4] = cell_coeff.eigen_values[8] = 1.79;
+	      //
+	      cell_coeff.eigenvector_1 << 0., 0., 0.;
 #endif
 #endif      
 	      
@@ -918,6 +937,8 @@ Domains_build_mesh::Conductivity_matching()
 	    cell_coeff.eigen_values[i] = 0.;
 	  //
 	  cell_coeff.eigen_values[0] = cell_coeff.eigen_values[4] = cell_coeff.eigen_values[8] = 1.79;
+	      //
+	      cell_coeff.eigenvector_1 << 0., 0., 0.;
 #endif
 #endif      
 	}
@@ -932,6 +953,8 @@ Domains_build_mesh::Conductivity_matching()
 #if TRACE == 100
 	  for ( int i = 0 ; i < 18 ; i++)
 	    cell_coeff.eigen_values[i] = 0.;
+	  //
+	  cell_coeff.eigenvector_1 << 0., 0., 0.;
 #endif
 #endif      
 	}
@@ -957,6 +980,8 @@ Domains_build_mesh::Conductivity_matching()
   positions_array = nullptr;
   delete [] Do_we_have_conductivity; 
   Do_we_have_conductivity = nullptr; 
+  delete [] P_matrices_array;
+  P_matrices_array = nullptr;
 }
 //
 //
@@ -1300,7 +1325,10 @@ Domains_build_mesh::Conductivity_matching_analysis()
 #if TRACE == 100
   //
   // Stream
-  std::stringstream err;
+  std::stringstream 
+    err,
+    err1;
+  //
   err 
     << "Cell_sub_domain "
     << "X_cent Y_cent Z_cent  "
@@ -1309,6 +1337,11 @@ Domains_build_mesh::Conductivity_matching_analysis()
     << "l1_v1 l2_v1 l3_v1 "
     << "l1_v2 l2_v2 l3_v2 "
     << "l1_v3 l2_v3 l3_v3 \n";
+  //
+  err1 
+    << "Cell_sub_domain "
+    << "X Y Z "
+    << "v11 v12 v13 \n";
 
 
   //
@@ -1321,22 +1354,33 @@ Domains_build_mesh::Conductivity_matching_analysis()
 	<< it->cell_subdomain << " "
 	<< it->vertices[4](0) << " " << it->vertices[4](1) << " " << it->vertices[4](2) << " ";
       //
+      err1 
+	<< it->cell_subdomain << " "
+	<< it->vertices[4](0) << " " << it->vertices[4](1) << " " << it->vertices[4](2) << " "
+	<< it->eigenvector_1(0) << " " << it->eigenvector_1(1) << " " << it->eigenvector_1(2) << " ";
+      //
       for( int i = 0 ; i < 18 ; i++ )
 	err << it->eigen_values[i] << " ";
       //
       err << std::endl;
+      err1 << std::endl;
     }
 
 
   //
   // 
-  std::ofstream outFile;
+  std::ofstream 
+    outFile,
+    outFile1;
   //
   outFile.open("Data_mesh.vs.conductivity.frame");
+  outFile1.open("Centroid_normal.frame");
   //
   outFile << err.rdbuf();
+  outFile1 << err1.rdbuf();
   //
   outFile.close();  
+  outFile1.close();  
 #endif
 #endif      
 }

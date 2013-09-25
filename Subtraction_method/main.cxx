@@ -1,6 +1,9 @@
 #include <vector>
 #include <dolfin.h>
 #include "Poisson.h"
+//
+#include "Source.h"
+//
 #include "Sources.h"
 #include "Conductivity.h"
 #include "Boundaries.h"
@@ -24,6 +27,11 @@ int main()
   //
   // Create mesh and function space
   //
+
+  //
+  // 
+  std::cout << "Load dipoles distribution" << std::endl;
+  Solver::Sources Dipoles_distribution;
 
   //
   //

@@ -10,7 +10,7 @@ LIBS    = -ldolfin -lboost_mpi
 #
 UFL_SRC    = Poisson.ufl
 UFL_HEADER = Poisson.h
-SRC        = main.cxx  Conductivity.cxx
+SRC        = main.cxx  Conductivity.cxx pugixml.cxx Sources.cxx
 OBJ        = $(SRC:.cxx=.o)
 #
 #

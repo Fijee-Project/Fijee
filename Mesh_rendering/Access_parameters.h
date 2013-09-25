@@ -44,6 +44,7 @@ typedef Eigen::Matrix< float, 3, 1 > Vector_f_3X1;
 /*! \namespace Domains
  * 
  * Name space for our new package
+ * A singleton provides for encapsulation of persistent state information with the benefits of lazy construction. It also avoids the issue of which code segment should "own" the static persistent object instance. It further guarantees what mechanism is used to allocate memory for the underlying object and allows for better control over its destruction.
  *
  */
 namespace Domains
@@ -139,7 +140,9 @@ namespace Domains
     Eigen::Matrix <float, 3, 3>* eigen_values_matrices_array_;
     //! Positions array of the conductivity tensor
     Eigen::Matrix <float, 3, 1>* positions_array_;
-    //! Speed up: check if we need make any calculation
+     //! Change base matrix array
+    Eigen::Matrix <float, 3, 3>* P_matrices_array_;
+   //! Speed up: check if we need make any calculation
     bool* Do_we_have_conductivity_; 
 
 
@@ -400,6 +403,14 @@ namespace Domains
      */
     void get_positions_array_( Eigen::Matrix <float, 3, 1>** Positions_Array );
     /*!
+     *  \brief Get P_matrices_array_
+     *
+     *  This method move the P matrices array out of the parameters object.
+     *
+     *  \param P_Matrices_Array: P matrices array from conductivity tensor object.
+     */
+    void get_P_matrices_array_( Eigen::Matrix <float, 3, 3>** P_Matrices_Array );
+    /*!
      *  \brief Get Do_we_have_conductivity_
      *
      *  This method move the conductivity checking array out of the parameters object.
@@ -438,6 +449,14 @@ namespace Domains
      *  \param Positions_Array: positions array for mesh rendering object.
      */
     void set_positions_array_( Eigen::Matrix <float, 3, 1>** Positions_Array );
+    /*!
+     *  \brief Set P_matrices_array_
+     *
+     *  This method move the P matrices array inside the parameters object.
+     *
+     *  \param P_Matrices_Array: P matrices array for mesh rendering object.
+     */
+    void set_P_matrices_array_( Eigen::Matrix <float, 3, 3>** P_Matrices_Array );
     /*!
      *  \brief Set Do_we_have_conductivity_
      *

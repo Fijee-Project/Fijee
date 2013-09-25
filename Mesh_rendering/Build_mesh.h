@@ -290,6 +290,8 @@ namespace Domains
       // l1  l2  l3 l_long l_tang l_mean 
       // l1_v0 l2_v0 l3_v0 - l1_v1 l2_v1 l3_v1 - l1_v3 l2_v3 l3_v3
       float eigen_values[18];
+      // Eigenvector | v1 > at the centroid
+      Eigen::Vector3f eigenvector_1;
       //
 #endif
 #endif      

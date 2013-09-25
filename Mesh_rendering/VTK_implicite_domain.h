@@ -1,6 +1,7 @@
 #ifndef VTK_IMPLICITE_DOMAIN_H_
 #define VTK_IMPLICITE_DOMAIN_H_
 #include <iostream>
+#include <cstring>
 #include <string>
 #include <fstream>
 #include <sstream>      // std::stringstream
@@ -65,9 +66,11 @@ typedef Kernel::FT FT;
 namespace Domains
 {
   /*! \class VTK_implicite_domain
-   * \brief classe representing whatever
+   * \brief classe building a list of "vertex, normal".
    *
-   *  This class is an example of class I will have to use
+   *  This class build a list of "vertex, normal" associated to a STL format mesh. This list will be an input of CGAL oracle for the construction of an implicite surface.
+   * The implicite functions will help cearting the INRIMAGE format 3D image.  
+   *
    */
   class VTK_implicite_domain
   {
