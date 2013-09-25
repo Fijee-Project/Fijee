@@ -3,6 +3,7 @@
 // We give a comprehensive type name
 //
 typedef Domains::Access_parameters DAp;
+typedef struct stat stat_file;
 //
 //
 //
@@ -32,6 +33,43 @@ DAp::Access_parameters():
     }
   //
   files_path_ = std::string(subjects_dir) + "/" + std::string(subject) + "/";
+
+  //
+  // Create output path
+  stat_file st;
+  int       status = 0;
+  mode_t    mode   = 0750;
+  //
+  files_path_output_ = files_path_ + "/fijee";
+  //
+  if ( stat( files_path_output_.c_str(), &st ) != 0 )
+    {
+      /* Directory does not exist */
+      if ( mkdir( files_path_output_.c_str(), mode ) != 0 )
+	status = -1;
+    }
+    else if (!S_ISDIR(st.st_mode))
+    {
+        errno = ENOTDIR;
+        status = -1;
+    }
+    else
+      {
+	std::cerr << "Warning: directory " << files_path_output_
+		  << " already exist. Data will be removed." << std::endl;
+      }
+  //
+  if (status == -1 )
+    {
+      std::cerr << "failed to create " << files_path_output_
+		<< ": " << strerror(errno) << std::endl;
+      //
+      exit(1);
+    }
+  // append the path line
+  files_path_ += "/";
+  
+
 
   //
   // Mesh rendering

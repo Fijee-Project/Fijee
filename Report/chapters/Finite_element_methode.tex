@@ -1,3 +1,72 @@
+bla
+
+\newpage
+
+%-------------------------------------------------------------------------------
+
+\section{Finite element methode\label{FEM}}
+
+The \FEM{} is a method of approximating the solution of \PED{} which is constructed from an equivalent formulation of the problem. This equivalent formulation is called {\it weak formulation}\index{weak formulation}. The general approach of the \FEM{} can be summarized in the following way: 
+
+\begin{itemize}
+\item We have a \PED{} with boundary conditions. We multiply this equation by a test function, we integrate over the entire simulation domain.
+\item The second step is to make a partial integration in order to obtain the weak formulation.
+\item At this stage, the domain discretization is essential (triangular or quadrilateral in two dimensions, tetrahedral and hexahedral in three dimensions). 
+\end{itemize}
+
+
+\newpage
+
+%-------------------------------------------------------------------------------
+
+\section{Mathematical background}
+
+The method principal is to approach on a domain $\Omega$, the solution of a \PED{} with boundary conditions on the edges of $\partial\Omega$ with local fields. Local fields defined on each subdomain $\Omega_{i}$ are generally polynomial interpolation. The overall solution is the concatenation of all local fields. The quality of the solution depends on the division of the sub-domain.
+
+\subsection{Weak formulation}
+
+\subsection{Galerkin method}
+
+\subsection{Introduction to FEM}
+
+\newpage
+
+%-------------------------------------------------------------------------------
+
+\section{Sparse matrices}
+
+\subsection{Sparse matrix formats}
+\subsubsection{Coordinate list (COO)}
+\subsubsection{Compressed sparse row (CSR or CRS)}
+
+\newpage
+
+%-------------------------------------------------------------------------------
+
+\section{Solvers and proconditionners}
+
+\newpage
+
+%-------------------------------------------------------------------------------
+
+\section{FEniCS}
+
+\newpage
+
+%-------------------------------------------------------------------------------
+
+\section{To review}
+
+
+
+
+
+
+
+
+
+
+
 Dans les applications de calcul, du type éléments finis, plus le maillage est dense plus la précision du calcul augmente. Cependant, la quantité de temps nécessaire à l'accomplissement d'un calcul basé sur un maillage est souvent proportionnelle au nombre d'éléments du maillage. Un compromis doit donc être trouvé entre la précision et le temps de calcul. 
 
 
