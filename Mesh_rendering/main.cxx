@@ -62,8 +62,10 @@ main()
   // Tetrahedrization
   timerLog->MarkEvent("Build the mesh");
   Domains::Build_mesh tetrahedrization;
-
-
+//  //
+//  // Match conductivity with mesh's cells
+//  timerLog->MarkEvent("White matter and gray matter vertices matching");
+//  tetrahedrization.White_gray_matter_vertices_matching();
   //
   // Match conductivity with mesh's cells
   timerLog->MarkEvent("Mesh conductivity matching");

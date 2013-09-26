@@ -52,11 +52,17 @@ export EIGEN3   = /home/cobigo/devel/C++/Eigen3/install
 export FENICS   = /home/cobigo/devel/CPP/FEniCS-project/install/
 export CUDA_LIB = /usr/local/cuda-5.0/lib64
 
+######################
+## Main DIRECTORIES ##
+######################
+export FIJEE += $(CURDIR)
+
 #####################
 ## SUB DIRECTORIES ##
 #####################
-MESH_RENDERING_DIR    = Mesh_rendering
-SUBTRACTION_METHOD_DIR= Subtraction_method
+UTILS_DIR              = Utils
+MESH_RENDERING_DIR     = Mesh_rendering
+SUBTRACTION_METHOD_DIR = Subtraction_method
 EXEC = $(MESH_RENDERING)/build_inrimage  $(SUBTRACTION_METHOD_DIR)/Poisson
 
 ###############
@@ -65,10 +71,12 @@ EXEC = $(MESH_RENDERING)/build_inrimage  $(SUBTRACTION_METHOD_DIR)/Poisson
 all: $(EXEC)
 
 $(EXEC):
+	( cd $(UTILS_DIR) && $(MAKE) )
 	( cd $(SUBTRACTION_METHOD_DIR) && $(MAKE) )
 	( cd $(MESH_RENDERING_DIR) && $(MAKE) )
 
 clean:
+	( cd $(UTILS_DIR) && $(MAKE) $@ )
 	( cd $(SUBTRACTION_METHOD_DIR) && $(MAKE) $@ )
 	( cd $(MESH_RENDERING_DIR) && $(MAKE) $@ )
 

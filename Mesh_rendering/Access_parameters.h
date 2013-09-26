@@ -13,6 +13,16 @@
 #include <sstream>
 #include <errno.h>    /* builtin errno*/
 #include <sys/stat.h> /*mkdir*/
+#include <vector>
+//
+// CGAL
+//
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Point_with_normal_3.h>
+//
+typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
+typedef CGAL::Point_with_normal_3<Kernel> Point_with_normal;
+
 //
 // NIFTI
 //
@@ -46,7 +56,7 @@ typedef Eigen::Matrix< float, 3, 1 > Vector_f_3X1;
 /*! \namespace Domains
  * 
  * Name space for our new package
- * A singleton provides for encapsulation of persistent state information with the benefits of lazy construction. It also avoids the issue of which code segment should "own" the static persistent object instance. It further guarantees what mechanism is used to allocate memory for the underlying object and allows for better control over its destruction.
+ * 
  *
  */
 namespace Domains
@@ -54,7 +64,7 @@ namespace Domains
   /*! \class Access_parameters
    *  \brief class representing whatever
    *
-   *  This class is an example of singleton I will have to use
+   *  This class provides for encapsulation of persistent state information. It also avoids the issue of which code segment should "own" the static persistent object instance. It further guarantees what mechanism is used to allocate memory for the underlying object and allows for better control over its destruction.
    */
   class Access_parameters
   {
@@ -83,6 +93,17 @@ namespace Domains
     std::string rh_smoothwm_;
     //! All segmentation header 
     std::string aseg_hdr_;
+    
+    //
+    // Surfaces contenairs
+    //! map of point with their vector for the gray matter left hemisphere.
+    std::vector<Point_with_normal> lh_gray_matter_surface_point_normal_;
+    //! map of point with their vector for the gray matter write hemisphere.
+    std::vector<Point_with_normal> rh_gray_matter_surface_point_normal_;
+    //! map of point with their vector for the white matter left hemisphere.
+    std::vector<Point_with_normal> lh_white_matter_surface_point_normal_;
+    //! map of point with their vector for the white matter write hemisphere.
+    std::vector<Point_with_normal> rh_white_matter_surface_point_normal_;
     
     //
     // aseg.nii NIFTI information
@@ -468,6 +489,38 @@ namespace Domains
      *  \param Do_We_Have_Conductivity: conductivity checking array for mesh rendering object.
      */
     void set_Do_we_have_conductivity_( bool** Do_We_Have_Conductivity );
+    /*!
+     *  \brief Set lh_gray_matter_surface_point_normal_
+     *
+     *  This method move the left hemisphere gray matter surface point normal vector inside the parameters object.
+     *
+     *  \param Lh_gray_matter_surface_point_normal: gray matter surface point normal vector of the gray matter surface mesh.
+     */
+    void set_lh_gray_matter_surface_point_normal_(std::vector<Point_with_normal>&&  Lh_gray_matter_surface_point_normal );
+    /*!
+     *  \brief Set rh_gray_matter_surface_point_normal_
+     *
+     *  This method move the right hemisphere gray matter surface point normal vector inside the parameters object.
+     *
+     *  \param Rh_gray_matter_surface_point_normal: gray matter surface point normal vector of the gray matter surface mesh.
+     */
+    void set_rh_gray_matter_surface_point_normal_(std::vector<Point_with_normal>&&  Rh_gray_matter_surface_point_normal );
+    /*!
+     *  \brief Set lh_white_matter_surface_point_normal_
+     *
+     *  This method move the left hemisphere white matter surface point normal vector inside the parameters object.
+     *
+     *  \param White_matter_surface_point_normal: white matter surface point normal vector of the white matter surface mesh.
+     */
+    void set_lh_white_matter_surface_point_normal_(std::vector<Point_with_normal>&&  Lh_white_matter_surface_point_normal );
+    /*!
+     *  \brief Set rh_white_matter_surface_point_normal_
+     *
+     *  This method move the right hemisphere white matter surface point normal vector inside the parameters object.
+     *
+     *  \param White_matter_surface_point_normal: white matter surface point normal vector of the white matter surface mesh.
+     */
+    void set_rh_white_matter_surface_point_normal_(std::vector<Point_with_normal>&&  Rh_white_matter_surface_point_normal );
     /*!
      *  \brief Kill the singleton instance
      *

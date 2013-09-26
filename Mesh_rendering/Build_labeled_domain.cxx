@@ -18,12 +18,14 @@
 // CGAL
 //
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Point_with_normal_3.h>
 #include <CGAL/Image_3.h>
 #include <CGAL/Surface_mesh_default_triangulation_3.h>
 #include <CGAL/Mesh_3/Image_to_labeled_function_wrapper.h>
 #include <CGAL/Labeled_image_mesh_domain_3.h>
 // Implicite functions
 typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
+typedef CGAL::Point_with_normal_3<Kernel> Point_with_normal;
 typedef CGAL::Surface_mesh_default_triangulation_3 Triangle_surface;
 typedef Triangle_surface::Geom_traits GT;
 typedef CGAL::Mesh_3::Image_to_labeled_function_wrapper<CGAL::Image_3, Kernel > Image_wrapper;
@@ -220,11 +222,11 @@ Domains_Build_labeled::Head_model_segmentation()
 #ifdef DEBUG_UCSF
   timerLog->MarkEvent("Skull and scalp");
 #endif
-  Labeled_domain< VTK_implicite_domain, GT::Point_3 > 
+  Labeled_domain< VTK_implicite_domain, GT::Point_3, std::vector<Point_with_normal> > 
     outside_scalp( (DAp::get_instance())->get_outer_skin_surface_() );
-  Labeled_domain< VTK_implicite_domain, GT::Point_3 > 
+  Labeled_domain< VTK_implicite_domain, GT::Point_3, std::vector<Point_with_normal> > 
     outside_skull( (DAp::get_instance())->get_outer_skull_surface_() );
-  Labeled_domain< VTK_implicite_domain, GT::Point_3 > 
+  Labeled_domain< VTK_implicite_domain, GT::Point_3, std::vector<Point_with_normal> > 
     inside_skull( (DAp::get_instance())->get_inner_skull_surface_() );
   //  
   //  outside_scalp( data_position_ );
@@ -242,13 +244,13 @@ Domains_Build_labeled::Head_model_segmentation()
 #ifdef DEBUG_UCSF
   timerLog->MarkEvent("Cortical segmentation");
 #endif
-  Labeled_domain< VTK_implicite_domain, GT::Point_3 > 
+  Labeled_domain< VTK_implicite_domain, GT::Point_3, std::vector<Point_with_normal> > 
     left_gray_matter ( (DAp::get_instance())->get_lh_pial_() );
-  Labeled_domain< VTK_implicite_domain, GT::Point_3 > 
+  Labeled_domain< VTK_implicite_domain, GT::Point_3, std::vector<Point_with_normal> > 
     right_gray_matter ( (DAp::get_instance())->get_rh_pial_() );
-  Labeled_domain< VTK_implicite_domain, GT::Point_3 > 
+  Labeled_domain< VTK_implicite_domain, GT::Point_3, std::vector<Point_with_normal> > 
     left_white_matter ( (DAp::get_instance())->get_lh_smoothwm_() );
-  Labeled_domain< VTK_implicite_domain, GT::Point_3 > 
+  Labeled_domain< VTK_implicite_domain, GT::Point_3, std::vector<Point_with_normal> > 
     right_white_matter ( (DAp::get_instance())->get_rh_smoothwm_() );
   //
   //  left_gray_matter( data_position_ );
@@ -429,6 +431,13 @@ Domains_Build_labeled::Head_model_segmentation()
 		data_label_[ idx ] = OPTIC_CHIASM_SUBCORTICAL;
 	    }
 	}
+
+  //
+  // Save the surfaces information
+  (DAp::get_instance())->set_lh_gray_matter_surface_point_normal_( left_gray_matter.get_point_normal() );
+  (DAp::get_instance())->set_rh_gray_matter_surface_point_normal_( right_gray_matter.get_point_normal() );
+  (DAp::get_instance())->set_lh_white_matter_surface_point_normal_( left_white_matter.get_point_normal() );
+  (DAp::get_instance())->set_rh_white_matter_surface_point_normal_( right_white_matter.get_point_normal() );
  
   //
   //

@@ -4,7 +4,7 @@
 // pugixml
 // same resources than Dolfin
 //
-#include "pugixml.h"
+#include "Utils/pugixml.hpp"
 //
 // UCSF project
 //

@@ -749,6 +749,38 @@ DAp::set_Do_we_have_conductivity_(  bool** Do_We_Have_Conductivity )
 //
 //
 //
+void
+DAp::set_lh_gray_matter_surface_point_normal_(std::vector<Point_with_normal>&&  Lh_gray_matter_surface_point_normal )
+{
+  lh_gray_matter_surface_point_normal_ = Lh_gray_matter_surface_point_normal;
+}
+//
+//
+//
+void
+DAp::set_rh_gray_matter_surface_point_normal_(std::vector<Point_with_normal>&&  rh_Gray_matter_surface_point_normal )
+{
+  rh_gray_matter_surface_point_normal_ = rh_Gray_matter_surface_point_normal;
+}
+//
+//
+//
+void
+DAp::set_lh_white_matter_surface_point_normal_(std::vector<Point_with_normal>&&  Lh_white_matter_surface_point_normal )
+{
+  lh_white_matter_surface_point_normal_ = Lh_white_matter_surface_point_normal;
+}
+//
+//
+//
+void
+DAp::set_rh_white_matter_surface_point_normal_(std::vector<Point_with_normal>&&  Rh_white_matter_surface_point_normal )
+{
+  rh_white_matter_surface_point_normal_ = Rh_white_matter_surface_point_normal;
+}
+//
+//
+//
 void 
 DAp::kill_instance()
 {
