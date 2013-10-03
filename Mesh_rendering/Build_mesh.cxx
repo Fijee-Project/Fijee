@@ -980,8 +980,12 @@ Domains_build_mesh::Conductivity_matching()
   positions_array = nullptr;
   delete [] Do_we_have_conductivity; 
   Do_we_have_conductivity = nullptr; 
+#ifdef TRACE
+#if TRACE == 100
   delete [] P_matrices_array;
   P_matrices_array = nullptr;
+#endif
+#endif      
 }
 //
 //
