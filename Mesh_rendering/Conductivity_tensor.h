@@ -1,6 +1,5 @@
 #ifndef CONDUCTIVITY_TENSOR_H_
 #define CONDUCTIVITY_TENSOR_H_
-//http://franckh.developpez.com/tutoriels/outils/doxygen/
 /*!
  * \file Conductivity_tensor.h
  * \brief brief describe 
