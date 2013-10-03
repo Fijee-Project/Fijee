@@ -1,5 +1,7 @@
 #ifndef BUILD_MESH_H_
 #define BUILD_MESH_H_
+#include <utility>
+#include <tuple>
 //
 // UCSF
 //
@@ -16,12 +18,29 @@
 #include <CGAL/Mesh_criteria_3.h>
 #include <CGAL/make_mesh_3.h>
 #include <CGAL/centroid.h>
+// K-nearest neighbor algorithm with CGAL
+#include <CGAL/basic.h>
+#include <CGAL/Search_traits_3.h>
+#include <CGAL/Search_traits_adapter.h>
+#include <CGAL/point_generators_3.h>
+#include <CGAL/Orthogonal_k_neighbor_search.h>
 //
 typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
 typedef CGAL::Labeled_image_mesh_domain_3<CGAL::Image_3,Kernel> Mesh_domain;
 typedef CGAL::Mesh_triangulation_3<Mesh_domain>::type Tr;
 typedef CGAL::Mesh_criteria_3<Tr> Mesh_criteria;
 typedef CGAL::Mesh_complex_3_in_triangulation_3<Tr> C3t3;
+typedef typename C3t3::Triangulation Triangulation;
+typedef typename C3t3::Cells_in_complex_iterator Cell_iterator;
+typedef typename Triangulation::Vertex_handle Vertex_handle;
+typedef typename Triangulation::Cell_handle Cell_handle;
+typedef typename Triangulation::Finite_vertices_iterator Finite_vertices_iterator;
+typedef typename Triangulation::Point Point_3;
+//
+// K-nearest neighbor algorithm with CGAL
+typedef CGAL::Search_traits_3< Kernel >Traits_base;
+
+
 /*!
  * \file Build_mesh.h
  * \brief brief describe 
@@ -38,6 +57,25 @@ typedef CGAL::Mesh_complex_3_in_triangulation_3<Tr> C3t3;
  */
 namespace Domains
 {
+  // -----------------------------------
+  // K-nearest neighbor algorithm (CGAL)
+  // -----------------------------------
+  struct Position_property_map
+  {
+    typedef Point_3 value_type;
+    typedef const value_type& reference;
+    typedef const std::tuple< Point_3, int >& key_type;
+    typedef boost::readable_property_map_tag category;
+  };
+  // get function for the property map
+  Position_property_map::reference 
+    get( Position_property_map, Position_property_map::key_type );
+  //
+  typedef CGAL::Search_traits_adapter< std::tuple< Point_3, int >, Position_property_map, Traits_base > Traits;
+  typedef CGAL::Orthogonal_k_neighbor_search< Traits > K_neighbor_search;
+  typedef K_neighbor_search::Tree Tree;
+  typedef K_neighbor_search::Distance Distance;
+
   // -----------------------------------
   // Rebin_cell_pmap
   // -----------------------------------
@@ -121,6 +159,7 @@ namespace Domains
       const C3T3& r_c3t3_;
       Subdomain_map subdomain_map_;
     };
+  typedef Rebind_cell_pmap<C3t3> Cell_pmap;
   
   // -----------------------------------
   // No_patch_facet_pmap_first
@@ -157,6 +196,7 @@ namespace Domains
   private:
     const Cell_pmap& cell_pmap_;
   };
+  typedef No_patch_facet_pmap_first<C3t3,Cell_pmap> Facet_pmap;
   
   // -----------------------------------
   // Default_vertex_index_pmap
@@ -247,7 +287,8 @@ namespace Domains
     const C3T3& r_c3t3_;
     const unsigned int edge_index_;
   };
-
+  typedef Default_vertex_pmap<C3t3, Cell_pmap, Facet_pmap> Vertex_pmap;
+  
 
   /*! \class Build_mesh
    * \brief classe Build_mesh buils head models meshes. 
@@ -393,6 +434,17 @@ namespace Domains
      *
      */
     void Conductivity_matching();
+
+  private:
+    /*!
+     */
+     void Conductivity_matching_classic();
+    /*!
+     */
+     void Conductivity_matching_test();
+    /*!
+     */
+     void Conductivity_matching_knn();
     /*!
      *  \brief Matches mesh's cells with conductivity
      *
@@ -401,7 +453,6 @@ namespace Domains
      */
     void Conductivity_matching_gpu();
 
-  private:
     /*!
      *  \brief Output the XML match between mesh and conductivity
      *
