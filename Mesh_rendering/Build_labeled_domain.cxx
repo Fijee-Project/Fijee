@@ -9,6 +9,7 @@
 #include "Labeled_domain.h"
 #include "VTK_implicite_domain.h"
 #include "Access_parameters.h"
+#include "Point_vector.h"
 //
 // VTK
 //
@@ -222,11 +223,11 @@ Domains_Build_labeled::Head_model_segmentation()
 #ifdef DEBUG_UCSF
   timerLog->MarkEvent("Skull and scalp");
 #endif
-  Labeled_domain< VTK_implicite_domain, GT::Point_3, std::vector<Point_with_normal> > 
+  Labeled_domain< VTK_implicite_domain, GT::Point_3, std::list< Point_vector > > 
     outside_scalp( (DAp::get_instance())->get_outer_skin_surface_() );
-  Labeled_domain< VTK_implicite_domain, GT::Point_3, std::vector<Point_with_normal> > 
+  Labeled_domain< VTK_implicite_domain, GT::Point_3, std::list< Point_vector > > 
     outside_skull( (DAp::get_instance())->get_outer_skull_surface_() );
-  Labeled_domain< VTK_implicite_domain, GT::Point_3, std::vector<Point_with_normal> > 
+  Labeled_domain< VTK_implicite_domain, GT::Point_3, std::list< Point_vector > > 
     inside_skull( (DAp::get_instance())->get_inner_skull_surface_() );
   //  
   //  outside_scalp( data_position_ );
@@ -244,13 +245,13 @@ Domains_Build_labeled::Head_model_segmentation()
 #ifdef DEBUG_UCSF
   timerLog->MarkEvent("Cortical segmentation");
 #endif
-  Labeled_domain< VTK_implicite_domain, GT::Point_3, std::vector<Point_with_normal> > 
+  Labeled_domain< VTK_implicite_domain, GT::Point_3, std::list< Point_vector > > 
     left_gray_matter ( (DAp::get_instance())->get_lh_pial_() );
-  Labeled_domain< VTK_implicite_domain, GT::Point_3, std::vector<Point_with_normal> > 
+  Labeled_domain< VTK_implicite_domain, GT::Point_3, std::list< Point_vector > > 
     right_gray_matter ( (DAp::get_instance())->get_rh_pial_() );
-  Labeled_domain< VTK_implicite_domain, GT::Point_3, std::vector<Point_with_normal> > 
+  Labeled_domain< VTK_implicite_domain, GT::Point_3, std::list< Point_vector > > 
     left_white_matter ( (DAp::get_instance())->get_lh_smoothwm_() );
-  Labeled_domain< VTK_implicite_domain, GT::Point_3, std::vector<Point_with_normal> > 
+  Labeled_domain< VTK_implicite_domain, GT::Point_3, std::list< Point_vector > > 
     right_white_matter ( (DAp::get_instance())->get_rh_smoothwm_() );
   //
   //  left_gray_matter( data_position_ );

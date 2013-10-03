@@ -31,7 +31,7 @@ main()
   // 
   // Access parameters
   Domains::Access_parameters* parameters = Domains::Access_parameters::get_instance();
-
+  parameters->init();
   
   // 
   // Create the INRIMAGE
@@ -42,7 +42,9 @@ main()
   // Write Inrimage
   timerLog->MarkEvent("Write Inrimage");
   labeled_image.Write_inrimage_file();
-  
+  // match white matter vertices with gray matter vertices
+  timerLog->MarkEvent("match white matter vertices with gray matter vertices");
+  parameters->epitaxy_growth();
 
   //
   // Diffusion tensor

@@ -266,6 +266,9 @@ Domain::VTK_implicite_domain( const char* Vtk_Mesh ):
       normal[2] /= norm;
 //      std::cout << normal[0] << " " << normal[1] << " " << normal[2] << " " << std::endl;
       //
+      point_normal_.push_back(Domains::Point_vector( vertex[0], vertex[1], vertex[2],
+						    normal[0], normal[1], normal[2] ));
+      //
       stream << vertex[0] << " " << vertex[1] << " " << vertex[2] << " " 
 	     << normal[0] << " " << normal[1] << " " << normal[2] << std::endl;
    }
@@ -314,11 +317,11 @@ Domain::VTK_implicite_domain( const char* Vtk_Mesh ):
 
   //
   //
-//  std::vector<Point_with_normal> Point_normal;
+  std::vector<Point_with_normal> Point_normal;
   if (!stream ||
       !CGAL::read_xyz_points_and_normals( stream,
-					  std::back_inserter(point_normal_),
-					  CGAL::make_normal_of_point_with_normal_pmap(std::back_inserter(point_normal_))))
+					  std::back_inserter(Point_normal),
+					  CGAL::make_normal_of_point_with_normal_pmap(std::back_inserter(Point_normal))))
     {
       std::cerr << "Reading error with the stream of point with normal" << std::endl;
       exit(-1);
@@ -326,9 +329,9 @@ Domain::VTK_implicite_domain( const char* Vtk_Mesh ):
 
   //
   // Creates implicit function from the read points using the default solver.
-  function_ = new Poisson_reconstruction_function( point_normal_.begin(), 
-						   point_normal_.end(),
-						   CGAL::make_normal_of_point_with_normal_pmap(point_normal_.begin()));
+  function_ = new Poisson_reconstruction_function( Point_normal.begin(), 
+						   Point_normal.end(),
+						   CGAL::make_normal_of_point_with_normal_pmap(Point_normal.begin()));
 }
 //
 //

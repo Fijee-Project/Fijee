@@ -24,7 +24,7 @@ INC_CUDA = #-I$(NIFTI)/include/nifti/
 
 ######
 ######
-SRC = main.cxx VTK_implicite_domain.cxx  Build_labeled_domain.cxx Build_mesh.cxx Access_parameters.cxx Conductivity_tensor.cxx #CUDA_Conductivity_matching.cxx
+SRC = main.cxx VTK_implicite_domain.cxx  Build_labeled_domain.cxx Build_mesh.cxx Access_parameters.cxx Conductivity_tensor.cxx Point_vector.cxx Dipole.cxx Cell_conductivity.cxx Point.cxx Distance.cxx #CUDA_Conductivity_matching.cxx
 OBJ = $(SRC:.cxx=.o)
 #
 SRC_CUDA = CUDA_Conductivity_matching.cu

@@ -750,7 +750,7 @@ DAp::set_Do_we_have_conductivity_(  bool** Do_We_Have_Conductivity )
 //
 //
 void
-DAp::set_lh_gray_matter_surface_point_normal_(std::vector<Point_with_normal>&&  Lh_gray_matter_surface_point_normal )
+DAp::set_lh_gray_matter_surface_point_normal_(std::list<Point_vector>&&  Lh_gray_matter_surface_point_normal )
 {
   lh_gray_matter_surface_point_normal_ = Lh_gray_matter_surface_point_normal;
 }
@@ -758,7 +758,7 @@ DAp::set_lh_gray_matter_surface_point_normal_(std::vector<Point_with_normal>&&  
 //
 //
 void
-DAp::set_rh_gray_matter_surface_point_normal_(std::vector<Point_with_normal>&&  rh_Gray_matter_surface_point_normal )
+DAp::set_rh_gray_matter_surface_point_normal_(std::list<Point_vector>&&  rh_Gray_matter_surface_point_normal )
 {
   rh_gray_matter_surface_point_normal_ = rh_Gray_matter_surface_point_normal;
 }
@@ -766,7 +766,7 @@ DAp::set_rh_gray_matter_surface_point_normal_(std::vector<Point_with_normal>&&  
 //
 //
 void
-DAp::set_lh_white_matter_surface_point_normal_(std::vector<Point_with_normal>&&  Lh_white_matter_surface_point_normal )
+DAp::set_lh_white_matter_surface_point_normal_(std::list<Point_vector>&&  Lh_white_matter_surface_point_normal )
 {
   lh_white_matter_surface_point_normal_ = Lh_white_matter_surface_point_normal;
 }
@@ -774,7 +774,7 @@ DAp::set_lh_white_matter_surface_point_normal_(std::vector<Point_with_normal>&& 
 //
 //
 void
-DAp::set_rh_white_matter_surface_point_normal_(std::vector<Point_with_normal>&&  Rh_white_matter_surface_point_normal )
+DAp::set_rh_white_matter_surface_point_normal_(std::list<Point_vector>&&  Rh_white_matter_surface_point_normal )
 {
   rh_white_matter_surface_point_normal_ = Rh_white_matter_surface_point_normal;
 }
@@ -788,6 +788,60 @@ DAp::kill_instance()
     {
       delete parameters_instance_;
       parameters_instance_ = NULL;
+    }
+}
+//
+//
+//
+void 
+DAp::epitaxy_growth()
+{
+  // 
+  // Reft hemisphere
+  match_wm_gm( lh_white_matter_surface_point_normal_,
+	       lh_gray_matter_surface_point_normal_,
+	       lh_match_wm_gm_);
+  // 
+  // Right hemisphere
+  match_wm_gm( rh_white_matter_surface_point_normal_,
+	       rh_gray_matter_surface_point_normal_,
+	       rh_match_wm_gm_);
+}
+//
+//
+//
+void 
+DAp::match_wm_gm( std::list<Domains::Point_vector>&  White_matter_surface_point_normal, 
+		  std::list<Domains::Point_vector>&  Gray_matter_surface_point_normal, 
+		  std::list< std::tuple< Domains::Point_vector, Domains::Point_vector > >& Match_wm_gm )
+{
+  //
+  // k nearest neighbor data structure
+  Tree tree;
+  // build the tree
+  for( auto gm_vertex : Gray_matter_surface_point_normal )
+    tree.insert( gm_vertex );
+ 
+  //
+  //
+  for ( auto wm_vertex : White_matter_surface_point_normal  )
+    {
+      //
+      //
+      Neighbor_search NN( tree, wm_vertex, 15 );
+      auto filter_nearest = NN.begin();
+
+      //
+      // theta between white matter normal and gray matter normal is less than 30°
+      float cos_theta = wm_vertex.cosine_theta( filter_nearest->first );
+      //
+      while( cos_theta < 0.87 && ++filter_nearest != NN.end() )
+	cos_theta = wm_vertex.cosine_theta( filter_nearest->first );
+
+      //
+      // make tuple list
+      if( filter_nearest != NN.end() )
+	Match_wm_gm.push_back( std::make_tuple(wm_vertex, filter_nearest->first) );
     }
 }
 //

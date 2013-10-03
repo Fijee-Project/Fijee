@@ -9,6 +9,10 @@
 #include <set>
 #include <vector>
 //
+// UCSF
+//
+#include "Point_vector.h"
+//
 // CGAL
 //
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
@@ -84,7 +88,7 @@ namespace Domains
     vtkSmartPointer<vtkPoints>  check_points_;
     vtkSmartPointer<vtkSelectEnclosedPoints> select_enclosed_points_;
     //! map of point with their vector. Those points represent vertices and their vectors represent the surface normal.
-    std::vector<Point_with_normal> point_normal_;
+    std::list <Domains::Point_vector > point_normal_;
 
   public:
     /*!
@@ -159,7 +163,7 @@ namespace Domains
      *
      *  \return point_normal_
      */
-    inline  std::vector<Point_with_normal> get_point_normal_( ) const {return point_normal_;};
+    inline  std::list<Domains::Point_vector> get_point_normal_( ) const {return point_normal_;};
  
   public:
     inline bool inside_domain( CGAL::Point_3< Kernel > Point )
