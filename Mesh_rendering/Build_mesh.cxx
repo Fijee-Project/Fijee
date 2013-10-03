@@ -1149,41 +1149,26 @@ Domains_build_mesh::Conductivity_matching_knn()
 
 	  //
 	  //
-	  Distance tr_dist;
-	  //
-	  for( auto centroid : search )
-	    std::cout << " d(q, nearest neighbor)=  "
-		      << tr_dist.inverse_of_transformed_distance(centroid.second) 
-		      << " -- pos: "   << std::get<0>(centroid.first)
-		      << " -- index: " << std::get<1>(centroid.first) 
-		      << std::endl;
+//	  Distance tr_dist;
+//	  //
+//	  for( auto centroid : search )
+//	    std::cout << " d(q, nearest neighbor)=  "
+//		      << tr_dist.inverse_of_transformed_distance(centroid.second) 
+//		      << " -- pos: "   << std::get<0>(centroid.first)
+//		      << " -- index: " << std::get<1>(centroid.first) 
+//		      << std::endl;
 
 	  //
-	  // 
+	  // Select the conductivity cell with positive l3
 	  while( conductivity_centroids != search.end() &&
 		 eigen_values_matrices_array[std::get<1>( conductivity_centroids->first )](2,2) < 0. )
-	    {
-	      conductivity_centroids++;
-	      std::cout << " d(q, nearest neighbor in while)=  "
-			<< tr_dist.inverse_of_transformed_distance(conductivity_centroids->second) 
-			<< " -- pos: "   << std::get<0>(conductivity_centroids->first)
-			<< " -- index: " << std::get<1>(conductivity_centroids->first) 
-			<< " -- l3: " << eigen_values_matrices_array[std::get<1>( conductivity_centroids->first )](2,2) 
-			<< std::endl;
-	    }
+	    conductivity_centroids++;
 	  //
 	  if( conductivity_centroids == search.end() )
 	    {
 	      std::cerr << "You might think about increasing the number of neighbor. Or check the Diffusion/Conductivity file." << std::endl;
 	      exit(1);
 	    }
-	  //
-	  std::cout << " d(q, nearest neighbor after while)=  "
-		    << tr_dist.inverse_of_transformed_distance(conductivity_centroids->second) 
-		    << " -- pos: "   << std::get<0>(conductivity_centroids->first)
-		    << " -- index: " << std::get<1>(conductivity_centroids->first) 
-		    << " -- l3: " << eigen_values_matrices_array[std::get<1>( conductivity_centroids->first )](2,2) 
-		    << std::endl;
 	  //
 	  cell_coeff.conductivity_coefficients[0] 
 	    = conductivity_tensors_array[std::get<1>( conductivity_centroids->first )](0,0);
@@ -1203,26 +1188,26 @@ Domains_build_mesh::Conductivity_matching_knn()
 #ifdef TRACE
 #if TRACE == 100
 	  // l1, l2, l3
-	  cell_coeff.eigen_values[0] = eigen_values_matrices_array[index_min_distance_v[4]](0,0);
-	  cell_coeff.eigen_values[1] = eigen_values_matrices_array[index_min_distance_v[4]](1,1);
-	  cell_coeff.eigen_values[2] = eigen_values_matrices_array[index_min_distance_v[4]](2,2);
+	  cell_coeff.eigen_values[0] = eigen_values_matrices_array[std::get<1>( conductivity_centroids->first )](0,0);
+	  cell_coeff.eigen_values[1] = eigen_values_matrices_array[std::get<1>( conductivity_centroids->first )](1,1);
+	  cell_coeff.eigen_values[2] = eigen_values_matrices_array[std::get<1>( conductivity_centroids->first )](2,2);
 	  // l_long l_tang l_mean
-	  cell_coeff.eigen_values[3] = eigen_values_matrices_array[index_min_distance_v[4]](0,0);
+	  cell_coeff.eigen_values[3] = eigen_values_matrices_array[std::get<1>( conductivity_centroids->first )](0,0);
 	  cell_coeff.eigen_values[4] = (cell_coeff.eigen_values[1]+cell_coeff.eigen_values[2]) / 2.;
 	  cell_coeff.eigen_values[5] = (cell_coeff.eigen_values[0]+cell_coeff.eigen_values[0]+cell_coeff.eigen_values[0] ) / 3.;
 	  // l1_v0 l2_v0 l3_v0 - l1_v1 l2_v1 l3_v1 - l1_v3 l2_v3 l3_v3
 	  for ( int i = 0 ; i < 4 ; i++ )
 	    {
-	      cell_coeff.eigen_values[6+i*3] = eigen_values_matrices_array[index_min_distance_v[i]](0,0);
-	      cell_coeff.eigen_values[7+i*3] = eigen_values_matrices_array[index_min_distance_v[i]](1,1);
-	      cell_coeff.eigen_values[8+i*3] = eigen_values_matrices_array[index_min_distance_v[i]](2,2);
+	      cell_coeff.eigen_values[6+i*3] = 0;
+	      cell_coeff.eigen_values[7+i*3] = 0;
+	      cell_coeff.eigen_values[8+i*3] = 0;
 	    }
 	  //
 	  Eigen::Vector3f vec_tmp;
 	  vec_tmp <<
-	    P_matrices_array[index_min_distance](0,0),
-	    P_matrices_array[index_min_distance](1,0),
-	    P_matrices_array[index_min_distance](2,0);
+	    P_matrices_array[std::get<1>( conductivity_centroids->first )](0,0),
+	    P_matrices_array[std::get<1>( conductivity_centroids->first )](1,0),
+	    P_matrices_array[std::get<1>( conductivity_centroids->first )](2,0);
 	  //
 	  cell_coeff.eigenvector_1  = rotation * vec_tmp;
 	  cell_coeff.eigenvector_1 /= cell_coeff.eigenvector_1.norm();
