@@ -54,6 +54,18 @@ namespace Domains
      */
     Cell_conductivity();
     /*!
+     *  \brief Default Constructor
+     *
+     *  Constructor of the class Cell_conductivity
+     *
+     */
+    Cell_conductivity( int, int, 
+		       float, float, float,
+		       float, float, float, float, 
+		       float, float, float, float, 
+		       float, float, float, float,
+		       float, float, float, float, float, float );
+    /*!
      *  \brief Copy Constructor
      *
      *  Constructor is a copy constructor

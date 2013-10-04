@@ -7,6 +7,8 @@
 //
 #include "enum.h"
 #include "CUDA_Conductivity_matching.h"
+#include "Dipole.h"
+#include "Cell_conductivity.h"
 //
 // CGAL
 //
@@ -74,7 +76,7 @@ namespace Domains
   typedef CGAL::Search_traits_adapter< std::tuple< Point_3, int >, Position_property_map, Traits_base > Traits;
   typedef CGAL::Orthogonal_k_neighbor_search< Traits > K_neighbor_search;
   typedef K_neighbor_search::Tree Tree;
-  typedef K_neighbor_search::Distance Distance;
+  //  typedef K_neighbor_search::Distance Distance;
 
   // -----------------------------------
   // Rebin_cell_pmap
@@ -343,6 +345,8 @@ namespace Domains
     C3t3 mesh_;
     //! List of cell with matching conductivity coefficients
     std::list< Cell_coefficient > list_coefficients_;
+    //! List of cell with matching conductivity coefficients
+    std::list< Cell_conductivity > list_cell_conductivity_;
 
   public:
     /*!

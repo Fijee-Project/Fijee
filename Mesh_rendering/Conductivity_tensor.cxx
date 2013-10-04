@@ -550,11 +550,7 @@ DCt::Move_conductivity_array_to_parameters()
   (DAp::get_instance())->set_eigen_values_matrices_array_( &eigen_values_matrices_array_ );
   (DAp::get_instance())->set_positions_array_( &positions_array_ );
   (DAp::get_instance())->set_Do_we_have_conductivity_( &Do_we_have_conductivity_ );
-#ifdef TRACE
-#if ( TRACE == 100 )
   (DAp::get_instance())->set_P_matrices_array_( &P_matrices_array_ );
-#endif
-#endif
 }
 //
 //

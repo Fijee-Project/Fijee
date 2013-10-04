@@ -18,7 +18,9 @@ DPv::Point_vector(): Domains::Point()
 //
 //
 DPv::Point_vector(  float X, float Y, float Z, 
-		    float Vx, float Vy, float Vz): Domains::Point(X,Y,Z)
+		    float Vx, float Vy, float Vz,
+		    float Weight ): 
+  Domains::Point(X,Y,Z,Weight)
 {
   vector_[0] = Vx;
   vector_[1] = Vy;
@@ -29,31 +31,14 @@ DPv::Point_vector(  float X, float Y, float Z,
 //
 //
 //
-DPv::Point_vector( const DPv& that ): Domains::Point(that),
-				      norm_(that.norm_)
+DPv::Point_vector( const DPv& that ): 
+  Domains::Point(that),
+  norm_(that.norm_)
 {
   vector_[0] = that.vector_[0];
   vector_[1] = that.vector_[1];
   vector_[2] = that.vector_[2];
 }
-////
-////
-////
-//DPv::Point_vector( DPv&& that ):
-//  pos_x_( 0 ),
-//  pos_y_( 0 ),
-//  tab_( nullptr )
-//{
-//  // pilfer the source
-//  list_position_ = std::move( that.list_position_ );
-//  pos_x_ =  that.get_pos_x();
-//  pos_y_ =  that.get_pos_y();
-//  tab_   = &that.get_tab();
-//  // reset that
-//  that.set_pos_x( 0 );
-//  that.set_pos_y( 0 );
-//  that.set_tab( nullptr );
-//}
 //
 //
 //
@@ -78,32 +63,6 @@ DPv::operator = ( const DPv& that )
   //
   return *this;
 }
-////
-////
-////
-//DPv& 
-//DPv::operator = ( DPv&& that )
-//{
-//  if( this != &that )
-//    {
-//      // initialisation
-//      pos_x_ = 0;
-//      pos_y_ = 0;
-//      delete [] tab_;
-//      tab_   = nullptr;
-//      // pilfer the source
-//      list_position_ = std::move( that.list_position_ );
-//      pos_x_ =  that.get_pos_x();
-//      pos_y_ =  that.get_pos_y();
-//      tab_   = &that.get_tab();
-//      // reset that
-//      that.set_pos_x( 0 );
-//      that.set_pos_y( 0 );
-//      that.set_tab( nullptr );
-//    }
-//  //
-//  return *this;
-//}
 //
 //
 //

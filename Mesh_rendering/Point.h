@@ -29,6 +29,8 @@ namespace Domains
   private:
     //! position of the point.
     float position_[3];
+    //! weight of the point. This member offert scalar information for the point. 
+    float weight_;
 
 
   public:
@@ -45,7 +47,7 @@ namespace Domains
      *  Constructor of the class Point
      *
      */
-    Point( float, float, float );
+    Point( float, float, float, float Weight = 1. );
     /*!
      *  \brief Copy Constructor
      *
@@ -98,6 +100,7 @@ namespace Domains
   public:
     const float* get_position_() const {return position_; }
 
+    float weight() const { return weight_; }
     float x() const { return position_[0]; }
     float y() const { return position_[1]; }
     float z() const { return position_[2]; }

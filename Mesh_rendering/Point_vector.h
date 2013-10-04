@@ -50,8 +50,8 @@ namespace Domains
      *  Constructor of the class Point_vector
      *
      */
-    Point_vector( float, float, float, 
-		  float, float, float );
+    Point_vector( float, float, float,
+		  float, float, float, float Weight = 1. );
    /*!
      *  \brief Copy Constructor
      *

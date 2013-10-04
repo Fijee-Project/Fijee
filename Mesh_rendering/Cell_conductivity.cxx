@@ -18,6 +18,28 @@ DCc::Cell_conductivity():
 //
 //
 //
+DCc::Cell_conductivity( int Cell_id, int Cell_subdomain, 
+			float Centroid_x, float Centroid_y, float Centroid_z, 
+			float L1, float V1_x, float V1_y, float V1_z, 
+			float L2, float V2_x, float V2_y, float V2_z,
+			float L3, float V3_x, float V3_y, float V3_z,
+			float C00, float C01, float C02, float C11, float C12, float C22 ):
+  cell_id_(Cell_id), cell_subdomain_(Cell_subdomain)
+{    
+    conductivity_coefficients_[0] = C00;
+    conductivity_coefficients_[1] = C01;
+    conductivity_coefficients_[2] = C02;
+    conductivity_coefficients_[3] = C11;
+    conductivity_coefficients_[4] = C12;
+    conductivity_coefficients_[5] = C22;
+    //
+    centroid_lambda_[0] = Domains::Point_vector( Centroid_x, Centroid_y, Centroid_z, V1_x, V1_y, V1_z, L1);
+    centroid_lambda_[1] = Domains::Point_vector( Centroid_x, Centroid_y, Centroid_z, V2_x, V2_y, V2_z, L2);
+    centroid_lambda_[2] = Domains::Point_vector( Centroid_x, Centroid_y, Centroid_z, V3_x, V3_y, V3_z, L3);
+}
+//
+//
+//
 DCc::Cell_conductivity( const DCc& that ):
   cell_id_(that.cell_id_), cell_subdomain_(that.cell_subdomain_)
 {
