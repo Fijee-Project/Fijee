@@ -1,3 +1,5 @@
+#ifndef ENUM_H_
+#define ENUM_H_
 enum Freesurfer_segmentation
   {
     //No. Label Name:                                //R   G   B   A
@@ -277,5 +279,7 @@ enum Mesh_output
     MESH_OUTPUT       = 1,
     MESH_SUBDOMAINS   = 2,
     MESH_VTU          = 3,
-    MESH_CONDUCTIVITY = 4
+    MESH_CONDUCTIVITY = 4,
+    MESH_DIPOLES      = 5,
   };
+#endif

@@ -12,6 +12,7 @@
 // UCSF
 //
 #include "Point_vector.h"
+#include "Cell_conductivity.h"
 /*! \namespace Domains
  * 
  * Name space for our new package
@@ -23,6 +24,8 @@ namespace Domains
    * \brief classe representing whatever
    *
    *  This class is an example of class I will have to use
+   * Point_vector discribe the position of the dipole; the direction of the dipole. 
+   * member weight_ of Point_vector class represent the intensity (mA) of the dipole.
    */
   class Dipole : public Domains::Point_vector
   {
@@ -56,6 +59,13 @@ namespace Domains
      *
      */
     Dipole( const Dipole& );
+    /*!
+     *  \brief Copy Constructor
+     *
+     *  Constructor is a copy constructor from Cell_conductivity object
+     *
+     */
+    Dipole( const Cell_conductivity& );
     /*!
      *  \brief Destructeur
      *

@@ -71,12 +71,12 @@ EXEC = $(MESH_RENDERING)/build_inrimage  $(SUBTRACTION_METHOD_DIR)/Poisson
 all: $(EXEC)
 
 $(EXEC):
-	( cd $(UTILS_DIR) && $(MAKE) )
+	( cd $(UTILS_DIR)/pugi/ && $(MAKE) )
 	( cd $(SUBTRACTION_METHOD_DIR) && $(MAKE) )
 	( cd $(MESH_RENDERING_DIR) && $(MAKE) )
 
 clean:
-	( cd $(UTILS_DIR) && $(MAKE) $@ )
+	( cd $(UTILS_DIR)/pugi/ && $(MAKE) $@ )
 	( cd $(SUBTRACTION_METHOD_DIR) && $(MAKE) $@ )
 	( cd $(MESH_RENDERING_DIR) && $(MAKE) $@ )
 

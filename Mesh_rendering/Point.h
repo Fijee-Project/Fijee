@@ -100,6 +100,7 @@ namespace Domains
   public:
     const float* get_position_() const {return position_; }
 
+    void set_weight_( float Weight ) {weight_ = Weight; }
     float weight() const { return weight_; }
     float x() const { return position_[0]; }
     float y() const { return position_[1]; }

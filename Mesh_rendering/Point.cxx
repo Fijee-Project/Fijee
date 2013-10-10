@@ -31,12 +31,6 @@ DPo::Point( const DPo& that ):
   position_[1] = that.position_[1];
   position_[2] = that.position_[2];
 }
-////
-////
-////
-//DPo::Point( DPo&& that )
-//{
-//}
 //
 //
 //
@@ -81,20 +75,6 @@ DPo::operator != ( const DPo& that )
 	   position_[1] != that.position_[1] && 
 	   position_[2] != that.position_[2] );
 }
-////
-////
-////
-//DPo& 
-//DPo::operator = ( DPo&& that )
-//{
-//  if( this != &that )
-//    {
-////      position_ = that.position_;
-////
-//    }
-//  //
-//  return *this;
-//}
 //
 //
 //
@@ -102,22 +82,11 @@ std::ostream&
 Domains::operator << ( std::ostream& stream, 
 		       const DPo& that)
 {
-//  std::for_each( that.get_list_position().begin(),
-//		 that.get_list_position().end(),
-//		 [&stream]( int Val )
-//		 {
-//		   stream << "list pos = " << Val << "\n";
-//		 });
-//  //
-//  stream << "position x = " <<    that.get_pos_x() << "\n";
-//  stream << "position y = " <<    that.get_pos_y() << "\n";
-//  if ( &that.get_tab() )
-//    {
-//      stream << "tab[0] = "     << ( &that.get_tab() )[0] << "\n";
-//      stream << "tab[1] = "     << ( &that.get_tab() )[1] << "\n";
-//      stream << "tab[2] = "     << ( &that.get_tab() )[2] << "\n";
-//      stream << "tab[3] = "     << ( &that.get_tab() )[3] << "\n";
-//    }
+  //
+  //
+  stream << "x=\"" << that.x() << "\" y=\"" << that.y() << "\" z=\"" << that.z() << "\" ";
+
+  //
   //
   return stream;
 };

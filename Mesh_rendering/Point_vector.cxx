@@ -174,6 +174,7 @@ DPv::cross( const DPv& Vector )
   vector->vz() = vector_[0] * Vector.vy() - vector_[1] * Vector.vx();
   //
   vector->normalize();
+
   //
   //
   return *vector;
@@ -227,22 +228,12 @@ std::ostream&
 Domains::operator << ( std::ostream& stream, 
 		       const DPv& that)
 {
-//  std::for_each( that.get_list_position().begin(),
-//		 that.get_list_position().end(),
-//		 [&stream]( int Val )
-//		 {
-//		   stream << "list pos = " << Val << "\n";
-//		 });
-//  //
-//  stream << "position x = " <<    that.get_pos_x() << "\n";
-//  stream << "position y = " <<    that.get_pos_y() << "\n";
-//  if ( &that.get_tab() )
-//    {
-//      stream << "tab[0] = "     << ( &that.get_tab() )[0] << "\n";
-//      stream << "tab[1] = "     << ( &that.get_tab() )[1] << "\n";
-//      stream << "tab[2] = "     << ( &that.get_tab() )[2] << "\n";
-//      stream << "tab[3] = "     << ( &that.get_tab() )[3] << "\n";
-//    }
+  //
+  //
+  stream << static_cast<Domains::Point>(that)
+	 << "vx=\"" << that.vx() << "\" vy=\"" << that.vy() << "\" vz=\"" << that.vz() << "\" ";
+  
+  //
   //
   return stream;
 };
