@@ -12,6 +12,9 @@ DD::Dipole():
 {
   for( int i = 0 ; i < 6 ; i++)
     conductivity_coefficients_[i] = 0.;
+  //
+  for( int i = 0 ; i < 3 ; i++)
+    conductivity_eigenvalues_[i] = 0.;
 }
 //
 //
@@ -22,6 +25,9 @@ DD::Dipole( const DD& that ):
 {
   for( int i = 0 ; i < 6 ; i++)
     conductivity_coefficients_[i] = that.conductivity_coefficients_[i];
+  //
+  for( int i = 0 ; i < 3 ; i++)
+    conductivity_eigenvalues_[i] = that.conductivity_eigenvalues_[i];
 }
 //
 //
@@ -32,12 +38,18 @@ DD::Dipole( const Domains::Cell_conductivity& that ):
 {
   //
   // set the dipole intensity
-  set_weight_( 111. );
+  set_weight_( 0.000000001 );
   
   //
   //
   for( int i = 0 ; i < 6 ; i++)
     conductivity_coefficients_[i] = that.get_conductivity_coefficients_()[i];
+
+  //
+  //
+  for( int i = 0 ; i < 3 ; i++)
+    conductivity_eigenvalues_[i] = that.get_centroid_lambda_()[i].weight();
+  
 }
 //
 //
@@ -56,6 +68,9 @@ DD::operator = ( const DD& that )
   //
   for( int i = 0 ; i < 6 ; i++)
     conductivity_coefficients_[i] = that.conductivity_coefficients_[i];
+  //
+  for( int i = 0 ; i < 3 ; i++)
+    conductivity_eigenvalues_[i] = that.conductivity_eigenvalues_[i];
 
   //
   //
@@ -75,11 +90,15 @@ Domains::operator << ( std::ostream& stream,
     << static_cast<Domains::Point_vector> (that)
     // Dipole intensity
     << "I=\"" << that.weight() << "\" "
-    // Conductivity coefficients
-    << "C00=\"" << that.C00() << "\" C01=\"" << that.C01() << "\" C02=\"" << that.C02() << "\" "
-    << "C11=\"" << that.C11() << "\" C12=\"" << that.C12() << "\" C22=\"" << that.C22() << "\" ";
+//    // Conductivity coefficients
+//    << "C00=\"" << that.C00() << "\" C01=\"" << that.C01() << "\" C02=\"" << that.C02() << "\" "
+//    << "C11=\"" << that.C11() << "\" C12=\"" << that.C12() << "\" C22=\"" << that.C22() << "\" ";
+    // Conductivity eigenvalues
+    << "lambda1=\"" << that.lambda1() 
+    << "\" lambda2=\"" << that.lambda2() 
+    << "\" lambda3=\"" << that.lambda3() << "\" ";
   
   //
   //
   return stream;
-};
+}

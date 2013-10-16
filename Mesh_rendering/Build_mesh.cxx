@@ -1175,6 +1175,7 @@ Domains_build_mesh::Conductivity_matching_knn()
 	  // Add link to the list
 	  list_cell_conductivity_.push_back( std::move(cell_parameters) );
 	} // end of brain //
+
       /////////////////////////
       // CerebroSpinal Fluid //
       /////////////////////////
@@ -1202,33 +1203,87 @@ Domains_build_mesh::Conductivity_matching_knn()
 	  // Add link to the list
 	  list_cell_conductivity_.push_back( std::move(cell_parameters) );
 	} // end of CSF //
-      /////////////////////
-      // Skull and scalp //
-      /////////////////////
-      else
+
+      ///////////
+      // Skull //
+      ///////////
+      else if ( cell_pmap.subdomain_index( cit ) == OUTSIDE_SKULL )
 	{
 	  //
 	  //
 	  Cell_conductivity 
 	    cell_parameters ( cell_id, cell_subdomain,
 			      cell_vertices[4](0),cell_vertices[4](1),cell_vertices[4](2),/* centroid */
-			      0.,/* l1 */
+			      0.0132,/* l1 */
 			      0., 0., 0., /* eigenvec V1 */
-			      0.,/* l2 */
+			      0.0132,/* l2 */
 			      0., 0., 0., /* eigenvec V2 */
-			      0.,/* l3 */
+			      0.0132,/* l3 */
 			      0., 0., 0., /* eigenvec V3 */
-			      0.00, /*C00*/
-			      0.00, /*C01*/
-			      0.00, /*C02*/
-			      0.00, /*C11*/
-			      0.00, /*C12*/
-			      0.00  /*C22*/ );
+			      0.0132, /*C00*/
+			      0.00,   /*C01*/
+			      0.00,   /*C02*/
+			      0.0132, /*C11*/
+			      0.00,   /*C12*/
+			      0.0132  /*C22*/ );
 	  
 	  //
 	  // Add link to the list
 	  list_cell_conductivity_.push_back( std::move(cell_parameters) );
 	} // and of scalp and skull //
+
+      ///////////
+      // Scalp //
+      ///////////
+      else if ( cell_pmap.subdomain_index( cit ) == OUTSIDE_SCALP )
+	{
+	  //
+	  //
+	  Cell_conductivity 
+	    cell_parameters ( cell_id, cell_subdomain,
+			      cell_vertices[4](0),cell_vertices[4](1),cell_vertices[4](2),/* centroid */
+			      0.33,/* l1 */
+			      0., 0., 0., /* eigenvec V1 */
+			      0.33,/* l2 */
+			      0., 0., 0., /* eigenvec V2 */
+			      0.33,/* l3 */
+			      0., 0., 0., /* eigenvec V3 */
+			      0.33, /*C00*/
+			      0.00, /*C01*/
+			      0.00, /*C02*/
+			      0.33, /*C11*/
+			      0.00, /*C12*/
+			      0.33  /*C22*/ );
+	  
+	  //
+	  // Add link to the list
+	  list_cell_conductivity_.push_back( std::move(cell_parameters) );
+	} // and of scalp  
+      else
+	{
+	  // Error condition
+	  //
+	  //
+//	  Cell_conductivity 
+//	    cell_parameters ( cell_id, cell_subdomain,
+//			      cell_vertices[4](0),cell_vertices[4](1),cell_vertices[4](2),/* centroid */
+//			      0.,/* l1 */
+//			      0., 0., 0., /* eigenvec V1 */
+//			      0.,/* l2 */
+//			      0., 0., 0., /* eigenvec V2 */
+//			      0.,/* l3 */
+//			      0., 0., 0., /* eigenvec V3 */
+//			      0., /*C00*/
+//			      0., /*C01*/
+//			      0., /*C02*/
+//			      0., /*C11*/
+//			      0., /*C12*/
+//			      0.  /*C22*/ );
+//	  
+//	  //
+//	  // Add link to the list
+//	  list_cell_conductivity_.push_back( std::move(cell_parameters) );
+	}
     }// end of for( Cell_iterator cit = mesh_...
 
 

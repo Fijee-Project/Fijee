@@ -4,55 +4,88 @@
 #include <vector>
 
 using namespace dolfin;
+/*!
+ * \file Source.h
+ * \brief brief describe 
+ * \author Yann Cobigo
+ * \version 0.1
+ */
 
-//
-// Potential Phi0
-//
-class Phi : public Expression
+/*! \namespace Solver
+ * 
+ * Name space for our new package
+ *
+ */
+namespace Solver
 {
-  void eval(Array<double>& values, const Array<double>& x) const
+  /*! \class Phi
+   * \brief classe representing whatever
+   *
+   *  This class is an example of class I will have to use
+   */
+  class Phi : public Expression
   {
-    double 
-      Q  = 0.000000001 ,
-      a0 = 0.33,
-      Cte = 1. / (4 * DOLFIN_PI * a0);
-    Vector
-      e(3),
-      r0(3), r(3);
+  private:
+    //! Dipole index
+    int index_;
+    //! Dipole position
+    std::vector<double> r0_values_;  
+    //! Dipole direction
+    std::vector<double> e_values_;  
+    //! Dipole intensity
+    double Q_;
+    //! Homogen conductivity eigenvalues
+    double a0_;
 
-    //
-    // Dipole direction
-    std::vector<double> e_values;  
-    e_values.push_back( 1. ); 
-    e_values.push_back( 0. ); 
-    e_values.push_back( 0. );
-    e.set_local( e_values );
+  public:
+    /*!
+     *  \brief Default Constructor
+     *
+     *  Constructor of the class Phi
+     *
+     */
+    Phi();
+    /*!
+     *  \brief Default Constructor
+     *
+     *  Constructor of the class Phi
+     *
+     */
+    Phi( int, double,
+	 double, double, double, 
+	 double, double, double,
+	 double, double, double );
+    /*!
+     *  \brief destructor
+     *
+     *  Destructo of the class Phi
+     *
+     */
+    ~Phi(){/* Do nothing */};
 
-    //
-    // Dipole position in [mm]
-    std::vector<double> r0_values;  
-    r0_values.push_back( 0.0 + 10. ); 
-    r0_values.push_back( 0.0 + 20. );
-    r0_values.push_back( 0.0 + 60. );
-    r0.set_local( r0_values );
+  public:
+    int    get_index_()const{return index_;};
+    double get_Q_()const{return Q_;};
+    double get_a0_()const{return a0_;};
 
-    //
-    // Mesure position in [mm]
-    std::vector<double> r_values;  
-    r_values.push_back( x[0] ); 
-    r_values.push_back( x[1] );
-    r_values.push_back( x[2] );
-    r.set_local( r_values );
-    // distance in [mm]
-    Vector dist(r);
-    dist -= r0;
-    double norm_dist = dist.norm("l2");
+    double get_X_()const{return r0_values_[0];};
+    double get_Y_()const{return r0_values_[1];};
+    double get_Z_()const{return r0_values_[2];};
+    double get_VX_()const{return e_values_[0];};
+    double get_VY_()const{return e_values_[1];};
+    double get_VZ_()const{return e_values_[2];};
 
-    // 
-    // 10^-3 / 10^-9 = 10^6 : [mm] -> [m]
-    values[0] = ( norm_dist < DOLFIN_EPS ? 0 : 
-		  Cte * Q * e.inner( dist ) / (norm_dist * norm_dist * norm_dist) ) * 1.e+6;
-    //    values[0] = Cte * Q * e.inner( dist ) / (norm_dist * norm_dist * norm_dist);
-  }
-};
+  private:
+    /*!
+     */
+    void eval(Array<double>& values, const Array<double>& x) const;
+  };
+  /*!
+   *  \brief Dump values for Phi
+   *
+   *  This method overload "<<" operator for a customuzed output.
+   *
+   */
+  std::ostream& operator << ( std::ostream&, const Phi& );
+}
 #endif

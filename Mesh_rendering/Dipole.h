@@ -42,6 +42,8 @@ namespace Domains
     //! 4 -> C12
     //! 5 -> C22
     float conductivity_coefficients_[6];
+    //! Conductivity eigenvalues
+    float conductivity_eigenvalues_[3];
 
     
   public:
@@ -99,13 +101,20 @@ namespace Domains
     float& C11() { return conductivity_coefficients_[3]; }
     float& C12() { return conductivity_coefficients_[4]; }
     float& C22() { return conductivity_coefficients_[5]; }
+
+    float lambda1() const { return conductivity_eigenvalues_[0]; }
+    float lambda2() const { return conductivity_eigenvalues_[1]; }
+    float lambda3() const { return conductivity_eigenvalues_[2]; }
+
+    float& lambda1() { return conductivity_eigenvalues_[0]; }
+    float& lambda2() { return conductivity_eigenvalues_[1]; }
+    float& lambda3() { return conductivity_eigenvalues_[2]; }
  };
   /*!
    *  \brief Dump values for Dipole
    *
    *  This method overload "<<" operator for a customuzed output.
    *
-   *  \param Point : new position to add in the list
    */
   std::ostream& operator << ( std::ostream&, const Dipole& );
 };
