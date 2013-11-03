@@ -153,7 +153,7 @@ Let $p_{i}$ and $p_{j}$ two points $P$. Then $p_{i}p_{j}$ segment is an edge of 
 
 %-------------------------------------------------------------------------------
 
-\section{\FIJEE{}'s mesh}
+\section{\FIJEE{}'s meshing process}
 
 However, due to the lack of reliable fully-automated tools for the unstructured discretization of medical datasets, simplistic geometric models are still of wide use. \\
 The simplicial meshes are good tools for the finite element method, and more generally for many computational methods for modeling physical systems. However, the creation of such meshes is sometimes problematic. Indeed, the generation of a mesh representing a continuous and appropriate form for numerical simulation or visualization, can be demanding for time and memory resources. In complicated cases, it may be impossible to generate a mesh without manual intervention to meet the needs of the calculation.\\
@@ -164,7 +164,7 @@ Similarly, in the EEG/MEG source localization problem using the boundary element
 
 
 \begin{itemize}
-\item {\bf licence}
+\item \CGAL{} is distributed under a dual-license scheme. \CGAL{} can be used together with Open Source software free of charge. Using \CGAL{} in other contexts can be done by obtaining a commercial license from GeometryFactory\footnote{http://geometryfactory.com/legal-terms/}. The fundamental building blocks of \CGAL{} are under the LGPL\footnote{The Lesser General Public License (v3+) gives you the right to use and copy the code freely. It is also possible to modify the code under the condition that the resulting modification is released as source code under the LGPL with any binary distribution of your software that uses these LGPL parts.}. The higher-level algorithms are released under the GPL\footnote{The GPL (v3+) is an Open Source license that, gives you the right to use, copy and modify the code freely. If you distribute your software based on GPLed CGAL data structures, you are obliged to distribute the modifications of CGAL you made, and you are furthermore obliged to distribute the source code of your own software under the GPL.} in order to protect their commercial value.
 \item sophisticated developpement in C++ language; flexible and easy to link to \FIJEE{};
 \item efficient forum support;
 \item large toolkit available;
@@ -173,19 +173,66 @@ Similarly, in the EEG/MEG source localization problem using the boundary element
 
 For the latter, \CGAL{} has two very important features used by \FIJEE{}. The first is the ability to create an implicit functions from a set of points and normals. The second is the mesh generation modularity (heterogeneous mesh size control) from the labeled volume image of the head.  It offers easy control over the size and shape of mesh tetrahedra.\\
 
-\subsection{Implicite surface}
-
-{\bf intro from CGAL, voir s'il y a un article}\\
-{\bf Faire le même topo que freesurfer pour le logiciel produisant skull/scalp}\\
+\subsection{\FREESURFER{}}
 
 \FREESURFER{} is a software known for the studies of \WM{} and \GM{}. \FREESURFER{} provides a detailed \WM{} and \GM{} surface meshes. \texttt{mris\_convert}, tool from \FREESURFER{}'s toolkit, allows the conversion of these meshes in the form \STL{}. From \STL{} format via \CGAL{}, it become possible to build implicite functions in purpose to produice labeled  volumes. \\
 Before selecting \CGAL{} to create implicit surafaces, tests were made with other algorithms. In particular, {\bf give the algorithm} used by \VTK{}. The results, {\bf show results} offer low efficiency and reliability. \\
 
-\subsection{Labeled volumes image}
+
+\subsection{\CGAL{}}
+
+CGAL is an Open Source Project providing access to efficient and reliable computationnal geometric algorithms written in C++ language. \CGAL{}, offers data structures and algorithms like triangulations, Voronoi diagrams, mesh generation, geometry processing (surface mesh simplification, subdivision and parameterization) , \dots %, interpolation (natural neighbor interpolation and placement of streamlines), shape analysis, fitting, and distances (smallest enclosing sphere of points or spheres, smallest enclosing ellipsoid of points, principal component analysis), and kinetic data structures.
+
+All these data structures and algorithms operate on geometric objects like points and segments, and perform geometric tests on them. These objects and predicates are regrouped in CGAL Kernels.
+
+Finally, the Support Library offers geometric object generators and spatial sorting functions, as well as a matrix search framework and a solver for linear and quadratic programs. It further offers interfaces to third party software such as the GUI libraries Qt, Geomview, and the Boost Graph Library. 
+
+\subsubsection{Implicite surface}
+
+This \CGAL{} component implements a surface reconstruction method which takes as input point sets with oriented normals and computes an implicit function. 
+
+{\bf Laurent Rineau and Mariette Yvinec. A generic software design for Delaunay refinement meshing. Comput. Geom. Theory Appl., 38:100-110, 2007. }
+
+Given a set of 3D points with oriented normals sampled on the {\bf to change: boundary of a 3D solid}, the Poisson Surface Reconstruction method solves for an approximate indicator function of the inferred solid, whose gradient best matches the input normals.
+
+{\bf Michael Kazhdan, M. Bolitho, and Hugues Hoppe. Poisson Surface Reconstruction. In Symp. on Geometry Processing, pages 61-70, 2006.} 
+
+%Cgal implements a variant of this algorithm which solves for a piecewise linear function on a 3D Delaunay triangulation instead of an adaptive octree. The algorithm takes as input a set of 3D oriented points. It builds a 3D Delaunay triangulation from these points and refines it by Delaunay refinement so as to remove all badly shaped (non isotropic) tetrahedra and to tessellate a loose bounding box of the input oriented points. The normal of each Steiner point added during refinement is set to zero. It then solves for a scalar indicator function f represented as a piecewise linear function over the refined triangulation. More specifically, it solves for the Poisson equation Δf = div(n) at each vertex of the triangulation using a sparse linear solver. Eventually, the Cgal surface mesh generator extracts an isosurface with function value set by default to be the median value of f at all input points. 
+
+
+\subsubsection{Labeled volumes image}
 
 {\bf intro from CGAL, voir s'il y a un article}\\
 \FIJEE{} offers the possibility to create a representation of labeled volumes of a patient's head, in a completely automatic way. This image, in three dimensions and \INRIMAGE{}\footnote{http://serdis.dis.ulpgc.es/~krissian/InrView1/IOformat.html} format, is produced using implicit surfaces for the sclap, skull, \CSF{}, \GM{} and \WM{}. The subcortical parts of the image are extracted frome \texttt{aseg.nii} (\NIFTI{} format) a \FREESURFER{}'s output. \\
 The image \INRIMAGE{} is provided as input to the \CGAL{}'s {\it oracle} for the production of three-dimensional volume meshes conforming different anatomical parts of the head.
+
+\subsubsection{3D Mesh Generation}
+
+The3D Mesh Generation is devoted to generate meshes discretizing 3D domains. The region may be connected or composed of multiple components and/or subdivided in several subdomains. \\
+The meshing engine used in this mesh generator is based on Delaunay refinement.  [CDL07, CDR07]. The Delaunay refinement is followed by a mesh optimization phase to remove slivers and provide a good quality mesh. 
+
+{\bf Jonathan R. Shewchuk. Tetrahedral mesh generation by Delaunay refinement. In Proc. 14th Annu. ACM Sympos. Comput. Geom., pages 86-95, 1998. }
+{\bf S.-W. Cheng, T. K. Dey, and J. A. Levine. A practical delaunay meshing algorithm for a large class of domains. In Meshing Roundtable, pages 477-494, 2007. }
+
+\paragraph{The meshing criteria}
+{
+The argument of type \texttt{MeshCriteria} passed to the mesh generator specifies the size and shape requirements for the tetrahedra in the mesh and for the triangles in the boundary surface mesh. These criteria condition the rules that drive the refinement process. \\
+The criteria for surface facets are governed by the four following parameters:
+
+\begin{itemize}
+\item \texttt{facet\_angle}. This parameter controls the shape of surface facets. Actually, it is a lower bound for the angle (in degree) of surface facets. When boundary surfaces are smooth, the termination of the meshing process is guaranteed if the angular bound is at most 30 degrees.
+\item \texttt{facet\_size} - controls the size of surface facets. 
+\item \texttt{facet\_distance} - controls the approximation error of boundary and subdivision surfaces. 
+\item \texttt{facet\_topology} - controls the set of topological constraints which have to be verified by each surface facet. By default, each vertex of a surface facet has to be located on a surface patch, on a curve segment, or on a corner. It can also be set to check whether the three vertices of a surface facet belongs to the same surface.
+\end{itemize}
+
+The criteria for mesh cells are governed by two parameters:
+
+\begin{itemize}
+\item \texttt{cell\_radius\_edge\_ratio} - controls the shape of mesh cells.
+\item \texttt{cell\_size} - controls the size of mesh tetrahedra.
+\end{itemize}
+}
 
 \paragraph{To review - High-Quality Consistent Meshing of Multi-Label Datasets}
 {
