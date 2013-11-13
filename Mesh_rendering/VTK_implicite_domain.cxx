@@ -147,6 +147,9 @@ Domain::VTK_implicite_domain( const char* Vtk_Mesh ):
       exit(-1);
     }
 
+  std::cout << "Rotation: " << (Domains::Access_parameters::get_instance())->get_rotation_() << std::endl;
+  std::cout << "Translation: " << (Domains::Access_parameters::get_instance())->get_translation_() << std::endl;
+
   //
   // Translate and rotate points with theire normal
   // Create a polydata object

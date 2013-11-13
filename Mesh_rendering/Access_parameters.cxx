@@ -40,7 +40,7 @@ DAp::Access_parameters():
   int       status = 0;
   mode_t    mode   = 0750;
   //
-  files_path_output_ = files_path_ + "/fijee";
+  files_path_output_ = files_path_ + "/fem/output/";
   //
   if ( stat( files_path_output_.c_str(), &st ) != 0 )
     {
@@ -77,14 +77,14 @@ DAp::Access_parameters():
 
   //
   // Skull and scalp
-  std::string skull_scalp_files_path = files_path_ + "/bem/watershed/STL/" + std::string(subject);
+  std::string skull_scalp_files_path = files_path_ + "fem/input/STL/" + std::string(subject);
   outer_skin_surface_  = skull_scalp_files_path + "_outer_skin_surface.stl";
   outer_skull_surface_ = skull_scalp_files_path + "_outer_skull_surface.stl";
   inner_skull_surface_ = skull_scalp_files_path + "_inner_skull_surface.stl";
 
   //
   // Cortical segmentation
-  std::string cortical_files_path = files_path_ + "/surf/STL/";
+  std::string cortical_files_path = files_path_ + "fem/input/STL/";
   lh_pial_     = cortical_files_path + "lh.pial.stl";
   rh_pial_     = cortical_files_path + "rh.pial.stl";
   lh_smoothwm_ = cortical_files_path + "lh.smoothwm.stl";
@@ -92,7 +92,7 @@ DAp::Access_parameters():
 
   //
   // Subcortical segmenation
-  aseg_hdr_ = files_path_ + "mri/m000-aseg.hdr";
+  aseg_hdr_ = files_path_ + "fem/input/mri/aseg.hdr";
 
   //
   // NIFTI information on all segmentation file
@@ -100,7 +100,7 @@ DAp::Access_parameters():
   
   //
   // All segmentation nifti file (aseg.nii)
-  std::string check_header = files_path_ + "mri/aseg.nii";
+  std::string check_header = files_path_ + "fem/input/mri/aseg.nii";
   FILE *aseg_file_nifti;
   aseg_file_nifti = fopen( check_header.c_str(),  "r");
   if ( aseg_file_nifti == NULL ) {

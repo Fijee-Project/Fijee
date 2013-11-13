@@ -236,6 +236,13 @@ namespace Domains
      */
     ucsf_get_macro(translation_, Vector_f_3X1);
    /*!
+     *  \brief Get files_path_output_
+     *
+     *  This method return the output path
+     *
+     */
+    ucsf_get_string_macro(files_path_output_);
+    /*!
      *  \brief Get outer_skin_surface_
      *
      *  This method return the outer skin surface.

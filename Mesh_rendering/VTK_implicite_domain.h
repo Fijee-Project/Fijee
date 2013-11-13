@@ -9,6 +9,10 @@
 #include <set>
 #include <vector>
 //
+// UCSF
+//
+#include "Access_parameters.h"
+//
 // CGAL
 //
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>

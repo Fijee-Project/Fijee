@@ -2,6 +2,7 @@
 ## CONFIGURE ##
 ###############
 export PREFIX =
+export PATH_SOFT =/data1/devel/CPP
 DEBUG         = no
 VERSION       = 1.0
 DIST          = fijee
@@ -10,6 +11,7 @@ DIST          = fijee
 ## COMPILATION ##
 #################
 export CXX  = g++
+export CC   = g++-4.4
 export CUDA = nvcc
 #-lineinfo CUDA
 #  -gencode arch=compute_10,code=sm_10 
@@ -34,23 +36,23 @@ export UFL = ffc
 ####################
 ## TIER LIBRARIES ##
 ####################
-CGAL_DIR  = /home/cobigo/devel/C++/CGAL
-NIFTI_DIR = /home/cobigo/devel/C++/nifti
-VTK_DIR   = /home/cobigo/devel/C++/VTK
+CGAL_DIR  = $(PATH_SOFT)/CGAL/
+NIFTI_DIR = $(PATH_SOFT)/nifti
+VTK_DIR   = $(PATH_SOFT)/VTK
 #
 ifeq ($(DEBUG),yes)
-export CGAL   += $(CGAL_DIR)/install.debug
-export NIFTI  += $(NIFTI_DIR)/install.debug
-export VTK    += $(VTK_DIR)/install-5.10.1.debug
+export CGAL   = $(CGAL_DIR)/install
+export NIFTI  = $(NIFTI_DIR)/install
+export VTK    = $(VTK_DIR)/install
 else
-export CGAL   += $(CGAL_DIR)/install
-export NIFTI  += $(NIFTI_DIR)/install
-export VTK    += $(VTK_DIR)/install
+export CGAL   = $(CGAL_DIR)/install
+export NIFTI  = $(NIFTI_DIR)/install
+export VTK    = $(VTK_DIR)/install
 endif
 #
-export EIGEN3   = /home/cobigo/devel/C++/Eigen3/install
-export FENICS   = /home/cobigo/devel/CPP/FEniCS-project/install/
-export CUDA_LIB = /usr/local/cuda-5.0/lib64
+export EIGEN3   = $(PATH_SOFT)/Eigen/install
+export FENICS   = $(PATH_SOFT)/FEniCS/install/
+export CUDA_LIB = /usr/local/cuda-5.5/targets/x86_64-linux/lib/
 
 #####################
 ## SUB DIRECTORIES ##
@@ -67,6 +69,10 @@ all: $(EXEC)
 $(EXEC):
 	( cd $(SUBTRACTION_METHOD_DIR) && $(MAKE) )
 	( cd $(MESH_RENDERING_DIR) && $(MAKE) )
+	@echo""
+	@echo "export LD_LIBRARY_PATH=$(CUDA_LIB):$(VTK)/lib/vtk-5.10:$(CGAL)/lib:$(LD_LIBRARY_PATH)"
+	@echo""
+
 
 clean:
 	( cd $(SUBTRACTION_METHOD_DIR) && $(MAKE) $@ )

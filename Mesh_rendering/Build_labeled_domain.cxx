@@ -68,7 +68,9 @@ Domains_Build_labeled::Build_labeled_domain()
   //
   // Data initialization
   //
-  file_inrimage_ = new std::ofstream("head_model.inr", std::ios::out | std::ios::binary);
+  std::string head_model_inr = (Domains::Access_parameters::get_instance())->get_files_path_output_();
+  head_model_inr += std::string("head_model.inr");
+  file_inrimage_ = new std::ofstream(head_model_inr.c_str(), std::ios::out | std::ios::binary);
   data_label_    = new char[ 256 * 256 * 256 ];
   data_position_ = new double*[ 256 * 256 * 256 ];
 

@@ -1,5 +1,6 @@
 #ifndef BUILD_MESH_H_
 #define BUILD_MESH_H_
+#include <string>
 #include <utility>
 #include <tuple>
 //
@@ -403,7 +404,9 @@ namespace Domains
      */
     inline void Output_mesh_format()
     {
-      std::ofstream medit_file("out.mesh");
+      std::string out_mesh = (Domains::Access_parameters::get_instance())->get_files_path_output_();
+      out_mesh += std::string("/out.mesh");
+      std::ofstream medit_file(out_mesh.c_str());
       mesh_.output_to_medit(medit_file);
     };
     /*!
