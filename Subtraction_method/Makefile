@@ -3,7 +3,7 @@ UFLFLAG = -l dolfin
 # Libraries and includes
 #
 INC     = -I$(FENICS)/include/
-LIB_DIR = -L$(FENICS)/lib -L/usr/lib 
+LIB_DIR = -L$(FENICS)/lib -L/usr/lib -L/usr/lib64/mpich2/lib/
 LIBS    = -ldolfin -lboost_mpi 
 #
 # Sources

@@ -396,14 +396,15 @@ Domains_Build_labeled::Head_model_segmentation()
 		  subcortical_brain(cell_center_aseg) ==  LEFT_PALLIDUM )
 		data_label_[ idx ] = PALLIDUM;
 	      //
-	      if( subcortical_brain(cell_center_aseg) == RIGHT_LATERAL_VENTRICLE || 
+	      if( subcortical_brain(cell_center_aseg) == CSF                     || 
+		  subcortical_brain(cell_center_aseg) == RIGHT_LATERAL_VENTRICLE || 
 		  subcortical_brain(cell_center_aseg) ==  LEFT_LATERAL_VENTRICLE || 
 		  subcortical_brain(cell_center_aseg) == RIGHT_INF_LAT_VENT      || 
 		  subcortical_brain(cell_center_aseg) ==  LEFT_INF_LAT_VENT      ||
 		  subcortical_brain(cell_center_aseg) == FOURTH_VENTRICLE        || 
 		  subcortical_brain(cell_center_aseg) == THIRD_VENTRICLE         || 
 		  subcortical_brain(cell_center_aseg) == FIFTH_VENTRICLE         )
-		data_label_[ idx ] = CSF;
+		data_label_[ idx ] = CEREBROSPINAL_FLUID;
 	      //
 	      if( subcortical_brain(cell_center_aseg) == RIGHT_CHOROID_PLEXUS || 
 		  subcortical_brain(cell_center_aseg) ==  LEFT_CHOROID_PLEXUS )
