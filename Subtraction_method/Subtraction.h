@@ -2,6 +2,7 @@
 #define _SUBTRACTION_H
 #include <list>
 #include <memory>
+#include <string>
 //
 // FEniCS
 //
@@ -20,6 +21,8 @@
 #include "Conductivity.h"
 #include "Boundaries.h"
 #include "Sub_Domaines.h"
+#include "PDE_solver_parameters.h"
+#include "Utils/Thread_dispatching.h"
 //
 //
 //
@@ -54,8 +57,10 @@ namespace Solver
     std::unique_ptr< MeshFunction< long unsigned int > > domains_;
     //! Anisotropic conductivity
     std::unique_ptr< Solver::Tensor_conductivity > sigma_;
-    //! Finite element method solution
-    std::unique_ptr< Function > u_;
+    //! Function space
+    std::unique_ptr< Poisson::FunctionSpace > V_;
+    // Boundaries
+    std::unique_ptr<  FacetFunction< size_t > > boundaries_;
 
   public:
     /*!
@@ -85,6 +90,15 @@ namespace Solver
      *
      */
     Subtraction& operator = ( const Subtraction& ){};
+    /*!
+     *  \brief Operator ()
+     *
+     *  Operator () of the class Subtraction
+     *
+     */
+    void operator () ( Solver::Phi& /*,
+		       Poisson::FunctionSpace&,
+		       FacetFunction< size_t >&*/);
 
   public:
     /*!

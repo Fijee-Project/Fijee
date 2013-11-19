@@ -1,6 +1,7 @@
 #include <iostream>
-#include"Subtraction.h"
+#include "Subtraction.h"
 
+typedef Solver::PDE_solver_parameters SDEsp;
 
 //
 //
@@ -23,6 +24,26 @@ Solver::Subtraction::Subtraction()
   // Load the conductivity. Anisotrope conductivity
   std::cout << "Load the conductivity" << std::endl;
   sigma_.reset( new Solver::Tensor_conductivity(*mesh_) );
+
+
+
+
+  //
+  //
+  //
+  // Define the function space
+  V_.reset( new Poisson::FunctionSpace(*mesh_) );
+  
+  //
+  // Define boundary condition
+  Periphery perifery;
+  // Initialize mesh function for boundary domains. We tag the boundaries
+  boundaries_.reset( new FacetFunction< size_t > (*mesh_) );
+  boundaries_->set_all(0);
+  perifery.mark(*boundaries_, 1);
+
+
+
 
   //
   // Read the dipoles xml file
@@ -106,115 +127,108 @@ Solver::Subtraction::Subtraction()
 void 
 Solver::Subtraction::solver_loop()
 {
+//  //
+//  // Define the function space
+//  Poisson::FunctionSpace V(*mesh_);
+//  
+//  //
+//  // Define boundary condition
+//  Periphery perifery;
+//  // Initialize mesh function for boundary domains. We tag the boundaries
+//  FacetFunction< size_t > boundaries(*mesh_);
+//  boundaries.set_all(0);
+//  perifery.mark(boundaries, 1);
+
   //
-  // Define the function space
-  Poisson::FunctionSpace V(*mesh_);
-  
-  //
-  // Define boundary condition
-  Periphery perifery;
-  // Initialize mesh function for boundary domains. We tag the boundaries
-  FacetFunction< size_t > boundaries(*mesh_);
-  boundaries.set_all(0);
-  perifery.mark(boundaries, 1);
-  
+  // Define the number of threads in the pool of threads
+  Utils::Thread_dispatching pool( (SDEsp::get_instance())->get_number_of_threads_() );
+
+
   //
   //
-  bool tempo = true;
-  for( auto source : dipoles_list_ )
-    if(tempo)
+  int tempo = 0;
+  for( auto source = dipoles_list_.begin() ;
+       source != dipoles_list_.end() ; source++ )
+    if( ++tempo < 5)
     {
-      tempo = false;
       //
-      //
-      std::cout << "Dipole: " << source.get_index_() << std::endl;
-      //
-      // Conductivity isotrope
-      Solver::Sigma_isotrope a_inf( source.get_a0_() );
-
-//      //
-//      // Define Dirichlet boundary conditions 
-//      DirichletBC boundary_conditions(V, source, perifery);
-
-      //////////////////////
-      // Poisson equation //
-      //////////////////////
-      
-      //
-      // Define variational forms
-      Poisson::BilinearForm a(V, V);
-      Poisson::LinearForm L(V);
-      
-      //
-      // Anisotropy
-      // Bilinear
-      a.a_sigma = *sigma_;
-      a.dx      = *domains_;
-      // Linear
-      L.a_inf   =  a_inf;
-      L.a_sigma = *sigma_;
-      L.Phi_0   =  source;
-      //
-      L.dx    = *domains_;
-      L.ds    =  boundaries;
-
-      //
-      // Compute solution
-      u_.reset( new Function(V) );
-      LinearVariationalProblem problem(a, L, *u_);
-      LinearVariationalSolver  solver(problem);
-      // krylov
-
-      //    krylov_solver            |    type  value          range  access  change
-      //    ------------------------------------------------------------------------
-      //    absolute_tolerance       |  double  1e-15             []       0       0
-      //    divergence_limit         |  double  10000             []       0       0
-      //    error_on_nonconvergence  |    bool   true  {true, false}       0       0
-      //    maximum_iterations       |     int  10000             []       0       0
-      //    monitor_convergence      |    bool  false  {true, false}       0       0
-      //    nonzero_initial_guess    |    bool  false  {true, false}       0       0
-      //    relative_tolerance       |  double  1e-06             []       0       0
-      //    report                   |    bool   true  {true, false}       0       0
-      //    use_petsc_cusp_hack      |    bool  false  {true, false}       0       0
-      //
-      solver.parameters["linear_solver"]  = "cg";
-      solver.parameters("krylov_solver")["maximum_iterations"] = 20000;
-      //  solver.parameters["linear_solver"]  = "bicgstab";
-      //  solver.parameters["linear_solver"]  = "cg";
-      solver.parameters["preconditioner"] = "ilu";
-      // Cholesky
-      //  solver.parameters["linear_solver"]  = "umfpack";
-      solver.solve();
-
-      //
-      // Save solution in VTK format
-      //  * Binary (.bin)
-      //  * RAW    (.raw)
-      //  * SVG    (.svg)
-      //  * XD3    (.xd3)
-      //  * XDMF   (.xdmf)
-      //  * XML    (.xml)
-      //  * XYZ    (.xyz)
-      //  * VTK    (.pvd)
-
-      File 
-	file_pvd("poisson.pvd"),
-	file_xyz("poisson.xyz"),
-	file_xml("poisson.xml"),
-	file_svg("poisson.svg"),
-	file_raw("poisson.raw"),
-	file_bin("poisson.bin");
-      //
-      file_pvd << *u_;
-      file_xyz << *u_;
-      file_xml << *u_;
-      file_svg << *u_;
-      file_raw << *u_;
-      file_bin << *u_;
-      //      file << *domains_;
-
-      //
-      // rekease the solution for the next calculation
-      u_.reset();
+      // Enqueue tasks
+      pool.enqueue( std::ref(*this), std::ref(*source) );
     }
+    else {break;}
 }
+//
+//
+//
+void 
+Solver::Subtraction::operator () ( Solver::Phi& source/*,
+				   Poisson::FunctionSpace& V,
+				   FacetFunction< size_t >& boundaries*/)
+{
+  //
+  //
+  std::cout << source.get_name_() << std::endl;
+  
+  //
+  // Conductivity isotrope
+  Solver::Sigma_isotrope a_inf( source.get_a0_() );
+
+  //      //
+  //      // Define Dirichlet boundary conditions 
+  //      DirichletBC boundary_conditions(V, source, perifery);
+
+  //////////////////////
+  // Poisson equation //
+  //////////////////////
+      
+  //
+  // Define variational forms
+  Poisson::BilinearForm a(*V_, *V_);
+  Poisson::LinearForm L(*V_);
+      
+  //
+  // Anisotropy
+  // Bilinear
+  a.a_sigma = *sigma_;
+  a.dx      = *domains_;
+  // Linear
+  L.a_inf   =  a_inf;
+  L.a_sigma = *sigma_;
+  L.Phi_0   =  source;
+  //
+  L.dx    = *domains_;
+  L.ds    = *boundaries_;
+
+  //
+  // Compute solution
+  Function u(*V_);
+  LinearVariationalProblem problem(a, L, u);
+  LinearVariationalSolver  solver(problem);
+  // krylov
+  solver.parameters["linear_solver"]  
+    = (SDEsp::get_instance())->get_linear_solver_();
+  solver.parameters("krylov_solver")["maximum_iterations"] 
+    = (SDEsp::get_instance())->get_maximum_iterations_();
+  solver.parameters("krylov_solver")["relative_tolerance"] 
+    = (SDEsp::get_instance())->get_relative_tolerance_();
+  solver.parameters["preconditioner"] 
+    = (SDEsp::get_instance())->get_preconditioner_();
+  //
+  solver.solve();
+
+  //
+  // Save solution in VTK format
+  //  * Binary (.bin)
+  //  * RAW    (.raw)
+  //  * SVG    (.svg)
+  //  * XD3    (.xd3)
+  //  * XDMF   (.xdmf)
+  //  * XML    (.xml)
+  //  * XYZ    (.xyz)
+  //  * VTK    (.pvd)
+  std::string file_name = source.get_name_() + std::string(".pvd");
+  File file( file_name.c_str() );
+  //
+  file << u;
+  file << *domains_;
+};

@@ -10,7 +10,7 @@ LIBS    = -ldolfin -lboost_mpi -lpugixml
 #
 UFL_SRC    = Poisson.ufl
 UFL_HEADER = Poisson.h
-SRC        = main.cxx  Conductivity.cxx Source.cxx Subtraction.cxx
+SRC        = main.cxx  Conductivity.cxx Source.cxx Subtraction.cxx PDE_solver_parameters.cxx
 OBJ        = $(SRC:.cxx=.o)
 #
 #

@@ -4,7 +4,7 @@
 //
 Solver::Phi::Phi(): 
   Expression(),
-  index_( 0 ), Q_( 0. ), a0_( 0. )
+  index_( 0 ), Q_( 0. ), a0_( 0. ), name_("no_name")
 {
   //
   //
@@ -41,6 +41,12 @@ Solver::Phi::Phi( int Index, double Intensity,
   e_values_[0] = VX;
   e_values_[1] = VY;
   e_values_[2] = VY;
+  //
+  name_ = "dipole_" + std::to_string(Index);
+//    + "_" + std::to_string(Intensity) + "_" 
+//    + std::to_string(X)  + "_"  + std::to_string(Y) + "_"  + std::to_string(Z) + "_" 
+//    + std::to_string(VX) + "_" + std::to_string(VY) + "_" + std::to_string(VZ) + "_"  
+//    + std::to_string(a0_);
 }
 //
 //
@@ -56,18 +62,10 @@ Solver::Phi::eval(Array<double>& values, const Array<double>& x) const
   
   //
   // Dipole direction
-  //    std::vector<double> e_values;  
-  //    e_values.push_back( 1. ); 
-  //    e_values.push_back( 0. ); 
-  //    e_values.push_back( 0. );
   e.set_local( e_values_ );
   
   //
   // Dipole position in [mm]
-  //    std::vector<double> r0_values;  
-  //    r0_values.push_back( 0.0 + 10. ); 
-  //    r0_values.push_back( 0.0 + 20. );
-  //    r0_values.push_back( 0.0 + 60. );
   r0.set_local( r0_values_ );
   
   //
@@ -85,7 +83,7 @@ Solver::Phi::eval(Array<double>& values, const Array<double>& x) const
   // 
   // 10^-3 / 10^-9 = 10^6 : [mm] -> [m]
   values[0] = ( norm_dist < DOLFIN_EPS ? 0 : 
-		Cte * Q_ * e.inner( dist ) / (norm_dist * norm_dist * norm_dist) ) * 1.e+6;
+		Cte * Q_ * e.inner( dist ) / (norm_dist * norm_dist * norm_dist) * 1.e+6 );
 }
 //
 //

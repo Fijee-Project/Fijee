@@ -25,6 +25,7 @@
 #include <CGAL/Search_traits_3.h>
 #include <CGAL/Search_traits_adapter.h>
 #include <CGAL/Orthogonal_k_neighbor_search.h>
+#include <CGAL/Orthogonal_incremental_neighbor_search.h>
 //
 typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
 typedef Kernel::Point_3 Dipole_position;
@@ -60,6 +61,15 @@ namespace Domains
   typedef CGAL::Orthogonal_k_neighbor_search< Dipoles_traits > Dipoles_neighbor_search;
   typedef Dipoles_neighbor_search::Tree Dipoles_tree;
   typedef Dipoles_neighbor_search::Distance Dipole_distance;
+  //
+  // Check the distance between two dipoles
+  //
+  typedef CGAL::Orthogonal_incremental_neighbor_search< Traits_base > incremental_search;
+  typedef incremental_search::iterator knn_iterator;
+  typedef incremental_search::Tree Distance_tree;
+
+  // -----------------------------------
+
   /*! \class Build_dipoles_list_knn
    * \brief classe representing whatever
    *

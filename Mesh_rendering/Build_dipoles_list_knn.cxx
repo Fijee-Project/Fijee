@@ -58,6 +58,11 @@ DBdlknn::Make_list( const std::list< Cell_conductivity >& List_cell_conductivity
 						     std::get<0>(right_hemisphere).y(),
 						     std::get<0>(right_hemisphere).z()),
 				     right_hemisphere) );
+  //
+  // Check the distance between two dipoles
+  Distance_tree sparse_dipole_distribution;
+  // insert a first fake value for initialisation
+  sparse_dipole_distribution.insert( Dipole_position(256,256,256) );
 
   //
   //
@@ -65,29 +70,79 @@ DBdlknn::Make_list( const std::list< Cell_conductivity >& List_cell_conductivity
     {
 
       //
-      //
+      // 
       if ( cell_conductivity.get_cell_subdomain_() == GRAY_MATTER )
 	{
 	  //
 	  //
-	  Point_vector cell_centroid = (cell_conductivity.get_centroid_lambda_())[0];
-	  
+	  Point_vector cell_centroid = ( cell_conductivity.get_centroid_lambda_() )[0];
+	  Dipole_position CGAL_cell_centroid( cell_centroid.x(),
+					      cell_centroid.y(), 
+					      cell_centroid.z() );
+	  // Check nearest dipole neighbor
+	  incremental_search search_knn( sparse_dipole_distribution, 
+					 CGAL_cell_centroid, 1 );
+//	  //
+//	  std::cout << "Point: " << CGAL_cell_centroid << std::endl;
+//	  std::cout << (search_knn.begin())->first << " "
+//		    << std::sqrt((search_knn.begin())->second) 
+//		    << std::endl;
+//	  //
+//	  sparse_dipole_distribution.insert(CGAL_cell_centroid);
+
+	  //
+	  //
+//	  if ( (search_knn.begin())->second > .5 )
+//	    {
+//
+//
+//	      std::cout << "Point: " << CGAL_cell_centroid << std::endl;
+//	      std::cout << (search_knn.begin())->first << " "
+//			<< std::sqrt((search_knn.begin())->second) 
+//			<< std::endl;
+//	      //
+//	      // we accept the dipole
+//	      sparse_dipole_distribution.insert( CGAL_cell_centroid );
+
+
 	  //
 	  // left hemisphere
 	  if( cell_centroid.x() < 0 )
 	    {
 	      // Record the tuple for the centroid
 	      if ( Select_dipole(lh_tree, cell_centroid) )
-		// Add the dipole in the list
-		dipoles_list_.push_back( Domains::Dipole(cell_conductivity) );
+		{
+		  // if the dipole is distant enough from other dipoles
+		  incremental_search search_knn( sparse_dipole_distribution, 
+						 CGAL_cell_centroid, 1 );
+		  // two dipoles must have a distance higher than 1 mm
+		  if ( (search_knn.begin())->second > 1. )
+		    {
+		      // Add in the checking distance tree
+		      sparse_dipole_distribution.insert( CGAL_cell_centroid );
+		      // Add the dipole in the list
+		      dipoles_list_.push_back( Domains::Dipole(cell_conductivity) );
+		    }
+		}
 	    }
 	  // right hemisphere
 	  else
 	    {
 	      // Record the tuple for the centroid
 	      if ( Select_dipole(rh_tree, cell_centroid) )
-		// Add the dipole in the list
-		dipoles_list_.push_back( Domains::Dipole(cell_conductivity) );
+		{
+		  // if the dipole is distant enough from other dipoles
+		  incremental_search search_knn( sparse_dipole_distribution, 
+						 CGAL_cell_centroid, 1 );
+		  //  two dipoles must have a distance higher than 1 mm
+		  if( (search_knn.begin())->second > 1. )
+		    {
+		      // Add in the checking distance tree
+		      sparse_dipole_distribution.insert( CGAL_cell_centroid );
+		      // Add the dipole in the list
+		      dipoles_list_.push_back( Domains::Dipole(cell_conductivity) );
+		    }
+		}
 	    }
 	}
     }

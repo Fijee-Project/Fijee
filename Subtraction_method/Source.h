@@ -2,6 +2,7 @@
 #define _SOURCE_H
 #include <dolfin.h>
 #include <vector>
+#include <string>
 
 using namespace dolfin;
 /*!
@@ -32,10 +33,12 @@ namespace Solver
     std::vector<double> r0_values_;  
     //! Dipole direction
     std::vector<double> e_values_;  
-    //! Dipole intensity
+    //! Dipole intensity [Q_] = A.m
     double Q_;
-    //! Homogen conductivity eigenvalues
+    //! homogeneous conductivity eigenvalues - [a0_] = S/m
     double a0_;
+    //! Dipole name
+    std::string name_;
 
   public:
     /*!
@@ -74,6 +77,8 @@ namespace Solver
     double get_VX_()const{return e_values_[0];};
     double get_VY_()const{return e_values_[1];};
     double get_VZ_()const{return e_values_[2];};
+
+    std::string get_name_(){return name_;};
 
   private:
     /*!
