@@ -19,6 +19,11 @@ Solver::Subtraction::Subtraction()
   // Load Sub_domains
   std::cout << "Load Sub_domains" << std::endl;
   domains_.reset( new MeshFunction< long unsigned int >(*mesh_, "../Mesh_rendering/mesh_subdomains.xml") );
+//  // write domains
+//  std::string domains_file_name = "domains.pvd";
+//  File domains_file( domains_file_name.c_str() );
+//  domains_file << *domains_;
+
 
   //
   // Load the conductivity. Anisotrope conductivity

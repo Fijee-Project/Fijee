@@ -102,7 +102,7 @@ SDEsp::init()
 
   //
   // Dispatching information
-  number_of_threads_ = 4;
+  number_of_threads_ = 2;
 }
 //
 //
