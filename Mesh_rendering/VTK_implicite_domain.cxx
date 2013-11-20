@@ -5,8 +5,8 @@
 //
 // CGAL
 //
-typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
-typedef CGAL::Point_with_normal_3<Kernel> Point_with_normal;
+//typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
+//typedef CGAL::Point_with_normal_3<Kernel> Point_with_normal;
 typedef Kernel::Point_3 Point;
 typedef Kernel::Vector_3 Vector;
 typedef CGAL::Poisson_reconstruction_function<Kernel> Poisson_reconstruction_function;
@@ -310,6 +310,9 @@ Domain::VTK_implicite_domain( const char* Vtk_Mesh ):
       normal[1] /= norm;
       normal[2] /= norm;
 //      std::cout << normal[0] << " " << normal[1] << " " << normal[2] << " " << std::endl;
+      //
+      point_normal_.push_back(Domains::Point_vector( vertex[0], vertex[1], vertex[2],
+						    normal[0], normal[1], normal[2] ));
       //
       stream << vertex[0] << " " << vertex[1] << " " << vertex[2] << " " 
 	     << normal[0] << " " << normal[1] << " " << normal[2] << std::endl;

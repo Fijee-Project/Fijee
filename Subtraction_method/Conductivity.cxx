@@ -1,5 +1,7 @@
 #include "Conductivity.h"
 
+typedef Solver::PDE_solver_parameters SDEsp;
+
 /* Tensor_conductivity */
 //
 //
@@ -7,19 +9,29 @@
 Solver::Tensor_conductivity::Tensor_conductivity( Mesh & Mesh_head ): 
   Expression(3,3)
 {
-//  C00_ = MeshFunction< double >(Mesh_head, "../../Bucket/C00.xml");
-//  C01_ = MeshFunction< double >(Mesh_head, "../../Bucket/C01.xml");
-//  C02_ = MeshFunction< double >(Mesh_head, "../../Bucket/C02.xml");
-//  C11_ = MeshFunction< double >(Mesh_head, "../../Bucket/C11.xml");
-//  C12_ = MeshFunction< double >(Mesh_head, "../../Bucket/C12.xml");
-//  C22_ = MeshFunction< double >(Mesh_head, "../../Bucket/C22.xml");
-
-  C00_ = MeshFunction< double >(Mesh_head, "../Mesh_rendering/C00.xml");
-  C01_ = MeshFunction< double >(Mesh_head, "../Mesh_rendering/C01.xml");
-  C02_ = MeshFunction< double >(Mesh_head, "../Mesh_rendering/C02.xml");
-  C11_ = MeshFunction< double >(Mesh_head, "../Mesh_rendering/C11.xml");
-  C12_ = MeshFunction< double >(Mesh_head, "../Mesh_rendering/C12.xml");
-  C22_ = MeshFunction< double >(Mesh_head, "../Mesh_rendering/C22.xml");
+  //
+  //
+  std::string 
+    C00 = (SDEsp::get_instance())->get_files_path_output_(), 
+    C01 = (SDEsp::get_instance())->get_files_path_output_(), 
+    C02 = (SDEsp::get_instance())->get_files_path_output_(), 
+    C11 = (SDEsp::get_instance())->get_files_path_output_(), 
+    C12 = (SDEsp::get_instance())->get_files_path_output_(), 
+    C22 = (SDEsp::get_instance())->get_files_path_output_(); 
+  //
+    C00 += "C00.xml"; 
+    C01 += "C01.xml"; 
+    C02 += "C02.xml"; 
+    C11 += "C11.xml"; 
+    C12 += "C12.xml"; 
+    C22 += "C22.xml"; 
+  //
+  C00_ = MeshFunction< double >(Mesh_head, C00.c_str() );
+  C01_ = MeshFunction< double >(Mesh_head, C01.c_str() );
+  C02_ = MeshFunction< double >(Mesh_head, C02.c_str() );
+  C11_ = MeshFunction< double >(Mesh_head, C11.c_str() );
+  C12_ = MeshFunction< double >(Mesh_head, C12.c_str() );
+  C22_ = MeshFunction< double >(Mesh_head, C22.c_str() );
 }
 //
 //

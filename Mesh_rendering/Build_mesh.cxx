@@ -156,32 +156,6 @@ Domains_build_mesh::~Build_mesh()
 //
 //
 //
-//Domains_build_mesh& 
-//Domains_build_mesh::operator = ( Domains_build_mesh&& that )
-//{
-//  if( this != &that )
-//    {
-//      // initialisation
-//      pos_x_ = 0;
-//      pos_y_ = 0;
-//      delete [] tab_;
-//      tab_   = nullptr;
-//      // pilfer the source
-//      list_position_ = std::move( that.list_position_ );
-//      pos_x_ =  that.get_pos_x();
-//      pos_y_ =  that.get_pos_y();
-//      tab_   = &that.get_tab();
-//      // reset that
-//      that.set_pos_x( 0 );
-//      that.set_pos_y( 0 );
-//      that.set_tab( nullptr );
-//    }
-//  //
-//  return *this;
-//}
-//
-//
-//
 void
 Domains_build_mesh::operator ()( Mesh_output Output )
 {
@@ -206,6 +180,11 @@ Domains_build_mesh::operator ()( Mesh_output Output )
     case MESH_CONDUCTIVITY:
       {
 	Output_mesh_conductivity_xml();
+	break;
+      }
+    case MESH_DIPOLES:
+      {
+	Output_dipoles_list_xml();
 	break;
       }
     default:
@@ -571,7 +550,7 @@ Domains_build_mesh::Output_mesh_conductivity_xml()
     FEniCS_xml_C11(C11_XML.c_str()), FEniCS_xml_C12(C12_XML.c_str()), 
     FEniCS_xml_C22(C22_XML.c_str());
   //
-  int num_of_tetrahedra = list_coefficients_.size();
+  int num_of_tetrahedra = list_cell_conductivity_.size();
   
 
   //
@@ -609,56 +588,54 @@ Domains_build_mesh::Output_mesh_conductivity_xml()
   
   //
   // Main loop
-  for ( auto it = list_coefficients_.begin() ; 
-	it != list_coefficients_.end() ; 
-	++it )
+  for ( auto cell_it : list_cell_conductivity_ )
     {
       //
       // C00
       FEniCS_xml_C00 
-	<< "      <value cell_index=\"" <<  it->cell_id
+	<< "      <value cell_index=\"" <<  cell_it.get_cell_id_()
 	<< "\" local_entity=\"0\" value=\""
-	<< it->conductivity_coefficients[0]
+	<< cell_it.C00()
 	<< "\" />\n";
  
       //
       // C01
       FEniCS_xml_C01 
-	<< "      <value cell_index=\"" <<  it->cell_id
+	<< "      <value cell_index=\"" <<  cell_it.get_cell_id_()
 	<< "\" local_entity=\"0\" value=\""
-	<< it->conductivity_coefficients[1]
+	<< cell_it.C01()
 	<< "\" />\n";
  
       //
       // C02
       FEniCS_xml_C02 
-	<< "      <value cell_index=\"" <<  it->cell_id
+	<< "      <value cell_index=\"" <<  cell_it.get_cell_id_()
 	<< "\" local_entity=\"0\" value=\""
-	<< it->conductivity_coefficients[2]
+	<< cell_it.C02()
 	<< "\" />\n";
  
       //
       // C11
       FEniCS_xml_C11 
-	<< "      <value cell_index=\"" <<  it->cell_id
+	<< "      <value cell_index=\"" <<  cell_it.get_cell_id_()
 	<< "\" local_entity=\"0\" value=\""
-	<< it->conductivity_coefficients[3]
+	<< cell_it.C11()
 	<< "\" />\n";
  
       //
       // C12
       FEniCS_xml_C12 
-	<< "      <value cell_index=\"" <<  it->cell_id
+	<< "      <value cell_index=\"" <<  cell_it.get_cell_id_()
 	<< "\" local_entity=\"0\" value=\""
-	<< it->conductivity_coefficients[4]
+	<< cell_it.C12()
 	<< "\" />\n";
  
       //
       // C22
       FEniCS_xml_C22 
-	<< "      <value cell_index=\"" <<  it->cell_id
+	<< "      <value cell_index=\"" <<  cell_it.get_cell_id_()
 	<< "\" local_entity=\"0\" value=\""
-	<< it->conductivity_coefficients[5]
+	<< cell_it.C22()
 	<< "\" />\n";
     }
 
@@ -681,6 +658,28 @@ Domains_build_mesh::Output_mesh_conductivity_xml()
   FEniCS_xml_C11.close();
   FEniCS_xml_C12.close();
   FEniCS_xml_C22.close();
+}
+//
+//
+//
+void 
+Domains_build_mesh::Output_dipoles_list_xml()
+{
+  //
+  // Output xml files. 
+  std::string dipoles_XML = 
+    (Domains::Access_parameters::get_instance())->get_files_path_output_();
+  dipoles_XML += std::string("dipoles.xml");
+  //
+  std::ofstream dipoles_file( dipoles_XML.c_str() );
+  
+  //
+  //
+  dipoles_->Build_stream(dipoles_file);
+
+  //
+  //
+  dipoles_file.close();
 }
 //
 //
@@ -1028,10 +1027,10 @@ Domains_build_mesh::Conductivity_matching_classic()
   Do_we_have_conductivity = nullptr; 
 #ifdef TRACE
 #if TRACE == 100
-  delete [] P_matrices_array;
+ delete [] P_matrices_array;
   P_matrices_array = nullptr;
 #endif
-#endif
+#endif      
 }
 //
 //
@@ -1061,12 +1060,8 @@ Domains_build_mesh::Conductivity_matching_knn()
   Eigen::Matrix <float, 3, 1>* positions_array             = nullptr;
   bool*                        Do_we_have_conductivity     = nullptr; 
   //
-#ifdef TRACE
-#if TRACE == 100
   Eigen::Matrix <float, 3, 3>* P_matrices_array  = nullptr;
   (DAp::get_instance())->get_P_matrices_array_( &P_matrices_array );
-#endif
-#endif
   (DAp::get_instance())->get_conductivity_tensors_array_( &conductivity_tensors_array );
   (DAp::get_instance())->get_eigen_values_matrices_array_( &eigen_values_matrices_array );
   (DAp::get_instance())->get_positions_array_( &positions_array );
@@ -1108,10 +1103,9 @@ Domains_build_mesh::Conductivity_matching_knn()
        ++cit )
     {
       //
-      // link of the linked list list_coefficients_
-      Cell_coefficient cell_coeff;
-      cell_coeff.cell_id        = inum++;
-      cell_coeff.cell_subdomain = cell_pmap.subdomain_index( cit );
+      // 
+      int cell_id        = inum++;
+      int cell_subdomain = cell_pmap.subdomain_index( cit );
 
 //#ifdef TRACE
 //#if TRACE == 4
@@ -1144,17 +1138,9 @@ Domains_build_mesh::Conductivity_matching_knn()
 	cell_vertices[i] = rotation * cell_vertices[i] + translation;
 
 
-      //
-      // Output for R analysis
-#ifdef TRACE
-#if TRACE == 100
-      for (int i = 0 ; i < 5 ; i++)
-	cell_coeff.vertices[i] = cell_vertices[i];
-#endif
-#endif      
-
-      //
-      // If we are in the brain
+      ////////////////////////
+      // Brain segmentation //
+      ////////////////////////
       if( cell_pmap.subdomain_index( cit ) != NO_SEGMENTATION    &&
 	  cell_pmap.subdomain_index( cit ) != OUTSIDE_SCALP      &&
 	  cell_pmap.subdomain_index( cit ) != OUTSIDE_SKULL      &&
@@ -1171,17 +1157,6 @@ Domains_build_mesh::Conductivity_matching_knn()
 	  auto conductivity_centroids = search.begin();
 
 	  //
-	  //
-//	  Distance tr_dist;
-//	  //
-//	  for( auto centroid : search )
-//	    std::cout << " d(q, nearest neighbor)=  "
-//		      << tr_dist.inverse_of_transformed_distance(centroid.second) 
-//		      << " -- pos: "   << std::get<0>(centroid.first)
-//		      << " -- index: " << std::get<1>(centroid.first) 
-//		      << std::endl;
-
-	  //
 	  // Select the conductivity cell with positive l3
 	  while( conductivity_centroids != search.end() &&
 		 eigen_values_matrices_array[std::get<1>( conductivity_centroids->first )](2,2) < 0. )
@@ -1192,93 +1167,151 @@ Domains_build_mesh::Conductivity_matching_knn()
 	      std::cerr << "You might think about increasing the number of neighbor. Or check the Diffusion/Conductivity file." << std::endl;
 	      exit(1);
 	    }
+
 	  //
-	  cell_coeff.conductivity_coefficients[0] 
-	    = conductivity_tensors_array[std::get<1>( conductivity_centroids->first )](0,0);
-	  cell_coeff.conductivity_coefficients[1] 
-	    = conductivity_tensors_array[std::get<1>( conductivity_centroids->first )](0,1);
-	  cell_coeff.conductivity_coefficients[2] 	       
-	    = conductivity_tensors_array[std::get<1>( conductivity_centroids->first )](0,2);
-	  cell_coeff.conductivity_coefficients[3] 	       
-	    = conductivity_tensors_array[std::get<1>( conductivity_centroids->first )](1,1);
-	  cell_coeff.conductivity_coefficients[4] 	       
-	    = conductivity_tensors_array[std::get<1>( conductivity_centroids->first )](1,2);
-	  cell_coeff.conductivity_coefficients[5] 	       
-	    = conductivity_tensors_array[std::get<1>( conductivity_centroids->first )](2,2);
-	  
-	  //
-	  // Output for R analysis
-#ifdef TRACE
-#if TRACE == 100
-	  // l1, l2, l3
-	  cell_coeff.eigen_values[0] = eigen_values_matrices_array[std::get<1>( conductivity_centroids->first )](0,0);
-	  cell_coeff.eigen_values[1] = eigen_values_matrices_array[std::get<1>( conductivity_centroids->first )](1,1);
-	  cell_coeff.eigen_values[2] = eigen_values_matrices_array[std::get<1>( conductivity_centroids->first )](2,2);
-	  // l_long l_tang l_mean
-	  cell_coeff.eigen_values[3] = eigen_values_matrices_array[std::get<1>( conductivity_centroids->first )](0,0);
-	  cell_coeff.eigen_values[4] = (cell_coeff.eigen_values[1]+cell_coeff.eigen_values[2]) / 2.;
-	  cell_coeff.eigen_values[5] = (cell_coeff.eigen_values[0]+cell_coeff.eigen_values[0]+cell_coeff.eigen_values[0] ) / 3.;
-	  // l1_v0 l2_v0 l3_v0 - l1_v1 l2_v1 l3_v1 - l1_v3 l2_v3 l3_v3
-	  for ( int i = 0 ; i < 4 ; i++ )
+	  // create the cell conductivity information object
+	  Eigen::Vector3f eigen_vector[3];
+	  for ( int i = 0 ; i < 3 ; i++ )
 	    {
-	      cell_coeff.eigen_values[6+i*3] = 0;
-	      cell_coeff.eigen_values[7+i*3] = 0;
-	      cell_coeff.eigen_values[8+i*3] = 0;
+	      eigen_vector[i] <<
+		P_matrices_array[std::get<1>( conductivity_centroids->first )](0,i),
+		P_matrices_array[std::get<1>( conductivity_centroids->first )](1,i),
+		P_matrices_array[std::get<1>( conductivity_centroids->first )](2,i);
+	      //
+	      Eigen::Vector3f eigen_vector_tmp = rotation * eigen_vector[i];
+	      eigen_vector[i] = eigen_vector_tmp;
 	    }
 	  //
-	  Eigen::Vector3f vec_tmp;
-	  vec_tmp <<
-	    P_matrices_array[std::get<1>( conductivity_centroids->first )](0,0),
-	    P_matrices_array[std::get<1>( conductivity_centroids->first )](1,0),
-	    P_matrices_array[std::get<1>( conductivity_centroids->first )](2,0);
+	  Cell_conductivity 
+	    cell_parameters ( cell_id, cell_subdomain,
+			      cell_vertices[4](0),cell_vertices[4](1),cell_vertices[4](2),/* centroid */
+			      eigen_values_matrices_array[std::get<1>( conductivity_centroids->first )](0,0),/* l1 */
+			      eigen_vector[0](0), eigen_vector[0](1), eigen_vector[0](2), /* eigenvec V1 */
+			      eigen_values_matrices_array[std::get<1>( conductivity_centroids->first )](1,1),/* l2 */
+			      eigen_vector[1](0), eigen_vector[1](1), eigen_vector[1](2), /* eigenvec V2 */
+			      eigen_values_matrices_array[std::get<1>( conductivity_centroids->first )](2,2),/* l3 */
+			      eigen_vector[2](0), eigen_vector[2](1), eigen_vector[2](2), /* eigenvec V3 */
+			      conductivity_tensors_array[std::get<1>( conductivity_centroids->first )](0,0), /*C00*/
+			      conductivity_tensors_array[std::get<1>( conductivity_centroids->first )](0,1), /*C01*/
+			      conductivity_tensors_array[std::get<1>( conductivity_centroids->first )](0,2), /*C02*/
+			      conductivity_tensors_array[std::get<1>( conductivity_centroids->first )](1,1), /*C11*/
+			      conductivity_tensors_array[std::get<1>( conductivity_centroids->first )](1,2), /*C12*/
+			      conductivity_tensors_array[std::get<1>( conductivity_centroids->first )](2,2)  /*C22*/ );
+	  
 	  //
-	  cell_coeff.eigenvector_1  = rotation * vec_tmp;
-	  cell_coeff.eigenvector_1 /= cell_coeff.eigenvector_1.norm();
-#endif
-#endif
-	} /*if( cell_pmap.subdomain_index( cit ) != NO_SEGMENTATION && ... )*/
+	  // Add link to the list
+	  list_cell_conductivity_.push_back( std::move(cell_parameters) );
+	} // end of brain //
+
+      /////////////////////////
+      // CerebroSpinal Fluid //
+      /////////////////////////
       else if ( cell_pmap.subdomain_index( cit ) == CEREBROSPINAL_FLUID )
 	{
-	  // Diagonal
-	  cell_coeff.conductivity_coefficients[0] = cell_coeff.conductivity_coefficients[3] = cell_coeff.conductivity_coefficients[5] = 1.79;
-	  // Non diagonal
-	  cell_coeff.conductivity_coefficients[1] = cell_coeff.conductivity_coefficients[2] = cell_coeff.conductivity_coefficients[4] = 0.;
+	  //
+	  //
+	  Cell_conductivity 
+	    cell_parameters ( cell_id, cell_subdomain,
+			      cell_vertices[4](0),cell_vertices[4](1),cell_vertices[4](2),/* centroid */
+			      1.79,/* l1 */
+			      0., 0., 0., /* eigenvec V1 */
+			      1.79,/* l2 */
+			      0., 0., 0., /* eigenvec V2 */
+			      1.79,/* l3 */
+			      0., 0., 0., /* eigenvec V3 */
+			      1.79, /*C00*/
+			      0.00, /*C01*/
+			      0.00, /*C02*/
+			      1.79, /*C11*/
+			      0.00, /*C12*/
+			      1.79  /*C22*/ );
+	  
+	  //
+	  // Add link to the list
+	  list_cell_conductivity_.push_back( std::move(cell_parameters) );
+	} // end of CSF //
 
+      ///////////
+      // Skull //
+      ///////////
+      else if ( cell_pmap.subdomain_index( cit ) == OUTSIDE_SKULL )
+	{
 	  //
-	  // Output for R analysis
-#ifdef TRACE
-#if TRACE == 100
-	  for ( int i = 0 ; i < 18 ; i++)
-	    cell_coeff.eigen_values[i] = 0.;
 	  //
-	  cell_coeff.eigen_values[0] = cell_coeff.eigen_values[4] = cell_coeff.eigen_values[8] = 1.79;
-	      //
-	      cell_coeff.eigenvector_1 << 0., 0., 0.;
-#endif
-#endif      
-	} /*else if ( cell_pmap.subdomain_index( cit ) == CEREBROSPINAL_FLUID )*/
-  // Skull and scalp
+	  Cell_conductivity 
+	    cell_parameters ( cell_id, cell_subdomain,
+			      cell_vertices[4](0),cell_vertices[4](1),cell_vertices[4](2),/* centroid */
+			      0.0132,/* l1 */
+			      0., 0., 0., /* eigenvec V1 */
+			      0.0132,/* l2 */
+			      0., 0., 0., /* eigenvec V2 */
+			      0.0132,/* l3 */
+			      0., 0., 0., /* eigenvec V3 */
+			      0.0132, /*C00*/
+			      0.00,   /*C01*/
+			      0.00,   /*C02*/
+			      0.0132, /*C11*/
+			      0.00,   /*C12*/
+			      0.0132  /*C22*/ );
+	  
+	  //
+	  // Add link to the list
+	  list_cell_conductivity_.push_back( std::move(cell_parameters) );
+	} // and of scalp and skull //
+
+      ///////////
+      // Scalp //
+      ///////////
+      else if ( cell_pmap.subdomain_index( cit ) == OUTSIDE_SCALP )
+	{
+	  //
+	  //
+	  Cell_conductivity 
+	    cell_parameters ( cell_id, cell_subdomain,
+			      cell_vertices[4](0),cell_vertices[4](1),cell_vertices[4](2),/* centroid */
+			      0.33,/* l1 */
+			      0., 0., 0., /* eigenvec V1 */
+			      0.33,/* l2 */
+			      0., 0., 0., /* eigenvec V2 */
+			      0.33,/* l3 */
+			      0., 0., 0., /* eigenvec V3 */
+			      0.33, /*C00*/
+			      0.00, /*C01*/
+			      0.00, /*C02*/
+			      0.33, /*C11*/
+			      0.00, /*C12*/
+			      0.33  /*C22*/ );
+	  
+	  //
+	  // Add link to the list
+	  list_cell_conductivity_.push_back( std::move(cell_parameters) );
+	} // and of scalp  
       else
 	{
-	  for ( int i = 0 ; i < 6 ; i++)
-	    cell_coeff.conductivity_coefficients[i] = 0.;
-
+	  // Error condition
 	  //
-	  // Output for R analysis
-#ifdef TRACE
-#if TRACE == 100
-	  for ( int i = 0 ; i < 18 ; i++)
-	    cell_coeff.eigen_values[i] = 0.;
 	  //
-	  cell_coeff.eigenvector_1 << 0., 0., 0.;
-#endif
-#endif      
+//	  Cell_conductivity 
+//	    cell_parameters ( cell_id, cell_subdomain,
+//			      cell_vertices[4](0),cell_vertices[4](1),cell_vertices[4](2),/* centroid */
+//			      0.,/* l1 */
+//			      0., 0., 0., /* eigenvec V1 */
+//			      0.,/* l2 */
+//			      0., 0., 0., /* eigenvec V2 */
+//			      0.,/* l3 */
+//			      0., 0., 0., /* eigenvec V3 */
+//			      0., /*C00*/
+//			      0., /*C01*/
+//			      0., /*C02*/
+//			      0., /*C11*/
+//			      0., /*C12*/
+//			      0.  /*C22*/ );
+//	  
+//	  //
+//	  // Add link to the list
+//	  list_cell_conductivity_.push_back( std::move(cell_parameters) );
 	}
-      
-      //
-      // Add link to the list
-      list_coefficients_.push_back( cell_coeff );
-    }
+    }// end of for( Cell_iterator cit = mesh_...
 
 
   //
@@ -1296,19 +1329,8 @@ Domains_build_mesh::Conductivity_matching_knn()
   positions_array = nullptr;
   delete [] Do_we_have_conductivity; 
   Do_we_have_conductivity = nullptr; 
-#ifdef TRACE
-#if TRACE == 100
   delete [] P_matrices_array;
   P_matrices_array = nullptr;
-#endif
-#endif
-}
-//
-//
-//
-void 
-Domains_build_mesh::Conductivity_matching_test()
-{
 }
 //
 //
@@ -1652,63 +1674,74 @@ Domains_build_mesh::Conductivity_matching_analysis()
   //
   // Stream
   std::stringstream 
-    err,
-    err1;
+    err;
   //
   err 
     << "Cell_sub_domain "
     << "X_cent Y_cent Z_cent  "
     << "l1  l2  l3 l_long l_tang l_mean "
-    << "l1_v0 l2_v0 l3_v0 "
-    << "l1_v1 l2_v1 l3_v1 "
-    << "l1_v2 l2_v2 l3_v2 "
-    << "l1_v3 l2_v3 l3_v3 \n";
-  //
-  err1 
-    << "Cell_sub_domain "
-    << "X Y Z "
-    << "v11 v12 v13 \n";
+    << "v11 v12 v13 "
+    << "v21 v22 v23 "
+    << "v31 v32 v33 \n";
 
 
   //
   // Main loop
-  for ( auto it = list_coefficients_.begin() ; 
-	it != list_coefficients_.end() ; 
-	++it )
+  for( auto cell_it : list_cell_conductivity_ )
     {
       err 
-	<< it->cell_subdomain << " "
-	<< it->vertices[4](0) << " " << it->vertices[4](1) << " " << it->vertices[4](2) << " ";
+	<< cell_it.get_cell_subdomain_() << " "
+	<< (cell_it.get_centroid_lambda_()[0]).x() << " " 
+	<< (cell_it.get_centroid_lambda_()[0]).y() << " " 
+	<< (cell_it.get_centroid_lambda_()[0]).z() << " ";
       //
-      err1 
-	<< it->cell_subdomain << " "
-	<< it->vertices[4](0) << " " << it->vertices[4](1) << " " << it->vertices[4](2) << " "
-	<< it->eigenvector_1(0) << " " << it->eigenvector_1(1) << " " << it->eigenvector_1(2) << " ";
+      float
+	l1 = (cell_it.get_centroid_lambda_()[0]).weight(),
+	l2 = (cell_it.get_centroid_lambda_()[1]).weight(),
+	l3 = (cell_it.get_centroid_lambda_()[2]).weight();
       //
-      for( int i = 0 ; i < 18 ; i++ )
-	err << it->eigen_values[i] << " ";
+      err 
+	<< l1 << " " << l2 << " " << l3 << " " << l1 << " " 
+	<< (l2+l3)/2. << " " << (l1+l2+l3)/3. << " " ;
+      //
+      err 
+	<< (cell_it.get_centroid_lambda_()[0]).vx() << " " 
+	<< (cell_it.get_centroid_lambda_()[0]).vy() << " " 
+	<< (cell_it.get_centroid_lambda_()[0]).vz() << " "
+	<< (cell_it.get_centroid_lambda_()[1]).vx() << " " 
+	<< (cell_it.get_centroid_lambda_()[1]).vy() << " " 
+	<< (cell_it.get_centroid_lambda_()[1]).vz() << " "
+	<< (cell_it.get_centroid_lambda_()[2]).vx() << " " 
+	<< (cell_it.get_centroid_lambda_()[2]).vy() << " " 
+	<< (cell_it.get_centroid_lambda_()[2]).vz() << " ";
       //
       err << std::endl;
-      err1 << std::endl;
     }
 
 
   //
   // 
-  std::ofstream 
-    outFile,
-    outFile1;
+  std::ofstream outFile;
   //
   outFile.open("Data_mesh.vs.conductivity.frame");
-  outFile1.open("Centroid_normal.frame");
   //
   outFile << err.rdbuf();
-  outFile1 << err1.rdbuf();
   //
   outFile.close();  
-  outFile1.close();  
 #endif
 #endif      
+}
+//
+//
+//
+void 
+Domains_build_mesh::Create_dipoles_list()
+{
+  //
+  // Select the list maker algorithm
+  dipoles_.reset( new Build_dipoles_list_knn );
+  //
+  dipoles_->Make_list(list_cell_conductivity_);
 }
 //
 //

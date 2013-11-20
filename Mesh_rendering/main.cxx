@@ -27,11 +27,10 @@ main()
   //
   std::cout << "Process started at: " << timerLog->GetUniversalTime() << std::endl;
 
-
   // 
   // Access parameters
   Domains::Access_parameters* parameters = Domains::Access_parameters::get_instance();
-
+  parameters->init();
   
   // 
   // Create the INRIMAGE
@@ -42,7 +41,9 @@ main()
   // Write Inrimage
   timerLog->MarkEvent("Write Inrimage");
   labeled_image.Write_inrimage_file();
-  
+  // match white matter vertices with gray matter vertices
+  timerLog->MarkEvent("match white matter vertices with gray matter vertices");
+  parameters->epitaxy_growth();
 
   //
   // Diffusion tensor
@@ -57,18 +58,18 @@ main()
   //
   tensor.Move_conductivity_array_to_parameters();
 
-
   //
   // Tetrahedrization
   timerLog->MarkEvent("Build the mesh");
   Domains::Build_mesh tetrahedrization;
-
-
   //
   // Match conductivity with mesh's cells
   timerLog->MarkEvent("Mesh conductivity matching");
-  //  tetrahedrization.Conductivity_matching();
   tetrahedrization.Conductivity_matching();
+  //
+  // Build electrical dipoles list
+  timerLog->MarkEvent("Build electrical dipoles list");
+  tetrahedrization.Create_dipoles_list();
 
   //
   // Output
@@ -83,11 +84,13 @@ main()
   tetrahedrization.Output_FEniCS_xml();
   timerLog->MarkEvent("write mesh conductivity");
   tetrahedrization.Output_mesh_conductivity_xml();
-//#ifdef TRACE
-//#if ( TRACE == 200 )
-//  tetrahedrization.Output_VTU_xml();
-//#endif
-//#endif
+  timerLog->MarkEvent("write dipoles list");
+  tetrahedrization.Output_dipoles_list_xml();
+  //#ifdef TRACE
+  //#if ( TRACE == 200 )
+  //  tetrahedrization.Output_VTU_xml();
+  //#endif
+  //#endif
   //
 #else
   // NO DEBUG MODE
@@ -95,25 +98,25 @@ main()
   std::thread output(std::ref(tetrahedrization), MESH_OUTPUT);
   std::thread subdomains(std::ref(tetrahedrization), MESH_SUBDOMAINS);
   std::thread conductivity(std::ref(tetrahedrization), MESH_CONDUCTIVITY);
+  std::thread dipoles(std::ref(tetrahedrization), MESH_DIPOLES);
   //
-//#ifdef TRACE
-//#if ( TRACE == 200 )
-//  std::thread vtu(std::ref(tetrahedrization), MESH_VTU);
-//  vtu.join();
-//#endif
-//#endif
+  //#ifdef TRACE
+  //#if ( TRACE == 200 )
+  //  std::thread vtu(std::ref(tetrahedrization), MESH_VTU);
+  //  vtu.join();
+  //#endif
+  //#endif
   //
   output.join();
   subdomains.join();
   conductivity.join();
+  dipoles.join();
 #endif
-
 
   //
   // Time log 
   timerLog->MarkEvent("Stop the process");
   std::cout << "Events log:" << *timerLog << std::endl;
-
  
   //
   //

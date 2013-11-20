@@ -54,11 +54,17 @@ export EIGEN3   = $(PATH_SOFT)/Eigen/install
 export FENICS   = $(PATH_SOFT)/FEniCS/install/
 export CUDA_LIB = /usr/local/cuda-5.0/lib64/
 
+######################
+## Main DIRECTORIES ##
+######################
+export FIJEE += $(CURDIR)
+
 #####################
 ## SUB DIRECTORIES ##
 #####################
-MESH_RENDERING_DIR    = Mesh_rendering
-SUBTRACTION_METHOD_DIR= Subtraction_method
+UTILS_DIR              = Utils
+MESH_RENDERING_DIR     = Mesh_rendering
+SUBTRACTION_METHOD_DIR = Subtraction_method
 EXEC = $(MESH_RENDERING)/build_inrimage  $(SUBTRACTION_METHOD_DIR)/Poisson
 
 ###############
@@ -67,6 +73,7 @@ EXEC = $(MESH_RENDERING)/build_inrimage  $(SUBTRACTION_METHOD_DIR)/Poisson
 all: $(EXEC)
 
 $(EXEC):
+	( cd $(UTILS_DIR)/pugi/ && $(MAKE) )
 	( cd $(SUBTRACTION_METHOD_DIR) && $(MAKE) )
 	( cd $(MESH_RENDERING_DIR) && $(MAKE) )
 	@echo""
@@ -75,6 +82,7 @@ $(EXEC):
 
 
 clean:
+	( cd $(UTILS_DIR)/pugi/ && $(MAKE) $@ )
 	( cd $(SUBTRACTION_METHOD_DIR) && $(MAKE) $@ )
 	( cd $(MESH_RENDERING_DIR) && $(MAKE) $@ )
 
@@ -83,6 +91,7 @@ distclean: clean
 	find . -name *.xml   -exec rm {} \;
 	find . -name *.mesh  -exec rm {} \;
 	find . -name *.vtu   -exec rm {} \;
+	find . -name *.pvd   -exec rm {} \;
 	find . -name *.inr   -exec rm {} \;
 	find . -name *.frame -exec rm {} \;
 

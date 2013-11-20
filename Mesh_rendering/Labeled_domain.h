@@ -29,7 +29,7 @@ namespace Domains
    *  This class is an example of class I will have to use
    */
   // Implicite_domain = 
-  template< typename Implicite_domain, typename Point_type >
+  template< typename Implicite_domain, typename Point_type, typename VectorPointNormal>
   class Labeled_domain
   {
   private:
@@ -60,7 +60,7 @@ namespace Domains
      *  Constructor is a copy constructor
      *
      */
-    Labeled_domain( const Labeled_domain< Implicite_domain, Point_type >& )
+    Labeled_domain( const Labeled_domain< Implicite_domain, Point_type, VectorPointNormal >& )
       {};
     /*!
      *  \brief Move Constructor
@@ -68,7 +68,7 @@ namespace Domains
      *  Constructor is a moving constructor
      *
      */
-    Labeled_domain( Labeled_domain< Implicite_domain, Point_type >&& )
+    Labeled_domain( Labeled_domain< Implicite_domain, Point_type, VectorPointNormal >&& )
       {};
     /*!
      *  \brief Destructeur
@@ -86,7 +86,7 @@ namespace Domains
      *  Operator = of the class Labeled_domain
      *
      */
-    Labeled_domain& operator = ( const Labeled_domain< Implicite_domain, Point_type >& )
+    Labeled_domain& operator = ( const Labeled_domain< Implicite_domain, Point_type, VectorPointNormal >& )
       {};
     /*!
      *  \brief Move Operator =
@@ -94,7 +94,7 @@ namespace Domains
      *  Move operator of the class Labeled_domain
      *
      */
-    Labeled_domain& operator = ( Labeled_domain< Implicite_domain, Point_type >&& )
+    Labeled_domain& operator = ( Labeled_domain< Implicite_domain, Point_type, VectorPointNormal >&& )
       {};
     /*!
      *  \brief Move Operator ()
@@ -122,6 +122,12 @@ namespace Domains
     inline bool inside_domain( Point_type Point_Type )
     {
       return implicite_domain_->inside_domain( Point_Type );
+    };
+
+    //    inline bool inside_domain( CGAL::Point_3< Kernel > Point )
+    inline VectorPointNormal get_point_normal()
+    {
+      return implicite_domain_->get_point_normal_();
     };
 
   };

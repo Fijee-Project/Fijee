@@ -8,11 +8,45 @@
  * \version 0.1
  */
 #include <iostream>
-#include <stdlib.h>     /* getenv */
+//#include <stdlib.h>     /* getenv */
 #include <string>
 #include <sstream>
-#include <errno.h>    /* builtin errno*/
-#include <sys/stat.h> /*mkdir*/
+//#include <errno.h>      /* builtin errno */
+//#include <sys/stat.h>   /* mkdir */
+#include <list>
+#include <tuple>
+#include <algorithm>    /* copy */
+//
+// UCSF
+//
+#include "Utils/Fijee_environment.h"
+#include "Point_vector.h"
+#include "Distance.h"
+//
+// CGAL
+//
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Point_with_normal_3.h>
+
+//#include <CGAL/Simple_cartesian.h>
+//#include <CGAL/Orthogonal_incremental_neighbor_search.h>
+#include <CGAL/Orthogonal_k_neighbor_search.h>
+//#include <CGAL/Search_traits_3.h>
+#include <CGAL/Search_traits.h>
+//
+typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
+typedef CGAL::Point_with_normal_3<Kernel> Point_with_normal;
+
+typedef CGAL::Search_traits<float, Domains::Point_vector, const float*, Construct_coord_iterator> TreeTraits;
+typedef CGAL::Orthogonal_k_neighbor_search<TreeTraits, Domains::Distance > Neighbor_search;
+typedef Neighbor_search::iterator NN_iterator;
+typedef Neighbor_search::Tree Tree;
+
+//typedef CGAL::Search_traits_3<Kernel> TreeTraits;
+//typedef CGAL::Orthogonal_k_neighbor_search<TreeTraits> Neighbor_search;
+////typedef CGAL::Orthogonal_incremental_neighbor_search<TreeTraits> NN_incremental_search;
+//typedef Neighbor_search::iterator NN_iterator;
+//typedef Neighbor_search::Tree Tree;
 //
 // NIFTI
 //
@@ -26,27 +60,12 @@
 typedef Eigen::Matrix< float, 3, 3 > Matrix_f_3X3;
 typedef Eigen::Matrix< float, 3, 1 > Vector_f_3X1;
 //
-// Get built-in type.  Creates member get_"name"() (e.g., get_visibility());
-//
-#define ucsf_get_macro(name,type) \
-  inline type get_##name() {	  \
-    return this->name;		  \
-  } 
-//
-// Get character string.  Creates member get_"name"() 
-// (e.g., char *GetFilename());
-//
-#define ucsf_get_string_macro(name) \
-  const char* get_##name() {	\
-    return this->name.c_str();	\
-  } 
-//
 //
 //
 /*! \namespace Domains
  * 
  * Name space for our new package
- * A singleton provides for encapsulation of persistent state information with the benefits of lazy construction. It also avoids the issue of which code segment should "own" the static persistent object instance. It further guarantees what mechanism is used to allocate memory for the underlying object and allows for better control over its destruction.
+ * 
  *
  */
 namespace Domains
@@ -54,7 +73,7 @@ namespace Domains
   /*! \class Access_parameters
    *  \brief class representing whatever
    *
-   *  This class is an example of singleton I will have to use
+   *  This class provides for encapsulation of persistent state information. It also avoids the issue of which code segment should "own" the static persistent object instance. It further guarantees what mechanism is used to allocate memory for the underlying object and allows for better control over its destruction.
    */
   class Access_parameters
   {
@@ -84,6 +103,21 @@ namespace Domains
     //! All segmentation header 
     std::string aseg_hdr_;
     
+    //
+    // Surfaces contenairs
+    //! List of point with their vector for the gray matter left hemisphere.
+    std::list< Domains::Point_vector > lh_gray_matter_surface_point_normal_;
+    //! List of point with their vector for the gray matter write hemisphere.
+    std::list< Domains::Point_vector > rh_gray_matter_surface_point_normal_;
+    //! List of point with their vector for the white matter left hemisphere.
+    std::list< Domains::Point_vector > lh_white_matter_surface_point_normal_;
+    //! List of point with their vector for the white matter write hemisphere.
+    std::list< Domains::Point_vector > rh_white_matter_surface_point_normal_;
+    //! List of matching vertices between white matter and gray matter left hemisphere.
+    std::list< std::tuple< Domains::Point_vector, Domains::Point_vector > > lh_match_wm_gm_;
+    //! List of matching vertices between white matter and gray matter right hemisphere.
+    std::list< std::tuple< Domains::Point_vector, Domains::Point_vector > > rh_match_wm_gm_;
+
     //
     // aseg.nii NIFTI information
     // image information
@@ -354,6 +388,32 @@ namespace Domains
      *
      */
     ucsf_get_macro(eigenvalues_translation_, Vector_f_3X1);
+   /*!
+     *  \brief Get lh_match_wm_gm_
+     *
+     *  This method return the white and gray matter vertices matching tuples for the left hemisphere.
+     *
+     */
+    void 
+      get_lh_match_wm_gm_(std::list< std::tuple< Domains::Point_vector, Domains::Point_vector > >& Lh_match_wm_gm) const 
+    { 
+      Lh_match_wm_gm.resize( lh_match_wm_gm_.size() );
+      //
+      std::move( lh_match_wm_gm_.begin(), lh_match_wm_gm_.end(), Lh_match_wm_gm.begin() );
+    };
+   /*!
+     *  \brief Get rh_match_wm_gm_
+     *
+     *  This method return the white and gray matter vertices matching tuples for the right hemisphere.
+     *
+     */
+    void get_rh_match_wm_gm_(std::list< std::tuple< Domains::Point_vector, Domains::Point_vector > >& Rh_match_wm_gm) const 
+    {  
+      Rh_match_wm_gm.resize( rh_match_wm_gm_.size() );
+      //
+      std::move( rh_match_wm_gm_.begin(), rh_match_wm_gm_.end(), Rh_match_wm_gm.begin() );
+    };
+
 
   public:
     /*!
@@ -476,12 +536,73 @@ namespace Domains
      */
     void set_Do_we_have_conductivity_( bool** Do_We_Have_Conductivity );
     /*!
+     *  \brief Set lh_gray_matter_surface_point_normal_
+     *
+     *  This method move the left hemisphere gray matter surface point normal vector inside the parameters object.
+     *
+     *  \param Lh_gray_matter_surface_point_normal: gray matter surface point normal vector of the gray matter surface mesh.
+     */
+    void set_lh_gray_matter_surface_point_normal_(std::list<Point_vector>&&  Lh_gray_matter_surface_point_normal );
+    /*!
+     *  \brief Set rh_gray_matter_surface_point_normal_
+     *
+     *  This method move the right hemisphere gray matter surface point normal vector inside the parameters object.
+     *
+     *  \param Rh_gray_matter_surface_point_normal: gray matter surface point normal vector of the gray matter surface mesh.
+     */
+    void set_rh_gray_matter_surface_point_normal_(std::list<Point_vector>&&  Rh_gray_matter_surface_point_normal );
+    /*!
+     *  \brief Set lh_white_matter_surface_point_normal_
+     *
+     *  This method move the left hemisphere white matter surface point normal vector inside the parameters object.
+     *
+     *  \param White_matter_surface_point_normal: white matter surface point normal vector of the white matter surface mesh.
+     */
+    void set_lh_white_matter_surface_point_normal_(std::list<Point_vector>&&  Lh_white_matter_surface_point_normal );
+    /*!
+     *  \brief Set rh_white_matter_surface_point_normal_
+     *
+     *  This method move the right hemisphere white matter surface point normal vector inside the parameters object.
+     *
+     *  \param White_matter_surface_point_normal: white matter surface point normal vector of the white matter surface mesh.
+     */
+    void set_rh_white_matter_surface_point_normal_(std::list<Point_vector>&&  Rh_white_matter_surface_point_normal );
+    /*!
      *  \brief Kill the singleton instance
      *
      *  This method kill the singleton parameters_instance pointer
      *
      */
     static void kill_instance();
+    /*!
+     *  \brief init parameters
+     *
+     *  This method initialize the simulation parameters.
+     *
+     */
+    void init(){};
+    /*!
+     *  \brief epitaxy growth
+     *
+     *  This method method matches the white matter vertices with the gray matter vertices. 
+     *  The goal is not only finding the closest vertices from the two materials but also minimize the angle between the carried normals. Most likely the gray matter follows an epitaxy growth.
+     *
+     */
+    void epitaxy_growth();
+
+  private:
+    /*!
+     *  \brief matching vertices between gray and white matters
+     *
+     *  This method method creates a list of tuples match of vertices between gray and white matter.
+     * 
+     *  \param White_matter_surface_point_normal: vector of white matter vertices with their normal.
+     *  \param Gray_matter_surface_point_normal: vector of gray matter vertices with their normal.
+     *  \param Match_wm_gm: list of tuple matching white matter with gray matter vertices.
+     */
+    void match_wm_gm( std::list<Point_vector>&  White_matter_surface_point_normal, 
+		      std::list<Point_vector>&  Gray_matter_surface_point_normal, 
+		      std::list< std::tuple< Point_vector, Point_vector > >& Match_wm_gm );
   };
   /*!
    *  \brief Dump values for Access_parameters

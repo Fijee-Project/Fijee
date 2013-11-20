@@ -3,7 +3,7 @@
 // We give a comprehensive type name
 //
 typedef Domains::Access_parameters DAp;
-typedef struct stat stat_file;
+//typedef struct stat stat_file;
 //
 //
 //
@@ -20,55 +20,10 @@ DAp::Access_parameters():
 {
   //
   // Check on ENV variables
-  char
-    *subjects_dir = getenv ("SUBJECTS_DIR"),
-    *subject      = getenv ("SUBJECT");
+  Utils::Fijee_environment fijee;
   //
-  if( subjects_dir == NULL ||
-      subject      == NULL )
-    {
-      std::cerr << "FreeSurfer Env variables $SUBJECTS_DIR and $SUBJECT must be defined" 
-		<< std::endl;
-      exit(1);
-    }
-  //
-  files_path_ = std::string(subjects_dir) + "/" + std::string(subject) + "/";
-
-  //
-  // Create output path
-  stat_file st;
-  int       status = 0;
-  mode_t    mode   = 0750;
-  //
-  files_path_output_ = files_path_ + "/fem/output/";
-  //
-  if ( stat( files_path_output_.c_str(), &st ) != 0 )
-    {
-      /* Directory does not exist */
-      if ( mkdir( files_path_output_.c_str(), mode ) != 0 )
-	status = -1;
-    }
-    else if (!S_ISDIR(st.st_mode))
-    {
-        errno = ENOTDIR;
-        status = -1;
-    }
-    else
-      {
-	std::cerr << "Warning: directory " << files_path_output_
-		  << " already exist. Data will be removed." << std::endl;
-      }
-  //
-  if (status == -1 )
-    {
-      std::cerr << "failed to create " << files_path_output_
-		<< ": " << strerror(errno) << std::endl;
-      //
-      exit(1);
-    }
-  // append the path line
-  files_path_ += "/";
-  
+  files_path_        = fijee.get_fem_path_();
+  files_path_output_ = fijee.get_fem_output_path_();
 
 
   //
@@ -77,7 +32,7 @@ DAp::Access_parameters():
 
   //
   // Skull and scalp
-  std::string skull_scalp_files_path = files_path_ + "fem/input/STL/" + std::string(subject);
+  std::string skull_scalp_files_path = files_path_ + "fem/input/STL/" + fijee.get_subject_();
   outer_skin_surface_  = skull_scalp_files_path + "_outer_skin_surface.stl";
   outer_skull_surface_ = skull_scalp_files_path + "_outer_skull_surface.stl";
   inner_skull_surface_ = skull_scalp_files_path + "_inner_skull_surface.stl";
@@ -749,6 +704,38 @@ DAp::set_Do_we_have_conductivity_(  bool** Do_We_Have_Conductivity )
 //
 //
 //
+void
+DAp::set_lh_gray_matter_surface_point_normal_(std::list<Point_vector>&&  Lh_gray_matter_surface_point_normal )
+{
+  lh_gray_matter_surface_point_normal_ = Lh_gray_matter_surface_point_normal;
+}
+//
+//
+//
+void
+DAp::set_rh_gray_matter_surface_point_normal_(std::list<Point_vector>&&  rh_Gray_matter_surface_point_normal )
+{
+  rh_gray_matter_surface_point_normal_ = rh_Gray_matter_surface_point_normal;
+}
+//
+//
+//
+void
+DAp::set_lh_white_matter_surface_point_normal_(std::list<Point_vector>&&  Lh_white_matter_surface_point_normal )
+{
+  lh_white_matter_surface_point_normal_ = Lh_white_matter_surface_point_normal;
+}
+//
+//
+//
+void
+DAp::set_rh_white_matter_surface_point_normal_(std::list<Point_vector>&&  Rh_white_matter_surface_point_normal )
+{
+  rh_white_matter_surface_point_normal_ = Rh_white_matter_surface_point_normal;
+}
+//
+//
+//
 void 
 DAp::kill_instance()
 {
@@ -756,6 +743,60 @@ DAp::kill_instance()
     {
       delete parameters_instance_;
       parameters_instance_ = NULL;
+    }
+}
+//
+//
+//
+void 
+DAp::epitaxy_growth()
+{
+  // 
+  // Reft hemisphere
+  match_wm_gm( lh_white_matter_surface_point_normal_,
+	       lh_gray_matter_surface_point_normal_,
+	       lh_match_wm_gm_);
+  // 
+  // Right hemisphere
+  match_wm_gm( rh_white_matter_surface_point_normal_,
+	       rh_gray_matter_surface_point_normal_,
+	       rh_match_wm_gm_);
+}
+//
+//
+//
+void 
+DAp::match_wm_gm( std::list<Domains::Point_vector>&  White_matter_surface_point_normal, 
+		  std::list<Domains::Point_vector>&  Gray_matter_surface_point_normal, 
+		  std::list< std::tuple< Domains::Point_vector, Domains::Point_vector > >& Match_wm_gm )
+{
+  //
+  // k nearest neighbor data structure
+  Tree tree;
+  // build the tree
+  for( auto gm_vertex : Gray_matter_surface_point_normal )
+    tree.insert( gm_vertex );
+ 
+  //
+  //
+  for ( auto wm_vertex : White_matter_surface_point_normal  )
+    {
+      //
+      //
+      Neighbor_search NN( tree, wm_vertex, 15 );
+      auto filter_nearest = NN.begin();
+
+      //
+      // theta between white matter normal and gray matter normal is less than 30°
+      float cos_theta = wm_vertex.cosine_theta( filter_nearest->first );
+      //
+      while( cos_theta < 0.87 && ++filter_nearest != NN.end() )
+	cos_theta = wm_vertex.cosine_theta( filter_nearest->first );
+
+      //
+      // make tuple list
+      if( filter_nearest != NN.end() )
+	Match_wm_gm.push_back( std::make_tuple(wm_vertex, filter_nearest->first) );
     }
 }
 //

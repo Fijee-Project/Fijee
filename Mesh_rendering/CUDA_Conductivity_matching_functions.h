@@ -1,7 +1,7 @@
 #ifndef _CUDA_CONDUCTIVITY_MATCHING_FUNCTIONS_
 #define _CUDA_CONDUCTIVITY_MATCHING_FUNCTIONS_
 #include <stdio.h>
-#include "enum.h"
+#include "Utils/enum.h"
 //
 //
 //
