@@ -27,10 +27,10 @@ Solver::Subtraction::Subtraction()
   subdomains_xml += "mesh_subdomains.xml";
   //
   domains_.reset( new MeshFunction< long unsigned int >(*mesh_, subdomains_xml.c_str()) );
-//  // write domains
-//  std::string domains_file_name = "domains.pvd";
-//  File domains_file( domains_file_name.c_str() );
-//  domains_file << *domains_;
+  // write domains
+  std::string domains_file_name = "domains.pvd";
+  File domains_file( domains_file_name.c_str() );
+  domains_file << *domains_;
 
 
   //
@@ -166,7 +166,7 @@ Solver::Subtraction::solver_loop()
   int tempo = 0;
   for( auto source = dipoles_list_.begin() ;
        source != dipoles_list_.end() ; source++ )
-    if( ++tempo < 5)
+    if( ++tempo < 80 )
     {
       //
       // Enqueue tasks
@@ -247,5 +247,5 @@ Solver::Subtraction::operator () ( Solver::Phi& source/*,
   File file( file_name.c_str() );
   //
   file << u;
-  file << *domains_;
+  //  file << *domains_;
 };

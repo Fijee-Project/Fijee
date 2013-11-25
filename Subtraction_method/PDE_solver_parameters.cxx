@@ -69,7 +69,7 @@ void
 SDEsp::init()
 {
   //
-  //  parameters["num_threads"] = 2;
+  //  dolfin::parameters["num_threads"] = 4;
 
   //
   // Back end parameters
@@ -108,7 +108,7 @@ SDEsp::init()
 
   //
   // Dispatching information
-  number_of_threads_ = 2;
+  number_of_threads_ = 16;
 }
 //
 //

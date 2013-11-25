@@ -22,7 +22,7 @@ EXEC = poisson
 all: $(EXEC) 
 
 
-poisson: $(UFL_HEADER) $(OBJ) 
+poisson: $(OBJ) 
 	$(CC) $(CXXFLAGS) $(INC) $(LIB_DIR) $(LIBS) $^ -o $@  
 
 
@@ -30,8 +30,8 @@ poisson: $(UFL_HEADER) $(OBJ)
 	$(CXX) $(CXXFLAGS) $(INC) -o $@ -c $<
 
 
-$(UFL_HEADER): $(UFL_SRC)
+subtraction: $(UFL_SRC)
 	$(UFL) $(UFLFLAG) $?
 
 clean:
-	rm $(EXEC) Poisson.h $(OBJ) #  poisson000000.vtu poisson.pvd
+	rm $(EXEC)  $(OBJ) #  poisson000000.vtu poisson.pvd

@@ -2,7 +2,7 @@
 ## CONFIGURE ##
 ###############
 export PREFIX =
-export PATH_SOFT =/home/cobigo/devel/CPP
+export PATH_SOFT =/data1/devel/CPP/
 DEBUG         = no
 VERSION       = 1.0
 DIST          = fijee
@@ -11,7 +11,7 @@ DIST          = fijee
 ## COMPILATION ##
 #################
 export CXX  = g++
-export CC   = g++
+export CC   = g++-4.4
 export CUDA = nvcc
 #-lineinfo CUDA
 #  -gencode arch=compute_10,code=sm_10 
@@ -52,7 +52,7 @@ endif
 #
 export EIGEN3   = $(PATH_SOFT)/Eigen/install
 export FENICS   = $(PATH_SOFT)/FEniCS/install/
-export CUDA_LIB = /usr/local/cuda-5.0/lib64/
+export CUDA_LIB = /usr/local/cuda-5.5/targets/x86_64-linux/lib/
 
 ######################
 ## Main DIRECTORIES ##
@@ -81,6 +81,10 @@ $(EXEC):
 	@echo""
 
 
+subtraction:
+	( cd $(SUBTRACTION_METHOD_DIR) && $(MAKE) subtraction )
+
+
 clean:
 	( cd $(UTILS_DIR)/pugi/ && $(MAKE) $@ )
 	( cd $(SUBTRACTION_METHOD_DIR) && $(MAKE) $@ )
@@ -91,9 +95,9 @@ distclean: clean
 	find . -name *.xml   -exec rm {} \;
 	find . -name *.mesh  -exec rm {} \;
 	find . -name *.vtu   -exec rm {} \;
-	find . -name *.pvd   -exec rm {} \;
 	find . -name *.inr   -exec rm {} \;
 	find . -name *.frame -exec rm {} \;
+	find . -name Poisson.h -exec rm {} \;
 
 #check:
 #	
