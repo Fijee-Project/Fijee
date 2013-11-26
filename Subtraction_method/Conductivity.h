@@ -3,6 +3,10 @@
 #include <dolfin.h>
 #include <vector>
 //
+// UCSF
+//
+#include "PDE_solver_parameters.h"
+//
 //
 //
 using namespace dolfin;

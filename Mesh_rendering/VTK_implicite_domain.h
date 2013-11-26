@@ -9,6 +9,11 @@
 #include <set>
 #include <vector>
 //
+// UCSF
+//
+#include "Access_parameters.h"
+#include "Point_vector.h"
+//
 // CGAL
 //
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
@@ -19,6 +24,7 @@
 #include <CGAL/compute_average_spacing.h>
 //
 typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
+typedef CGAL::Point_with_normal_3<Kernel> Point_with_normal;
 typedef CGAL::Poisson_reconstruction_function<Kernel> Poisson_reconstruction_function;
 typedef Kernel::FT FT;
 //
@@ -80,8 +86,10 @@ namespace Domains
     Poisson_reconstruction_function* function_;
     //
     vtkSmartPointer<vtkOBBTree> obb_tree_;
-    vtkSmartPointer<vtkPoints> check_points_;
+    vtkSmartPointer<vtkPoints>  check_points_;
     vtkSmartPointer<vtkSelectEnclosedPoints> select_enclosed_points_;
+    //! map of point with their vector. Those points represent vertices and their vectors represent the surface normal.
+    std::list <Domains::Point_vector > point_normal_;
 
   public:
     /*!
@@ -149,6 +157,14 @@ namespace Domains
      *  \return max_x_
      */
     //    inline double get_max_x( ) const {return max_x_;};
+    /*!
+     *  \brief Get point_normal vector
+     *
+     *  This method return point_normal_ of the STL mesh.
+     *
+     *  \return point_normal_
+     */
+    inline  std::list<Domains::Point_vector> get_point_normal_( ) const {return point_normal_;};
  
   public:
     inline bool inside_domain( CGAL::Point_3< Kernel > Point )

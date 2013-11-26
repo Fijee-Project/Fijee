@@ -5,12 +5,16 @@
 //
 // CGAL
 //
-typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
-typedef CGAL::Point_with_normal_3<Kernel> Point_with_normal;
+//typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
+//typedef CGAL::Point_with_normal_3<Kernel> Point_with_normal;
 typedef Kernel::Point_3 Point;
 typedef Kernel::Vector_3 Vector;
 typedef CGAL::Poisson_reconstruction_function<Kernel> Poisson_reconstruction_function;
 typedef CGAL::Implicit_surface_3<Kernel, Poisson_reconstruction_function> Surface_3;
+//
+// Eigen
+//
+#include <Eigen/Dense>
 //
 // VTK
 //
@@ -148,6 +152,44 @@ Domain::VTK_implicite_domain( const char* Vtk_Mesh ):
     }
 
   //
+  // MNI 305 coordinates
+  Eigen::Matrix3f R_mni305;
+  R_mni305 <<
+    -1, 0, 0,
+     0, 0, 1,
+     0,-1, 0;
+  //
+  Eigen::Vector3f T_mni305;
+  T_mni305 <<
+     128,
+    -128,
+     128;
+  
+  //
+  // We check how different we are from MNI 305 coordinates
+  Eigen::Matrix3f aseg_rotation = 
+    (Domains::Access_parameters::get_instance())->get_rotation_();
+  Eigen::Vector3f aseg_translation = 
+    (Domains::Access_parameters::get_instance())->get_translation_();
+  //
+  Eigen::Vector3f delta_traslation = aseg_translation - T_mni305;
+  //
+  Eigen::Matrix3f delta_rotation = aseg_rotation - R_mni305;
+  //
+  // We don't have explicite example to be sure about the 
+  // correct rotation to apply. All the next commented code
+  // lines can help if we face this case.
+  if ( delta_rotation.cwiseAbs().maxCoeff() > 1.e-03 )
+    {
+      std::cerr << delta_rotation << std::endl;
+      std::cerr << "Patient position was very tilted compared to the MNI 305 coordinates" << std::endl;
+      std::cerr << "We might need to implement a rotation like:" << std::endl;
+      std::cerr << "R = Id + delta_rotation" << std::endl;
+      exit( 1 );
+    }
+
+
+  //
   // Translate and rotate points with theire normal
   // Create a polydata object
   vtkSmartPointer<vtkPolyData> Poly_data_points =
@@ -170,7 +212,10 @@ Domain::VTK_implicite_domain( const char* Vtk_Mesh ):
 //  rotation->RotateWXYZ(90, 1, 0, 0);
   // translation
   vtkSmartPointer<vtkTransform> translation = vtkSmartPointer<vtkTransform>::New();
-  translation->Translate(.0, 38., 6.);
+  //YC  translation->Translate(.0, 38., 6.);
+  translation->Translate( delta_traslation(0), 
+			  delta_traslation(1), 
+			  delta_traslation(2) );
 //  // Points symmetry
 //  vtkSmartPointer<vtkTransformPolyDataFilter> transform_symmetric = 
 //    vtkSmartPointer<vtkTransformPolyDataFilter>::New();
@@ -265,6 +310,9 @@ Domain::VTK_implicite_domain( const char* Vtk_Mesh ):
       normal[1] /= norm;
       normal[2] /= norm;
 //      std::cout << normal[0] << " " << normal[1] << " " << normal[2] << " " << std::endl;
+      //
+      point_normal_.push_back(Domains::Point_vector( vertex[0], vertex[1], vertex[2],
+						    normal[0], normal[1], normal[2] ));
       //
       stream << vertex[0] << " " << vertex[1] << " " << vertex[2] << " " 
 	     << normal[0] << " " << normal[1] << " " << normal[2] << std::endl;

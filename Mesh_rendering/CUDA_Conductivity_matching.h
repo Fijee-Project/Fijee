@@ -5,7 +5,7 @@
 //
 // UCSF
 //
-//#include "enum.h"
+//#include "Utils/enum.h"
 //
 // CUDA runtime
 //

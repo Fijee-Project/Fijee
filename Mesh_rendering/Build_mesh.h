@@ -1,12 +1,21 @@
 #ifndef BUILD_MESH_H_
 #define BUILD_MESH_H_
+#include <string>
 #include <utility>
 #include <tuple>
+#include <iostream>
+#include <fstream>      // std::ifstream, std::ofstream
+#include <map>
+#include <memory> // unique_ptr
 //
 // UCSF
 //
-#include "enum.h"
+#include "Utils/enum.h"
 #include "CUDA_Conductivity_matching.h"
+#include "Dipole.h"
+#include "Cell_conductivity.h"
+#include "Build_dipoles_list.h"
+#include "Build_dipoles_list_knn.h"
 //
 // CGAL
 //
@@ -22,7 +31,6 @@
 #include <CGAL/basic.h>
 #include <CGAL/Search_traits_3.h>
 #include <CGAL/Search_traits_adapter.h>
-#include <CGAL/point_generators_3.h>
 #include <CGAL/Orthogonal_k_neighbor_search.h>
 //
 typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
@@ -47,9 +55,6 @@ typedef CGAL::Search_traits_3< Kernel >Traits_base;
  * \author Yann Cobigo
  * \version 0.1
  */
-#include <iostream>
-#include <fstream>      // std::ifstream, std::ofstream
-#include <map>
 /*! \namespace Domains
  * 
  * Name space for our new package
@@ -59,6 +64,7 @@ namespace Domains
 {
   // -----------------------------------
   // K-nearest neighbor algorithm (CGAL)
+  // Conductivity_matching_knn() func
   // -----------------------------------
   struct Position_property_map
   {
@@ -74,7 +80,6 @@ namespace Domains
   typedef CGAL::Search_traits_adapter< std::tuple< Point_3, int >, Position_property_map, Traits_base > Traits;
   typedef CGAL::Orthogonal_k_neighbor_search< Traits > K_neighbor_search;
   typedef K_neighbor_search::Tree Tree;
-  typedef K_neighbor_search::Distance Distance;
 
   // -----------------------------------
   // Rebin_cell_pmap
@@ -343,6 +348,12 @@ namespace Domains
     C3t3 mesh_;
     //! List of cell with matching conductivity coefficients
     std::list< Cell_coefficient > list_coefficients_;
+    //! List of cell with matching conductivity coefficients
+    std::list< Cell_conductivity > list_cell_conductivity_;
+    //! Algorithm building the dipoles list;
+    std::unique_ptr< Build_dipoles_list > dipoles_;
+    //! List of dipoles
+    std::list< Dipole > list_dipoles_;
 
   public:
     /*!
@@ -403,7 +414,9 @@ namespace Domains
      */
     inline void Output_mesh_format()
     {
-      std::ofstream medit_file("out.mesh");
+      std::string out_mesh = (Domains::Access_parameters::get_instance())->get_files_path_output_();
+      out_mesh += std::string("/out.mesh");
+      std::ofstream medit_file(out_mesh.c_str());
       mesh_.output_to_medit(medit_file);
     };
     /*!
@@ -421,6 +434,13 @@ namespace Domains
      */
     void Output_VTU_xml();
     /*!
+     *  \brief Output the XML of the dipoles' list
+     *
+     *  This method create the list of dipoles.
+     *
+     */
+    void Output_dipoles_list_xml();
+    /*!
      *  \brief Output the XML match between mesh and conductivity
      *
      *  This method matches a conductivity tensor for each cell.
@@ -434,14 +454,18 @@ namespace Domains
      *
      */
     void Conductivity_matching();
+    /*!
+     *  \brief Create the list of dipoles
+     *
+     *  This method create the list of dipoles: position, orientation, ...
+     *
+     */
+    void Create_dipoles_list();
 
   private:
     /*!
      */
      void Conductivity_matching_classic();
-    /*!
-     */
-     void Conductivity_matching_test();
     /*!
      */
      void Conductivity_matching_knn();
