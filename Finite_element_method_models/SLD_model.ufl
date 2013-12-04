@@ -1,0 +1,42 @@
+# Source localization direct model
+
+#
+# Functions space
+#
+cell    = tetrahedron
+scalarElement = FiniteElement("Lagrange", cell, 1)
+tensorElement = TensorElement("Lagrange", cell, 1)
+
+#element = FiniteElement("Lagrange", cell, 1)
+
+
+#
+# Function definition
+#
+
+u   = TrialFunction(scalarElement)
+v   = TestFunction(scalarElement)
+n   = scalarElement.cell().n
+
+a_sigma   = Coefficient(tensorElement)
+#e_d       = VectorConstant(scalarElement)
+#f         = Coefficient(scalarElement)
+
+#a_1  = Constant(cell)
+#a_2  = Constant(cell)
+#a_3  = Constant(cell)
+#a_4  = Constant(cell)
+#e_d = VectorConstant(cell)
+#f   = Coefficient(element)
+
+# Bilinear form
+a   = inner( a_sigma * grad(u), grad(v) )*dx 
+#a  += inner( a_2*grad(u), grad(v) )*dx(2)
+#a  += inner( a_3*grad(u), grad(v) )*dx(3)
+#a  += inner( a_4*grad(u), grad(v) )*dx(4)
+#
+# Linear form
+L   = inner(n,grad(v))*dx 
+#L  += f*inner(e_d,grad(v))*dx(2)
+#L  += f*inner(e_d,grad(v))*dx(3)
+#L  += f*inner(e_d,grad(v))*dx(4)
