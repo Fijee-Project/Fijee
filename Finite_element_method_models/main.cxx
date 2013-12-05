@@ -5,6 +5,7 @@
 //
 #include "PDE_solver_parameters.h"
 #include "SL_subtraction.h"
+#include "SL_direct.h"
 #include "Model_solver.h"
 
 int main()
@@ -15,9 +16,11 @@ int main()
   solver_parameters->init();
   
   //
-  // 
-  Solver::Model_solver< Solver::SL_subtraction /* physical model */,
-			2 >  model; // solver_parameters->get_number_of_threads_()
+  // physical models:
+  //  - Solver::SL_subtraction
+  //  - Solver::SL_direct
+  Solver::Model_solver< /* physical model */ Solver::SL_subtraction,
+			/*solver_parameters->get_number_of_threads_()*/ 2>  model;
 
   //
   //

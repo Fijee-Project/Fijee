@@ -104,7 +104,7 @@ SDEsp::init()
   //
   maximum_iterations_ = 10000;
   //
-  relative_tolerance_ = 1.e-06;
+  relative_tolerance_ = 1.e-08 /*1.e-06*/;
 
   //
   // Dispatching information

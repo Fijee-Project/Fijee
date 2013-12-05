@@ -95,7 +95,7 @@ distclean: clean
 	find . -name SLD_model.h -exec rm {} \;
 	find . -name *.xml   -exec rm {} \;
 	find . -name *.mesh  -exec rm {} \;
-	find . -name *.vtu   -exec rm {} \;
+#	find . -name *.vtu   -exec rm {} \;
 	find . -name *.inr   -exec rm {} \;
 	find . -name *.frame -exec rm {} \;
 

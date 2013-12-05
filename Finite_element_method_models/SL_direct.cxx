@@ -1,12 +1,12 @@
 #include <iostream>
-#include "SL_subtraction.h"
+#include "SL_direct.h"
 
 typedef Solver::PDE_solver_parameters SDEsp;
 
 //
 //
 //
-Solver::SL_subtraction::SL_subtraction()
+Solver::SL_direct::SL_direct()
 {
   //
   // Load the mesh
@@ -43,15 +43,15 @@ Solver::SL_subtraction::SL_subtraction()
   //
   //
   // Define the function space
-  V_.reset( new SLS_model::FunctionSpace(*mesh_) );
+  V_.reset( new SLD_model::FunctionSpace(*mesh_) );
   
   //
   // Define boundary condition
-  Periphery perifery;
+  perifery_.reset( new Periphery() );
   // Initialize mesh function for boundary domains. We tag the boundaries
   boundaries_.reset( new FacetFunction< size_t > (*mesh_) );
   boundaries_->set_all(0);
-  perifery.mark(*boundaries_, 1);
+  perifery_->mark(*boundaries_, 1);
 
 
   //
@@ -103,15 +103,12 @@ Solver::SL_subtraction::SL_subtraction()
 	    double direction_vz = dipole.attribute("vz").as_double();
 	    // Intensity
 	    double Q = dipole.attribute("I").as_double();
-	    // Conductivity
-	    double lambda1 = dipole.attribute("lambda1").as_double();
-	    double lambda2 = dipole.attribute("lambda2").as_double();
-	    double lambda3 = dipole.attribute("lambda3").as_double();
+	    // Index cell
+	    double index_cell = dipole.attribute("index_cell").as_uint();
 	    //
-	    dipoles_list_.push_back(/*std::move(*/Solver::Phi( index, Q,
-							       position_x, position_y, position_z, 
-							       direction_vx, direction_vy, direction_vz, 
-							       lambda1, lambda2, lambda3 )/*)*/);
+	    dipoles_list_.push_back(std::move(Solver::Current_density( index, index_cell, Q,
+								       position_x, position_y, position_z, 
+								       direction_vx, direction_vy, direction_vz )));
 	  }
 	
 	//
@@ -138,14 +135,14 @@ Solver::SL_subtraction::SL_subtraction()
 //
 //
 void 
-Solver::SL_subtraction::operator () ( /*Solver::Phi& source,
-				        SLS_model::FunctionSpace& V,
+Solver::SL_direct::operator () ( /*Solver::Phi& source,
+				        SLD_model::FunctionSpace& V,
 				        FacetFunction< size_t >& boundaries*/)
 {
   //
   // Mutex the dipoles vector poping process
   //
-  Solver::Phi source;
+  Solver::Current_density source;
     try {
       // lock the dipole list
       std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
@@ -160,40 +157,34 @@ Solver::SL_subtraction::operator () ( /*Solver::Phi& source,
   //
   std::cout << source.get_name_() << std::endl;
   
-  //
-  // Conductivity isotrope
-  Solver::Sigma_isotrope a_inf( source.get_a0_() );
+//  //
+//  // Define Dirichlet boundary conditions 
+//  DirichletBC boundary_conditions(*V, source, perifery);
 
-  //      //
-  //      // Define Dirichlet boundary conditions 
-  //      DirichletBC boundary_conditions(*V, source, perifery);
 
-  ////////////////////////////////////////////////////
-  // Source localization subtraction model equation //
-  ////////////////////////////////////////////////////
+  ///////////////////////////////////////////////
+  // Source localization direct model equation //
+  ///////////////////////////////////////////////
       
   //
   // Define variational forms
-  SLS_model::BilinearForm a(*V_, *V_);
-  SLS_model::LinearForm L(*V_);
+  SLD_model::BilinearForm a(*V_, *V_);
+  SLD_model::LinearForm L(*V_);
       
   //
   // Anisotropy
   // Bilinear
-  a.a_sigma = *sigma_;
-  a.dx      = *domains_;
+  a.a_sigma  = *sigma_;
+  a.dx       = *domains_;
   // Linear
-  L.a_inf   =  a_inf;
-  L.a_sigma = *sigma_;
-  L.Phi_0   =  source;
+  L.J_source = source;
   //
-  L.dx    = *domains_;
-  L.ds    = *boundaries_;
+  L.dx       = *domains_;
+  L.ds       = *boundaries_;
 
   //
   // Compute solution
   Function u(*V_);
-  //
   LinearVariationalProblem problem(a, L, u);
   LinearVariationalSolver  solver(problem);
   // krylov
@@ -208,18 +199,6 @@ Solver::SL_subtraction::operator () ( /*Solver::Phi& source,
   //
   solver.solve();
 
-//  // Theoric Potential
-//  Function Phi_th(*V_);
-//  Phi_th.interpolate(source);
-
-  //
-  // V_{tot} = \sum_{i=1}^{n} U_{i} \phi_{i}. where \{\phi_i\}_{i=1}^{n} is a basis for V_h, 
-  // and U is a vector of expansion coefficients for V_{tot,h}.
-  Function Phi_tot(*V_);
-  Phi_tot.interpolate(source);
-  *Phi_tot.vector()  += *u.vector();
-
-
   //
   // Save solution in VTK format
   //  * Binary (.bin)
@@ -232,12 +211,6 @@ Solver::SL_subtraction::operator () ( /*Solver::Phi& source,
   //  * VTK    (.pvd)
   std::string file_name = source.get_name_() + std::string(".pvd");
   File file( file_name.c_str() );
-  std::string file_th_name = source.get_name_() + std::string("_Phi_th.pvd");
-  File file_th(file_th_name.c_str());
-  std::string file_tot_name = source.get_name_() + std::string("_Phi_tot.pvd");
-  File file_tot(file_tot_name.c_str());
   //
-//  file << u;
-//  file_th << Phi_th;
-  file_tot << Phi_tot;
+  file << u;
 };

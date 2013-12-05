@@ -10,7 +10,7 @@ LIBS    = -ldolfin -lboost_mpi -lpugixml
 #
 UFL_SRC    = SLS_model.ufl SLD_model.ufl
 UFL_HEADER = $(UFL_SRC:.ufl=.h)
-SRC        = main.cxx  Conductivity.cxx Source.cxx SL_subtraction.cxx PDE_solver_parameters.cxx
+SRC        = main.cxx  Conductivity.cxx Source.cxx SL_subtraction.cxx SL_direct.cxx PDE_solver_parameters.cxx
 OBJ        = $(SRC:.cxx=.o)
 #
 #
