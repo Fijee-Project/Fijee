@@ -4,7 +4,7 @@
 //
 // UCSF
 //
-#include "Build_labeled_domain.h"
+#include "Head_labeled_domain.h"
 #include "Utils/enum.h"
 #include "Labeled_domain.h"
 #include "VTK_implicite_domain.h"
@@ -33,7 +33,7 @@ typedef CGAL::Mesh_3::Image_to_labeled_function_wrapper<CGAL::Image_3, Kernel > 
 //
 // We give a comprehensive type name
 //
-typedef Domains::Build_labeled_domain Domains_Build_labeled;
+typedef Domains::Head_labeled_domain Domains_Head_labeled;
 typedef Domains::Access_parameters DAp;
 
 #ifdef DEBUG_UCSF
@@ -45,7 +45,7 @@ vtkSmartPointer<vtkTimerLog> timerLog =
 //
 //
 //
-Domains_Build_labeled::Build_labeled_domain()
+Domains_Head_labeled::Head_labeled_domain()
 {  
   //
   // Header image's information MUST be the same for eigen values et vectores
@@ -121,19 +121,19 @@ Domains_Build_labeled::Build_labeled_domain()
 ////
 ////
 ////
-//Domains_Build_labeled::Build_labeled_domain( const Domains_Build_labeled& that )
+//Domains_Head_labeled::Head_labeled_domain( const Domains_Head_labeled& that )
 //{
 //}
 ////
 ////
 ////
-//Domains_Build_labeled::Build_labeled_domain( Domains_Build_labeled&& that )
+//Domains_Head_labeled::Head_labeled_domain( Domains_Head_labeled&& that )
 //{
 //}
 //
 //
 //
-Domains_Build_labeled::~Build_labeled_domain()
+Domains_Head_labeled::~Head_labeled_domain()
 {  
   // close INRIMAGE file
   file_inrimage_->close();
@@ -153,8 +153,8 @@ Domains_Build_labeled::~Build_labeled_domain()
 ////
 ////
 ////
-//Domains_Build_labeled& 
-//Domains_Build_labeled::operator = ( const Domains_Build_labeled& that )
+//Domains_Head_labeled& 
+//Domains_Head_labeled::operator = ( const Domains_Head_labeled& that )
 //{
 //  if ( this != &that ) 
 //    {
@@ -178,8 +178,8 @@ Domains_Build_labeled::~Build_labeled_domain()
 ////
 ////
 ////
-//Domains_Build_labeled& 
-//Domains_Build_labeled::operator = ( Domains_Build_labeled&& that )
+//Domains_Head_labeled& 
+//Domains_Head_labeled::operator = ( Domains_Head_labeled&& that )
 //{
 //  if( this != &that )
 //    {
@@ -205,16 +205,16 @@ Domains_Build_labeled::~Build_labeled_domain()
 //
 //
 void
-Domains_Build_labeled::operator()()
+Domains_Head_labeled::operator()()
 {
-  Head_model_segmentation();
-  Write_inrimage_file();
+  model_segmentation();
+  write_inrimage_file();
 }
 //
 //
 //
 void
-Domains_Build_labeled::Head_model_segmentation()
+Domains_Head_labeled::model_segmentation()
 {
 #ifdef DEBUG_UCSF
   timerLog->GetUniversalTime();
@@ -226,11 +226,11 @@ Domains_Build_labeled::Head_model_segmentation()
   timerLog->MarkEvent("Skull and scalp");
 #endif
   Labeled_domain< VTK_implicite_domain, GT::Point_3, std::list< Point_vector > > 
-    outside_scalp( (DAp::get_instance())->get_outer_skin_surface_() );
+    outside_scalp( (DAp::get_instance())->get_outer_skin_surface_(), SIMU_HEAD );
   Labeled_domain< VTK_implicite_domain, GT::Point_3, std::list< Point_vector > > 
-    outside_skull( (DAp::get_instance())->get_outer_skull_surface_() );
+    outside_skull( (DAp::get_instance())->get_outer_skull_surface_(), SIMU_HEAD );
   Labeled_domain< VTK_implicite_domain, GT::Point_3, std::list< Point_vector > > 
-    inside_skull( (DAp::get_instance())->get_inner_skull_surface_() );
+    inside_skull( (DAp::get_instance())->get_inner_skull_surface_(), SIMU_HEAD );
   //  
   //  outside_scalp( data_position_ );
   //  outside_skull( data_position_ );
@@ -248,13 +248,13 @@ Domains_Build_labeled::Head_model_segmentation()
   timerLog->MarkEvent("Cortical segmentation");
 #endif
   Labeled_domain< VTK_implicite_domain, GT::Point_3, std::list< Point_vector > > 
-    left_gray_matter ( (DAp::get_instance())->get_lh_pial_() );
+    left_gray_matter ( (DAp::get_instance())->get_lh_pial_(), SIMU_HEAD );
   Labeled_domain< VTK_implicite_domain, GT::Point_3, std::list< Point_vector > > 
-    right_gray_matter ( (DAp::get_instance())->get_rh_pial_() );
+    right_gray_matter ( (DAp::get_instance())->get_rh_pial_(), SIMU_HEAD );
   Labeled_domain< VTK_implicite_domain, GT::Point_3, std::list< Point_vector > > 
-    left_white_matter ( (DAp::get_instance())->get_lh_smoothwm_() );
+    left_white_matter ( (DAp::get_instance())->get_lh_smoothwm_(), SIMU_HEAD );
   Labeled_domain< VTK_implicite_domain, GT::Point_3, std::list< Point_vector > > 
-    right_white_matter ( (DAp::get_instance())->get_rh_smoothwm_() );
+    right_white_matter ( (DAp::get_instance())->get_rh_smoothwm_(), SIMU_HEAD );
   //
   //  left_gray_matter( data_position_ );
   //  right_gray_matter( data_position_ );
@@ -448,14 +448,14 @@ Domains_Build_labeled::Head_model_segmentation()
 #ifdef DEBUG_UCSF
   //
   // Time log 
-  std::cout << "Build_labeled_domain - event log:" << *timerLog << std::endl;
+  std::cout << "Head_labeled_domain - event log:" << *timerLog << std::endl;
 #endif
 }
 //
 //
 //
 void
-Domains_Build_labeled::Build_mesh()
+Domains_Head_labeled::Head_mesh()
 {
 }
 //
@@ -463,7 +463,7 @@ Domains_Build_labeled::Build_mesh()
 //
 std::ostream& 
 Domains::operator << ( std::ostream& stream, 
-		       const Domains_Build_labeled& that)
+		       const Domains_Head_labeled& that)
 {
   // std::for_each( that.get_list_position().begin(),
   //		 that.get_list_position().end(),

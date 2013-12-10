@@ -13,6 +13,7 @@
 //
 #include "Access_parameters.h"
 #include "Point_vector.h"
+#include "Utils/enum.h"
 //
 // CGAL
 //
@@ -105,7 +106,7 @@ namespace Domains
      *  Constructor of the class VTK_implicite_domain
      *
      */
-    VTK_implicite_domain( const char* );
+    VTK_implicite_domain( const char*, Simulation Simu );
     /*!
      *  \brief Copy Constructor
      *

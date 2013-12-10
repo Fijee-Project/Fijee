@@ -1,0 +1,7 @@
+export VTK=/home/cobigo/devel/C++/VTK/install
+g++ -O3  -Wno-deprecated -std=c++0x main.cxx -I$VTK/include/vtk-5.10/  -L $VTK/lib/vtk-5.10/ \
+    	-lvtkCommon -lvtkFiltering -lvtkGenericFiltering -lvtkGraphics \
+	-lvtkIO -lvtkRendering -lvtksys -lvtkVolumeRendering -lvtkzlib -lvtkfreetype  -lvtkftgl \
+	-lvtkImaging  -lvtkhdf5  -lvtkhdf5_hl  -lvtkexpat  -lvtktiff  -lvtkjpeg  -lvtkpng  -lvtksqlite \
+	-lvtkmetaio  -lLSDyna  -lvtkNetCDF   -lvtkDICOMParser  -lvtkverdict -lvtkNetCDF -lvtkHybrid \
+	-lvtkNetCDF_cxx -lvtkexoIIc

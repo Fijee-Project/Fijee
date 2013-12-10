@@ -1,7 +1,7 @@
-#ifndef BUILD_LABELED_DOMAIN_H_
-#define BUILD_LABELED_DOMAIN_H_
+#ifndef HEAD_LABELED_DOMAIN_H_
+#define HEAD_LABELED_DOMAIN_H_
 /*!
- * \file Build_labeled_domain.h
+ * \file Head_labeled_domain.h
  * \brief brief describe 
  * \author Yann Cobigo
  * \version 0.1
@@ -19,12 +19,12 @@
  */
 namespace Domains
 {
-  /*! \class Build_labeled_domain
+  /*! \class Head_labeled_domain
    * \brief classe representing whatever
    *
    *  This class is an example of class I will have to use
    */
-  class Build_labeled_domain
+  class Head_labeled_domain
   {
   private:
     // aseg.nii NIFTI information
@@ -63,44 +63,44 @@ namespace Domains
     /*!
      *  \brief Default Constructor
      *
-     *  Constructor of the class Build_labeled_domain
+     *  Constructor of the class Head_labeled_domain
      *
      */
-    Build_labeled_domain();
+    Head_labeled_domain();
     /*!
      *  \brief Copy Constructor
      *
      *  Constructor is a copy constructor
      *
      */
-    Build_labeled_domain( const Build_labeled_domain& ) = delete;
+    Head_labeled_domain( const Head_labeled_domain& ) = delete;
     /*!
      *  \brief Move Constructor
      *
      *  Constructor is a moving constructor
      *
      */
-    Build_labeled_domain( Build_labeled_domain&& ) = delete;
+    Head_labeled_domain( Head_labeled_domain&& ) = delete;
     /*!
      *  \brief Destructeur
      *
-     *  Destructor of the class Build_labeled_domain
+     *  Destructor of the class Head_labeled_domain
      */
-    virtual ~Build_labeled_domain();
+    virtual ~Head_labeled_domain();
     /*!
      *  \brief Operator =
      *
-     *  Operator = of the class Build_labeled_domain
+     *  Operator = of the class Head_labeled_domain
      *
      */
-    Build_labeled_domain& operator = ( const Build_labeled_domain& ) = delete;
+    Head_labeled_domain& operator = ( const Head_labeled_domain& ) = delete;
     /*!
      *  \brief Move Operator =
      *
-     *  Move operator of the class Build_labeled_domain
+     *  Move operator of the class Head_labeled_domain
      *
      */
-    Build_labeled_domain& operator = ( Build_labeled_domain&& ) = delete;
+    Head_labeled_domain& operator = ( Head_labeled_domain&& ) = delete;
     /*!
      *  \brief Operator ()
      *
@@ -127,14 +127,14 @@ namespace Domains
      *  to precess the segmented domains.
      *
      */
-    void Head_model_segmentation();
+    void model_segmentation();
     /*!
      *  \brief Write inrimage
      *
      *  This method write the data_mode_ array in the head_model.inr inrimage file format.
      *
      */
-    inline void Write_inrimage_file()
+    inline void write_inrimage_file()
     {
       file_inrimage_->write( data_label_, 256*256*256 );
     };
@@ -144,16 +144,16 @@ namespace Domains
      *  This method 
      *
      */
-    void Build_mesh();
+    void Head_mesh();
 
   };
   /*!
-   *  \brief Dump values for Build_labeled_domain
+   *  \brief Dump values for Head_labeled_domain
    *
    *  This method overload "<<" operator for a customuzed output.
    *
    *  \param Point : new position to add in the list
    */
-  std::ostream& operator << ( std::ostream&, const Build_labeled_domain& );
+  std::ostream& operator << ( std::ostream&, const Head_labeled_domain& );
 };
 #endif

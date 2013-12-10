@@ -2,7 +2,7 @@
 ## CONFIGURE ##
 ###############
 export PREFIX =
-export PATH_SOFT =/data1/devel/CPP/
+export PATH_SOFT =/home/cobigo/devel/CPP/
 DEBUG         = no
 VERSION       = 1.0
 DIST          = fijee
@@ -11,7 +11,7 @@ DIST          = fijee
 ## COMPILATION ##
 #################
 export CXX  = g++
-export CC   = g++-4.4
+export CC   = g++
 export CUDA = nvcc
 #-lineinfo CUDA
 #  -gencode arch=compute_10,code=sm_10 
@@ -52,7 +52,7 @@ endif
 #
 export EIGEN3   = $(PATH_SOFT)/Eigen/install
 export FENICS   = $(PATH_SOFT)/FEniCS/install/
-export CUDA_LIB = /usr/local/cuda-5.5/targets/x86_64-linux/lib/
+export CUDA_LIB = /usr/local/cuda-5.0/lib64/
 
 ######################
 ## Main DIRECTORIES ##

@@ -12,6 +12,7 @@
 #include <errno.h>      /* builtin errno */
 #include <sys/stat.h>   /* mkdir */
 #include <cstring>      /* strerror */
+#include <exception>
 //
 // Get built-in type.  Creates member get_"name"() (e.g., get_visibility());
 //
@@ -65,6 +66,8 @@ namespace Utils
       {
 	//
 	// Check on ENV variables
+	// ToDo: replace getenv ...
+	// getenv never throws exceptions
 	subjects_dir_ = getenv ("SUBJECTS_DIR");
 	subject_      = getenv ("SUBJECT");
 	//

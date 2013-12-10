@@ -282,4 +282,14 @@ enum Mesh_output
     MESH_CONDUCTIVITY = 4,
     MESH_DIPOLES      = 5,
   };
+
+enum Simulation
+  {
+    NO_SIMU         = 0,
+    SIMU_HEAD       = 1,
+    SIMU_SPHERES    = 2,
+    SIMU_BEM        = 3,
+  };
+
+
 #endif

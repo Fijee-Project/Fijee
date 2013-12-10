@@ -542,7 +542,7 @@ DCt::operator ()()
 //
 //
 void 
-DCt::Move_conductivity_array_to_parameters()
+DCt::move_conductivity_array_to_parameters()
 {
   //
   // Transfer the address of data

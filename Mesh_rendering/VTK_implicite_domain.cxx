@@ -30,336 +30,341 @@ Domain::VTK_implicite_domain():
 //
 //
 //
-Domain::VTK_implicite_domain( const char* Vtk_Mesh ):
+Domain::VTK_implicite_domain( const char* Vtk_Mesh, Simulation Simu ):
   vtk_mesh_( Vtk_Mesh ),
   check_points_(nullptr), select_enclosed_points_(nullptr)
 {
   //
-  //
-  vtkSmartPointer< vtkPoints > Points   = vtkSmartPointer< vtkPoints >::New();
-  vtkSmartPointer< vtkPoints > Normals  = vtkSmartPointer< vtkPoints >::New();
-
-  std::string line;
-  float x[3]; // position
-  float n[3]; // normal
-  vtkIdType points_id[3]; // pts[3]
-  vtkIdType normal_id;
-  std::map< std::string, vtkIdType > Vertex_type_id;
-  std::map< vtkIdType, std::set<vtkIdType> > Point_and_normals;
-
-  //
-  // Stereo Lithographie
-  ifstream Stl_file ( Vtk_Mesh );
-  if (Stl_file.is_open())
-    {
-      //
-      //  Ingest header and junk to get to first vertex
-      if ( ! getline (Stl_file,line) )
-	{
-//	  vtkErrorMacro ("STLReader error reading file: " << this->FileName
-//			 << " Premature EOF while reading header.");
-	  exit(-1);
-	}
-      
-      //
-      // main loop
-      while ( Stl_file.good() )
-	{
-	  // facet normal
-	  if ( getline (Stl_file,line) )
-	    {
-	      if( sscanf( line.c_str(), "%*s %*s %f %f %f\n", n, n+1, n+2 ) != 3 )
-		{
-		  break;
-		}
-	      //
-	      normal_id = Normals->InsertNextPoint(n);
-	    }
-	  // outer loop
-	  if ( getline (Stl_file,line) )
-	    {
-	    }
-	  
-	  //
-	  // Vertices construction
-	  // vertex 0
-	  if ( getline (Stl_file,line) )
-	    {
-	      if (sscanf (line.c_str(), "%*s %f %f %f\n", x,x+1,x+2) != 3)
-		{
-		}
-	      //
-	      if( Vertex_type_id.find(line) == Vertex_type_id.end() )
-		{
-		  points_id[0] = Points->InsertNextPoint(x);
-		  Vertex_type_id[line] = points_id[0];
-		  Point_and_normals[ points_id[0] ].insert( normal_id );
-		}
-	      else
-		  Point_and_normals[ Vertex_type_id[line] ].insert( normal_id );
-		
-	    }
-	  // vertex 1
-	  if ( getline (Stl_file,line) )
-	    {
-	      if (sscanf (line.c_str(), "%*s %f %f %f\n", x,x+1,x+2) != 3)
-		{
-		}
-	      //
-	      if( Vertex_type_id.find(line) == Vertex_type_id.end() )
-		{
-		  points_id[1] = Points->InsertNextPoint(x);	    
-		  Vertex_type_id[line] = points_id[1];
-		  Point_and_normals[ points_id[1] ].insert( normal_id );
-		}
-	      else
-		  Point_and_normals[ Vertex_type_id[line] ].insert( normal_id );
-	    }
-	  // vertex 2
-	  if ( getline (Stl_file,line) )
-	    {
-	      if (sscanf (line.c_str(), "%*s %f %f %f\n", x,x+1,x+2) != 3)
-		{
-		}
-	      //
-	      if( Vertex_type_id.find(line) == Vertex_type_id.end() )
-		{
-		  points_id[2] = Points->InsertNextPoint(x);	    
-		  Vertex_type_id[line] = points_id[2];
-		  Point_and_normals[ points_id[2] ].insert( normal_id );
-		}
-	      else
-		  Point_and_normals[ Vertex_type_id[line] ].insert( normal_id );
-	    }
-
-	  //
-	  // endloop
-	  if ( getline (Stl_file,line) )
-	    {
-	    }
-	  // endfacet
-	  if ( getline (Stl_file,line) )
-	    {
-	    }
-	}
-      //
-      Stl_file.close();
-    }
-  else 
-    {
-      std::cout << "Unable to open file: " << Vtk_Mesh << std::endl;
-      exit(-1);
-    }
-
-  //
-  // MNI 305 coordinates
-  Eigen::Matrix3f R_mni305;
-  R_mni305 <<
-    -1, 0, 0,
-     0, 0, 1,
-     0,-1, 0;
-  //
-  Eigen::Vector3f T_mni305;
-  T_mni305 <<
-     128,
-    -128,
-     128;
-  
-  //
-  // We check how different we are from MNI 305 coordinates
-  Eigen::Matrix3f aseg_rotation = 
-    (Domains::Access_parameters::get_instance())->get_rotation_();
-  Eigen::Vector3f aseg_translation = 
-    (Domains::Access_parameters::get_instance())->get_translation_();
-  //
-  Eigen::Vector3f delta_traslation = aseg_translation - T_mni305;
-  //
-  Eigen::Matrix3f delta_rotation = aseg_rotation - R_mni305;
-  //
-  // We don't have explicite example to be sure about the 
-  // correct rotation to apply. All the next commented code
-  // lines can help if we face this case.
-  if ( delta_rotation.cwiseAbs().maxCoeff() > 1.e-03 )
-    {
-      std::cerr << delta_rotation << std::endl;
-      std::cerr << "Patient position was very tilted compared to the MNI 305 coordinates" << std::endl;
-      std::cerr << "We might need to implement a rotation like:" << std::endl;
-      std::cerr << "R = Id + delta_rotation" << std::endl;
-      exit( 1 );
-    }
-
-
-  //
-  // Translate and rotate points with theire normal
-  // Create a polydata object
-  vtkSmartPointer<vtkPolyData> Poly_data_points =
-    vtkSmartPointer<vtkPolyData>::New();
-  Poly_data_points->SetPoints( Points );
-  vtkSmartPointer<vtkPolyData> Poly_data_normals =
-    vtkSmartPointer<vtkPolyData>::New();
-  Poly_data_normals->SetPoints( Normals );
-//  // Transform the VTK mesh
-//  // bug Freesurfer: mirror symmetry
-//  double symmetry_matrix[16] = { 1, 0, 0, 0,
-//				 0, 1, 0, 38,
-//				 0, 0, 1, 0,
-//				 0, 0, 0, 1};
-//  
-//  vtkSmartPointer<vtkTransform> symmetry    = vtkSmartPointer<vtkTransform>::New();
-//  symmetry->SetMatrix( symmetry_matrix );
-//  // rotation
-//  vtkSmartPointer<vtkTransform> rotation    = vtkSmartPointer<vtkTransform>::New();
-//  rotation->RotateWXYZ(90, 1, 0, 0);
-  // translation
-  vtkSmartPointer<vtkTransform> translation = vtkSmartPointer<vtkTransform>::New();
-  //YC  translation->Translate(.0, 38., 6.);
-  translation->Translate( delta_traslation(0), 
-			  delta_traslation(1), 
-			  delta_traslation(2) );
-//  // Points symmetry
-//  vtkSmartPointer<vtkTransformPolyDataFilter> transform_symmetric = 
-//    vtkSmartPointer<vtkTransformPolyDataFilter>::New();
-//  transform_symmetric->SetTransform( symmetry );
-//#if VTK_MAJOR_VERSION <= 5
-//  transform_symmetric->SetInputConnection( Poly_data_points->GetProducerPort() );
-//#else
-//  transform_symmetric->SetInputData( Poly_data_points );
-//#endif
-//  transform_symmetric->Update();
-//  // Points rotation
-//  vtkSmartPointer<vtkTransformPolyDataFilter> transform_rotation = 
-//    vtkSmartPointer<vtkTransformPolyDataFilter>::New();
-//  transform_rotation->SetTransform( rotation );
-//#if VTK_MAJOR_VERSION <= 5
-//  transform_rotation->SetInputConnection( transform_symmetric->GetOutputPort() );
-//#else
-//  transform_rotation->SetInputData( transform_symmetric );
-//#endif
-//  transform_rotation->Update();
-  // Point translation
-  vtkSmartPointer<vtkTransformPolyDataFilter> transform_translation = 
-      vtkSmartPointer<vtkTransformPolyDataFilter>::New();
-  transform_translation->SetTransform( translation );
-#if VTK_MAJOR_VERSION <= 5
-  transform_translation->SetInputConnection( Poly_data_points->GetProducerPort() );
-#else
-  transform_translation->SetInputData( Poly_data_points );
-#endif
-  transform_translation->Update();
-//  // Normals symmetry
-//  vtkSmartPointer<vtkTransformPolyDataFilter> normals_symmetric = 
-//    vtkSmartPointer<vtkTransformPolyDataFilter>::New();
-//  normals_symmetric->SetTransform( symmetry );
-//#if VTK_MAJOR_VERSION <= 5
-//  normals_symmetric->SetInputConnection( Poly_data_normals->GetProducerPort() );
-//#else
-//  normals_symmetric->SetInputData( Poly_data_normals );
-//#endif
-//  normals_symmetric->Update();
-//  // Normals rotation
-//  vtkSmartPointer<vtkTransformPolyDataFilter> normals_rotation = 
-//    vtkSmartPointer<vtkTransformPolyDataFilter>::New();
-//  normals_rotation->SetTransform( rotation );
-//#if VTK_MAJOR_VERSION <= 5
-//  normals_rotation->SetInputConnection( normals_symmetric->GetOutputPort() );
-//#else
-//  normals_rotation->SetInputData( normals_symmetric );
-//#endif
-//  normals_rotation->Update();
- 
-  //
-  // Create the Point with normal contenair
-  double vertex[3];
-  double 
-    normal[3],
-    normal_part[3];
-  double norm;
-  // create the stream for CGAL
+  // create the stream for CGAL applications
   std::stringstream stream;
-  //
-  std::map< vtkIdType, std::set< vtkIdType > >::iterator it;
-  for ( it  = Point_and_normals.begin() ; 
-	it != Point_and_normals.end() ; 
-	++it )
-    {
-      //      Points->GetPoint( it->first, vertex);
-      //     Poly_data_points->GetPoint( it->first, vertex);
-      transform_translation->GetOutput()->GetPoint( it->first, vertex );
-//      transform_symmetric->GetOutput()->GetPoint( it->first, vertex );
-//      std::cout << vertex[0] << " " << vertex[1] << " " << vertex[2] << " ";
-      //
-      normal[0] = 0.;
-      normal[1] = 0.;
-      normal[2] = 0.;
-      std::set<vtkIdType>::iterator it_normal;
-      for ( it_normal  = (it->second).begin(); 
-	    it_normal != (it->second).end(); 
-	    ++it_normal)
-	{
-	  //	  normal = 
-	  //	  Normals->GetPoint( (*it_normal), normal_part);
-	  Poly_data_normals->GetPoint( (*it_normal), normal_part);
-//	  normals_rotation->GetOutput()->GetPoint( (*it_normal), normal_part);
-//	  normals_symmetric->GetOutput()->GetPoint( (*it_normal), normal_part);
-	  normal[0] += normal_part[0];
-	  normal[1] += normal_part[1];
-	  normal[2] += normal_part[2];
-	}
-      norm = sqrt( normal[0]*normal[0] + normal[1]*normal[1] + normal[2]*normal[2] );
-      normal[0] /= norm;
-      normal[1] /= norm;
-      normal[2] /= norm;
-//      std::cout << normal[0] << " " << normal[1] << " " << normal[2] << " " << std::endl;
-      //
-      point_normal_.push_back(Domains::Point_vector( vertex[0], vertex[1], vertex[2],
-						    normal[0], normal[1], normal[2] ));
-      //
-      stream << vertex[0] << " " << vertex[1] << " " << vertex[2] << " " 
-	     << normal[0] << " " << normal[1] << " " << normal[2] << std::endl;
-   }
 
   //
-  // Output for R analysis
-#ifdef TRACE
-#if ( TRACE == 100 )
-
-  std::cout << Vtk_Mesh << std::endl;
-
-  std::ofstream* outfile;// ("new.txt");
   //
-  if( strcmp(Vtk_Mesh,"/home/cobigo/subjects/GazzDCS0004mgh//surf/STL/lh.pial.stl") == 0 )
+  switch( Simu )
     {
-      outfile = new ofstream("lh.pial.frame");
-      *outfile << "X Y Z v11 v12 v13 \n";
-      *outfile << stream.str();
-      outfile->close();
-    }
-  else if ( strcmp(Vtk_Mesh,"/home/cobigo/subjects/GazzDCS0004mgh//surf/STL/rh.pial.stl") == 0 )
-    {
-      outfile = new ofstream("rh.pial.frame");
-      *outfile << "X Y Z v11 v12 v13 \n";
-      *outfile << stream.str();
-      outfile->close();
-    }
-  else if ( strcmp(Vtk_Mesh,"/home/cobigo/subjects/GazzDCS0004mgh//surf/STL/lh.smoothwm.stl") == 0 )
-    {
-      outfile = new ofstream("lh.smoothwm.frame");
-      *outfile << "X Y Z v11 v12 v13 \n";
-      *outfile << stream.str();
-      outfile->close();
-   }
-  else if ( strcmp(Vtk_Mesh,"/home/cobigo/subjects/GazzDCS0004mgh//surf/STL/rh.smoothwm.stl") == 0 )
-    {
-      outfile = new ofstream("rh.smoothwm.frame");
-      *outfile << "X Y Z v11 v12 v13 \n";
-      *outfile << stream.str();
-      outfile->close();
-   }
-  //
+    case SIMU_BEM:
+    case SIMU_HEAD:
+      {
+	//
+	//
+	vtkSmartPointer< vtkPoints > Points   = vtkSmartPointer< vtkPoints >::New();
+	vtkSmartPointer< vtkPoints > Normals  = vtkSmartPointer< vtkPoints >::New();
+
+	std::string line;
+	float x[3]; // position
+	float n[3]; // normal
+	vtkIdType points_id[3]; // pts[3]
+	vtkIdType normal_id;
+	std::map< std::string, vtkIdType > Vertex_type_id;
+	std::map< vtkIdType, std::set<vtkIdType> > Point_and_normals;
+
+	//
+	// Stereo Lithographie
+	ifstream Stl_file ( Vtk_Mesh );
+	if (Stl_file.is_open())
+	  {
+	    //
+	    //  Ingest header and junk to get to first vertex
+	    if ( ! getline (Stl_file,line) )
+	      {
+		//	  vtkErrorMacro ("STLReader error reading file: " << this->FileName
+		//			 << " Premature EOF while reading header.");
+		exit(-1);
+	      }
+      
+	    //
+	    // main loop
+	    while ( Stl_file.good() )
+	      {
+		// facet normal
+		if ( getline (Stl_file,line) )
+		  {
+		    if( sscanf( line.c_str(), "%*s %*s %f %f %f\n", n, n+1, n+2 ) != 3 )
+		      {
+			break;
+		      }
+		    //
+		    normal_id = Normals->InsertNextPoint(n);
+		  }
+		// outer loop
+		if ( getline (Stl_file,line) )
+		  {
+		  }
+	  
+		//
+		// Vertices construction
+		// vertex 0
+		if ( getline (Stl_file,line) )
+		  {
+		    if (sscanf (line.c_str(), "%*s %f %f %f\n", x,x+1,x+2) != 3)
+		      {
+		      }
+		    //
+		    if( Vertex_type_id.find(line) == Vertex_type_id.end() )
+		      {
+			points_id[0] = Points->InsertNextPoint(x);
+			Vertex_type_id[line] = points_id[0];
+			Point_and_normals[ points_id[0] ].insert( normal_id );
+		      }
+		    else
+		      Point_and_normals[ Vertex_type_id[line] ].insert( normal_id );
+		
+		  }
+		// vertex 1
+		if ( getline (Stl_file,line) )
+		  {
+		    if (sscanf (line.c_str(), "%*s %f %f %f\n", x,x+1,x+2) != 3)
+		      {
+		      }
+		    //
+		    if( Vertex_type_id.find(line) == Vertex_type_id.end() )
+		      {
+			points_id[1] = Points->InsertNextPoint(x);	    
+			Vertex_type_id[line] = points_id[1];
+			Point_and_normals[ points_id[1] ].insert( normal_id );
+		      }
+		    else
+		      Point_and_normals[ Vertex_type_id[line] ].insert( normal_id );
+		  }
+		// vertex 2
+		if ( getline (Stl_file,line) )
+		  {
+		    if (sscanf (line.c_str(), "%*s %f %f %f\n", x,x+1,x+2) != 3)
+		      {
+		      }
+		    //
+		    if( Vertex_type_id.find(line) == Vertex_type_id.end() )
+		      {
+			points_id[2] = Points->InsertNextPoint(x);	    
+			Vertex_type_id[line] = points_id[2];
+			Point_and_normals[ points_id[2] ].insert( normal_id );
+		      }
+		    else
+		      Point_and_normals[ Vertex_type_id[line] ].insert( normal_id );
+		  }
+
+		//
+		// endloop
+		if ( getline (Stl_file,line) )
+		  {
+		  }
+		// endfacet
+		if ( getline (Stl_file,line) )
+		  {
+		  }
+	      }
+	    //
+	    Stl_file.close();
+	  }
+	else 
+	  {
+	    std::cout << "Unable to open file: " << Vtk_Mesh << std::endl;
+	    exit(-1);
+	  }
+
+	//
+	// MNI 305 coordinates
+	Eigen::Matrix3f R_mni305;
+	R_mni305 <<
+	  -1, 0, 0,
+	  0, 0, 1,
+	  0,-1, 0;
+	//
+	Eigen::Vector3f T_mni305;
+	T_mni305 <<
+	  128,
+	  -128,
+	  128;
   
-#endif
-#endif
+	//
+	// We check how different we are from MNI 305 coordinates
+	Eigen::Matrix3f aseg_rotation = 
+	  (Domains::Access_parameters::get_instance())->get_rotation_();
+	Eigen::Vector3f aseg_translation = 
+	  (Domains::Access_parameters::get_instance())->get_translation_();
+	//
+	Eigen::Vector3f delta_traslation = aseg_translation - T_mni305;
+	//
+	Eigen::Matrix3f delta_rotation = aseg_rotation - R_mni305;
+	//
+	// We don't have explicite example to be sure about the 
+	// correct rotation to apply. All the next commented code
+	// lines can help if we face this case.
+	if ( delta_rotation.cwiseAbs().maxCoeff() > 1.e-03 )
+	  {
+	    std::cerr << delta_rotation << std::endl;
+	    std::cerr << "Patient position was very tilted compared to the MNI 305 coordinates" << std::endl;
+	    std::cerr << "We might need to implement a rotation like:" << std::endl;
+	    std::cerr << "R = Id + delta_rotation" << std::endl;
+	    exit( 1 );
+	  }
 
+
+	//
+	// Translate and rotate points with theire normal
+	// Create a polydata object
+	vtkSmartPointer<vtkPolyData> Poly_data_points =
+	  vtkSmartPointer<vtkPolyData>::New();
+	Poly_data_points->SetPoints( Points );
+	vtkSmartPointer<vtkPolyData> Poly_data_normals =
+	  vtkSmartPointer<vtkPolyData>::New();
+	Poly_data_normals->SetPoints( Normals );
+	//  // Transform the VTK mesh
+	//  // bug Freesurfer: mirror symmetry
+	//  double symmetry_matrix[16] = { 1, 0, 0, 0,
+	//				 0, 1, 0, 38,
+	//				 0, 0, 1, 0,
+	//				 0, 0, 0, 1};
+	//  
+	//  vtkSmartPointer<vtkTransform> symmetry    = vtkSmartPointer<vtkTransform>::New();
+	//  symmetry->SetMatrix( symmetry_matrix );
+	//  // rotation
+	//  vtkSmartPointer<vtkTransform> rotation    = vtkSmartPointer<vtkTransform>::New();
+	//  rotation->RotateWXYZ(90, 1, 0, 0);
+	// translation
+	vtkSmartPointer<vtkTransform> translation = vtkSmartPointer<vtkTransform>::New();
+	//YC  translation->Translate(.0, 38., 6.);
+	translation->Translate( delta_traslation(0), 
+				delta_traslation(1), 
+				delta_traslation(2) );
+	//  // Points symmetry
+	//  vtkSmartPointer<vtkTransformPolyDataFilter> transform_symmetric = 
+	//    vtkSmartPointer<vtkTransformPolyDataFilter>::New();
+	//  transform_symmetric->SetTransform( symmetry );
+	//#if VTK_MAJOR_VERSION <= 5
+	//  transform_symmetric->SetInputConnection( Poly_data_points->GetProducerPort() );
+	//#else
+	//  transform_symmetric->SetInputData( Poly_data_points );
+	//#endif
+	//  transform_symmetric->Update();
+	//  // Points rotation
+	//  vtkSmartPointer<vtkTransformPolyDataFilter> transform_rotation = 
+	//    vtkSmartPointer<vtkTransformPolyDataFilter>::New();
+	//  transform_rotation->SetTransform( rotation );
+	//#if VTK_MAJOR_VERSION <= 5
+	//  transform_rotation->SetInputConnection( transform_symmetric->GetOutputPort() );
+	//#else
+	//  transform_rotation->SetInputData( transform_symmetric );
+	//#endif
+	//  transform_rotation->Update();
+	// Point translation
+	vtkSmartPointer<vtkTransformPolyDataFilter> transform_translation = 
+	  vtkSmartPointer<vtkTransformPolyDataFilter>::New();
+	transform_translation->SetTransform( translation );
+#if VTK_MAJOR_VERSION <= 5
+	transform_translation->SetInputConnection( Poly_data_points->GetProducerPort() );
+#else
+	transform_translation->SetInputData( Poly_data_points );
+#endif
+	transform_translation->Update();
+	//  // Normals symmetry
+	//  vtkSmartPointer<vtkTransformPolyDataFilter> normals_symmetric = 
+	//    vtkSmartPointer<vtkTransformPolyDataFilter>::New();
+	//  normals_symmetric->SetTransform( symmetry );
+	//#if VTK_MAJOR_VERSION <= 5
+	//  normals_symmetric->SetInputConnection( Poly_data_normals->GetProducerPort() );
+	//#else
+	//  normals_symmetric->SetInputData( Poly_data_normals );
+	//#endif
+	//  normals_symmetric->Update();
+	//  // Normals rotation
+	//  vtkSmartPointer<vtkTransformPolyDataFilter> normals_rotation = 
+	//    vtkSmartPointer<vtkTransformPolyDataFilter>::New();
+	//  normals_rotation->SetTransform( rotation );
+	//#if VTK_MAJOR_VERSION <= 5
+	//  normals_rotation->SetInputConnection( normals_symmetric->GetOutputPort() );
+	//#else
+	//  normals_rotation->SetInputData( normals_symmetric );
+	//#endif
+	//  normals_rotation->Update();
+ 
+	//
+	// Create the Point with normal contenair
+	double vertex[3];
+	double 
+	  normal[3],
+	  normal_part[3];
+	double norm;
+	//
+	std::map< vtkIdType, std::set< vtkIdType > >::iterator it;
+	for ( it  = Point_and_normals.begin() ; 
+	      it != Point_and_normals.end() ; 
+	      ++it )
+	  {
+	    //      Points->GetPoint( it->first, vertex);
+	    //     Poly_data_points->GetPoint( it->first, vertex);
+	    transform_translation->GetOutput()->GetPoint( it->first, vertex );
+	    //      transform_symmetric->GetOutput()->GetPoint( it->first, vertex );
+	    //      std::cout << vertex[0] << " " << vertex[1] << " " << vertex[2] << " ";
+	    //
+	    normal[0] = 0.;
+	    normal[1] = 0.;
+	    normal[2] = 0.;
+	    std::set<vtkIdType>::iterator it_normal;
+	    for ( it_normal  = (it->second).begin(); 
+		  it_normal != (it->second).end(); 
+		  ++it_normal)
+	      {
+		//	  normal = 
+		//	  Normals->GetPoint( (*it_normal), normal_part);
+		Poly_data_normals->GetPoint( (*it_normal), normal_part);
+		//	  normals_rotation->GetOutput()->GetPoint( (*it_normal), normal_part);
+		//	  normals_symmetric->GetOutput()->GetPoint( (*it_normal), normal_part);
+		normal[0] += normal_part[0];
+		normal[1] += normal_part[1];
+		normal[2] += normal_part[2];
+	      }
+	    norm = sqrt( normal[0]*normal[0] + normal[1]*normal[1] + normal[2]*normal[2] );
+	    normal[0] /= norm;
+	    normal[1] /= norm;
+	    normal[2] /= norm;
+	    //      std::cout << normal[0] << " " << normal[1] << " " << normal[2] << " " << std::endl;
+	    //
+	    point_normal_.push_back(Domains::Point_vector( vertex[0], vertex[1], vertex[2],
+							   normal[0], normal[1], normal[2] ));
+	    //
+	    stream << vertex[0] << " " << vertex[1] << " " << vertex[2] << " " 
+		   << normal[0] << " " << normal[1] << " " << normal[2] << std::endl;
+	  }
+	break;
+      }
+    case SIMU_SPHERES:
+      {
+	//
+	//
+	std::string line;
+	std::ifstream stream_file( Vtk_Mesh );
+	//
+	if ( stream_file.is_open() )
+	  {
+	    //
+	    //
+	    while ( stream_file.good() )
+	      {
+		// X Y Z n_X n_Y n_Z
+		if ( getline (stream_file,line) )
+		  {
+		    stream << line << std::endl;
+		  }
+	      }
+	  }
+	else
+	  {
+	    std::cerr << "Problem opening the file: " << Vtk_Mesh << std::endl;
+	    exit(0);
+	  }
+	break;
+      }
+    default:
+      {
+	std::cerr << "No simulation mode (SIMU_HEAD, SIMU_SPHERES, ...) selected" << std::endl;
+      }
+    } /* end of switch */
+
+//  ofstream tempo("test.txt");
+//  tempo << stream.rdbuf();
+//  tempo.close();
+  
   //
   //
   std::vector<Point_with_normal> Point_normal;

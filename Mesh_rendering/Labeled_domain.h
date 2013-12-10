@@ -4,6 +4,10 @@
 #include <string>
 #include <fstream>
 //
+// UCSF
+//
+#include "Utils/enum.h"
+//
 // Project
 //
 //
@@ -51,8 +55,8 @@ namespace Domains
      *  Constructor of the class Labeled_domain
      *
      */
-    Labeled_domain( const char* File):
-    implicite_domain_( new Implicite_domain( File ) )
+    Labeled_domain( const char* File, Simulation simu ):
+    implicite_domain_( new Implicite_domain( File, simu ))
       {};
     /*!
      *  \brief Copy Constructor

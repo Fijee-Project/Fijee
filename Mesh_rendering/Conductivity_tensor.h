@@ -127,6 +127,15 @@ namespace Domains
      */
     void operator ()();
 
+  private:
+    /*!
+     *  \brief Move_conductivity_array_to_parameters
+     *
+     *  This method moves members array to Access_Parameters's object.
+     *
+     */
+    void move_conductivity_array_to_parameters();
+
   public:
     /*!
      *  \brief Move_conductivity_array_to_parameters
@@ -134,7 +143,10 @@ namespace Domains
      *  This method moves members array to Access_Parameters's object.
      *
      */
-    void Move_conductivity_array_to_parameters();
+    void make_conductivity()
+    {
+      move_conductivity_array_to_parameters();
+    };
     /*!
      *  \brief VTK visualization
      *
