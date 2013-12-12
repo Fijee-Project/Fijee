@@ -182,6 +182,11 @@ namespace Domains
    //! Speed up: check if we need make any calculation
     bool* Do_we_have_conductivity_; 
 
+    //
+    // Electrodes
+    //! Electrodes Standard 10/20 Cap81
+    std::string electrodes_10_20_;
+
 
   protected:
     /*!
@@ -413,6 +418,13 @@ namespace Domains
       //
       std::move( rh_match_wm_gm_.begin(), rh_match_wm_gm_.end(), Rh_match_wm_gm.begin() );
     };
+   /*!
+     *  \brief Get electrodes standard 10/20
+     *
+     *  This method return the electrodes standard 10/20 list.
+     *
+     */
+    ucsf_get_string_macro(electrodes_10_20_);
 
 
   public:

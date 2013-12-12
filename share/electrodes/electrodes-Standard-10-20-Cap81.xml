@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fijee xmlns:fijee="http://www.fenicsproject.org">
+  <electrodes size="81">
+    <electrode index="1"  label="Fp1" x="0.95" y="0.309" z="-0.0349" phi=" 18" theta=" -2" radius="1" />	
+    <electrode index="2"  label="Fpz" x="0.999" y="-0" z="-0.0349" phi=" -0" theta=" -2" radius="1" />	
+    <electrode index="3"  label="Fp2" x="0.95" y="-0.309" z="-0.0349" phi="-18" theta=" -2" radius="1" />	
+    <electrode index="4"  label="Nz" x="0.927" y="0" z="-0.375" phi=" -0" theta="-22" radius="1" />	
+    <electrode index="5"  label="AF9" x="0.663" y="0.618" z="-0.423" phi=" 43" theta="-25" radius="1" />	
+    <electrode index="6"  label="AF7" x="0.788" y="0.615" z="-0.0349" phi=" 38" theta=" -2" radius="1" />	
+    <electrode index="7"  label="AF3" x="0.885" y="0.376" z="0.276" phi=" 23" theta=" 16" radius="1" />	
+    <electrode index="8"  label="AFz" x="0.934" y="-0" z="0.358" phi=" -0" theta=" 21" radius="1" />	
+    <electrode index="9"  label="AF4" x="0.885" y="-0.376" z="0.276" phi="-23" theta=" 16" radius="1" />	
+    <electrode index="10"  label="AF8" x="0.788" y="-0.615" z="-0.0349" phi="-38" theta=" -2" radius="1" />	
+    <electrode index="11" label="AF10" x="0.663" y="-0.618" z="-0.423" phi="-43" theta="-25" radius="1" />	
+    <electrode index="12" label="F9" x="0.52" y="0.742" z="-0.423" phi=" 55" theta="-25" radius="1" />	
+    <electrode index="13" label="F7" x="0.587" y="0.809" z="-0.0349" phi=" 54" theta=" -2" radius="1" />	
+    <electrode index="14" label="F5" x="0.634" y="0.729" z="0.259" phi=" 49" theta=" 15" radius="1" />	
+    <electrode index="15" label="F3" x="0.673" y="0.545" z="0.5" phi=" 39" theta=" 30" radius="1" />	
+    <electrode index="16" label="F1" x="0.71" y="0.287" z="0.643" phi=" 22" theta=" 40" radius="1" />	
+    <electrode index="17" label="Fz" x="0.719" y="0" z="0.695" phi=" -0" theta=" 44" radius="1" />	
+    <electrode index="18" label="F2" x="0.71" y="-0.287" z="0.643" phi="-22" theta=" 40" radius="1" />	
+    <electrode index="19" label="F4" x="0.673" y="-0.545" z="0.5" phi="-39" theta=" 30" radius="1" />	
+    <electrode index="20" label="F6" x="0.634" y="-0.729" z="0.259" phi="-49" theta=" 15" radius="1" />	
+    <electrode index="21" label="F8" x="0.587" y="-0.809" z="-0.0349" phi="-54" theta=" -2" radius="1" />	
+    <electrode index="22" label="F10" x="0.52" y="-0.742" z="-0.423" phi="-55" theta="-25" radius="1" />	
+    <electrode index="23" label="FT9" x="0.28" y="0.862" z="-0.423" phi=" 72" theta="-25" radius="1" />	
+    <electrode index="24" label="FT7" x="0.309" y="0.95" z="-0.0349" phi=" 72" theta=" -2" radius="1" />	
+    <electrode index="25" label="FC5" x="0.339" y="0.883" z="0.326" phi=" 69" theta=" 19" radius="1" />	
+    <electrode index="26" label="FC3" x="0.36" y="0.676" z="0.643" phi=" 62" theta=" 40" radius="1" />	
+    <electrode index="27" label="FC1" x="0.375" y="0.375" z="0.848" phi=" 45" theta=" 58" radius="1" />	
+    <electrode index="28" label="FCz" x="0.391" y=" -0" z="0.921" phi=" -0" theta=" 67" radius="1" />	
+    <electrode index="29" label="FC2" x="0.375" y="-0.375" z="0.848" phi="-45" theta=" 58" radius="1" />	
+    <electrode index="30" label="FC4" x="0.36" y="-0.676" z="0.643" phi="-62" theta=" 40" radius="1" />	
+    <electrode index="31" label="FC6" x="0.339" y="-0.883" z="0.326" phi="-69" theta=" 19" radius="1" />	
+    <electrode index="32" label="FT8" x="0.309" y="-0.95" z="-0.0349" phi="-72" theta=" -2" radius="1" />	
+    <electrode index="33" label="FT10" x="0.28" y="-0.862" z="-0.423" phi="-72" theta="-25" radius="1" />	
+    <electrode index="34" label="T9" x="5.55e-17" y="0.906" z="-0.423" phi=" 90" theta="-25" radius="1" />	
+    <electrode index="35" label="T7" x="6.12e-17" y="0.999" z="-0.0349" phi=" 90" theta=" -2" radius="1" />	
+    <electrode index="36" label="C5" x="5.72e-17" y="0.934" z="0.358" phi=" 90" theta=" 21" radius="1" />	
+    <electrode index="37" label="C3" x="4.4e-17" y="0.719" z="0.695" phi=" 90" theta=" 44" radius="1" />	
+    <electrode index="38" label="C1" x="2.39e-17" y="0.391" z="0.921" phi=" 90" theta=" 67" radius="1" />	
+    <electrode index="39" label="Cz" x="3.75e-33" y="-6.12e-17" z="1" phi="-90" theta=" 90" radius="1" />	
+    <electrode index="40" label="C2" x="2.39e-17" y="-0.391" z="0.921" phi="-90" theta=" 67" radius="1" />	
+    <electrode index="41" label="C4" x="4.4e-17" y="-0.719" z="0.695" phi="-90" theta=" 44" radius="1" />	
+    <electrode index="42" label="C6" x="5.72e-17" y="-0.934" z="0.358" phi="-90" theta=" 21" radius="1" />	
+    <electrode index="43" label="T8" x="6.12e-17" y="-0.999" z="-0.0349" phi="-90" theta=" -2" radius="1" />	
+    <electrode index="44" label="T10" x="5.55e-17" y="-0.906" z="-0.423" phi="-90" theta="-25" radius="1" />	
+    <electrode index="45" label="TP9" x="-0.28" y="0.862" z="-0.423" phi="108" theta="-25" radius="1" />	
+    <electrode index="46" label="TP7" x="-0.309" y="0.95" z="-0.0349" phi="108" theta=" -2" radius="1" />	
+    <electrode index="47" label="CP5" x="-0.339" y="0.883" z="0.326" phi="111" theta=" 19" radius="1" />	
+    <electrode index="48" label="CP3" x="-0.36" y="0.676" z="0.643" phi="118" theta=" 40" radius="1" />	
+    <electrode index="49" label="CP1" x="-0.375" y="0.375" z="0.848" phi="135" theta=" 58" radius="1" />	
+    <electrode index="50" label="CPz" x="-0.391" y="-4.79e-17" z="0.921" phi="-18" theta=" 67" radius="1" />	
+    <electrode index="51" label="CP2" x="-0.375" y="-0.375" z="0.848" phi="-13" theta=" 58" radius="1" />	
+    <electrode index="52" label="CP4" x="-0.36" y="-0.676" z="0.643" phi="-11" theta=" 40" radius="1" />	
+    <electrode index="53" label="CP6" x="-0.339" y="-0.883" z="0.326" phi="-11" theta=" 19" radius="1" />	
+    <electrode index="54" label="TP8" x="-0.309" y="-0.95" z="-0.0349" phi="-10" theta=" -2" radius="1" />	
+    <electrode index="55" label="TP10" x="-0.28" y="-0.862" z="-0.423" phi="-10" theta="-25" radius="1" />	
+    <electrode index="56" label="P9" x="-0.533" y="0.733" z="-0.423" phi="126" theta="-25" radius="1" />	
+    <electrode index="57" label="P7" x="-0.587" y="0.809" z="-0.0349" phi="126" theta=" -2" radius="1" />	
+    <electrode index="58" label="P5" x="-0.634" y="0.729" z="0.259" phi="131" theta=" 15" radius="1" />	
+    <electrode index="59" label="P3" x="-0.673" y="0.545" z="0.5" phi="141" theta=" 30" radius="1" />	
+    <electrode index="60" label="P1" x="-0.71" y="0.287" z="0.643" phi="158" theta=" 40" radius="1" />	
+    <electrode index="61" label="Pz" x="-0.719" y="-8.81e-17" z="0.695" phi="-18" theta=" 44" radius="1" />	
+    <electrode index="62" label="P2" x="-0.71" y="-0.287" z="0.643" phi="-15" theta=" 40" radius="1" />	
+    <electrode index="63" label="P4" x="-0.673" y="-0.545" z="0.5" phi="-14" theta=" 30" radius="1" />	
+    <electrode index="64" label="P6" x="-0.634" y="-0.729" z="0.259" phi="-13" theta=" 15" radius="1" />	
+    <electrode index="65" label="P8" x="-0.587" y="-0.809" z="-0.0349" phi="-12" theta=" -2" radius="1" />	
+    <electrode index="66" label="P10" x="-0.533" y="-0.733" z="-0.423" phi="-12" theta="-25" radius="1" />	
+    <electrode index="67" label="PO9" x="-0.733" y="0.533" z="-0.423" phi="144" theta="-25" radius="1" />	
+    <electrode index="68" label="PO7" x="-0.809" y="0.587" z="-0.0349" phi="144" theta=" -2" radius="1" />	
+    <electrode index="69" label="PO3" x="-0.885" y="0.376" z="0.276" phi="157" theta=" 16" radius="1" />	
+    <electrode index="70" label="POz" x="-0.934" y="-1.14e-16" z="0.358" phi="-18" theta=" 21" radius="1" />	
+    <electrode index="71" label="PO4" x="-0.885" y="-0.376" z="0.276" phi="-15" theta=" 16" radius="1" />	
+    <electrode index="72" label="PO8" x="-0.809" y="-0.587" z="-0.0349" phi="-14" theta=" -2" radius="1" />	
+    <electrode index="73" label="PO10" x="-0.733" y="-0.533" z="-0.423" phi="-14" theta="-25" radius="1" />	
+    <electrode index="74" label="O1" x="-0.95" y="0.309" z="-0.0349" phi="162" theta=" -2" radius="1" />	
+    <electrode index="75" label="Oz" x="-0.999" y="-1.22e-16" z="-0.034" phi="-18" theta=" -2" radius="1" />	
+    <electrode index="76" label="O2" x="-0.95" y="-0.309" z="-0.0349" phi="-16" theta=" -2" radius="1" />	
+    <electrode index="77" label="O9" x="-0.862" y="0.28" z="-0.423" phi="162" theta="-25" radius="1" />	
+    <electrode index="78" label="O10" x="-0.862" y="-0.28" z="-0.423" phi="-16" theta="-25" radius="1" />	
+    <electrode index="79" label="CB1" x="-0.542" y="0.542" z="-0.643" phi="135" theta="-40" radius="1" />	
+    <electrode index="80" label="CB2" x="-0.542" y="-0.542" z="-0.643" phi="-13" theta="-40" radius="1" />	
+    <electrode index="81" label="Iz" x="-0.906" y="-1.11e-16" z="-0.423" phi="-18" theta="-25" radius="1" />	
+  </electrodes>
+</fijee>
+

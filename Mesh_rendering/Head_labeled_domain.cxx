@@ -10,6 +10,7 @@
 #include "VTK_implicite_domain.h"
 #include "Access_parameters.h"
 #include "Point_vector.h"
+#include "Build_electrodes_list.h"
 //
 // VTK
 //
@@ -264,10 +265,19 @@ Domains_Head_labeled::model_segmentation()
   std::thread right_gray_matter_thread(std::ref(right_gray_matter), data_position_);
   std::thread left_white_matter_thread(std::ref(left_white_matter), data_position_);
   std::thread right_white_matter_thread(std::ref(right_white_matter), data_position_);
+
+  //
+  // Electrodes localization
+  Domains::Build_electrodes_list electrodes;
+  electrodes.adjust_cap_positions_on( outside_scalp );
+  
+  //
+  // End of cortical segmentation
   left_gray_matter_thread.join();
   right_gray_matter_thread.join();
   left_white_matter_thread.join();
   right_white_matter_thread.join();
+  
 
   //
   // Subcortical segmenation

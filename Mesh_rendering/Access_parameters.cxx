@@ -16,7 +16,8 @@ DAp::Access_parameters():
   conductivity_tensors_array_(nullptr),
   eigen_values_matrices_array_(nullptr),
   positions_array_(nullptr),
-  Do_we_have_conductivity_(nullptr)
+  Do_we_have_conductivity_(nullptr),
+  electrodes_10_20_("../share/electrodes/electrodes-Standard-10-20-Cap81.xml")
 {
   //
   // Check on ENV variables

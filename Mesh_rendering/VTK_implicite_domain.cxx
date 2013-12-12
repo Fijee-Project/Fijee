@@ -361,10 +361,6 @@ Domain::VTK_implicite_domain( const char* Vtk_Mesh, Simulation Simu ):
       }
     } /* end of switch */
 
-//  ofstream tempo("test.txt");
-//  tempo << stream.rdbuf();
-//  tempo.close();
-  
   //
   //
   std::vector<Point_with_normal> Point_normal;
