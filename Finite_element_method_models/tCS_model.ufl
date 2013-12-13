@@ -1,0 +1,30 @@
+# transcranial current stimulation (tCS)
+# tDCS
+# tACS
+
+#
+# Functions space
+#
+cell          = tetrahedron
+scalarElement = FiniteElement("Lagrange", cell, 1)
+vectorElement = VectorElement("Lagrange", cell, 1)
+tensorElement = TensorElement("Lagrange", cell, 1)
+ 
+#
+# Function definition
+#
+
+u   = TrialFunction(scalarElement)
+v   = TestFunction(scalarElement)
+#n   = scalarElement.cell().n
+
+a_sigma  = Coefficient(tensorElement)
+Cte      = Constant(cell)
+
+#
+# Bilinear form
+a  = inner( a_sigma * grad(u), grad(v) ) * dx 
+
+#
+# Linear form
+L   = Cte * v * ds

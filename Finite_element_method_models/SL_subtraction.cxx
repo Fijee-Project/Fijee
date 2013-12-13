@@ -218,6 +218,16 @@ Solver::SL_subtraction::operator () ( /*Solver::Phi& source,
   Function Phi_tot(*V_);
   Phi_tot.interpolate(source);
   *Phi_tot.vector()  += *u.vector();
+  
+//  //
+//  // 
+//  for ( CellIterator cell(*mesh_) ; !cell.end() ; ++cell)
+//    {
+//      if((*domains_)[*cell] != 5 )
+//	{
+//	  (*Phi_tot.vector())[cell->index];
+//	}
+//    }
 
 
   //
@@ -232,12 +242,12 @@ Solver::SL_subtraction::operator () ( /*Solver::Phi& source,
   //  * VTK    (.pvd)
   std::string file_name = source.get_name_() + std::string(".pvd");
   File file( file_name.c_str() );
-  std::string file_th_name = source.get_name_() + std::string("_Phi_th.pvd");
-  File file_th(file_th_name.c_str());
-  std::string file_tot_name = source.get_name_() + std::string("_Phi_tot.pvd");
-  File file_tot(file_tot_name.c_str());
+//  std::string file_th_name = source.get_name_() + std::string("_Phi_th.pvd");
+//  File file_th(file_th_name.c_str());
+//  std::string file_tot_name = source.get_name_() + std::string("_Phi_tot.pvd");
+//  File file_tot(file_tot_name.c_str());
   //
 //  file << u;
 //  file_th << Phi_th;
-  file_tot << Phi_tot;
+  file << Phi_tot;
 };
