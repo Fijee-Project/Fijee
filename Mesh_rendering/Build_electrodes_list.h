@@ -110,7 +110,16 @@ namespace Domains
     void adjust_cap_positions_on( Labeled_domain< VTK_implicite_domain, 
 				                  GT::Point_3, 
 				                  std::list< Point_vector > >&  Surf );
-};
+    /*!
+     *  \brief inside the domaine
+     *
+     *  This function check if the point Point is inside an electrode.
+     *
+     * \param Point: check point.
+     *
+     */
+    bool inside_domain( GT::Point_3 Point );
+  };
   /*!
    *  \brief Dump values for Build_electrodes_list
    *

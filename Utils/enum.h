@@ -270,6 +270,9 @@ enum Brain_segmentation
     VENTRAL_DIENCEPHALON      = 21, //  28  LEFT_VENTRALDC 
                                     //  60 RIGHT_VENTRALDC
     OPTIC_CHIASM_SUBCORTICAL  = 22, //  85 OPTIC_CHIASM
+    //
+    //
+    ELECTRODE                 = 100,
   }; 
 
 

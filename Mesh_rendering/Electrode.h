@@ -8,11 +8,13 @@
  * \version 0.1
  */
 #include <iostream>
+#include <memory>
 //
 // UCSF
 //
+#include "Point.h"
 #include "Point_vector.h"
-#include "Cell_conductivity.h"
+#include "Access_parameters.h"
 /*! \namespace Domains
  * 
  * Name space for our new package
@@ -20,6 +22,58 @@
  */
 namespace Domains
 {
+
+  /*! \class Shape
+   * \brief classe representing whatever
+   *
+   *  This class is an example of class 
+   * 
+   */
+  class Shape
+  {
+  public:
+    virtual bool inside( float,
+			 Domains::Point_vector&, 
+			 float, float, float ) = 0;
+  };
+  
+  class Circle : public Shape
+  {
+  public:
+    Circle(){};
+    virtual ~Circle(){};
+    Circle( const Circle& ){};
+    Circle& operator = ( const Circle& ){};
+
+  public:
+    /*!
+     *  \brief inside 
+     *
+     *  This function check if the point (X, Y, Z) is inside the Circle Shape with the radius Shape_radius.
+     *
+     *  \param Shape_radius: Radius of the shape
+     *  \param Center: center of the shape
+     *  \param X: x-position of the checl point
+     *  \param Y: y-position of the checl point
+     *  \param Z: z-position of the checl point
+     *
+     */
+    virtual bool inside( float Shape_radius, 
+			 Domains::Point_vector& Center, 
+			 float X, float Y, float Z )
+    {
+//      std::cout << "======================" << std::endl;
+//      std::cout << Center.x() << " " << Center.y() << " " << Center.z() << std::endl;
+//      std::cout << X << " " << Y << " " << Z << std::endl;
+      return ( (Center.x() - X)*(Center.x() - X) + 
+	       (Center.y() - Y)*(Center.y() - Y) + 
+	       (Center.z() - Z)*(Center.z() - Z) - 
+	       Shape_radius*Shape_radius < 0. ?
+	       true : false);
+    };
+  };
+
+
   /*! \class Electrode
    * \brief classe representing whatever
    *
@@ -30,8 +84,13 @@ namespace Domains
   class Electrode : public Domains::Point_vector
   {
   private:
+    //! Index of the electrode
+    int index_;
+    //! Label of the electrode
+    std::string label_;
+    //! Electrode shape
+    std::shared_ptr< Domains::Shape > shape_;
 
-    
   public:
     /*!
      *  \brief Default Constructor
@@ -50,25 +109,18 @@ namespace Domains
 	       float, float, float,
 	       float, float, float );
     /*!
+     *  \brief Destructeur
+     *
+     *  Destructor of the class Electrode
+     */
+    virtual ~Electrode();
+    /*!
      *  \brief Copy Constructor
      *
      *  Constructor is a copy constructor
      *
      */
     Electrode( const Electrode& );
-    /*!
-     *  \brief Copy Constructor
-     *
-     *  Constructor is a copy constructor from Cell_conductivity object
-     *
-     */
-    Electrode( const Cell_conductivity& );
-    /*!
-     *  \brief Destructeur
-     *
-     *  Destructor of the class Electrode
-     */
-    virtual ~Electrode();
     /*!
      *  \brief Operator =
      *
@@ -78,32 +130,24 @@ namespace Domains
     Electrode& operator = ( const Electrode& );
     
   public:
-//    int get_cell_id_() const {return cell_id_;};
-//    int get_cell_subdomain_() const {return cell_subdomain_;};
-//
-//    const float* get_conductivity_coefficients_() const {return conductivity_coefficients_; }
-//
-//    float C00() const { return conductivity_coefficients_[0]; }
-//    float C01() const { return conductivity_coefficients_[1]; }
-//    float C02() const { return conductivity_coefficients_[2]; }
-//    float C11() const { return conductivity_coefficients_[3]; }
-//    float C12() const { return conductivity_coefficients_[4]; }
-//    float C22() const { return conductivity_coefficients_[5]; }
-//
-//    float& C00() { return conductivity_coefficients_[0]; }
-//    float& C01() { return conductivity_coefficients_[1]; }
-//    float& C02() { return conductivity_coefficients_[2]; }
-//    float& C11() { return conductivity_coefficients_[3]; }
-//    float& C12() { return conductivity_coefficients_[4]; }
-//    float& C22() { return conductivity_coefficients_[5]; }
-//
-//    float lambda1() const { return conductivity_eigenvalues_[0]; }
-//    float lambda2() const { return conductivity_eigenvalues_[1]; }
-//    float lambda3() const { return conductivity_eigenvalues_[2]; }
-//
-//    float& lambda1() { return conductivity_eigenvalues_[0]; }
-//    float& lambda2() { return conductivity_eigenvalues_[1]; }
-//    float& lambda3() { return conductivity_eigenvalues_[2]; }
+    ucsf_get_macro(index_, int);
+    ucsf_get_macro(label_, std::string);
+
+  public:
+    /*!
+     *  \brief inside electrode domain
+     *
+     *  This function check if the point (X, Y, Z) is inside the electrode.
+     *
+     *  \param X : x-position of the checl point
+     *  \param Y : y-position of the checl point
+     *  \param Z : z-position of the checl point
+     *
+     */
+    bool inside_domain(float X, float Y, float Z)
+    {
+      return shape_->inside( 5. /*mm*/, *this /*Center*/, X, Y, Z);
+    }
  };
   /*!
    *  \brief Dump values for Electrode

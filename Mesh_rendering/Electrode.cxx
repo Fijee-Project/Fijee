@@ -7,31 +7,48 @@ typedef Domains::Electrode DD;
 //
 //
 DD::Electrode():
-  Domains::Point_vector()
+  Domains::Point_vector(),
+  index_(0), label_(""), shape_(nullptr)
 {
 
 }
 //
 //
 //
-DD::Electrode( int index, std::string label, 
-	       float position_x, float position_y, float position_z,
-	       float radius, float phi, float theta )
+DD::Electrode( int Index, std::string Label, 
+	       float Position_x, float Position_y, float Position_z,
+	       float Radius, float Phi, float Theta ):
+  Domains::Point_vector( Position_x, Position_y, Position_z, 
+			 Radius * cos(Phi) * sin(Theta) /*nx*/, 
+			 Radius * sin(Phi) * sin(Theta) /*ny*/, 
+			 Radius * cos(Theta) /*nz*/, 
+			 Radius /*\hat{n} vector normalization*/),
+  index_(Index), label_(Label)
 {
-  Domains::Point_vector( position_x, position_y, position_z, 
-			 radius * cos(theta) * sin(phi) /*nx*/, 
-			 radius * sin(theta) * sin(phi) /*ny*/, 
-			 radius * cos(phi) /*nz*/, 
-			 radius /*\hat{n} vector normalization*/);
+  shape_.reset( new Circle() );
+// //
+// // Check the positions relations
+// if( Position_x > Radius * cos(Phi) * sin(Theta) + 0.001 || Position_x < Radius * cos(Phi) * sin(Theta) - 0.001 ||
+//     Position_y > Radius * sin(Phi) * sin(Theta) + 0.001 || Position_y < Radius * sin(Phi) * sin(Theta)  - 0.001 ||
+//     Position_z > Radius * cos(Theta) + 0.001 || Position_z <  Radius * cos(Theta) - 0.001 )
+//   {
+//     std::cerr << "Position_x " << Position_x << "\n"
+//		<< "Radius * cos(Phi) * sin(Theta) : " << Radius * cos(Phi) * sin(Theta) << "\n"
+//		<< "Position_y " << Position_y << "\n"
+//		<< "Radius * sin(Phi) * sin(Theta) : " << Radius * sin(Phi) * sin(Theta) << "\n"
+//		<< "Position_z " << Position_z << "\n"
+//		<< "Radius * cos(Theta): " << Radius * cos(Theta) << "\n"
+//		<< "Theta " << Theta << " Phi " << Phi << "\n";
+//    exit(1);
+//   }
 }
 //
 //
 //
 DD::Electrode( const DD& that ):
-  Domains::Point_vector(that)
-{
-
-}
+  Domains::Point_vector(that),
+  index_(that.index_),label_(that.label_), shape_(that.shape_)
+{}
 //
 //
 //
@@ -44,6 +61,9 @@ DD::operator = ( const DD& that )
 {
   Domains::Point_vector::operator = (that);
   //
+  index_ = that.index_;
+  label_ = that.label_;
+  shape_ = that.shape_;
 
   //
   //

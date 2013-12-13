@@ -70,6 +70,24 @@ DBel::Build_electrodes_list()
 	    // z = r * cos(theta)
 	    phi = phi * PI / 180.;
 	    theta = PI/2. - theta * PI / 180.;
+
+	    //
+	    // Standard-10-20-Cap81
+	    // Nz ~ (1,0,0) 
+	    // Our framework: Nz ~ (0,1,0)
+	    // We apply
+	    //
+	    //     | cos(Pi/2) = 0   -sin(Pi/2) = -1  0 |
+	    // R = | sin(Pi/2) = 1    cos(Pi/2) =  0  0 |
+	    //     |      0                0          1 |
+	    // !!!Take automatique vectors from VTK_implicite _domain.cxx!!!
+	    float temp_x = position_x;
+	    position_x = -(position_y - 6); 
+	    position_y =  temp_x; 
+	    position_z = position_z + 38;
+	    //
+	    phi += PI/2.;
+
 	    //
 	    electrodes_.push_back( Domains::Electrode( index, label, 
 						       position_x, position_y, position_z,
@@ -108,6 +126,43 @@ DBel::Build_electrodes_list()
 void
 DBel::adjust_cap_positions_on( Labeled_domain< VTK_implicite_domain, GT::Point_3, std::list< Point_vector > >&  Sclap )
 {
+  for( auto electrode = electrodes_.begin() ; 
+       electrode     != electrodes_.end() ; 
+       electrode++  
+       )
+    {
+//      std::cout << "================" << std::endl << std::endl;
+//      std::cout << "avant" << std::endl;
+//      std::cout << electrode.get_index_() << " " << electrode.get_label_()  << std::endl;
+//      std::cout << electrode.x() << " " << electrode.y() << " " << electrode.z() << std::endl;
+      while( Sclap.inside_domain(GT::Point_3( electrode->x(),
+					      electrode->y(),
+					      electrode->z() )) )
+	{
+	  electrode->x() += electrode->vx();
+	  electrode->y() += electrode->vy();
+	  electrode->z() += electrode->vz();
+	}
+//      std::cout << "Apres" << std::endl;
+//      std::cout << electrode.get_index_() << " " << electrode.get_label_()  << std::endl;
+//      std::cout << electrode.x() << " " << electrode.y() << " " << electrode.z() << std::endl;
+    }
+}
+//
+//
+//
+bool
+DBel::inside_domain( GT::Point_3 Point )
+{
+  for( auto electrode : electrodes_ )
+    {
+      if(electrode.inside_domain( Point.x(), Point.y(), Point.z() ))
+	return true;
+    }
+  
+  //
+  //
+  return false;
 }
 //
 //

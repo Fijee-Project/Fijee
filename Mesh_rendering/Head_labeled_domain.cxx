@@ -321,6 +321,12 @@ Domains_Head_labeled::model_segmentation()
 				       data_position_[idx][2]);
 
 	  //
+	  // Electrodes position
+	  //
+	  if( electrodes.inside_domain( cell_center ) ) 
+	    data_label_[ idx ] = ELECTRODE; 
+	  
+	  //
 	  // Brain segmentation
 	  //
 	  
