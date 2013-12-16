@@ -1141,10 +1141,11 @@ Domains_build_mesh::Conductivity_matching_knn()
       ////////////////////////
       // Brain segmentation //
       ////////////////////////
-      if( cell_pmap.subdomain_index( cit ) != NO_SEGMENTATION    &&
-	  cell_pmap.subdomain_index( cit ) != OUTSIDE_SCALP      &&
-	  cell_pmap.subdomain_index( cit ) != OUTSIDE_SKULL      &&
-	  cell_pmap.subdomain_index( cit ) != CEREBROSPINAL_FLUID )
+      if( cell_pmap.subdomain_index( cit ) != NO_SEGMENTATION     &&
+	  cell_pmap.subdomain_index( cit ) != OUTSIDE_SCALP       &&
+	  cell_pmap.subdomain_index( cit ) != OUTSIDE_SKULL       &&
+	  cell_pmap.subdomain_index( cit ) != CEREBROSPINAL_FLUID &&
+	  cell_pmap.subdomain_index( cit ) != ELECTRODE )
 	{
 	  //
 	  // Search the K-nearest neighbor
@@ -1286,6 +1287,35 @@ Domains_build_mesh::Conductivity_matching_knn()
 	  // Add link to the list
 	  list_cell_conductivity_.push_back( std::move(cell_parameters) );
 	} // and of scalp  
+
+      ///////////////
+      // Electrode //
+      ///////////////
+      else if ( cell_pmap.subdomain_index( cit ) == ELECTRODE )
+	{
+	  std::cout << "Je passe" << std::endl;
+	  //
+	  //
+	  Cell_conductivity 
+	    cell_parameters ( cell_id, cell_subdomain,
+			      cell_vertices[4](0),cell_vertices[4](1),cell_vertices[4](2),/* centroid */
+			      0.33,/* l1 */
+			      0., 0., 0., /* eigenvec V1 */
+			      0.33,/* l2 */
+			      0., 0., 0., /* eigenvec V2 */
+			      0.33,/* l3 */
+			      0., 0., 0., /* eigenvec V3 */
+			      0.33, /*C00*/
+			      0.00, /*C01*/
+			      0.00, /*C02*/
+			      0.33, /*C11*/
+			      0.00, /*C12*/
+			      0.33  /*C22*/ );
+	  
+	  //
+	  // Add link to the list
+	  list_cell_conductivity_.push_back( std::move(cell_parameters) );
+	} // Electrode
       else
 	{
 	  // Error condition

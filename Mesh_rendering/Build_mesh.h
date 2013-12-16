@@ -141,7 +141,8 @@ namespace Domains
       
       int subdomain_index(const Cell_handle& ch) const
       {
-	return subdomain_index(r_c3t3_.subdomain_index(ch));
+	//	return subdomain_index(r_c3t3_.subdomain_index(ch));
+	return r_c3t3_.subdomain_index(ch);
       }
       
       size_type subdomain_number() const
