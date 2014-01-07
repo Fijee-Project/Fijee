@@ -18,8 +18,9 @@ int main()
   
   //
   // physical models:
-  //  - Solver::SL_subtraction
-  //  - Solver::SL_direct
+  //  - Source localization
+  //    - Solver::SL_subtraction
+  //    - Solver::SL_direct
   //  - transcranial current stimulation
   //    - Solver::tCS_tDCS
   //    - Solver::tCS_tACS

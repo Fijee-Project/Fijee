@@ -20,6 +20,7 @@ SDEsp::PDE_solver_parameters()
   //
   files_path_        = fijee.get_fem_path_();
   files_path_output_ = fijee.get_fem_output_path_();
+  files_path_result_ = fijee.get_fem_result_path_();
 }
 //
 //

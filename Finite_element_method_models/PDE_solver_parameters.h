@@ -43,6 +43,7 @@ namespace Solver
 //    //! Freesurfer path. This path allow the program to reach all files we will need during the execution.
     std::string files_path_;
     std::string files_path_output_;
+    std::string files_path_result_;
 
     //
     // PDE solver parameters
@@ -106,6 +107,13 @@ namespace Solver
      *
      */
     ucsf_get_string_macro(files_path_output_);
+    /*!
+     *  \brief Get files_path_result_
+     *
+     *  This method return the result path
+     *
+     */
+    ucsf_get_string_macro(files_path_result_);
     /*!
      *  \brief Get linear_solver_
      *

@@ -28,7 +28,8 @@ Solver::SL_subtraction::SL_subtraction()
   //
   domains_.reset( new MeshFunction< long unsigned int >(*mesh_, subdomains_xml.c_str()) );
   // write domains
-  std::string domains_file_name = "domains.pvd";
+  std::string domains_file_name = (SDEsp::get_instance())->get_files_path_result_();
+  domains_file_name            += std::string("domains.pvd");
   File domains_file( domains_file_name.c_str() );
   domains_file << *domains_;
 
@@ -240,7 +241,8 @@ Solver::SL_subtraction::operator () ( /*Solver::Phi& source,
   //  * XML    (.xml)
   //  * XYZ    (.xyz)
   //  * VTK    (.pvd)
-  std::string file_name = source.get_name_() + std::string(".pvd");
+  std::string file_name = (SDEsp::get_instance())->get_files_path_result_() 
+  + source.get_name_() + std::string(".pvd");
   File file( file_name.c_str() );
 //  std::string file_th_name = source.get_name_() + std::string("_Phi_th.pvd");
 //  File file_th(file_th_name.c_str());

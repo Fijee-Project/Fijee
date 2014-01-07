@@ -28,7 +28,8 @@ Solver::tCS_tDCS::tCS_tDCS()
   //
   domains_.reset( new MeshFunction< long unsigned int >(*mesh_, subdomains_xml.c_str()) );
   // write domains
-  std::string domains_file_name = "domains.pvd";
+  std::string domains_file_name = (SDEsp::get_instance())->get_files_path_result_();
+  domains_file_name            += std::string("domains.pvd");
   File domains_file( domains_file_name.c_str() );
   domains_file << *domains_;
 
@@ -208,7 +209,8 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
   //  * XML    (.xml)
   //  * XYZ    (.xyz)
   //  * VTK    (.pvd)
-//  std::string file_name = source.get_name_() + std::string(".pvd");
+//  std::string file_name = (SDEsp::get_instance())->get_files_path_result_() + 
+//  source.get_name_() + std::string(".pvd");
 //  File file( file_name.c_str() );
 //  //
 //  file << u;
