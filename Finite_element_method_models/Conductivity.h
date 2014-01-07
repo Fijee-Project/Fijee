@@ -69,7 +69,7 @@ namespace Solver
     /*!
      *  \brief value_rank
      *
-     *  This method evaluates 
+     *  This method returns the rank of the tensor
      *
      */
     virtual std::size_t value_rank() const

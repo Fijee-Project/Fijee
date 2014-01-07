@@ -1,13 +1,16 @@
-#ifndef _SUBTRACTION_H
-#define _SUBTRACTION_H
+#ifndef _SL_SUBTRACTION_H
+#define _SL_SUBTRACTION_H
 #include <list>
 #include <memory>
 #include <string>
+#include <mutex>
+#include <stdexcept>      // std::logic_error
 //
 // FEniCS
 //
 #include <dolfin.h>
-#include "Poisson.h"
+// Source localization subtraction model
+#include "SLS_model.h"
 //
 // pugixml
 // same resources than Dolfin
@@ -16,20 +19,19 @@
 //
 // UCSF project
 //
-#include "Physical_model.h"
 #include "Source.h"
 #include "Conductivity.h"
 #include "Boundaries.h"
-#include "Sub_Domaines.h"
+#include "Sub_domaines.h"
 #include "PDE_solver_parameters.h"
-#include "Utils/Thread_dispatching.h"
+//#include "Utils/Thread_dispatching.h"
 //
 //
 //
 //using namespace dolfin;
 //
 /*!
- * \file Subtraction.h
+ * \file SL_subtraction.h
  * \brief brief describe 
  * \author Yann Cobigo
  * \version 0.1
@@ -42,12 +44,12 @@
  */
 namespace Solver
 {
-  /*! \class Subtraction
-   * \brief classe representing the dipoles distribution
+  /*! \class SL_subtraction
+   * \brief classe representing the source localisation with subtraction method.
    *
-   *  This class is an example of class I will have to use
+   *  This class representing the Physical model for the source localisation using the subtraction method.
    */
-  class Subtraction : public Physical_model
+  class SL_subtraction
   {
     //! Dipoles list
     std::list< Solver::Phi > dipoles_list_;
@@ -58,52 +60,54 @@ namespace Solver
     //! Anisotropic conductivity
     std::unique_ptr< Solver::Tensor_conductivity > sigma_;
     //! Function space
-    std::unique_ptr< Poisson::FunctionSpace > V_;
-    // Boundaries
+    std::unique_ptr< SLS_model::FunctionSpace > V_;
+    //! Boundarie conditions
     std::unique_ptr<  FacetFunction< size_t > > boundaries_;
+    
+  private:
+    std::mutex critical_zone_;
 
   public:
     /*!
      *  \brief Default Constructor
      *
-     *  Constructor of the class Subtraction
+     *  Constructor of the class SL_subtraction
      *
      */
-    Subtraction();
+    SL_subtraction();
     /*!
      *  \brief Copy Constructor
      *
      *  Constructor is a copy constructor
      *
      */
-    Subtraction( const Subtraction& ){};
+    SL_subtraction( const SL_subtraction& ){};
     /*!
      *  \brief Destructeur
      *
-     *  Destructor of the class Subtraction
+     *  Destructor of the class SL_subtraction
      */
-    virtual ~Subtraction(){/* Do nothing */};
+    ~SL_subtraction(){/* Do nothing */};
     /*!
      *  \brief Operator =
      *
-     *  Operator = of the class Subtraction
+     *  Operator = of the class SL_subtraction
      *
      */
-    Subtraction& operator = ( const Subtraction& ){};
+    SL_subtraction& operator = ( const SL_subtraction& ){};
     /*!
      *  \brief Operator ()
      *
-     *  Operator () of the class Subtraction
+     *  Operator () of the class SL_subtraction
      *
      */
-    void operator () ( Solver::Phi& /*,
-		       Poisson::FunctionSpace&,
-		       FacetFunction< size_t >&*/);
-
+    void operator () ();
+    
   public:
     /*!
      */
-    virtual void solver_loop();
+    inline
+      int get_number_of_physical_event(){return number_dipoles_; };
 
 
   private:

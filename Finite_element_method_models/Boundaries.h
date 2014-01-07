@@ -20,4 +20,13 @@ class Periphery : public dolfin::SubDomain
     return ( on_boundary  );
   }
 };
+
+//// Normal derivative (Neumann boundary condition)
+//class dVdn : public Expression
+//{
+//  void eval(Array<double>& values, const Array<double>& x) const
+//  {
+//    values[0] = 0.;
+//  }
+//};
 #endif

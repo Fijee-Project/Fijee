@@ -43,12 +43,12 @@ Solver::Tensor_conductivity::eval(Array<double>& values, const Array<double>& x,
   const uint cell_index = cell.index;
   // values should not be zero
   double
-    C00 = ( C00_[cell_index] != 0. ? C00_[cell_index] : 0.0132 ),
-    C01 = ( C01_[cell_index] != 0. ? C01_[cell_index] : 0.0132 ),
-    C02 = ( C02_[cell_index] != 0. ? C02_[cell_index] : 0.0132 ),
-    C11 = ( C11_[cell_index] != 0. ? C11_[cell_index] : 0.0132 ),
-    C12 = ( C12_[cell_index] != 0. ? C12_[cell_index] : 0.0132 ),
-    C22 = ( C22_[cell_index] != 0. ? C22_[cell_index] : 0.0132 );
+    C00 = /*(*/ C00_[cell_index] /*!= 0. ? C00_[cell_index] : 0.0132 )*/,
+    C01 = /*(*/ C01_[cell_index] /*!= 0. ? C01_[cell_index] : 0.0132 )*/,
+    C02 = /*(*/ C02_[cell_index] /*!= 0. ? C02_[cell_index] : 0.0132 )*/,
+    C11 = /*(*/ C11_[cell_index] /*!= 0. ? C11_[cell_index] : 0.0132 )*/,
+    C12 = /*(*/ C12_[cell_index] /*!= 0. ? C12_[cell_index] : 0.0132 )*/,
+    C22 = /*(*/ C22_[cell_index] /*!= 0. ? C22_[cell_index] : 0.0132 )*/;
   //
   values[0] = C00; values[3] = C01; values[6] = C02;
   values[1] = C01; values[4] = C11; values[7] = C12;

@@ -54,6 +54,8 @@ namespace Utils
     std::string fem_path_;
     //! Finite element method output directory path.
     std::string fem_output_path_;
+    //! Finite element method result directory path.
+    std::string fem_result_path_;
 
   public:
     /*!
@@ -112,6 +114,39 @@ namespace Utils
 	    //
 	    exit(1);
 	  }
+
+	//
+	// Create result path
+	status = 0;
+	//
+	fem_result_path_ = fem_path_ + "/fem/result/";
+	//
+	if ( stat( fem_result_path_.c_str(), &st ) != 0 )
+	  {
+	    /* Directory does not exist */
+	    if ( mkdir( fem_result_path_.c_str(), mode ) != 0 )
+	      status = -1;
+	  }
+	else if (!S_ISDIR(st.st_mode))
+	  {
+	    errno = ENOTDIR;
+	    status = -1;
+	  }
+	else
+	  {
+	    std::cerr << "Warning: directory " << fem_result_path_
+		      << " already exist. Data will be removed." << std::endl;
+	  }
+	//
+	if (status == -1 )
+	  {
+	    std::cerr << "failed to create " << fem_result_path_
+		      << ": " << strerror(errno) << std::endl;
+	    //
+	    exit(1);
+	  }
+
+	//
 	// append the path line
 	fem_path_ += "/";
       };
@@ -165,6 +200,13 @@ namespace Utils
      *
      */
     ucsf_get_macro(fem_output_path_, std::string);
+   /*!
+     *  \brief Get fem_result_path_
+     *
+     *  This method return the finite element method result directory path.
+     *
+     */
+    ucsf_get_macro(fem_result_path_, std::string);
 
     
   };

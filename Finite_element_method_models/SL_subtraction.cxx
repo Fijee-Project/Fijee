@@ -1,12 +1,12 @@
 #include <iostream>
-#include "Subtraction.h"
+#include "SL_subtraction.h"
 
 typedef Solver::PDE_solver_parameters SDEsp;
 
 //
 //
 //
-Solver::Subtraction::Subtraction()
+Solver::SL_subtraction::SL_subtraction()
 {
   //
   // Load the mesh
@@ -28,7 +28,8 @@ Solver::Subtraction::Subtraction()
   //
   domains_.reset( new MeshFunction< long unsigned int >(*mesh_, subdomains_xml.c_str()) );
   // write domains
-  std::string domains_file_name = "domains.pvd";
+  std::string domains_file_name = (SDEsp::get_instance())->get_files_path_result_();
+  domains_file_name            += std::string("domains.pvd");
   File domains_file( domains_file_name.c_str() );
   domains_file << *domains_;
 
@@ -39,13 +40,11 @@ Solver::Subtraction::Subtraction()
   sigma_.reset( new Solver::Tensor_conductivity(*mesh_) );
 
 
-
-
   //
   //
   //
   // Define the function space
-  V_.reset( new Poisson::FunctionSpace(*mesh_) );
+  V_.reset( new SLS_model::FunctionSpace(*mesh_) );
   
   //
   // Define boundary condition
@@ -54,8 +53,6 @@ Solver::Subtraction::Subtraction()
   boundaries_.reset( new FacetFunction< size_t > (*mesh_) );
   boundaries_->set_all(0);
   perifery.mark(*boundaries_, 1);
-
-
 
 
   //
@@ -112,10 +109,10 @@ Solver::Subtraction::Subtraction()
 	    double lambda2 = dipole.attribute("lambda2").as_double();
 	    double lambda3 = dipole.attribute("lambda3").as_double();
 	    //
-	    dipoles_list_.push_back(std::move(Solver::Phi( index, Q,
-							   position_x, position_y, position_z, 
-							   direction_vx, direction_vy, direction_vz, 
-							   lambda1, lambda2, lambda3 )));
+	    dipoles_list_.push_back(/*std::move(*/Solver::Phi( index, Q,
+							       position_x, position_y, position_z, 
+							       direction_vx, direction_vy, direction_vz, 
+							       lambda1, lambda2, lambda3 )/*)*/);
 	  }
 	
 	//
@@ -142,46 +139,24 @@ Solver::Subtraction::Subtraction()
 //
 //
 void 
-Solver::Subtraction::solver_loop()
+Solver::SL_subtraction::operator () ( /*Solver::Phi& source,
+				        SLS_model::FunctionSpace& V,
+				        FacetFunction< size_t >& boundaries*/)
 {
-//  //
-//  // Define the function space
-//  Poisson::FunctionSpace V(*mesh_);
-//  
-//  //
-//  // Define boundary condition
-//  Periphery perifery;
-//  // Initialize mesh function for boundary domains. We tag the boundaries
-//  FacetFunction< size_t > boundaries(*mesh_);
-//  boundaries.set_all(0);
-//  perifery.mark(boundaries, 1);
-
   //
-  // Define the number of threads in the pool of threads
-  Utils::Thread_dispatching pool( (SDEsp::get_instance())->get_number_of_threads_() );
-
-
+  // Mutex the dipoles vector poping process
   //
-  //
-  int tempo = 0;
-  for( auto source = dipoles_list_.begin() ;
-       source != dipoles_list_.end() ; source++ )
-    if( ++tempo < 80 )
-    {
-      //
-      // Enqueue tasks
-      pool.enqueue( std::ref(*this), std::ref(*source) );
+  Solver::Phi source;
+    try {
+      // lock the dipole list
+      std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
+      source = dipoles_list_.front();
+      dipoles_list_.pop_front();
     }
-    else {break;}
-}
-//
-//
-//
-void 
-Solver::Subtraction::operator () ( Solver::Phi& source/*,
-				   Poisson::FunctionSpace& V,
-				   FacetFunction< size_t >& boundaries*/)
-{
+    catch (std::logic_error&) {
+      std::cout << "[exception caught]\n";
+    }
+
   //
   //
   std::cout << source.get_name_() << std::endl;
@@ -192,16 +167,16 @@ Solver::Subtraction::operator () ( Solver::Phi& source/*,
 
   //      //
   //      // Define Dirichlet boundary conditions 
-  //      DirichletBC boundary_conditions(V, source, perifery);
+  //      DirichletBC boundary_conditions(*V, source, perifery);
 
-  //////////////////////
-  // Poisson equation //
-  //////////////////////
+  ////////////////////////////////////////////////////
+  // Source localization subtraction model equation //
+  ////////////////////////////////////////////////////
       
   //
   // Define variational forms
-  Poisson::BilinearForm a(*V_, *V_);
-  Poisson::LinearForm L(*V_);
+  SLS_model::BilinearForm a(*V_, *V_);
+  SLS_model::LinearForm L(*V_);
       
   //
   // Anisotropy
@@ -219,6 +194,7 @@ Solver::Subtraction::operator () ( Solver::Phi& source/*,
   //
   // Compute solution
   Function u(*V_);
+  //
   LinearVariationalProblem problem(a, L, u);
   LinearVariationalSolver  solver(problem);
   // krylov
@@ -233,6 +209,28 @@ Solver::Subtraction::operator () ( Solver::Phi& source/*,
   //
   solver.solve();
 
+//  // Theoric Potential
+//  Function Phi_th(*V_);
+//  Phi_th.interpolate(source);
+
+  //
+  // V_{tot} = \sum_{i=1}^{n} U_{i} \phi_{i}. where \{\phi_i\}_{i=1}^{n} is a basis for V_h, 
+  // and U is a vector of expansion coefficients for V_{tot,h}.
+  Function Phi_tot(*V_);
+  Phi_tot.interpolate(source);
+  *Phi_tot.vector()  += *u.vector();
+  
+//  //
+//  // 
+//  for ( CellIterator cell(*mesh_) ; !cell.end() ; ++cell)
+//    {
+//      if((*domains_)[*cell] != 5 )
+//	{
+//	  (*Phi_tot.vector())[cell->index];
+//	}
+//    }
+
+
   //
   // Save solution in VTK format
   //  * Binary (.bin)
@@ -243,9 +241,15 @@ Solver::Subtraction::operator () ( Solver::Phi& source/*,
   //  * XML    (.xml)
   //  * XYZ    (.xyz)
   //  * VTK    (.pvd)
-  std::string file_name = source.get_name_() + std::string(".pvd");
+  std::string file_name = (SDEsp::get_instance())->get_files_path_result_() 
+  + source.get_name_() + std::string(".pvd");
   File file( file_name.c_str() );
+//  std::string file_th_name = source.get_name_() + std::string("_Phi_th.pvd");
+//  File file_th(file_th_name.c_str());
+//  std::string file_tot_name = source.get_name_() + std::string("_Phi_tot.pvd");
+//  File file_tot(file_tot_name.c_str());
   //
-  file << u;
-  //  file << *domains_;
+//  file << u;
+//  file_th << Phi_th;
+  file << Phi_tot;
 };

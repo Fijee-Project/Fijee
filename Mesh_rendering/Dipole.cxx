@@ -90,9 +90,8 @@ Domains::operator << ( std::ostream& stream,
     << static_cast<Domains::Point_vector> (that)
     // Dipole intensity
     << "I=\"" << that.weight() << "\" "
-//    // Conductivity coefficients
-//    << "C00=\"" << that.C00() << "\" C01=\"" << that.C01() << "\" C02=\"" << that.C02() << "\" "
-//    << "C11=\"" << that.C11() << "\" C12=\"" << that.C12() << "\" C22=\"" << that.C22() << "\" ";
+    // Cell id
+    << "index_cell=\"" << that.get_cell_id_() << "\" "
     // Conductivity eigenvalues
     << "lambda1=\"" << that.lambda1() 
     << "\" lambda2=\"" << that.lambda2() 

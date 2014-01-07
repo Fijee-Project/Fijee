@@ -20,6 +20,7 @@ SDEsp::PDE_solver_parameters()
   //
   files_path_        = fijee.get_fem_path_();
   files_path_output_ = fijee.get_fem_output_path_();
+  files_path_result_ = fijee.get_fem_result_path_();
 }
 //
 //
@@ -104,11 +105,11 @@ SDEsp::init()
   //
   maximum_iterations_ = 10000;
   //
-  relative_tolerance_ = 1.e-06;
+  relative_tolerance_ = 1.e-08 /*1.e-06*/;
 
   //
   // Dispatching information
-  number_of_threads_ = 1;
+  number_of_threads_ = 2;
 }
 //
 //
