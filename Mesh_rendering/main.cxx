@@ -36,8 +36,13 @@ main()
   parameters->init();
   
   // 
-  // Head simulation:    Domains::Head_labeled_domain, Domains::Conductivity_tensor
-  // Spheres simulation: Domains::Spheres_labeled_domain, Domains::Conductivity_tensor
+  // Head simulation:    
+  //   - Domains::Head_labeled_domain 
+  //   - Domains::Conductivity_tensor
+  //
+  // Spheres simulation: 
+  //   - Domains::Spheres_labeled_domain 
+  //   - Domains::Conductivity_tensor
   Domains::Mesh_generator< Domains::Head_labeled_domain, 
 			   Domains::Conductivity_tensor > generator;
   //

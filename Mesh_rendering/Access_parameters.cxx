@@ -93,6 +93,13 @@ DAp::Access_parameters():
     aseg_header_nifti.srow_x[3],
     aseg_header_nifti.srow_y[3],
     aseg_header_nifti.srow_z[3];
+  //
+  delta_rotation_ << 
+    0.,0.,0.,
+    0.,0.,0.,
+    0.,0.,0.;
+  //
+  delta_translation_ << 0.,0.,0.;
 
   //
   // Some print out

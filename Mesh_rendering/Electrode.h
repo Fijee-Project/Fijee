@@ -37,19 +37,19 @@ namespace Domains
 			 float, float, float ) = 0;
   };
   
-  class Circle : public Shape
+  class Sphere : public Shape
   {
   public:
-    Circle(){};
-    virtual ~Circle(){};
-    Circle( const Circle& ){};
-    Circle& operator = ( const Circle& ){};
+    Sphere(){};
+    virtual ~Sphere(){};
+    Sphere( const Sphere& ){};
+    Sphere& operator = ( const Sphere& ){};
 
   public:
     /*!
      *  \brief inside 
      *
-     *  This function check if the point (X, Y, Z) is inside the Circle Shape with the radius Shape_radius.
+     *  This function check if the point (X, Y, Z) is inside the Sphere Shape with the radius Shape_radius.
      *
      *  \param Shape_radius: Radius of the shape
      *  \param Center: center of the shape
@@ -62,9 +62,6 @@ namespace Domains
 			 Domains::Point_vector& Center, 
 			 float X, float Y, float Z )
     {
-//      std::cout << "======================" << std::endl;
-//      std::cout << Center.x() << " " << Center.y() << " " << Center.z() << std::endl;
-//      std::cout << X << " " << Y << " " << Z << std::endl;
       return ( (Center.x() - X)*(Center.x() - X) + 
 	       (Center.y() - Y)*(Center.y() - Y) + 
 	       (Center.z() - Z)*(Center.z() - Z) - 

@@ -105,17 +105,17 @@ namespace Domains
     
     //
     // Surfaces contenairs
-    //! List of point with their vector for the gray matter left hemisphere.
+    //! List of point with their vector for the gray matter left hemisphere
     std::list< Domains::Point_vector > lh_gray_matter_surface_point_normal_;
-    //! List of point with their vector for the gray matter write hemisphere.
+    //! List of point with their vector for the gray matter write hemisphere
     std::list< Domains::Point_vector > rh_gray_matter_surface_point_normal_;
-    //! List of point with their vector for the white matter left hemisphere.
+    //! List of point with their vector for the white matter left hemisphere
     std::list< Domains::Point_vector > lh_white_matter_surface_point_normal_;
-    //! List of point with their vector for the white matter write hemisphere.
+    //! List of point with their vector for the white matter write hemisphere
     std::list< Domains::Point_vector > rh_white_matter_surface_point_normal_;
-    //! List of matching vertices between white matter and gray matter left hemisphere.
+    //! List of matching vertices between white matter and gray matter left hemisphere
     std::list< std::tuple< Domains::Point_vector, Domains::Point_vector > > lh_match_wm_gm_;
-    //! List of matching vertices between white matter and gray matter right hemisphere.
+    //! List of matching vertices between white matter and gray matter right hemisphere
     std::list< std::tuple< Domains::Point_vector, Domains::Point_vector > > rh_match_wm_gm_;
 
     //
@@ -146,6 +146,12 @@ namespace Domains
     Matrix_f_3X3 rotation_;
     //! translation_ is the translation matrix
     Vector_f_3X1 translation_;
+    // Delta between our transformation and MNI 305 transformation
+    //! Delta rotation_ is the rotation matrix
+    Matrix_f_3X3 delta_rotation_;
+    //! Delta translation_ is the translation matrix
+    Vector_f_3X1 delta_translation_;
+    
     
     //
     // NIFTI Diffusion/Conductivity data information
@@ -274,6 +280,20 @@ namespace Domains
      *
      */
     ucsf_get_macro(translation_, Vector_f_3X1);
+     /*!
+     *  \brief Get delta_rotation_
+     *
+     *  This method return the delta rotation matrix between nifti rotation and MNI305 rotation.
+     *
+     */
+    ucsf_get_macro(delta_rotation_, Matrix_f_3X3);
+   /*!
+     *  \brief Get delta_translation_
+     *
+     *  This method return the delta translation vector between nifti rotation and MNI305 rotation.
+     *
+     */
+    ucsf_get_macro(delta_translation_, Vector_f_3X1);
    /*!
      *  \brief Get files_path_output_
      *
@@ -399,8 +419,7 @@ namespace Domains
      *  This method return the white and gray matter vertices matching tuples for the left hemisphere.
      *
      */
-    void 
-      get_lh_match_wm_gm_(std::list< std::tuple< Domains::Point_vector, Domains::Point_vector > >& Lh_match_wm_gm) const 
+    void get_lh_match_wm_gm_(std::list< std::tuple< Domains::Point_vector, Domains::Point_vector > >& Lh_match_wm_gm) const 
     { 
       Lh_match_wm_gm.resize( lh_match_wm_gm_.size() );
       //
@@ -428,6 +447,20 @@ namespace Domains
 
 
   public:
+     /*!
+     *  \brief Set delta_rotation_
+     *
+     *  This method set the delta rotation matrix between nifti rotation and MNI305 rotation.
+     *
+     */
+    inline void set_delta_rotation_(Matrix_f_3X3 Delta_Rotation){delta_rotation_ = Delta_Rotation;};
+   /*!
+     *  \brief Set delta_translation_
+     *
+     *  This method set the delta translation vector between nifti rotation and MNI305 rotation.
+     *
+     */
+    inline void set_delta_translation_(Vector_f_3X1 Delta_Translation){delta_translation_ = Delta_Translation;};
     /*!
      *  \brief Get data_eigen_values_
      *

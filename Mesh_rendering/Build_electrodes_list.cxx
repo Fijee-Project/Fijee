@@ -82,9 +82,15 @@ DBel::Build_electrodes_list()
 	    //     |      0                0          1 |
 	    // !!!Take automatique vectors from VTK_implicite _domain.cxx!!!
 	    float temp_x = position_x;
-	    position_x = -(position_y - 6); 
-	    position_y =  temp_x; 
-	    position_z = position_z + 38;
+	    //
+	    position_x  = - position_y;
+	    //	    position_x -= (Domains::Access_parameters::get_instance())->get_delta_translation_()[2];
+	    //
+	    position_y  = temp_x;
+	    //	    position_y += (Domains::Access_parameters::get_instance())->get_delta_translation_()[0];
+	    //
+	    position_z  = position_z;
+	    //	    position_z += (Domains::Access_parameters::get_instance())->get_delta_translation_()[1];
 	    //
 	    phi += PI/2.;
 
@@ -131,10 +137,6 @@ DBel::adjust_cap_positions_on( Labeled_domain< VTK_implicite_domain, GT::Point_3
        electrode++  
        )
     {
-//      std::cout << "================" << std::endl << std::endl;
-//      std::cout << "avant" << std::endl;
-//      std::cout << electrode.get_index_() << " " << electrode.get_label_()  << std::endl;
-//      std::cout << electrode.x() << " " << electrode.y() << " " << electrode.z() << std::endl;
       while( Sclap.inside_domain(GT::Point_3( electrode->x(),
 					      electrode->y(),
 					      electrode->z() )) )
@@ -143,9 +145,62 @@ DBel::adjust_cap_positions_on( Labeled_domain< VTK_implicite_domain, GT::Point_3
 	  electrode->y() += electrode->vy();
 	  electrode->z() += electrode->vz();
 	}
-//      std::cout << "Apres" << std::endl;
-//      std::cout << electrode.get_index_() << " " << electrode.get_label_()  << std::endl;
-//      std::cout << electrode.x() << " " << electrode.y() << " " << electrode.z() << std::endl;
+    }
+}
+//
+//
+//
+void
+DBel::adjust_cap_positions_on( Labeled_domain< VTK_implicite_domain, 
+					       GT::Point_3, std::list< Point_vector > >&  Sclap,
+			       Labeled_domain< VTK_implicite_domain, 
+					       GT::Point_3, std::list< Point_vector > >&  Skull
+			       )
+{
+  //
+  // First we find the center of the skull
+  float skull_center[3];
+  double amplitude[3];
+  //
+  for ( int i = 0 ; i < 3 ; i++ )
+    {
+      amplitude[i]  = Skull.get_poly_data_bounds_()[2*i+1];/* max */
+      amplitude[i] -= Skull.get_poly_data_bounds_()[2*i];  /* min */
+      //
+      skull_center[i] = Skull.get_poly_data_bounds_()[2*i] + amplitude[i] / 2.;
+    }
+
+  //
+  // Translation of the center according to the MNI 305 delta translation
+  skull_center[0] += (Domains::Access_parameters::get_instance())->get_delta_translation_()[0];
+  skull_center[1] += (Domains::Access_parameters::get_instance())->get_delta_translation_()[1];
+  skull_center[2] += (Domains::Access_parameters::get_instance())->get_delta_translation_()[2];
+  // arbitrary offset 5% on "Z" 
+  skull_center[2] += 5. * amplitude[2] / 100.;
+
+  //
+  //
+  for( auto electrode = electrodes_.begin() ; 
+       electrode     != electrodes_.end() ; 
+       electrode++  
+       )
+    {
+      //
+      // translation of coordinates to the center of the skull
+      electrode->x() += skull_center[0];
+      electrode->y() += skull_center[1];
+      electrode->z() += skull_center[2];
+
+      //
+      //
+      while( Sclap.inside_domain(GT::Point_3( electrode->x(),
+					      electrode->y(),
+					      electrode->z() )) )
+	{
+	  electrode->x() += electrode->vx();
+	  electrode->y() += electrode->vy();
+	  electrode->z() += electrode->vz();
+	}
     }
 }
 //

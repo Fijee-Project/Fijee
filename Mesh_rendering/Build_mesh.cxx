@@ -1293,7 +1293,6 @@ Domains_build_mesh::Conductivity_matching_knn()
       ///////////////
       else if ( cell_pmap.subdomain_index( cit ) == ELECTRODE )
 	{
-	  std::cout << "Je passe" << std::endl;
 	  //
 	  //
 	  Cell_conductivity 

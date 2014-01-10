@@ -269,7 +269,7 @@ Domains_Head_labeled::model_segmentation()
   //
   // Electrodes localization
   Domains::Build_electrodes_list electrodes;
-  electrodes.adjust_cap_positions_on( outside_scalp );
+  electrodes.adjust_cap_positions_on( outside_scalp, inside_skull );
   
   //
   // End of cortical segmentation

@@ -128,6 +128,12 @@ namespace Domains
       return implicite_domain_->inside_domain( Point_Type );
     };
 
+    //    
+    inline const double* get_poly_data_bounds_()
+    {
+      return implicite_domain_->get_poly_data_bounds_();
+    };
+
     //    inline bool inside_domain( CGAL::Point_3< Kernel > Point )
     inline VectorPointNormal get_point_normal()
     {

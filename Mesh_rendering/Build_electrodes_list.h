@@ -109,7 +109,19 @@ namespace Domains
      */
     void adjust_cap_positions_on( Labeled_domain< VTK_implicite_domain, 
 				                  GT::Point_3, 
-				                  std::list< Point_vector > >&  Surf );
+				                  std::list< Point_vector > >&  Surf );    /*!
+     *  \brief adjust the electrod position on a surface
+     *
+     *  Adjust the electrod position on the surface Surf1 using the center of coordinate from the surface Surf2.
+     *
+     */
+    void adjust_cap_positions_on( Labeled_domain< VTK_implicite_domain, 
+				                  GT::Point_3, 
+				                  std::list< Point_vector > >&  Surf1,
+				  Labeled_domain< VTK_implicite_domain, 
+				                  GT::Point_3, 
+				                  std::list< Point_vector > >&  Surf2
+				  );
     /*!
      *  \brief inside the domaine
      *

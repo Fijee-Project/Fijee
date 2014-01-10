@@ -25,7 +25,7 @@ DD::Electrode( int Index, std::string Label,
 			 Radius /*\hat{n} vector normalization*/),
   index_(Index), label_(Label)
 {
-  shape_.reset( new Circle() );
+  shape_.reset( new Sphere() );
 // //
 // // Check the positions relations
 // if( Position_x > Radius * cos(Phi) * sin(Theta) + 0.001 || Position_x < Radius * cos(Phi) * sin(Theta) - 0.001 ||

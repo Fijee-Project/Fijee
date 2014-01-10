@@ -198,6 +198,9 @@ Domain::VTK_implicite_domain( const char* Vtk_Mesh, Simulation Simu ):
 	    std::cerr << "R = Id + delta_rotation" << std::endl;
 	    exit( 1 );
 	  }
+	// Set the delta transformation
+	(Domains::Access_parameters::get_instance())->set_delta_rotation_(delta_rotation);
+	(Domains::Access_parameters::get_instance())->set_delta_translation_(delta_traslation);
 
 
 	//
@@ -212,9 +215,9 @@ Domain::VTK_implicite_domain( const char* Vtk_Mesh, Simulation Simu ):
 	//  // Transform the VTK mesh
 	//  // bug Freesurfer: mirror symmetry
 	//  double symmetry_matrix[16] = { 1, 0, 0, 0,
-	//				 0, 1, 0, 38,
-	//				 0, 0, 1, 0,
-	//				 0, 0, 0, 1};
+	//				   0, 1, 0, 38,
+	//				   0, 0, 1, 6.,
+	//				   0, 0, 0, 1};
 	//  
 	//  vtkSmartPointer<vtkTransform> symmetry    = vtkSmartPointer<vtkTransform>::New();
 	//  symmetry->SetMatrix( symmetry_matrix );
@@ -277,6 +280,10 @@ Domain::VTK_implicite_domain( const char* Vtk_Mesh, Simulation Simu ):
 	//  normals_rotation->SetInputData( normals_symmetric );
 	//#endif
 	//  normals_rotation->Update();
+
+	//
+	// Record the boundery data
+	Poly_data_points->GetBounds(poly_data_bounds_);
  
 	//
 	// Create the Point with normal contenair
@@ -330,6 +337,15 @@ Domain::VTK_implicite_domain( const char* Vtk_Mesh, Simulation Simu ):
       }
     case SIMU_SPHERES:
       {
+	// TODO
+	// Boundary data
+	poly_data_bounds_[0] = 0.;
+	poly_data_bounds_[1] = 0.;
+	poly_data_bounds_[2] = 0.;
+	poly_data_bounds_[3] = 0.;
+	poly_data_bounds_[4] = 0.;
+	poly_data_bounds_[5] = 0.;
+	
 	//
 	//
 	std::string line;

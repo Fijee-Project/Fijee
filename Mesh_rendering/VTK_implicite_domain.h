@@ -91,6 +91,14 @@ namespace Domains
     vtkSmartPointer<vtkSelectEnclosedPoints> select_enclosed_points_;
     //! map of point with their vector. Those points represent vertices and their vectors represent the surface normal.
     std::list <Domains::Point_vector > point_normal_;
+    //! VTK poly data bounds
+    //! xmin = poly_data_bounds_[0]
+    //! xmax = poly_data_bounds_[1]
+    //! ymin = poly_data_bounds_[2]
+    //! ymax = poly_data_bounds_[3]
+    //! zmin = poly_data_bounds_[4]
+    //! zmax = poly_data_bounds_[5]
+    double poly_data_bounds_[6];
 
   public:
     /*!
@@ -151,13 +159,13 @@ namespace Domains
 
   public:
     /*!
-     *  \brief Get max_x_ value
+     *  \brief Get extrema values
      *
-     *  This method return the maximum x coordinate max_x_.
+     *  This method return the extrema of the poly data point set.
      *
-     *  \return max_x_
+     *  \return extrema
      */
-    //    inline double get_max_x( ) const {return max_x_;};
+    inline const double* get_poly_data_bounds_() const {return poly_data_bounds_;};
     /*!
      *  \brief Get point_normal vector
      *
