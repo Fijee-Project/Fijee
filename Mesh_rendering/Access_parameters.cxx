@@ -760,7 +760,7 @@ void
 DAp::epitaxy_growth()
 {
   // 
-  // Reft hemisphere
+  // Left hemisphere
   match_wm_gm( lh_white_matter_surface_point_normal_,
 	       lh_gray_matter_surface_point_normal_,
 	       lh_match_wm_gm_);

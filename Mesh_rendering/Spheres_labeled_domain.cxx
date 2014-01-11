@@ -7,7 +7,7 @@
 #include "Spheres_labeled_domain.h"
 #include "Utils/enum.h"
 #include "Labeled_domain.h"
-#include "VTK_implicite_domain.h"
+#include "Spheres_implicite_domain.h"
 #include "Access_parameters.h"
 #include "Point_vector.h"
 //
@@ -198,14 +198,14 @@ Domains_Spheres_labeled::model_segmentation()
 {
   //
   // brain, CSF, scalp and skull
-  Labeled_domain< VTK_implicite_domain, GT::Point_3, std::list< Point_vector > > 
-    scalp( "../share/sphere_scalp.xyz", SIMU_SPHERES );
-  Labeled_domain< VTK_implicite_domain, GT::Point_3, std::list< Point_vector > > 
-    skull( "../share/sphere_skull.xyz", SIMU_SPHERES  );
-  Labeled_domain< VTK_implicite_domain, GT::Point_3, std::list< Point_vector > > 
-    CSF( "../share/sphere_CSF.xyz", SIMU_SPHERES  );
-  Labeled_domain< VTK_implicite_domain, GT::Point_3, std::list< Point_vector > > 
-    brain( "../share/sphere_brain.xyz", SIMU_SPHERES  );
+  Labeled_domain< Spheres_implicite_domain, GT::Point_3, std::list< Point_vector > > 
+    scalp( "../share/sphere_scalp.xyz" );
+  Labeled_domain< Spheres_implicite_domain, GT::Point_3, std::list< Point_vector > > 
+    skull( "../share/sphere_skull.xyz" );
+  Labeled_domain< Spheres_implicite_domain, GT::Point_3, std::list< Point_vector > > 
+    CSF( "../share/sphere_CSF.xyz"  );
+  Labeled_domain< Spheres_implicite_domain, GT::Point_3, std::list< Point_vector > > 
+    brain( "../share/sphere_brain.xyz" );
   //  
   //  scalp( data_position_ );
   //  skull( data_position_ );

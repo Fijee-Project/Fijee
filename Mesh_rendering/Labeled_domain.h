@@ -47,7 +47,7 @@ namespace Domains
      *
      */
   Labeled_domain():
-    implicite_domain_( NULL )
+    implicite_domain_( nullptr )
       {};
     /*!
      *  \brief Constructor
@@ -55,8 +55,8 @@ namespace Domains
      *  Constructor of the class Labeled_domain
      *
      */
-    Labeled_domain( const char* File, Simulation simu ):
-    implicite_domain_( new Implicite_domain( File, simu ))
+    Labeled_domain( const char* File ):
+    implicite_domain_( new Implicite_domain( File ) )
       {};
     /*!
      *  \brief Copy Constructor

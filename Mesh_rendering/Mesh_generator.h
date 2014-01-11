@@ -12,6 +12,7 @@
 // UCSF project
 //
 #include "Access_parameters.h"
+#include "Utils/enum.h"
 //
 //
 //
@@ -40,12 +41,13 @@ namespace Domains
    *
    *  This class is an example of class I will have to use
    */
-  template < typename Labeled_domain, typename Conductivity >
+  template < typename Labeled_domain, typename Conductivity, typename Mesher >
   class Mesh_generator
   {
   private:
     Labeled_domain domains_;
     Conductivity   tensors_;
+    Mesher         mesher_;
 
   public:
     /*!
@@ -106,6 +108,60 @@ namespace Domains
       //
       // Diffusion tensor
       tensors_.make_conductivity();
+      
+      //
+      //
+      mesher_.Tetrahedrization();
+
+      //
+      //
+      mesher_.Conductivity_matching( tensors_ );
+      
+      //
+      // Build electrical dipoles list
+      mesher_.Create_dipoles_list();
+    }
+    /*!
+     *  \brief 
+     *
+     *  
+     *
+     */
+    void make_output()
+    {
+#ifdef DEBUG
+      // DEBUG MODE
+      // Sequencing
+      mesher_.Output_mesh_format();
+      mesher_.Output_FEniCS_xml();
+      mesher_.Output_mesh_conductivity_xml();
+      mesher_.Output_dipoles_list_xml();
+      //#ifdef TRACE
+      //#if ( TRACE == 200 )
+      //  mesher_.Output_VTU_xml();
+      //#endif
+      //#endif
+      //
+#else
+  // NO DEBUG MODE
+  // Multi-threading
+      std::thread output(std::ref(mesher_), MESH_OUTPUT);
+      std::thread subdomains(std::ref(mesher_), MESH_SUBDOMAINS);
+      std::thread conductivity(std::ref(mesher_), MESH_CONDUCTIVITY);
+      std::thread dipoles(std::ref(mesher_), MESH_DIPOLES);
+      //
+      //#ifdef TRACE
+      //#if ( TRACE == 200 )
+      //  std::thread vtu(std::ref(mesher_), MESH_VTU);
+      //  vtu.join();
+      //#endif
+      //#endif
+      //
+      output.join();
+      subdomains.join();
+      conductivity.join();
+      dipoles.join();
+#endif
     }
   };
 }

@@ -227,11 +227,11 @@ Domains_Head_labeled::model_segmentation()
   timerLog->MarkEvent("Skull and scalp");
 #endif
   Labeled_domain< VTK_implicite_domain, GT::Point_3, std::list< Point_vector > > 
-    outside_scalp( (DAp::get_instance())->get_outer_skin_surface_(), SIMU_HEAD );
+    outside_scalp( (DAp::get_instance())->get_outer_skin_surface_() );
   Labeled_domain< VTK_implicite_domain, GT::Point_3, std::list< Point_vector > > 
-    outside_skull( (DAp::get_instance())->get_outer_skull_surface_(), SIMU_HEAD );
+    outside_skull( (DAp::get_instance())->get_outer_skull_surface_() );
   Labeled_domain< VTK_implicite_domain, GT::Point_3, std::list< Point_vector > > 
-    inside_skull( (DAp::get_instance())->get_inner_skull_surface_(), SIMU_HEAD );
+    inside_skull( (DAp::get_instance())->get_inner_skull_surface_() );
   //  
   //  outside_scalp( data_position_ );
   //  outside_skull( data_position_ );
@@ -249,13 +249,13 @@ Domains_Head_labeled::model_segmentation()
   timerLog->MarkEvent("Cortical segmentation");
 #endif
   Labeled_domain< VTK_implicite_domain, GT::Point_3, std::list< Point_vector > > 
-    left_gray_matter ( (DAp::get_instance())->get_lh_pial_(), SIMU_HEAD );
+    left_gray_matter ( (DAp::get_instance())->get_lh_pial_() );
   Labeled_domain< VTK_implicite_domain, GT::Point_3, std::list< Point_vector > > 
-    right_gray_matter ( (DAp::get_instance())->get_rh_pial_(), SIMU_HEAD );
+    right_gray_matter ( (DAp::get_instance())->get_rh_pial_() );
   Labeled_domain< VTK_implicite_domain, GT::Point_3, std::list< Point_vector > > 
-    left_white_matter ( (DAp::get_instance())->get_lh_smoothwm_(), SIMU_HEAD );
+    left_white_matter ( (DAp::get_instance())->get_lh_smoothwm_() );
   Labeled_domain< VTK_implicite_domain, GT::Point_3, std::list< Point_vector > > 
-    right_white_matter ( (DAp::get_instance())->get_rh_smoothwm_(), SIMU_HEAD );
+    right_white_matter ( (DAp::get_instance())->get_rh_smoothwm_() );
   //
   //  left_gray_matter( data_position_ );
   //  right_gray_matter( data_position_ );
@@ -458,6 +458,8 @@ Domains_Head_labeled::model_segmentation()
   (DAp::get_instance())->set_rh_gray_matter_surface_point_normal_( right_gray_matter.get_point_normal() );
   (DAp::get_instance())->set_lh_white_matter_surface_point_normal_( left_white_matter.get_point_normal() );
   (DAp::get_instance())->set_rh_white_matter_surface_point_normal_( right_white_matter.get_point_normal() );
+  // match white matter vertices with gray matter vertices
+  (DAp::get_instance())->epitaxy_growth();
  
   //
   //

@@ -1,6 +1,7 @@
 #ifndef VTK_IMPLICITE_DOMAIN_H_
 #define VTK_IMPLICITE_DOMAIN_H_
 #include <iostream>
+#include <memory>
 #include <cstring>
 #include <string>
 #include <fstream>
@@ -14,6 +15,7 @@
 #include "Access_parameters.h"
 #include "Point_vector.h"
 #include "Utils/enum.h"
+#include "Implicite_domain.h"
 //
 // CGAL
 //
@@ -79,17 +81,14 @@ namespace Domains
    * The implicite functions will help cearting the INRIMAGE format 3D image.  
    *
    */
-  class VTK_implicite_domain
+  class VTK_implicite_domain : public Implicite_domain
   {
   private:
+    //! 2D mesh structure loaded in VTK functions
     std::string vtk_mesh_; 
     //! Implicite surface function
-    Poisson_reconstruction_function* function_;
-    //
-    vtkSmartPointer<vtkOBBTree> obb_tree_;
-    vtkSmartPointer<vtkPoints>  check_points_;
-    vtkSmartPointer<vtkSelectEnclosedPoints> select_enclosed_points_;
-    //! map of point with their vector. Those points represent vertices and their vectors represent the surface normal.
+        std::unique_ptr< Poisson_reconstruction_function > function_;
+    //! map of point with their vector. Those points represent vertices and their vectors (surface normal).
     std::list <Domains::Point_vector > point_normal_;
     //! VTK poly data bounds
     //! xmin = poly_data_bounds_[0]
@@ -114,7 +113,7 @@ namespace Domains
      *  Constructor of the class VTK_implicite_domain
      *
      */
-    VTK_implicite_domain( const char*, Simulation Simu );
+    VTK_implicite_domain( const char* );
     /*!
      *  \brief Copy Constructor
      *
@@ -134,7 +133,7 @@ namespace Domains
      *
      *  Destructor of the class VTK_implicite_domain
      */
-    virtual ~VTK_implicite_domain();
+    virtual ~VTK_implicite_domain(){/* Do nothing */};
     /*!
      *  \brief Operator =
      *
@@ -155,7 +154,7 @@ namespace Domains
      *  Object function for multi-threading
      *
      */
-    void operator ()( double** );
+    virtual void operator ()( double** );
 
   public:
     /*!
@@ -165,7 +164,7 @@ namespace Domains
      *
      *  \return extrema
      */
-    inline const double* get_poly_data_bounds_() const {return poly_data_bounds_;};
+    virtual inline const double* get_poly_data_bounds_() const {return poly_data_bounds_;};
     /*!
      *  \brief Get point_normal vector
      *
@@ -173,10 +172,11 @@ namespace Domains
      *
      *  \return point_normal_
      */
-    inline  std::list<Domains::Point_vector> get_point_normal_( ) const {return point_normal_;};
+    virtual inline  std::list<Domains::Point_vector> get_point_normal_( ) const {return point_normal_;};
  
   public:
-    inline bool inside_domain( CGAL::Point_3< Kernel > Point )
+    virtual inline 
+      bool inside_domain( CGAL::Point_3< Kernel > Point )
     {
       return ( (*function_)( Point ) <= 0. ? true : false );
     };

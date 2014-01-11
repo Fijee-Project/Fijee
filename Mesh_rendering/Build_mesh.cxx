@@ -62,6 +62,12 @@ Domains::get( Domains::Position_property_map, Domains::Position_property_map::ke
 //
 //
 Domains_build_mesh::Build_mesh()
+{}
+//
+//
+//
+void
+Domains_build_mesh::Tetrahedrization()
 {
   //
   // Loads image
@@ -685,20 +691,28 @@ Domains_build_mesh::Output_dipoles_list_xml()
 //
 //
 void 
-Domains_build_mesh::Conductivity_matching()
+Domains_build_mesh::Conductivity_matching( Domains::Head_conductivity_tensor& Tensor )
 {
 #ifdef GPU
-  Conductivity_matching_gpu();
+  Conductivity_matching_gpu(Tensor);
 #else
-  //  Conductivity_matching_classic();
-  Conductivity_matching_knn();
+  //  Conductivity_matching_classic(Tensor);
+  Conductivity_matching_knn(Tensor);
 #endif
 }
 //
 //
 //
 void 
-Domains_build_mesh::Conductivity_matching_classic()
+Domains_build_mesh::Conductivity_matching( Domains::Spheres_conductivity_tensor& Tensor )
+{
+  std::cout << "Work on the spehres!!" << std::endl;
+}
+//
+//
+//
+void 
+Domains_build_mesh::Conductivity_matching_classic( Domains::Head_conductivity_tensor& Tensor )
 {
 //  //
 //  // typedef
@@ -1036,7 +1050,7 @@ Domains_build_mesh::Conductivity_matching_classic()
 //
 //
 void 
-Domains_build_mesh::Conductivity_matching_knn()
+Domains_build_mesh::Conductivity_matching_knn( Domains::Head_conductivity_tensor& Tensor )
 {
   //
   // Tetrahedra mapping
@@ -1365,7 +1379,7 @@ Domains_build_mesh::Conductivity_matching_knn()
 //
 //
 void 
-Domains_build_mesh::Conductivity_matching_gpu()
+Domains_build_mesh::Conductivity_matching_gpu( Domains::Head_conductivity_tensor& Tensor )
 {
 //  //
 //  // typedef

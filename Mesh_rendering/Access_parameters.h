@@ -448,6 +448,32 @@ namespace Domains
 
   public:
      /*!
+     *  \brief Set rotation_
+     *
+     *  This method reset the rotation to the MNI305 rotation matrix.
+     *
+     */
+    inline void set_rotation_MNI305_()
+    { 
+      rotation_ <<
+	-1, 0, 0,
+	 0, 0, 1,
+	 0,-1, 0;
+    };
+   /*!
+     *  \brief Set translation_
+     *
+     *  This method set the translation vector to the MNI305 translation vector.
+     *
+     */
+    inline void set_delta_translation_MNI305_()
+    {
+      delta_translation_  <<
+	 128,
+	-128,
+	 128;
+    };
+     /*!
      *  \brief Set delta_rotation_
      *
      *  This method set the delta rotation matrix between nifti rotation and MNI305 rotation.
@@ -457,7 +483,7 @@ namespace Domains
    /*!
      *  \brief Set delta_translation_
      *
-     *  This method set the delta translation vector between nifti rotation and MNI305 rotation.
+     *  This method set the delta translation vector between nifti translation and MNI305 translation.
      *
      */
     inline void set_delta_translation_(Vector_f_3X1 Delta_Translation){delta_translation_ = Delta_Translation;};

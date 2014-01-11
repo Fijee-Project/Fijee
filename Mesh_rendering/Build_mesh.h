@@ -14,6 +14,8 @@
 #include "CUDA_Conductivity_matching.h"
 #include "Dipole.h"
 #include "Cell_conductivity.h"
+#include "Head_conductivity_tensor.h"
+#include "Spheres_conductivity_tensor.h"
 #include "Build_dipoles_list.h"
 #include "Build_dipoles_list_knn.h"
 //
@@ -353,8 +355,8 @@ namespace Domains
     std::list< Cell_conductivity > list_cell_conductivity_;
     //! Algorithm building the dipoles list;
     std::unique_ptr< Build_dipoles_list > dipoles_;
-    //! List of dipoles
-    std::list< Dipole > list_dipoles_;
+//    //! List of dipoles
+//    std::list< Dipole > list_dipoles_;
 
   public:
     /*!
@@ -454,29 +456,43 @@ namespace Domains
      *  This method matches a conductivity tensor for each tetrahedron of the mesh.
      *
      */
-    void Conductivity_matching();
-    /*!
-     *  \brief Create the list of dipoles
-     *
-     *  This method create the list of dipoles: position, orientation, ...
-     *
-     */
-    void Create_dipoles_list();
-
-  private:
-    /*!
-     */
-     void Conductivity_matching_classic();
-    /*!
-     */
-     void Conductivity_matching_knn();
+    void Conductivity_matching( Domains::Head_conductivity_tensor& );
     /*!
      *  \brief Matches mesh's cells with conductivity
      *
      *  This method matches a conductivity tensor for each tetrahedron of the mesh.
      *
      */
-    void Conductivity_matching_gpu();
+    void Conductivity_matching( Domains::Spheres_conductivity_tensor& );
+     /*!
+     *  \brief Create the list of dipoles
+     *
+     *  This method create the list of dipoles: position, orientation, ...
+     *
+     */
+    void Create_dipoles_list();
+    /*!
+     *  \brief Tetrahedrization
+     *
+     *  This method create the tetrahedrization.
+     *
+     */
+    void Tetrahedrization();
+
+  private:
+    /*!
+     */
+     void Conductivity_matching_classic( Domains::Head_conductivity_tensor& );
+    /*!
+     */
+     void Conductivity_matching_knn( Domains::Head_conductivity_tensor& );
+    /*!
+     *  \brief Matches mesh's cells with conductivity
+     *
+     *  This method matches a conductivity tensor for each tetrahedron of the mesh.
+     *
+     */
+    void Conductivity_matching_gpu( Domains::Head_conductivity_tensor& );
 
     /*!
      *  \brief Output the XML match between mesh and conductivity
