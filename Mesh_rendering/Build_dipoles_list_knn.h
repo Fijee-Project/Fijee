@@ -119,7 +119,17 @@ namespace Domains
      *
      */
     Build_dipoles_list_knn& operator = ( const Build_dipoles_list_knn& );
-    
+    /*!
+     *  \brief Operator ()
+     *
+     *  Operator () of the class Build_dipoles_list_knn
+     *
+     */
+    virtual void operator ()()
+    {
+      Output_dipoles_list_xml();
+    };
+
   public:
     /*!
      */
@@ -127,6 +137,13 @@ namespace Domains
     /*!
      */
     virtual void Build_stream(std::ofstream& );
+    /*!
+     *  \brief Output the XML of the dipoles' list
+     *
+     *  This method create the list of dipoles.
+     *
+     */
+    virtual void Output_dipoles_list_xml();
 
   private:
     /*!

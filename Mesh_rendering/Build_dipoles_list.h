@@ -60,7 +60,14 @@ namespace Domains
      *
      */
     Build_dipoles_list& operator = ( const Build_dipoles_list& );
-    
+     /*!
+     *  \brief Operator ()
+     *
+     *  Operator () of the class Build_dipoles_list
+     *
+     */
+    virtual void operator () () = 0;
+   
   public:
     /*!
      */
@@ -68,6 +75,13 @@ namespace Domains
     /*!
      */
     virtual void Build_stream(std::ofstream&) = 0;
+    /*!
+     *  \brief Output the XML of the dipoles' list
+     *
+     *  This method create the list of dipoles.
+     *
+     */
+    virtual void Output_dipoles_list_xml() = 0;
 
   private:
     /*!

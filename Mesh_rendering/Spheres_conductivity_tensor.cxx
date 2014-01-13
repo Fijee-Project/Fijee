@@ -127,19 +127,6 @@ DSct::operator = ( DSct&& that )
 //
 //
 //
-void
-DSct::operator ()()
-{
-}
-//
-//
-//
-void 
-DSct::move_conductivity_array_to_parameters()
-{}
-//
-//
-//
 void 
 DSct::VTK_visualization()
 {}

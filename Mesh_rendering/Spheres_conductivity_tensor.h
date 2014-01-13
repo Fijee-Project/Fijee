@@ -11,7 +11,9 @@
 //
 // UCSF
 //
+#include "Utils/Fijee_environment.h"
 #include "Conductivity_tensor.h"
+#include "Cell_conductivity.h"
 //
 // Eigen
 //
@@ -35,7 +37,11 @@ namespace Domains
    */
   class Spheres_conductivity_tensor : public Conductivity_tensor
   {
- 
+  private:
+    //! List of cell with matching conductivity coefficients
+    std::list< Cell_conductivity > list_cell_conductivity_;
+
+
   public:
     /*!
      *  \brief Default Constructor
@@ -84,16 +90,15 @@ namespace Domains
      *  Object function for multi-threading
      *
      */
-    void operator ()();
+    virtual void operator ()()
+    {
+      Output_mesh_conductivity_xml();
+    };
 
   private:
     /*!
-     *  \brief Move_conductivity_array_to_parameters
-     *
-     *  This method moves members array to Access_Parameters's object.
-     *
      */
-    void move_conductivity_array_to_parameters();
+    virtual void Make_analysis(){};
 
   public:
     /*!
@@ -102,10 +107,14 @@ namespace Domains
      *  This method moves members array to Access_Parameters's object.
      *
      */
-    void make_conductivity()
-    {
-      move_conductivity_array_to_parameters();
-    };
+    virtual void make_conductivity( const C3t3& ){};
+    /*!
+     *  \brief Output the XML match between mesh and conductivity
+     *
+     *  This method matches a conductivity tensor for each cell.
+     *
+     */
+    virtual void Output_mesh_conductivity_xml(){};
     /*!
      *  \brief VTK visualization
      *

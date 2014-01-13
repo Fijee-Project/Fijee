@@ -12,7 +12,10 @@
 //
 // UCSF
 //
+#include "Utils/Fijee_environment.h"
 #include "Conductivity_tensor.h"
+#include "CGAL_tools.h"
+#include "Cell_conductivity.h"
 //
 // Eigen
 //
@@ -34,7 +37,7 @@ namespace Domains
    *
    *  This class is an example of class I will have to use
    */
-  class Head_conductivity_tensor : public Conductivity_tensor
+  class Head_conductivity_tensor : public Conductivity_tensor//, public Utils::Statistical_analysis
   {
   private:
     //
@@ -81,6 +84,13 @@ namespace Domains
     Eigen::Matrix <float, 3, 1>* positions_array_;
     //! Speed up: check if we need make any calculation
     bool* Do_we_have_conductivity_; 
+
+    //
+    // Conductivity matching
+    //
+    //! List of cell with matching conductivity coefficients
+    std::list< Cell_conductivity > list_cell_conductivity_;
+
 
   public:
     /*!
@@ -130,16 +140,29 @@ namespace Domains
      *  Object function for multi-threading
      *
      */
-    void operator ()();
+    virtual void operator ()()
+    {
+      Output_mesh_conductivity_xml();
+    };
+
+  public:
+    /*!
+     *  \brief Get number_of_pixels_x_
+     *
+     *  This method return the number of pixels x.
+     *
+     */
+    ucsf_get_macro(list_cell_conductivity_, std::list< Cell_conductivity >);
+
 
   private:
     /*!
-     *  \brief Move_conductivity_array_to_parameters
+     *  \brief 
      *
-     *  This method moves members array to Access_Parameters's object.
+     *  This method 
      *
      */
-    void move_conductivity_array_to_parameters();
+    void Make_analysis();
 
   public:
     /*!
@@ -148,10 +171,14 @@ namespace Domains
      *  This method moves members array to Access_Parameters's object.
      *
      */
-    void make_conductivity()
-    {
-      move_conductivity_array_to_parameters();
-    };
+    virtual void make_conductivity( const C3t3& );
+    /*!
+     *  \brief Output the XML match between mesh and conductivity
+     *
+     *  This method matches a conductivity tensor for each cell.
+     *
+     */
+    virtual void Output_mesh_conductivity_xml();
     /*!
      *  \brief VTK visualization
      *

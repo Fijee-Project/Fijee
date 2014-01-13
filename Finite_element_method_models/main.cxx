@@ -25,7 +25,7 @@ int main()
   //    - Solver::tCS_tDCS
   //    - Solver::tCS_tACS
   Solver::Model_solver< /* physical model */ Solver::SL_subtraction,
-			/*solver_parameters->get_number_of_threads_()*/ 2 >  model;
+			/*solver_parameters->get_number_of_threads_()*/ 1 >  model;
 
   //
   //

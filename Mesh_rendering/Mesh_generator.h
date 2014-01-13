@@ -3,6 +3,7 @@
 #include <iostream>
 #include <thread>
 #include <string>
+#include <list>
 //
 // pugixml
 // same resources than Dolfin
@@ -13,6 +14,9 @@
 //
 #include "Access_parameters.h"
 #include "Utils/enum.h"
+#include "Cell_conductivity.h"
+#include "Build_dipoles_list.h"
+#include "Build_dipoles_list_knn.h"
 //
 //
 //
@@ -48,6 +52,8 @@ namespace Domains
     Labeled_domain domains_;
     Conductivity   tensors_;
     Mesher         mesher_;
+    //! List of cell with matching conductivity coefficients
+    std::list< Cell_conductivity > list_cell_conductivity_;
 
   public:
     /*!
@@ -72,13 +78,6 @@ namespace Domains
      *
      */
     Mesh_generator& operator = ( const Mesh_generator& ){};
-//    /*!
-//     *  \brief Operator ()
-//     *
-//     *  Operator () of the class Mesh_generator
-//     *
-//     */
-//    void operator () ();
 
   public:
     /*!
@@ -106,20 +105,12 @@ namespace Domains
     void make_conductivity()
     {
       //
-      // Diffusion tensor
-      tensors_.make_conductivity();
-      
-      //
-      //
+      // Tetrahedrization
       mesher_.Tetrahedrization();
 
       //
-      //
-      mesher_.Conductivity_matching( tensors_ );
-      
-      //
-      // Build electrical dipoles list
-      mesher_.Create_dipoles_list();
+      // Diffusion tensor
+      tensors_.make_conductivity( mesher_.get_mesh_() );
     }
     /*!
      *  \brief 
@@ -129,13 +120,18 @@ namespace Domains
      */
     void make_output()
     {
+      //
+      // Algorithm building the dipoles list;
+      Build_dipoles_list_knn dipoles_;
+      dipoles_.Make_list( tensors_.get_list_cell_conductivity_() );
+
 #ifdef DEBUG
       // DEBUG MODE
       // Sequencing
       mesher_.Output_mesh_format();
       mesher_.Output_FEniCS_xml();
-      mesher_.Output_mesh_conductivity_xml();
-      mesher_.Output_dipoles_list_xml();
+      tensors_.Output_mesh_conductivity_xml();
+      dipoles_.Output_dipoles_list_xml();
       //#ifdef TRACE
       //#if ( TRACE == 200 )
       //  mesher_.Output_VTU_xml();
@@ -147,8 +143,8 @@ namespace Domains
   // Multi-threading
       std::thread output(std::ref(mesher_), MESH_OUTPUT);
       std::thread subdomains(std::ref(mesher_), MESH_SUBDOMAINS);
-      std::thread conductivity(std::ref(mesher_), MESH_CONDUCTIVITY);
-      std::thread dipoles(std::ref(mesher_), MESH_DIPOLES);
+      std::thread conductivity(std::ref(tensors_));
+      std::thread dipoles(std::ref(dipoles_));
       //
       //#ifdef TRACE
       //#if ( TRACE == 200 )

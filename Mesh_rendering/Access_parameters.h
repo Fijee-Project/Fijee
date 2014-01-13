@@ -176,19 +176,6 @@ namespace Domains
     Vector_f_3X1 eigenvalues_translation_;
 
     //
-    // Conductivity information
-    //! Conductivity tensors array
-    Eigen::Matrix <float, 3, 3>* conductivity_tensors_array_;
-    //! eigen values matrices array
-    Eigen::Matrix <float, 3, 3>* eigen_values_matrices_array_;
-    //! Positions array of the conductivity tensor
-    Eigen::Matrix <float, 3, 1>* positions_array_;
-     //! Change base matrix array
-    Eigen::Matrix <float, 3, 3>* P_matrices_array_;
-   //! Speed up: check if we need make any calculation
-    bool* Do_we_have_conductivity_; 
-
-    //
     // Electrodes
     //! Electrodes Standard 10/20 Cap81
     std::string electrodes_10_20_;
@@ -520,92 +507,12 @@ namespace Domains
      */
     void get_data_eigen_vector3_( float** Data_Eigen_Vector3 );
     /*!
-     *  \brief Get conductivity_tensors_array_
-     *
-     *  This method move the conductivity tensors array out of the parameters object.
-     *
-     *  \param Conductivity_Tensors_Array: conductivity tensors array from conductivity tensor object.
-     */
-    void get_conductivity_tensors_array_( Eigen::Matrix <float, 3, 3>** Conductivity_Tensors_Array );
-    /*!
-     *  \brief Get eigen_values_matrices_array_
-     *
-     *  This method move the eigen values matrices array out of the parameters object.
-     *
-     *  \param Eigen_Values_Matrices_Array: eigen values matrices array from conductivity object.
-     */
-    void get_eigen_values_matrices_array_( Eigen::Matrix <float, 3, 3>** Eigen_Values_Matrices_Array );
-    /*!
-     *  \brief Get positions_array_
-     *
-     *  This method move the positions array out of the parameters object.
-     *
-     *  \param Positions_Array: positions array from conductivity tensor object.
-     */
-    void get_positions_array_( Eigen::Matrix <float, 3, 1>** Positions_Array );
-    /*!
-     *  \brief Get P_matrices_array_
-     *
-     *  This method move the P matrices array out of the parameters object.
-     *
-     *  \param P_Matrices_Array: P matrices array from conductivity tensor object.
-     */
-    void get_P_matrices_array_( Eigen::Matrix <float, 3, 3>** P_Matrices_Array );
-    /*!
-     *  \brief Get Do_we_have_conductivity_
-     *
-     *  This method move the conductivity checking array out of the parameters object.
-     *
-     *  \param Do_We_Have_Conductivity: conductivity checking array from conductivity tensor object.
-     */
-    void get_Do_we_have_conductivity_( bool** Do_We_Have_Conductivity );
-    /*!
      *  \brief Get the singleton instance
      *
      *  This method return the pointer parameters_instance_
      *
      */
     static Access_parameters* get_instance();
-    /*!
-     *  \brief Set conductivity_tensors_array_
-     *
-     *  This method move the conductivity tensors array inside the parameters object.
-     *
-     *  \param Conductivity_Tensors_Array: conductivity tensors array for mesh rendering object.
-     */
-    void set_conductivity_tensors_array_( Eigen::Matrix <float, 3, 3>** Conductivity_Tensors_Array );
-    /*!
-     *  \brief Set eigen_values_matrices_array_
-     *
-     *  This method move the conductivity tensors array inside the parameters object.
-     *
-     *  \param Eigen_Values_Matrices_Array: conductivity tensors array for mesh rendering object.
-     */
-    void set_eigen_values_matrices_array_( Eigen::Matrix <float, 3, 3>** Eigen_Values_Matrices_Array );
-    /*!
-     *  \brief Set positions_array_
-     *
-     *  This method move the positions array inside the parameters object.
-     *
-     *  \param Positions_Array: positions array for mesh rendering object.
-     */
-    void set_positions_array_( Eigen::Matrix <float, 3, 1>** Positions_Array );
-    /*!
-     *  \brief Set P_matrices_array_
-     *
-     *  This method move the P matrices array inside the parameters object.
-     *
-     *  \param P_Matrices_Array: P matrices array for mesh rendering object.
-     */
-    void set_P_matrices_array_( Eigen::Matrix <float, 3, 3>** P_Matrices_Array );
-    /*!
-     *  \brief Set Do_we_have_conductivity_
-     *
-     *  This method move the conductivity checking array inside the parameters object.
-     *
-     *  \param Do_We_Have_Conductivity: conductivity checking array for mesh rendering object.
-     */
-    void set_Do_we_have_conductivity_( bool** Do_We_Have_Conductivity );
     /*!
      *  \brief Set lh_gray_matter_surface_point_normal_
      *

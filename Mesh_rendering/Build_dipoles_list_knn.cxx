@@ -68,7 +68,6 @@ DBdlknn::Make_list( const std::list< Cell_conductivity >& List_cell_conductivity
   //
   for ( auto cell_conductivity : List_cell_conductivity )
     {
-
       //
       // 
       if ( cell_conductivity.get_cell_subdomain_() == GRAY_MATTER )
@@ -299,6 +298,28 @@ DBdlknn::Make_analysis()
   Make_output_file("Dipole.distribution.frame");
 #endif
 #endif      
+}
+//
+//
+//
+void
+DBdlknn::Output_dipoles_list_xml()
+{
+  //
+  // Output xml files. 
+  std::string dipoles_XML = 
+    (Domains::Access_parameters::get_instance())->get_files_path_output_();
+  dipoles_XML += std::string("dipoles.xml");
+  //
+  std::ofstream dipoles_file( dipoles_XML.c_str() );
+  
+  //
+  //
+  Build_stream(dipoles_file);
+
+  //
+  //
+  dipoles_file.close();
 }
 //
 //
