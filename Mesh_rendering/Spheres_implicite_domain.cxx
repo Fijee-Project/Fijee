@@ -44,8 +44,8 @@ Domain::Spheres_implicite_domain( const char* Vtk_Mesh ):
 
   //
   // reset the transformation matrix
-  (Domains::Access_parameters::get_instance())->set_rotation_MNI305_();
-  (Domains::Access_parameters::get_instance())->set_delta_translation_MNI305_();
+  (Domains::Access_parameters::get_instance())->set_rotation_Id_();
+  (Domains::Access_parameters::get_instance())->set_translation_128_();
   // Delta vectors
   Eigen::Matrix3f delta_rotation;
   delta_rotation <<
@@ -58,7 +58,6 @@ Domain::Spheres_implicite_domain( const char* Vtk_Mesh ):
   // Set the delta transformation
   (Domains::Access_parameters::get_instance())->set_delta_rotation_(delta_rotation);
   (Domains::Access_parameters::get_instance())->set_delta_translation_(delta_traslation);
-
 
   //
   // Boundary data

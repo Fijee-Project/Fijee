@@ -6,6 +6,10 @@
 #include "Labeled_domain.h"
 #include "VTK_implicite_domain.h"
 //
+// Eigen
+//
+#include <Eigen/Dense>
+//
 //
 //
 #define PI 3.14159265359
@@ -130,13 +134,24 @@ DBel::Build_electrodes_list()
 //
 //
 void
-DBel::adjust_cap_positions_on( Labeled_domain< VTK_implicite_domain, GT::Point_3, std::list< Point_vector > >&  Sclap )
+DBel::adjust_cap_positions_on( Labeled_domain< Spheres_implicite_domain, 
+					       GT::Point_3, std::list< Point_vector > >&  Sclap )
 {
+  //
+  //
   for( auto electrode = electrodes_.begin() ; 
        electrode     != electrodes_.end() ; 
        electrode++  
        )
     {
+      //
+      //
+      electrode->x() += 128.;
+      electrode->y() += 128.;
+      electrode->z() += 128. + 20. * 1.84;
+
+      //
+      //
       while( Sclap.inside_domain(GT::Point_3( electrode->x(),
 					      electrode->y(),
 					      electrode->z() )) )

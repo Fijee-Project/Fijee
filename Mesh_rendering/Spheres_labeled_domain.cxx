@@ -10,6 +10,7 @@
 #include "Spheres_implicite_domain.h"
 #include "Access_parameters.h"
 #include "Point_vector.h"
+#include "Build_electrodes_list.h"
 //
 // VTK
 //
@@ -215,10 +216,16 @@ Domains_Spheres_labeled::model_segmentation()
   std::thread skull_thread(std::ref(skull), data_position_);
   std::thread CSF_thread  (std::ref(CSF),   data_position_);
   std::thread brain_thread(std::ref(brain), data_position_);
+  // End of spheres segmentation
   scalp_thread.join();
   skull_thread.join();
   CSF_thread.join();
   brain_thread.join();
+  
+  //
+  // Electrodes localization
+  Domains::Build_electrodes_list electrodes;
+  electrodes.adjust_cap_positions_on( scalp );
 
   //
   // main loop building inrimage data
@@ -235,6 +242,13 @@ Domains_Spheres_labeled::model_segmentation()
 	  GT::Point_3 cell_center(data_position_[idx][0],
 				  data_position_[idx][1],
 				  data_position_[idx][2]);
+
+	  //
+	  // Electrodes position
+	  //
+	  if( electrodes.inside_domain( cell_center ) ) 
+	    data_label_[ idx ] = ELECTRODE; 
+	  
 
 	  //
 	  // Brain segmentation

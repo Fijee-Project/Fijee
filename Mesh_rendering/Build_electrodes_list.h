@@ -17,6 +17,7 @@
 #include "Electrode.h"
 #include "Labeled_domain.h"
 #include "VTK_implicite_domain.h"
+#include "Spheres_implicite_domain.h"
 //#include "Point_vector.h"
 #include "Utils/Statistical_analysis.h"
 //
@@ -107,9 +108,10 @@ namespace Domains
      *  Adjust the electrod position on the surface Surf.
      *
      */
-    void adjust_cap_positions_on( Labeled_domain< VTK_implicite_domain, 
+    void adjust_cap_positions_on( Labeled_domain< Spheres_implicite_domain, 
 				                  GT::Point_3, 
-				                  std::list< Point_vector > >&  Surf );    /*!
+				                  std::list< Point_vector > >&  Surf );    
+    /*!
      *  \brief adjust the electrod position on a surface
      *
      *  Adjust the electrod position on the surface Surf1 using the center of coordinate from the surface Surf2.

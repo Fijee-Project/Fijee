@@ -95,10 +95,19 @@ namespace Domains
       Output_mesh_conductivity_xml();
     };
 
+  public:
+    /*!
+     *  \brief Get number_of_pixels_x_
+     *
+     *  This method return the number of pixels x.
+     *
+     */
+    ucsf_get_macro(list_cell_conductivity_, std::list< Cell_conductivity >);
+
   private:
     /*!
      */
-    virtual void Make_analysis(){};
+    virtual void Make_analysis();
 
   public:
     /*!
@@ -107,14 +116,14 @@ namespace Domains
      *  This method moves members array to Access_Parameters's object.
      *
      */
-    virtual void make_conductivity( const C3t3& ){};
+    virtual void make_conductivity( const C3t3& );
     /*!
      *  \brief Output the XML match between mesh and conductivity
      *
      *  This method matches a conductivity tensor for each cell.
      *
      */
-    virtual void Output_mesh_conductivity_xml(){};
+    virtual void Output_mesh_conductivity_xml();
     /*!
      *  \brief VTK visualization
      *

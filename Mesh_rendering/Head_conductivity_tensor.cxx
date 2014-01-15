@@ -538,16 +538,6 @@ void
 DHct::make_conductivity( const C3t3& Mesh )
 {
   //
-  //
-//  //
-//  // Transfer the address of data
-//  (DAp::get_instance())->set_conductivity_tensors_array_( &conductivity_tensors_array_ );
-//  (DAp::get_instance())->set_eigen_values_matrices_array_( &eigen_values_matrices_array_ );
-//  (DAp::get_instance())->set_positions_array_( &positions_array_ );
-//  (DAp::get_instance())->set_Do_we_have_conductivity_( &Do_we_have_conductivity_ );
-//  (DAp::get_instance())->set_P_matrices_array_( &P_matrices_array_ );
-
-  //
   // Tetrahedra mapping
   Cell_pmap cell_pmap( Mesh );
 
@@ -561,20 +551,6 @@ DHct::make_conductivity( const C3t3& Mesh )
   int eigenvalues_number_of_pixels_x = (DAp::get_instance())->get_eigenvalues_number_of_pixels_x_();
   int eigenvalues_number_of_pixels_y = (DAp::get_instance())->get_eigenvalues_number_of_pixels_y_();
   int eigenvalues_number_of_pixels_z = (DAp::get_instance())->get_eigenvalues_number_of_pixels_z_();
-
-//  //
-//  // Retrieve the conductivity data array to match the cell's mesh
-//  Eigen::Matrix <float, 3, 3>* conductivity_tensors_array  = nullptr;
-//  Eigen::Matrix <float, 3, 3>* eigen_values_matrices_array = nullptr;
-//  Eigen::Matrix <float, 3, 1>* positions_array             = nullptr;
-//  bool*                        Do_we_have_conductivity     = nullptr; 
-//  //
-//  Eigen::Matrix <float, 3, 3>* P_matrices_array  = nullptr;
-//  (DAp::get_instance())->get_P_matrices_array_( &P_matrices_array );
-//  (DAp::get_instance())->get_conductivity_tensors_array_( &conductivity_tensors_array );
-//  (DAp::get_instance())->get_eigen_values_matrices_array_( &eigen_values_matrices_array );
-//  (DAp::get_instance())->get_positions_array_( &positions_array );
-//  (DAp::get_instance())->get_Do_we_have_conductivity_( &Do_we_have_conductivity );
 
   //
   // Build the CGAL k-nearest neighbor tree
@@ -724,11 +700,11 @@ DHct::make_conductivity( const C3t3& Mesh )
 	    cell_parameters ( cell_id, cell_subdomain,
 			      cell_vertices[4](0),cell_vertices[4](1),cell_vertices[4](2),/* centroid */
 			      1.79,/* l1 */
-			      0., 0., 0., /* eigenvec V1 */
+			      1., 0., 0., /* eigenvec V1 */
 			      1.79,/* l2 */
-			      0., 0., 0., /* eigenvec V2 */
+			      0., 1., 0., /* eigenvec V2 */
 			      1.79,/* l3 */
-			      0., 0., 0., /* eigenvec V3 */
+			      0., 0., 1., /* eigenvec V3 */
 			      1.79, /*C00*/
 			      0.00, /*C01*/
 			      0.00, /*C02*/
@@ -752,11 +728,11 @@ DHct::make_conductivity( const C3t3& Mesh )
 	    cell_parameters ( cell_id, cell_subdomain,
 			      cell_vertices[4](0),cell_vertices[4](1),cell_vertices[4](2),/* centroid */
 			      0.0132,/* l1 */
-			      0., 0., 0., /* eigenvec V1 */
+			      1., 0., 0., /* eigenvec V1 */
 			      0.0132,/* l2 */
-			      0., 0., 0., /* eigenvec V2 */
+			      0., 1., 0., /* eigenvec V2 */
 			      0.0132,/* l3 */
-			      0., 0., 0., /* eigenvec V3 */
+			      0., 0., 1., /* eigenvec V3 */
 			      0.0132, /*C00*/
 			      0.00,   /*C01*/
 			      0.00,   /*C02*/
@@ -780,11 +756,11 @@ DHct::make_conductivity( const C3t3& Mesh )
 	    cell_parameters ( cell_id, cell_subdomain,
 			      cell_vertices[4](0),cell_vertices[4](1),cell_vertices[4](2),/* centroid */
 			      0.33,/* l1 */
-			      0., 0., 0., /* eigenvec V1 */
+			      1., 0., 0., /* eigenvec V1 */
 			      0.33,/* l2 */
-			      0., 0., 0., /* eigenvec V2 */
+			      0., 1., 0., /* eigenvec V2 */
 			      0.33,/* l3 */
-			      0., 0., 0., /* eigenvec V3 */
+			      0., 0., 1., /* eigenvec V3 */
 			      0.33, /*C00*/
 			      0.00, /*C01*/
 			      0.00, /*C02*/
@@ -808,11 +784,11 @@ DHct::make_conductivity( const C3t3& Mesh )
 	    cell_parameters ( cell_id, cell_subdomain,
 			      cell_vertices[4](0),cell_vertices[4](1),cell_vertices[4](2),/* centroid */
 			      0.33,/* l1 */
-			      0., 0., 0., /* eigenvec V1 */
+			      1., 0., 0., /* eigenvec V1 */
 			      0.33,/* l2 */
-			      0., 0., 0., /* eigenvec V2 */
+			      0., 1., 0., /* eigenvec V2 */
 			      0.33,/* l3 */
-			      0., 0., 0., /* eigenvec V3 */
+			      0., 0., 1., /* eigenvec V3 */
 			      0.33, /*C00*/
 			      0.00, /*C01*/
 			      0.00, /*C02*/
@@ -855,22 +831,6 @@ DHct::make_conductivity( const C3t3& Mesh )
   //
   // Output for R analysis
   Make_analysis();
-
-
-//  //
-//  // Clean up
-//  delete [] conductivity_tensors_array;
-//  conductivity_tensors_array = nullptr;
-//  delete [] eigen_values_matrices_array;
-//  eigen_values_matrices_array = nullptr;
-//  delete [] positions_array;
-//  positions_array = nullptr;
-//  delete [] Do_we_have_conductivity; 
-//  Do_we_have_conductivity = nullptr; 
-//  delete [] P_matrices_array;
-//  P_matrices_array = nullptr;
-
-
 }
 //
 //

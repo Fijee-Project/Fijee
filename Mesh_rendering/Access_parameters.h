@@ -435,7 +435,7 @@ namespace Domains
 
   public:
      /*!
-     *  \brief Set rotation_
+     *  \brief Set rotation_ along with MNI305
      *
      *  This method reset the rotation to the MNI305 rotation matrix.
      *
@@ -443,9 +443,9 @@ namespace Domains
     inline void set_rotation_MNI305_()
     { 
       rotation_ <<
-	-1, 0, 0,
-	 0, 0, 1,
-	 0,-1, 0;
+	-1., 0., 0.,
+	 0., 0., 1.,
+	 0.,-1., 0.;
     };
    /*!
      *  \brief Set translation_
@@ -453,12 +453,38 @@ namespace Domains
      *  This method set the translation vector to the MNI305 translation vector.
      *
      */
-    inline void set_delta_translation_MNI305_()
+    inline void set_translation_MNI305_()
     {
-      delta_translation_  <<
-	 128,
-	-128,
-	 128;
+      translation_  <<
+	 128.,
+	-128.,
+	 128.;
+    };
+     /*!
+     *  \brief Set rotation_ Id
+     *
+     *  This method reset the rotation to Id matrix.
+     *
+     */
+    inline void set_rotation_Id_()
+    { 
+      rotation_ <<
+	1., 0., 0.,
+	0., 1., 0.,
+	0., 0., 1.;
+    };
+   /*!
+     *  \brief Set translation_ as 128 vector
+     *
+     *  This method set the translation vector as 128 mm translation vector.
+     *
+     */
+    inline void set_translation_128_()
+    {
+      translation_  <<
+	128.,
+	128.,
+	128.;
     };
      /*!
      *  \brief Set delta_rotation_
