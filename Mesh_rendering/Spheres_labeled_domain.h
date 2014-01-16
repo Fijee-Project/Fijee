@@ -41,13 +41,11 @@ namespace Domains
 //    float size_of_pixel_size_y_;
 //    //! size_of_pixel_size_z_ is size of pixel on Z
 //    float size_of_pixel_size_z_;
-//    // Transformation information
-//    //! rotation_ is the rotation matrix
-//    Eigen::Matrix< float, 3, 3 > rotation_;
-//    //! translation_ is the translation matrix
-//    Eigen::Matrix< float, 3, 1 > translation_;
-//    //! qfac adapte the transformation in case of an improper rotation matrix (| rotation_ | = -1)
-//    int qfac_;
+    // Transformation information
+    //! rotation_ is the rotation matrix
+    Eigen::Matrix< float, 3, 3 > rotation_;
+    //! translation_ is the translation matrix
+    Eigen::Matrix< float, 3, 1 > translation_;
 
     //! Inrimage file format (.inr) for the labeled domains of the head. 
     //! file_inrimage_ stream builds head_model.inr file that can be checked with medInria.

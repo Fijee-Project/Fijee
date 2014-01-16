@@ -84,11 +84,11 @@ int main()
 	  {
 	    //
 	    //
-	    float x = 128 + r[seg] * 
+	    float x = r[seg] * 
 	      cos(n_phi * delta_phi[seg]) * sin(n_theta * delta_theta[seg]);
-	    float y = 128 + r[seg] * 
+	    float y = r[seg] * 
 	      sin(n_phi * delta_phi[seg]) * sin(n_theta * delta_theta[seg]);
-	    float z = 128 + r[seg] * cos(n_theta * delta_theta[seg]);
+	    float z = r[seg] * cos(n_theta * delta_theta[seg]);
 	    // normal
 	    float x_normal = 
 	      cos(n_phi * delta_phi[seg]) * sin(n_theta * delta_theta[seg]);

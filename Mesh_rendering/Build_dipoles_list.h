@@ -73,6 +73,10 @@ namespace Domains
      */
     virtual void Make_list( const std::list< Cell_conductivity >& List_cell_conductivity ) = 0;
     /*!
+     *  \brief Build stream
+     *
+     *  This method create the output stream.
+     *
      */
     virtual void Build_stream(std::ofstream&) = 0;
     /*!

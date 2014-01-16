@@ -15,6 +15,10 @@
 #include "Point.h"
 #include "Point_vector.h"
 #include "Access_parameters.h"
+//
+// Eigen
+//
+#include <Eigen/Dense>
 /*! \namespace Domains
  * 
  * Name space for our new package

@@ -73,15 +73,15 @@ namespace Domains
      *
      */
     Build_electrodes_list();
-    /*!
-     *  \brief Default Constructor
-     *
-     *  Constructor of the class Build_electrodes_list
-     *
-     */
-    Build_electrodes_list( Domains::Labeled_domain< VTK_implicite_domain, 
-			   GT::Point_3, 
-			   std::list< Point_vector > > &);
+// ToRemove    /*!
+// ToRemove     *  \brief Default Constructor
+// ToRemove     *
+// ToRemove     *  Constructor of the class Build_electrodes_list
+// ToRemove     *
+// ToRemove     */
+// ToRemove    Build_electrodes_list( Domains::Labeled_domain< VTK_implicite_domain, 
+// ToRemove			   GT::Point_3, 
+// ToRemove			   std::list< Point_vector > > &);
 //    /*!
 //     *  \brief Copy Constructor
 //     *
@@ -102,10 +102,12 @@ namespace Domains
 //     *
 //     */
 //    Build_electrodes_list& operator = ( const Build_electrodes_list& );
+
+  public:
     /*!
      *  \brief adjust the electrod position on a surface
      *
-     *  Adjust the electrod position on the surface Surf.
+     *  Adjust the electrod position on the surface Surf in the spheres model case.
      *
      */
     void adjust_cap_positions_on( Labeled_domain< Spheres_implicite_domain, 
@@ -122,8 +124,7 @@ namespace Domains
 				                  std::list< Point_vector > >&  Surf1,
 				  Labeled_domain< VTK_implicite_domain, 
 				                  GT::Point_3, 
-				                  std::list< Point_vector > >&  Surf2
-				  );
+				                  std::list< Point_vector > >&  Surf2 );
     /*!
      *  \brief inside the domaine
      *
@@ -133,6 +134,20 @@ namespace Domains
      *
      */
     bool inside_domain( GT::Point_3 Point );
+    /*!
+     *  \brief Output the XML of the electrodes' list
+     *
+     *  This method create the list electrodes
+     *
+     */
+    void Output_electrodes_list_xml();
+    /*!
+     *  \brief Build stream
+     *
+     *  This method create the output stream.
+     *
+     */
+    void Build_stream(std::ofstream&);
   };
   /*!
    *  \brief Dump values for Build_electrodes_list

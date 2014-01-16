@@ -357,8 +357,7 @@ DBdlknn::Build_stream( std::ofstream& stream )
   //
   stream << "  </dipoles>\n" 
 	 << "</fijee>\n"; 
-};
-
+}
 //
 //
 //

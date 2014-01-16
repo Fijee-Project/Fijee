@@ -78,18 +78,11 @@ Domains::operator << ( std::ostream& stream,
 {
   //
   //
-// stream 
-//    // Position Direction
-//    << static_cast<Domains::Point_vector> (that)
-//    // Electrode intensity
-//    << "I=\"" << that.weight() << "\" "
-////    // Conductivity coefficients
-////    << "C00=\"" << that.C00() << "\" C01=\"" << that.C01() << "\" C02=\"" << that.C02() << "\" "
-////    << "C11=\"" << that.C11() << "\" C12=\"" << that.C12() << "\" C22=\"" << that.C22() << "\" ";
-//    // Conductivity eigenvalues
-//    << "lambda1=\"" << that.lambda1() 
-//    << "\" lambda2=\"" << that.lambda2() 
-//    << "\" lambda3=\"" << that.lambda3() << "\" ";
+  stream 
+    // Position Direction
+    << static_cast<Domains::Point_vector> (that)
+    // Dipole intensity
+    << "label=\"" << that.get_label_() << "\" ";
   
   //
   //

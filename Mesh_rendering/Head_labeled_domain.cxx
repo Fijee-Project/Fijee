@@ -270,7 +270,9 @@ Domains_Head_labeled::model_segmentation()
   // Electrodes localization
   Domains::Build_electrodes_list electrodes;
   electrodes.adjust_cap_positions_on( outside_scalp, inside_skull );
-  
+  // Write electrodes XML file
+  electrodes.Output_electrodes_list_xml();
+
   //
   // End of cortical segmentation
   left_gray_matter_thread.join();

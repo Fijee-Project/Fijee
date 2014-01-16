@@ -42,10 +42,6 @@ Domain::Spheres_implicite_domain( const char* Vtk_Mesh ):
   // create the stream for CGAL applications
   std::stringstream stream;
 
-  //
-  // reset the transformation matrix
-  (Domains::Access_parameters::get_instance())->set_rotation_Id_();
-  (Domains::Access_parameters::get_instance())->set_translation_128_();
   // Delta vectors
   Eigen::Matrix3f delta_rotation;
   delta_rotation <<

@@ -48,6 +48,16 @@ typedef Domains::Access_parameters DAp;
 //
 Domains_Spheres_labeled::Spheres_labeled_domain()
 {  
+  //
+  // Transformation
+  //
+  // Reset of transformation matrices
+  (Domains::Access_parameters::get_instance())->set_rotation_MNI305_();
+  (Domains::Access_parameters::get_instance())->set_translation_MNI305_();
+  //
+  rotation_    = (DAp::get_instance())->get_rotation_();
+  translation_ = (DAp::get_instance())->get_translation_();
+
 
   //
   // Data initialization
@@ -226,11 +236,14 @@ Domains_Spheres_labeled::model_segmentation()
   // Electrodes localization
   Domains::Build_electrodes_list electrodes;
   electrodes.adjust_cap_positions_on( scalp );
+  // Write electrodes XML file
+  electrodes.Output_electrodes_list_xml();
 
   //
   // main loop building inrimage data
   // speed-up
   bool is_in_CSF = false;
+  Eigen::Matrix< float, 3, 1 > position;
   //
   // create a data_label_tmp private in the different
   for ( int k = 0; k < 256; k++ )
@@ -239,9 +252,15 @@ Domains_Spheres_labeled::model_segmentation()
 	{
  	  int idx = i + j*256 + k*256*256;
 	  //
-	  GT::Point_3 cell_center(data_position_[idx][0],
-				  data_position_[idx][1],
-				  data_position_[idx][2]);
+	  position <<
+	    /* size_of_pixel_size_x_ * */ data_position_[idx][0],
+	    /* size_of_pixel_size_y_ * */ data_position_[idx][1],
+	    /* size_of_pixel_size_z_ * */ data_position_[idx][2];
+	  position = rotation_ * position + translation_;
+	  //
+	  GT::Point_3 cell_center(position(0,0),
+				  position(1,0),
+				  position(2,0));
 
 	  //
 	  // Electrodes position

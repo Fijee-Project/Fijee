@@ -25,7 +25,8 @@ DBel::Build_electrodes_list()
   //
   // Load the MNI electrode positions
   pugi::xml_document     xml_file;
-  pugi::xml_parse_result result = xml_file.load_file( (Domains::Access_parameters::get_instance())->get_electrodes_10_20_() );
+  pugi::xml_parse_result 
+    result = xml_file.load_file( (Domains::Access_parameters::get_instance())->get_electrodes_10_20_() );
 
   int number_electrods_;
   //
@@ -145,10 +146,8 @@ DBel::adjust_cap_positions_on( Labeled_domain< Spheres_implicite_domain,
        )
     {
       //
-      //
-      electrode->x() += 128.;
-      electrode->y() += 128.;
-      electrode->z() += 128. + 20. * 1.84;
+      // Arbitrary offset
+      electrode->z() += 20. * 1.96;
 
       //
       //
@@ -190,7 +189,7 @@ DBel::adjust_cap_positions_on( Labeled_domain< VTK_implicite_domain,
   skull_center[0] += (Domains::Access_parameters::get_instance())->get_delta_translation_()[0];
   skull_center[1] += (Domains::Access_parameters::get_instance())->get_delta_translation_()[1];
   skull_center[2] += (Domains::Access_parameters::get_instance())->get_delta_translation_()[2];
-  // arbitrary offset 5% on "Z" 
+  // Arbitrary offset 5% on "Z" 
   skull_center[2] += 5. * amplitude[2] / 100.;
 
   //
@@ -233,6 +232,54 @@ DBel::inside_domain( GT::Point_3 Point )
   //
   //
   return false;
+}
+//
+//
+//
+void 
+DBel::Output_electrodes_list_xml()
+{
+  //
+  // Output xml files. 
+  std::string electrodes_XML = 
+    (Domains::Access_parameters::get_instance())->get_files_path_output_();
+  electrodes_XML += std::string("electrodes.xml");
+  //
+  std::ofstream electrodes_file( electrodes_XML.c_str() );
+  
+  //
+  //
+  Build_stream(electrodes_file);
+
+  //
+  //
+  electrodes_file.close();
+}
+//
+//
+//
+void
+DBel::Build_stream( std::ofstream& stream )
+{
+  //
+  //
+  stream << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+	 << "<fijee xmlns:fijee=\"http://www.fenicsproject.org\">\n";
+  
+  //
+  //
+  stream << "  <electrodess size=\"" << electrodes_.size() << "\">\n";
+  
+  //
+  //
+  int index = 0;
+  for ( auto electrode : electrodes_ )
+    stream << "    <electrode index=\"" << index++ << "\" " << electrode << "/>\n";
+  
+  //
+  //
+  stream << "  </electrodes>\n" 
+	 << "</fijee>\n"; 
 }
 //
 //
