@@ -12,9 +12,13 @@
 //
 // UCSF
 //
+#include "Utils/enum.h"
 #include "Point.h"
 #include "Point_vector.h"
 #include "Access_parameters.h"
+#include "Electrode_shape.h"
+#include "Electrode_shape_sphere.h"
+#include "Electrode_shape_cylinder.h"
 //
 // Eigen
 //
@@ -26,55 +30,6 @@
  */
 namespace Domains
 {
-
-  /*! \class Shape
-   * \brief classe representing whatever
-   *
-   *  This class is an example of class 
-   * 
-   */
-  class Shape
-  {
-  public:
-    virtual bool inside( float,
-			 Domains::Point_vector&, 
-			 float, float, float ) = 0;
-  };
-  
-  class Sphere : public Shape
-  {
-  public:
-    Sphere(){};
-    virtual ~Sphere(){};
-    Sphere( const Sphere& ){};
-    Sphere& operator = ( const Sphere& ){};
-
-  public:
-    /*!
-     *  \brief inside 
-     *
-     *  This function check if the point (X, Y, Z) is inside the Sphere Shape with the radius Shape_radius.
-     *
-     *  \param Shape_radius: Radius of the shape
-     *  \param Center: center of the shape
-     *  \param X: x-position of the checl point
-     *  \param Y: y-position of the checl point
-     *  \param Z: z-position of the checl point
-     *
-     */
-    virtual bool inside( float Shape_radius, 
-			 Domains::Point_vector& Center, 
-			 float X, float Y, float Z )
-    {
-      return ( (Center.x() - X)*(Center.x() - X) + 
-	       (Center.y() - Y)*(Center.y() - Y) + 
-	       (Center.z() - Z)*(Center.z() - Z) - 
-	       Shape_radius*Shape_radius < 0. ?
-	       true : false);
-    };
-  };
-
-
   /*! \class Electrode
    * \brief classe representing whatever
    *
@@ -90,7 +45,7 @@ namespace Domains
     //! Label of the electrode
     std::string label_;
     //! Electrode shape
-    std::shared_ptr< Domains::Shape > shape_;
+    std::shared_ptr< Domains::Electrode_shape > shape_;
 
   public:
     /*!
@@ -147,7 +102,7 @@ namespace Domains
      */
     bool inside_domain(float X, float Y, float Z)
     {
-      return shape_->inside( 5. /*mm*/, *this /*Center*/, X, Y, Z);
+      return shape_->inside( *this /*Center*/, X, Y, Z );
     }
  };
   /*!

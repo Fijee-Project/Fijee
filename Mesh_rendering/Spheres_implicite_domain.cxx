@@ -101,6 +101,12 @@ Domain::Spheres_implicite_domain( const char* Vtk_Mesh ):
     }
 
   //
+  // Fill up our own point vector container
+  for ( auto pv : Point_normal )
+    point_normal_.push_back(Domains::Point_vector( pv.position().x(), pv.position().y(), pv.position().z(),
+						   pv.normal().x(), pv.normal().y(), pv.normal().z() ));
+  
+  //
   // Creates implicit function from the read points using the default solver.
   function_.reset( new Poisson_reconstruction_function( Point_normal.begin(), 
 							Point_normal.end(),

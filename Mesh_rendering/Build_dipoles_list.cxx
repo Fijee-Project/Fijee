@@ -20,6 +20,7 @@ DBdl::Build_dipoles_list( const DBdl& that )
 //
 DBdl::~Build_dipoles_list()
 {
+  /* Do nothing */
 }
 //
 //

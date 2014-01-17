@@ -2,11 +2,11 @@
 //
 // We give a comprehensive type name
 //
-typedef Domains::Electrode DD;
+typedef Domains::Electrode DE;
 //
 //
 //
-DD::Electrode():
+DE::Electrode():
   Domains::Point_vector(),
   index_(0), label_(""), shape_(nullptr)
 {
@@ -15,7 +15,7 @@ DD::Electrode():
 //
 //
 //
-DD::Electrode( int Index, std::string Label, 
+DE::Electrode( int Index, std::string Label, 
 	       float Position_x, float Position_y, float Position_z,
 	       float Radius, float Phi, float Theta ):
   Domains::Point_vector( Position_x, Position_y, Position_z, 
@@ -25,39 +25,51 @@ DD::Electrode( int Index, std::string Label,
 			 Radius /*\hat{n} vector normalization*/),
   index_(Index), label_(Label)
 {
-  shape_.reset( new Sphere() );
-// //
-// // Check the positions relations
-// if( Position_x > Radius * cos(Phi) * sin(Theta) + 0.001 || Position_x < Radius * cos(Phi) * sin(Theta) - 0.001 ||
-//     Position_y > Radius * sin(Phi) * sin(Theta) + 0.001 || Position_y < Radius * sin(Phi) * sin(Theta)  - 0.001 ||
-//     Position_z > Radius * cos(Theta) + 0.001 || Position_z <  Radius * cos(Theta) - 0.001 )
-//   {
-//     std::cerr << "Position_x " << Position_x << "\n"
-//		<< "Radius * cos(Phi) * sin(Theta) : " << Radius * cos(Phi) * sin(Theta) << "\n"
-//		<< "Position_y " << Position_y << "\n"
-//		<< "Radius * sin(Phi) * sin(Theta) : " << Radius * sin(Phi) * sin(Theta) << "\n"
-//		<< "Position_z " << Position_z << "\n"
-//		<< "Radius * cos(Theta): " << Radius * cos(Theta) << "\n"
-//		<< "Theta " << Theta << " Phi " << Phi << "\n";
-//    exit(1);
-//   }
+  //
+  // Select the shape factory
+  // ToDo Parameter from Access_parameters
+  Electrode_type Shape = CYLINDER;
+  
+  switch ( Shape )
+    {
+    case SPHERE:
+      {
+	// ToDo Parameter from Access_parameters
+	float radius = 5 /*mm*/;
+	shape_.reset( new Electrode_shape_sphere(radius) );
+	break;
+      }
+    case CYLINDER:
+      {
+	// ToDo Parameter from Access_parameters
+	float radius = 5 /*mm*/;
+	float height = 2 /*mm*/;
+	shape_.reset( new Electrode_shape_cylinder(radius, height) );
+	break;
+      }
+    default:
+      {
+	std::cerr << "Electrode shape unknown" << std::endl;
+	abort();
+      }
+    }
 }
 //
 //
 //
-DD::Electrode( const DD& that ):
+DE::Electrode( const DE& that ):
   Domains::Point_vector(that),
   index_(that.index_),label_(that.label_), shape_(that.shape_)
 {}
 //
 //
 //
-DD::~Electrode(){ /* Do nothing */}
+DE::~Electrode(){ /* Do nothing */}
 //
 //
 //
-DD& 
-DD::operator = ( const DD& that )
+DE& 
+DE::operator = ( const DE& that )
 {
   Domains::Point_vector::operator = (that);
   //
@@ -74,7 +86,7 @@ DD::operator = ( const DD& that )
 //
 std::ostream& 
 Domains::operator << ( std::ostream& stream, 
-		       const DD& that)
+		       const DE& that)
 {
   //
   //

@@ -122,24 +122,34 @@ namespace Domains
     //    inline double get_max_x( ) const {return max_x_;};
  
   public:
-    //    inline bool inside_domain( CGAL::Point_3< Kernel > Point )
+    /*!
+     *  \brief Inside domain
+     *
+     *  This method check if a point is inside the implicite domain
+     *
+     */
     inline bool inside_domain( Point_type Point_Type )
     {
       return implicite_domain_->inside_domain( Point_Type );
     };
-
-    //    
+    /*!
+     *  \brief
+     */
     inline const double* get_poly_data_bounds_()
     {
       return implicite_domain_->get_poly_data_bounds_();
     };
-
-    //    inline bool inside_domain( CGAL::Point_3< Kernel > Point )
+    /*!
+     *  \brief Get point_normal vector
+     *
+     *  This method return point_normal_ of the STL mesh.
+     *
+     *  \return point_normal_
+     */
     inline VectorPointNormal get_point_normal()
     {
       return implicite_domain_->get_point_normal_();
     };
-
   };
   /*!
    *  \brief Dump values for Labeled_domain

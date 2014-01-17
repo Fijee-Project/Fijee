@@ -1,5 +1,8 @@
 #ifndef ENUM_H_
 #define ENUM_H_
+//
+//
+//
 enum Freesurfer_segmentation
   {
     //No. Label Name:                                //R   G   B   A
@@ -218,8 +221,9 @@ enum Freesurfer_segmentation
     CC_MID_ANTERIOR                          = 254 ,  //0   0   208 0
     CC_ANTERIOR                              = 255    //0   0   255 0
   };
-
-
+//
+//
+//
 enum Brain_segmentation 
   {
     NO_SEGMENTATION           = 0,  //
@@ -274,8 +278,9 @@ enum Brain_segmentation
     //
     ELECTRODE                 = 100,
   }; 
-
-
+//
+//
+//
 enum Mesh_output 
   {
     NO_OUTPUT         = 0,
@@ -285,13 +290,14 @@ enum Mesh_output
     MESH_CONDUCTIVITY = 4,
     MESH_DIPOLES      = 5,
   };
-
-enum Simulation
+//
+//
+//
+enum Electrode_type
   {
-    NO_SIMU         = 0,
-    SIMU_HEAD       = 1,
-    SIMU_SPHERES    = 2,
-    SIMU_BEM        = 3,
+    NO_TYPE     = 0,
+    SPHERE      = 1,
+    CYLINDER    = 2,
   };
 
 

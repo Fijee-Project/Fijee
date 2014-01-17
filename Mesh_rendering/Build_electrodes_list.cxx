@@ -136,8 +136,16 @@ DBel::Build_electrodes_list()
 //
 void
 DBel::adjust_cap_positions_on( Labeled_domain< Spheres_implicite_domain, 
-					       GT::Point_3, std::list< Point_vector > >&  Sclap )
+					       GT::Point_3, std::list< Point_vector > >&  Scalp )
 {
+  //
+  // k nearest neighbor data structure
+  Tree tree;
+  // build the tree
+  for( auto surf_point_normal : Scalp.get_point_normal() )
+    tree.insert( surf_point_normal );
+  
+
   //
   //
   for( auto electrode = electrodes_.begin() ; 
@@ -151,7 +159,7 @@ DBel::adjust_cap_positions_on( Labeled_domain< Spheres_implicite_domain,
 
       //
       //
-      while( Sclap.inside_domain(GT::Point_3( electrode->x(),
+      while( Scalp.inside_domain(GT::Point_3( electrode->x(),
 					      electrode->y(),
 					      electrode->z() )) )
 	{
@@ -159,20 +167,37 @@ DBel::adjust_cap_positions_on( Labeled_domain< Spheres_implicite_domain,
 	  electrode->y() += electrode->vy();
 	  electrode->z() += electrode->vz();
 	}
-    }
+
+      //
+      // Correction of the electrode direction (vector giving the orientation of the electrode)
+      Neighbor_search NN( tree, static_cast<Domains::Point_vector> (*electrode), 1 );
+      auto filter_nearest = NN.begin();
+      //
+      electrode->vx() = filter_nearest->first.vx();
+      electrode->vy() = filter_nearest->first.vy();
+      electrode->vz() = filter_nearest->first.vz();
+   }
 }
 //
 //
 //
 void
 DBel::adjust_cap_positions_on( Labeled_domain< VTK_implicite_domain, 
-					       GT::Point_3, std::list< Point_vector > >&  Sclap,
+					       GT::Point_3, std::list< Point_vector > >&  Scalp,
 			       Labeled_domain< VTK_implicite_domain, 
 					       GT::Point_3, std::list< Point_vector > >&  Skull
 			       )
 {
   //
-  // First we find the center of the skull
+  // k nearest neighbor data structure
+  Tree tree;
+  // build the tree
+  for( auto surf_point_normal : Scalp.get_point_normal() )
+    tree.insert( surf_point_normal );
+  
+
+  //
+  // We seek the center of the skull
   float skull_center[3];
   double amplitude[3];
   //
@@ -207,7 +232,7 @@ DBel::adjust_cap_positions_on( Labeled_domain< VTK_implicite_domain,
 
       //
       //
-      while( Sclap.inside_domain(GT::Point_3( electrode->x(),
+      while( Scalp.inside_domain(GT::Point_3( electrode->x(),
 					      electrode->y(),
 					      electrode->z() )) )
 	{
@@ -215,6 +240,15 @@ DBel::adjust_cap_positions_on( Labeled_domain< VTK_implicite_domain,
 	  electrode->y() += electrode->vy();
 	  electrode->z() += electrode->vz();
 	}
+
+      //
+      // Correction of the electrode direction (vector giving the orientation of the electrode)
+      Neighbor_search NN( tree, static_cast<Domains::Point_vector> (*electrode), 1 );
+      auto filter_nearest = NN.begin();
+      //
+      electrode->vx() = filter_nearest->first.vx();
+      electrode->vy() = filter_nearest->first.vy();
+      electrode->vz() = filter_nearest->first.vz();
     }
 }
 //
