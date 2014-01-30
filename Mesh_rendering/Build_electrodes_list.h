@@ -73,15 +73,6 @@ namespace Domains
      *
      */
     Build_electrodes_list();
-// ToRemove    /*!
-// ToRemove     *  \brief Default Constructor
-// ToRemove     *
-// ToRemove     *  Constructor of the class Build_electrodes_list
-// ToRemove     *
-// ToRemove     */
-// ToRemove    Build_electrodes_list( Domains::Labeled_domain< VTK_implicite_domain, 
-// ToRemove			   GT::Point_3, 
-// ToRemove			   std::list< Point_vector > > &);
 //    /*!
 //     *  \brief Copy Constructor
 //     *

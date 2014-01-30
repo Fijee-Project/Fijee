@@ -318,3 +318,170 @@ Solver::operator << ( std::ostream& stream,
   //
   return stream;
 };
+//
+//
+//
+Solver::Current_intensity::Current_intensity(): 
+  Expression(1,1),
+  index_( 0 ), I_( 0. ), surface_(0.), label_("no_name")
+{
+  //
+  //
+  r0_values_.resize(3);
+  e_values_.resize(3);
+  //
+  r0_values_[0] = 0.;
+  r0_values_[1] = 0.;
+  r0_values_[2] = 0.;
+  //
+  e_values_[0] = 0.;
+  e_values_[1] = 0.;
+  e_values_[2] = 0.;
+  //
+  impedance_ = std::complex<double>(0.,0.);
+}
+//
+//
+//
+Solver::Current_intensity::Current_intensity(const Current_intensity& that): 
+  Expression(1,1), index_(that.index_), I_(that.I_), label_(that.label_),
+  impedance_(that.impedance_), surface_(that.surface_)
+{
+  //
+  //
+  r0_values_.resize(3);
+  e_values_.resize(3);
+  //
+  r0_values_[0] = that.r0_values_[0];
+  r0_values_[1] = that.r0_values_[1];
+  r0_values_[2] = that.r0_values_[2];
+  //
+  e_values_[0] = that.e_values_[0];
+  e_values_[1] = that.e_values_[1];
+  e_values_[2] = that.e_values_[2];
+}
+//
+//
+//
+Solver::Current_intensity::Current_intensity( int Index, std::string Label, double Intensity,
+					      double X,  double Y,  double Z, 
+					      double VX, double VY, double VZ,
+					      double Re_z_l, double Im_z_l, double Surface): 
+  Expression(1,1), index_( Index ), label_( Label ), I_( Intensity ), impedance_( (Re_z_l,Im_z_l) ), 
+  surface_(Surface) 
+{
+  //
+  //
+  r0_values_.resize(3);
+  e_values_.resize(3);
+  //
+  r0_values_[0] = X;
+  r0_values_[1] = Y;
+  r0_values_[2] = Z;
+  //
+  e_values_[0] = VX;
+  e_values_[1] = VY;
+  e_values_[2] = VZ;
+}
+//
+//
+//
+void 
+Solver::Current_intensity::eval(Array<double>& values, const Array<double>& x, const ufc::cell& cell) const
+{
+  if ( x[0] < r0_values_[0] + 1.e-3 && x[0] > r0_values_[0] - 1.e-3 &&  
+       x[1] < r0_values_[1] + 1.e-3 && x[1] > r0_values_[1] - 1.e-3 &&  
+       x[2] < r0_values_[2] + 1.e-3 && x[2] > r0_values_[2] - 1.e-3  )
+    values[0] = I_;
+  else
+    values[0] = 0.;
+//  if( index_cell_ == cell.index )
+//    {
+////      Vector e(3)/*, r0(3), r(3)*/;
+////      
+////      //
+////      // Dipole direction
+////      e.set_local( e_values_ );
+////      
+////      //
+////      // Dipole position in [mm]
+////      r0.set_local( r0_values_ );
+////      
+////      //
+////      // Mesure position in [mm]
+////      std::vector<double> r_values(3);  
+////      r_values[0] = x[0]; 
+////      r_values[1] = x[1];
+////      r_values[2] = x[2];
+////      r.set_local( r_values );
+////      // distance in [mm]
+////      Vector dist(r);
+////      dist -= r0;
+////      double norm_dist = dist.norm("l2");
+//      
+//      // 
+//      // \vec{J}_{source} = \vec{Q} \delta(\vec{dist})
+//      // if the distance is less than 0.5 mm, the value is Q; 0 otherwise.
+//      values[0] = e_values_[0] * Q_ / 1.73;
+//      values[1] = e_values_[1] * Q_ / 1.73;
+//      values[2] = e_values_[2] * Q_ / 1.73;
+//    }
+//  else
+//    {
+//      values[0] = 0.;
+//      values[1] = 0.;
+//      values[2] = 0.;
+//    }
+}
+//
+//
+//
+Solver::Current_intensity&
+Solver::Current_intensity::operator =( const Current_intensity& that )
+{
+  index_ = that.index_;
+  I_     = that.I_;
+  label_  = that.label_;
+  //
+  //
+  r0_values_.resize(3);
+  e_values_.resize(3);
+  //
+  r0_values_[0] = that.get_X_();
+  r0_values_[1] = that.get_Y_();
+  r0_values_[2] = that.get_Z_();
+  //
+  e_values_[0] = that.get_VX_();
+  e_values_[1] = that.get_VY_();
+  e_values_[2] = that.get_VZ_();
+  //
+  impedance_ = that.get_impedance_();
+  //
+  surface_   = that.get_surface_();
+  
+  //
+  //
+  return *this;
+}
+//
+//
+//
+std::ostream& 
+Solver::operator << ( std::ostream& stream, 
+		      const Solver::Current_intensity& that)
+{
+//  //
+//  //
+//  stream 
+//    << "Dipole source -- index: " << that.get_index_() << " -- " 
+//    << "index cell: " << that.get_index_cell_() << "\n"
+//    << "Position:"
+//    << " (" << that.get_X_() << ", " << that.get_Y_() << ", " << that.get_Z_()  << ") " 
+//    << " -- direction: " 
+//    << " (" << that.get_VX_()  << ", " << that.get_VY_() << ", " << that.get_VZ_()  << ") \n"
+//    << "Intensity: " << that.get_Q_() << std::endl;
+//  
+//  //
+//  //
+//  return stream;
+};

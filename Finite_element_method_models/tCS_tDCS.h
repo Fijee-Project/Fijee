@@ -51,8 +51,8 @@ namespace Solver
    */
   class tCS_tDCS
   {
-    //! Dipoles list
-    std::list< Solver::Current_density > dipoles_list_;
+    //! Electrodes list
+    std::vector< Solver::Current_intensity > electrodes_vector_;
     //! Head model mesh
     std::unique_ptr< Mesh > mesh_;
     //! Head model sub domains
@@ -109,12 +109,12 @@ namespace Solver
     /*!
      */
     inline
-      int get_number_of_physical_event(){return number_dipoles_; };
+      int get_number_of_physical_event(){return number_electrodes_; };
 
 
   private:
-    /// Number of dipoles
-    int number_dipoles_;
+    /// Number of electrodes
+    int number_electrodes_;
 
   };
 }

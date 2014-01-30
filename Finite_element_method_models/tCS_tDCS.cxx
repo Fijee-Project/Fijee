@@ -55,82 +55,90 @@ Solver::tCS_tDCS::tCS_tDCS()
   perifery_->mark(*boundaries_, 1);
 
 
-//  //
-//  // Read the dipoles xml file
-//  std::cout << "Load the dipoles" << std::endl;
-//  //
-//  std::string dipoles_xml = (SDEsp::get_instance())->get_files_path_output_();
-//  dipoles_xml += "dipoles.xml";
-//  //
-//  pugi::xml_document     xml_file;
-//  pugi::xml_parse_result result = xml_file.load_file( dipoles_xml.c_str() );
-//  //
-//  switch( result.status )
-//    {
-//    case pugi::status_ok:
-//      {
-//	//
-//	// Check that we have a FIJEE XML file
-//	const pugi::xml_node fijee_node = xml_file.child("fijee");
-//	if (!fijee_node)
-//	  {
-//	    std::cerr << "Read data from XML: Not a FIJEE XML file" << std::endl;
-//	    exit(1);
-//	  }
-//  
-//	//
-//	// Get dipoles node
-//	const pugi::xml_node dipoles_node = fijee_node.child("dipoles");
-//	if (!dipoles_node)
-//	  {
-//	    std::cerr << "Read data from XML: Not a FIJEE XML file" << std::endl;
-//	    exit(1);
-//	  }
-//	// Get the number of dipoles
-//	number_dipoles_ = dipoles_node.attribute("size").as_int();
-//
-//	//
-//	//
-//	for( auto dipole : dipoles_node )
-//	  {
-//	    int index = dipole.attribute("index").as_uint();
-//	    // position
-//	    double position_x = dipole.attribute("x").as_double();
-//	    double position_y = dipole.attribute("y").as_double();
-//	    double position_z = dipole.attribute("z").as_double();
-//	    // Direction
-//	    double direction_vx = dipole.attribute("vx").as_double();
-//	    double direction_vy = dipole.attribute("vy").as_double();
-//	    double direction_vz = dipole.attribute("vz").as_double();
-//	    // Intensity
-//	    double Q = dipole.attribute("I").as_double();
+  //
+  // Read the electrodes xml file
+  std::cout << "Load the electrodes" << std::endl;
+  //
+  std::string electrodes_xml = (SDEsp::get_instance())->get_files_path_output_();
+  electrodes_xml += "electrodes.xml";
+  //
+  pugi::xml_document     xml_file;
+  pugi::xml_parse_result result = xml_file.load_file( electrodes_xml.c_str() );
+  //
+  switch( result.status )
+    {
+    case pugi::status_ok:
+      {
+	//
+	// Check that we have a FIJEE XML file
+	const pugi::xml_node fijee_node = xml_file.child("fijee");
+	if (!fijee_node)
+	  {
+	    std::cerr << "Read data from XML: Not a FIJEE XML file" << std::endl;
+	    exit(1);
+	  }
+  
+	//
+	// Get electrodes node
+	const pugi::xml_node electrodes_node = fijee_node.child("electrodes");
+	if (!electrodes_node)
+	  {
+	    std::cerr << "Read data from XML: no electrodes node" << std::endl;
+	    exit(1);
+	  }
+	// Get the number of electrodes
+	number_electrodes_ = electrodes_node.attribute("size").as_int();
+
+	//
+	//
+	for( auto electrode : electrodes_node )
+	  {
+	    int index = electrode.attribute("index").as_uint();
+	    // position
+	    double position_x = electrode.attribute("x").as_double(); /* mm */
+	    double position_y = electrode.attribute("y").as_double(); /* mm */
+	    double position_z = electrode.attribute("z").as_double(); /* mm */
+	    // Direction
+	    double direction_vx = electrode.attribute("vx").as_double();
+	    double direction_vy = electrode.attribute("vy").as_double();
+	    double direction_vz = electrode.attribute("vz").as_double();
+	    // Label
+	    std::string label = electrode.attribute("label").as_string(); 
+	    // Intensity
+	    double I = electrode.attribute("I").as_double(); /* Ampere */
+	    // Impedance
+	    double Re_z_l = electrode.attribute("Re_z_l").as_double();
+	    double Im_z_l = electrode.attribute("Im_z_l").as_double();
+	    // Contact surface between Electrode and the scalp
+	    double surface = electrode.attribute("surface").as_double(); /* m^2 */
 //	    // Index cell
-//	    double index_cell = dipole.attribute("index_cell").as_uint();
-//	    //
-//	    dipoles_list_.push_back(std::move(Solver::Current_density( index, index_cell, Q,
-//								       position_x, position_y, position_z, 
-//								       direction_vx, direction_vy, direction_vz )));
-//	  }
-//	
-//	//
-//	//
-//	break;
-//      };
-//    default:
-//      {
-//	std::cerr << "Error reading XML file: " << result.description() << std::endl;
-//	exit(1);
-//      }
-//    }
-//
-//  //
-//  // check we read correctly the dipoles file
-//  if( number_dipoles_ != dipoles_list_.size() )
-//    {
-//      std::cerr << "The number of dipoles in the list is different from the number of dipoles in the file"
-//		<< std::endl;
-//      exit(1);
-//    }
+//	    double index_cell = electrode.attribute("index_cell").as_uint();
+	    //
+	    electrodes_vector_.push_back(std::move(Solver::Current_intensity( index/*, index_cell*/, label, I, 
+									      position_x, position_y, position_z, 
+									      direction_vx, direction_vy, direction_vz,
+									      Re_z_l, Im_z_l, surface )));
+	  }
+	
+	//
+	//
+	break;
+      };
+    default:
+      {
+	std::cerr << "Error reading XML file: " << result.description() << std::endl;
+	exit(1);
+      }
+    }
+
+  //
+  // check we read correctly the electrodes file
+  if( number_electrodes_ != electrodes_vector_.size() )
+    {
+      std::cerr << "The number of electrodes in the list is different from the number of electrodes in the file"
+		<< std::endl;
+      exit(1);
+    }
 }
 //
 //
@@ -141,14 +149,14 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
 				        FacetFunction< size_t >& boundaries*/)
 {
 //  //
-//  // Mutex the dipoles vector poping process
+//  // Mutex the electrodes vector poping process
 //  //
 //  Solver::Current_density source;
 //    try {
-//      // lock the dipole list
+//      // lock the electrode list
 //      std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
-//      source = dipoles_list_.front();
-//      dipoles_list_.pop_front();
+//      source = electrodes_list_.front();
+//      electrodes_list_.pop_front();
 //    }
 //    catch (std::logic_error&) {
 //      std::cout << "[exception caught]\n";
@@ -172,32 +180,34 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
   tCS_model::BilinearForm a(*V_, *V_);
   tCS_model::LinearForm L(*V_);
       
-  //
-  // Anisotropy
-  // Bilinear
-  a.a_sigma  = *sigma_;
-  a.dx       = *domains_;
-  // Linear
-  Constant Cte (0.);
-  L.Cte      = Cte;
-  L.ds       = *boundaries_;
-
-  //
-  // Compute solution
-  Function u(*V_);
-  LinearVariationalProblem problem(a, L, u);
-  LinearVariationalSolver  solver(problem);
-  // krylov
-  solver.parameters["linear_solver"]  
-    = (SDEsp::get_instance())->get_linear_solver_();
-  solver.parameters("krylov_solver")["maximum_iterations"] 
-    = (SDEsp::get_instance())->get_maximum_iterations_();
-  solver.parameters("krylov_solver")["relative_tolerance"] 
-    = (SDEsp::get_instance())->get_relative_tolerance_();
-  solver.parameters["preconditioner"] 
-    = (SDEsp::get_instance())->get_preconditioner_();
-  //
-  solver.solve();
+ //
+ // Anisotropy
+ // Bilinear
+ a.a_sigma  = *sigma_;
+ a.dx       = *domains_;
+ // Linear
+ // Vector I(electrodes_vector_);
+// L.I = I;
+////  Constant Cte (0.);
+////  L.Cte      = Cte;
+////  L.ds       = *boundaries_;
+////
+//  //
+//  // Compute solution
+//  Function u(*V_);
+//  LinearVariationalProblem problem(a, L, u);
+//  LinearVariationalSolver  solver(problem);
+//  // krylov
+//  solver.parameters["linear_solver"]  
+//    = (SDEsp::get_instance())->get_linear_solver_();
+//  solver.parameters("krylov_solver")["maximum_iterations"] 
+//    = (SDEsp::get_instance())->get_maximum_iterations_();
+//  solver.parameters("krylov_solver")["relative_tolerance"] 
+//    = (SDEsp::get_instance())->get_relative_tolerance_();
+//  solver.parameters["preconditioner"] 
+//    = (SDEsp::get_instance())->get_preconditioner_();
+//  //
+//  solver.solve();
 
   //
   // Save solution in VTK format

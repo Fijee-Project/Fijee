@@ -16,6 +16,10 @@
 #include "Point.h"
 #include "Point_vector.h"
 #include "Access_parameters.h"
+//
+//
+//
+#define PI 3.14159265359
 /*! \namespace Domains
  * 
  * Name space for our new package
@@ -85,7 +89,14 @@ namespace Domains
      */
     virtual bool inside( Domains::Point_vector& Center, 
 			 float X, float Y, float Z );
-  };
+     /*!
+     *  \brief Size of the contact surface
+     *
+     *  This function return the size of the contect surface between the electrode and the scalp.
+     *
+     */
+    virtual float contact_surface(){return PI * radius_ * radius_ * 1e-6 /* m^2 */;};
+ };
   /*!
    *  \brief Dump values for Electrode
    *

@@ -9,17 +9,19 @@ cell          = tetrahedron
 scalarElement = FiniteElement("Lagrange", cell, 1)
 vectorElement = VectorElement("Lagrange", cell, 1)
 tensorElement = TensorElement("Lagrange", cell, 1)
- 
+#
+system =  scalarElement * vectorElement
 #
 # Function definition
 #
 
-u   = TrialFunction(scalarElement)
-v   = TestFunction(scalarElement)
+(u, U)   = TrialFunctions(system)
+(v, V)   = TestFunctions(system)
 #n   = scalarElement.cell().n
 
 a_sigma  = Coefficient(tensorElement)
-Cte      = Constant(cell)
+I        = Coefficient(vectorElement)
+
 
 #
 # Bilinear form
@@ -27,4 +29,5 @@ a  = inner( a_sigma * grad(u), grad(v) ) * dx
 
 #
 # Linear form
-L   = Cte * v * ds
+L   = inner(I,V) * ds
+#L   = dot(I,V)

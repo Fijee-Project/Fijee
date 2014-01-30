@@ -24,7 +24,7 @@ int main()
   //  - transcranial current stimulation
   //    - Solver::tCS_tDCS
   //    - Solver::tCS_tACS
-  Solver::Model_solver< /* physical model */ Solver::SL_subtraction,
+  Solver::Model_solver< /* physical model */ Solver::tCS_tDCS,
 			/*solver_parameters->get_number_of_threads_()*/ 1 >  model;
 
   //

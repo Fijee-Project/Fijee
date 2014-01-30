@@ -8,10 +8,10 @@ typedef Domains::Electrode DE;
 //
 DE::Electrode():
   Domains::Point_vector(),
-  index_(0), label_(""), shape_(nullptr)
-{
-
-}
+  index_(0), label_(""), intensity_(0.), 
+  impedance_(std::complex<float>(0.,0.)),
+  shape_(nullptr)
+{}
 //
 //
 //
@@ -29,6 +29,8 @@ DE::Electrode( int Index, std::string Label,
   // Select the shape factory
   // ToDo Parameter from Access_parameters
   Electrode_type Shape = CYLINDER;
+  impedance_ = std::complex<float>(0.,0.);
+  intensity_ = 0. /* A */;
   
   switch ( Shape )
     {
@@ -59,7 +61,9 @@ DE::Electrode( int Index, std::string Label,
 //
 DE::Electrode( const DE& that ):
   Domains::Point_vector(that),
-  index_(that.index_),label_(that.label_), shape_(that.shape_)
+  index_(that.index_),label_(that.label_), 
+  intensity_(that.intensity_), impedance_(that.impedance_),
+  shape_(that.shape_)
 {}
 //
 //
@@ -73,9 +77,11 @@ DE::operator = ( const DE& that )
 {
   Domains::Point_vector::operator = (that);
   //
-  index_ = that.index_;
-  label_ = that.label_;
-  shape_ = that.shape_;
+  index_     = that.index_;
+  label_     = that.label_;
+  intensity_ = that.intensity_;
+  impedance_ = that.impedance_;
+  shape_     = that.shape_;
 
   //
   //
@@ -93,8 +99,15 @@ Domains::operator << ( std::ostream& stream,
   stream 
     // Position Direction
     << static_cast<Domains::Point_vector> (that)
-    // Dipole intensity
-    << "label=\"" << that.get_label_() << "\" ";
+    // Electrode label
+    << "label=\"" << that.get_label_() << "\" "
+    // Electrode intensity
+    << "I=\"" << that.get_intensity_() << "\" "
+    // Electrode impedence 
+    << "Re_z_l=\"" << that.get_impedance_().real() << "\" "
+    << "Im_z_l=\"" << that.get_impedance_().imag() << "\" "
+    // Electrode surface
+    << "surface=\"" << that.get_shape_()->contact_surface() << "\" ";
   
   //
   //

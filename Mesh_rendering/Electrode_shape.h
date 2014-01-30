@@ -52,6 +52,13 @@ namespace Domains
      */
     virtual bool inside( Domains::Point_vector&, 
 			 float, float, float ) = 0;
+    /*!
+     *  \brief Size of the contact surface
+     *
+     *  This function return the size of the contect surface between the electrode and the scalp.
+     *
+     */
+    virtual float contact_surface( ) = 0;
   };
 };
 #endif
