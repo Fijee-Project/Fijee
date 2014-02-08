@@ -31,5 +31,5 @@ a  = inner( a_sigma * grad(Phi_s), grad(v) ) * dx
 
 # Linear form
 L  = inner( ( a_inf - a_sigma ) * grad(Phi_0), grad(v) ) * dx
-L -=  ( v * inner(n, a_inf * grad(Phi_0)) ) * ds(0)
+L -=  ( v * inner(n, a_inf * grad(Phi_0)) ) * ds(0) 
 

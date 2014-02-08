@@ -24,8 +24,11 @@ typedef CGAL::Mesh_criteria_3<Tr> Mesh_criteria;
 typedef CGAL::Mesh_complex_3_in_triangulation_3<Tr> C3t3;
 typedef typename C3t3::Triangulation Triangulation;
 typedef typename C3t3::Cells_in_complex_iterator Cell_iterator;
+typedef typename C3t3::Facets_in_complex_iterator Facet_iterator;
+//typedef typename Triangulation::Facet_handle Facet_handle;
 typedef typename Triangulation::Vertex_handle Vertex_handle;
 typedef typename Triangulation::Cell_handle Cell_handle;
+typedef std::pair<Cell_handle, int>  Cell_facet; 
 typedef typename Triangulation::Finite_vertices_iterator Finite_vertices_iterator;
 typedef typename Triangulation::Point Point_3;
 //

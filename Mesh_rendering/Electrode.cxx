@@ -9,7 +9,7 @@ typedef Domains::Electrode DE;
 DE::Electrode():
   Domains::Point_vector(),
   index_(0), label_(""), intensity_(0.), 
-  impedance_(std::complex<float>(0.,0.)),
+  potential_(0.), impedance_(std::complex<float>(0.,0.)),
   shape_(nullptr)
 {}
 //
@@ -31,6 +31,7 @@ DE::Electrode( int Index, std::string Label,
   Electrode_type Shape = CYLINDER;
   impedance_ = std::complex<float>(0.,0.);
   intensity_ = 0. /* A */;
+  potential_ = 0. /* V */;
   
   switch ( Shape )
     {
@@ -63,7 +64,7 @@ DE::Electrode( const DE& that ):
   Domains::Point_vector(that),
   index_(that.index_),label_(that.label_), 
   intensity_(that.intensity_), impedance_(that.impedance_),
-  shape_(that.shape_)
+  potential_(that.potential_), shape_(that.shape_)
 {}
 //
 //
@@ -80,6 +81,7 @@ DE::operator = ( const DE& that )
   index_     = that.index_;
   label_     = that.label_;
   intensity_ = that.intensity_;
+  potential_ = that.potential_;
   impedance_ = that.impedance_;
   shape_     = that.shape_;
 
@@ -103,11 +105,13 @@ Domains::operator << ( std::ostream& stream,
     << "label=\"" << that.get_label_() << "\" "
     // Electrode intensity
     << "I=\"" << that.get_intensity_() << "\" "
+    // Electrode potential
+    << "V=\"" << that.get_potential_() << "\" "
     // Electrode impedence 
     << "Re_z_l=\"" << that.get_impedance_().real() << "\" "
-    << "Im_z_l=\"" << that.get_impedance_().imag() << "\" "
-    // Electrode surface
-    << "surface=\"" << that.get_shape_()->contact_surface() << "\" ";
+    << "Im_z_l=\"" << that.get_impedance_().imag() << "\" ";
+    // Electrode shape
+    that.get_shape_()->print( stream );
   
   //
   //

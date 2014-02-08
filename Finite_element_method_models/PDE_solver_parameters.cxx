@@ -74,7 +74,7 @@ SDEsp::init()
 
   //
   // Back end parameters
-  // Allowed values are: [PETSc, STL, uBLAS, Epetra, MTL4].
+  // Allowed values are: [PETSc, STL, uBLAS, Epetra, MTL4, ViennaCL].
   // Epetra in Trilinos
   // uBLAS needs UMFPACK
   dolfin::parameters["linear_algebra_backend"] = "ViennaCL";

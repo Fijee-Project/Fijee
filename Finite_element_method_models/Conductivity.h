@@ -55,7 +55,14 @@ namespace Solver
      *  Constructor of the class Tensor_conductivity
      *
      */
-    Tensor_conductivity( Mesh& );
+    Tensor_conductivity( boost::shared_ptr< const Mesh > );
+    /*!
+     *  \brief destructor
+     *
+     *  Constructor of the class Tensor_conductivity
+     *
+     */
+    ~Tensor_conductivity(){/*Do nothing*/};
 
     
   public:
@@ -65,7 +72,7 @@ namespace Solver
      *  This method evaluates expression on each cell
      *
      */
-    void eval(Array<double>& , const Array<double>& , const ufc::cell& ) const;
+    virtual void eval(Array<double>& , const Array<double>& , const ufc::cell& ) const;
     /*!
      *  \brief value_rank
      *

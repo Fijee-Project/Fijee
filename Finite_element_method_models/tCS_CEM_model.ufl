@@ -1,0 +1,37 @@
+# transcranial current stimulation (tCS)
+# tDCS
+# tACS
+
+#
+# Functions space
+#
+cell          = tetrahedron
+scalarContinue = FiniteElement("Lagrange", cell, 1)
+scalarDiscrete = FiniteElement("R", cell, 0)
+#vectorElement = VectorElement("Lagrange", cell, 1)
+tensorElement = TensorElement("Lagrange", cell, 1)
+#
+system = scalarContinue * scalarContinue
+#
+# Function definition
+#
+
+(u, U)   = TrialFunctions(system)
+(v, V)   = TestFunctions(system)
+#n   = scalarElement.cell().n
+
+a_sigma  = Coefficient(tensorElement) # Conductivity tensor [S/m]
+I        = Coefficient(scalarDiscrete) # Injection [A]
+#Se       = Coefficient(scalarDiscrete) # surface of the electrode [m^2]
+
+#
+# Bilinear form
+a  = inner( a_sigma * grad(u), grad(v) ) * dx 
+a += (u - U)*(v - V) * ds(100) # Domains '100' are the electrodes
+
+#
+# Linear form
+#L   = ( (I * V) / Se ) * ds(100) # Domains '100' are the electrodes
+L   = (I * V) * ds(100) # Domains '100' are the electrodes
+#L   = dot(I , V) #* ds(100) # Domains '100' are the electrodes
+#L   = I * V #* ds(100) # Domains '100' are the electrodes

@@ -19,7 +19,6 @@
 //
 //
 //
-#define PI 3.14159265359
 /*! \namespace Domains
  * 
  * Name space for our new package
@@ -76,6 +75,9 @@ namespace Domains
     Electrode_shape_sphere& operator = ( const Electrode_shape_sphere& ){};
 
   public:
+    ucsf_get_macro(radius_, float);
+
+  public:
     /*!
      *  \brief inside 
      *
@@ -88,15 +90,22 @@ namespace Domains
      *
      */
     virtual bool inside( Domains::Point_vector& Center, 
-			 float X, float Y, float Z );
+			 float X, float Y, float Z ) const;
      /*!
      *  \brief Size of the contact surface
      *
      *  This function return the size of the contect surface between the electrode and the scalp.
      *
      */
-    virtual float contact_surface(){return PI * radius_ * radius_ * 1e-6 /* m^2 */;};
- };
+    virtual float contact_surface()const{return PI * radius_ * radius_  /* mm^2 */;};
+    /*!
+     *  \brief print members
+     *
+     *  This function print the class members
+     *
+     */
+    virtual void print( std::ostream& ) const;
+  };
   /*!
    *  \brief Dump values for Electrode
    *

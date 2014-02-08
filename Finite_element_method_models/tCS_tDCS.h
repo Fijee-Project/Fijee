@@ -5,6 +5,7 @@
 #include <string>
 #include <mutex>
 #include <stdexcept>      // std::logic_error
+#include <map>
 //
 // FEniCS
 //
@@ -19,7 +20,8 @@
 //
 // UCSF project
 //
-#include "Source.h"
+#include "Electrodes_setup.h"
+#include "Electrodes_surface.h"
 #include "Conductivity.h"
 #include "Boundaries.h"
 #include "Sub_domaines.h"
@@ -52,19 +54,24 @@ namespace Solver
   class tCS_tDCS
   {
     //! Electrodes list
-    std::vector< Solver::Current_intensity > electrodes_vector_;
+    boost::shared_ptr< Solver::Electrodes_setup > electrodes_;
     //! Head model mesh
-    std::unique_ptr< Mesh > mesh_;
+    boost::shared_ptr< Mesh > mesh_;
+    //! Head model facets collection
+    boost::shared_ptr< MeshValueCollection< std::size_t > > mesh_facets_collection_;
     //! Head model sub domains
-    std::unique_ptr< MeshFunction< long unsigned int > > domains_;
+    boost::shared_ptr< MeshFunction< long unsigned int > > domains_;
     //! Anisotropic conductivity
-    std::unique_ptr< Solver::Tensor_conductivity > sigma_;
+    boost::shared_ptr< Solver::Tensor_conductivity > sigma_;
     //! Function space
-    std::unique_ptr< tCS_model::FunctionSpace > V_;
+    boost::shared_ptr< tCS_model::FunctionSpace > V_;
     //! Periphery
-    std::unique_ptr< Periphery > perifery_;
+    boost::shared_ptr< Periphery > perifery_;
     //! Boundarie conditions
-    std::unique_ptr<  FacetFunction< size_t > > boundaries_;
+    boost::shared_ptr< MeshFunction< std::size_t > > boundaries_;
+
+  std::map< std::size_t, std::size_t > map_index_cell_;
+
     
   private:
     std::mutex critical_zone_;
@@ -109,13 +116,7 @@ namespace Solver
     /*!
      */
     inline
-      int get_number_of_physical_event(){return number_electrodes_; };
-
-
-  private:
-    /// Number of electrodes
-    int number_electrodes_;
-
+      int get_number_of_physical_event(){return 1; };
   };
 }
 #endif

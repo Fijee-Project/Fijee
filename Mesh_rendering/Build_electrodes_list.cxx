@@ -28,7 +28,7 @@ DBel::Build_electrodes_list()
   pugi::xml_parse_result 
     result = xml_file.load_file( (Domains::Access_parameters::get_instance())->get_electrodes_10_20_() );
 
-  int number_electrods_;
+  int number_electrodes_;
   //
   switch( result.status )
     {
@@ -52,7 +52,7 @@ DBel::Build_electrodes_list()
 	    exit(1);
 	  }
 	// Get the number of dipoles
-	number_electrods_ = electrodes_node.attribute("size").as_int();
+	number_electrodes_ = electrodes_node.attribute("size").as_int();
 
 	//
 	//
@@ -302,7 +302,7 @@ DBel::Build_stream( std::ofstream& stream )
   
   //
   //
-  stream << "  <electrodess size=\"" << electrodes_.size() << "\">\n";
+  stream << "  <electrodes size=\"" << electrodes_.size() << "\">\n";
   
   //
   //

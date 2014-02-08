@@ -70,7 +70,7 @@ EXEC = $(MESH_RENDERING)/build_inrimage  $(FEM_MODELS_DIR)/Poisson
 ###############
 ## EXECUTION ##
 ###############
-all: $(EXEC)
+all: models $(EXEC)
 
 $(EXEC):
 	( cd $(UTILS_DIR)/pugi/ && $(MAKE) )

@@ -22,6 +22,7 @@
 #include "Utils/Fijee_environment.h"
 #include "Point_vector.h"
 #include "Distance.h"
+#define PI 3.14159265359
 //
 // CGAL
 //

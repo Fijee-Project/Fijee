@@ -20,7 +20,7 @@ DEsc::Electrode_shape_cylinder( float Radius, float Height ):
 //
 bool
 DEsc::inside( Domains::Point_vector& Center, 
-	      float X, float Y, float Z )
+	      float X, float Y, float Z ) const
 {
   //
   // Gram-Schimdt
@@ -58,17 +58,37 @@ DEsc::inside( Domains::Point_vector& Center,
 //
 //
 //
+void 
+DEsc::print( std::ostream& Stream ) const 
+{
+  Stream 
+    // shape type
+    << "type=\"CYLINDER\" "
+    // shape radius
+    << "radius=\"" << radius_ << "\" "
+    // shape height
+    << "height=\"" << height_ << "\" "
+    // shape surface
+    << "surface=\"" << contact_surface() << "\" ";
+};
+//
+//
+//
 std::ostream& 
 Domains::operator << ( std::ostream& stream, 
 		       const DEsc& that)
 {
   //
   //
-//  stream 
-//    // Position Direction
-//    << static_cast<Domains::Point_vector> (that)
-//    // Dipole intensity
-//    << "label=\"" << that.get_label_() << "\" ";
+  stream 
+    // shape type
+    << "type=\"CYLINDER\" "
+    // shape radius
+    << "radius=\"" << that.get_radius_() << "\" "
+    // shape height
+    << "height=\"" << that.get_height_() << "\" "
+    // shape surface
+    << "surface=\"" << that.contact_surface() << "\" ";
   
   //
   //

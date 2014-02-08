@@ -26,7 +26,7 @@ Solver::SL_direct::SL_direct()
   std::string subdomains_xml = (SDEsp::get_instance())->get_files_path_output_();
   subdomains_xml += "mesh_subdomains.xml";
   //
-  domains_.reset( new MeshFunction< long unsigned int >(*mesh_, subdomains_xml.c_str()) );
+  domains_.reset( new MeshFunction< long unsigned int >(mesh_, subdomains_xml.c_str()) );
   // write domains
   std::string domains_file_name = (SDEsp::get_instance())->get_files_path_result_();
   domains_file_name            += std::string("domains.pvd");
@@ -37,7 +37,7 @@ Solver::SL_direct::SL_direct()
   //
   // Load the conductivity. Anisotrope conductivity
   std::cout << "Load the conductivity" << std::endl;
-  sigma_.reset( new Solver::Tensor_conductivity(*mesh_) );
+  sigma_.reset( new Solver::Tensor_conductivity(mesh_) );
 
 
   //

@@ -47,6 +47,8 @@ namespace Domains
     std::string label_;
     //! Electrode intensity
     float intensity_;
+    //! Electrode potential
+    float potential_;
     //! Electrode impedance
     std::complex<float> impedance_;
     //! Electrode shape
@@ -94,8 +96,10 @@ namespace Domains
     ucsf_get_macro(index_, int);
     ucsf_get_macro(label_, std::string);
     ucsf_get_macro(intensity_, float);
+    ucsf_get_macro(potential_, float);
     ucsf_get_macro(impedance_, std::complex<float>);
     ucsf_get_macro(shape_, std::shared_ptr< Domains::Electrode_shape > );
+    
 
   public:
     /*!

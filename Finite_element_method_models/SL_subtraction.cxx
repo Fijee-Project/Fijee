@@ -37,7 +37,7 @@ Solver::SL_subtraction::SL_subtraction()
   //
   // Load the conductivity. Anisotrope conductivity
   std::cout << "Load the conductivity" << std::endl;
-  sigma_.reset( new Solver::Tensor_conductivity(*mesh_) );
+  sigma_.reset( new Solver::Tensor_conductivity(mesh_) );
 
 
   //

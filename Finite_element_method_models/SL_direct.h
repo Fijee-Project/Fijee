@@ -54,17 +54,17 @@ namespace Solver
     //! Dipoles list
     std::list< Solver::Current_density > dipoles_list_;
     //! Head model mesh
-    std::unique_ptr< Mesh > mesh_;
+    boost::shared_ptr< Mesh > mesh_;
     //! Head model sub domains
-    std::unique_ptr< MeshFunction< long unsigned int > > domains_;
+    boost::shared_ptr< MeshFunction< long unsigned int > > domains_;
     //! Anisotropic conductivity
-    std::unique_ptr< Solver::Tensor_conductivity > sigma_;
+    boost::shared_ptr< Solver::Tensor_conductivity > sigma_;
     //! Function space
-    std::unique_ptr< SLD_model::FunctionSpace > V_;
+    boost::shared_ptr< SLD_model::FunctionSpace > V_;
     //! Periphery
-    std::unique_ptr< Periphery > perifery_;
+    boost::shared_ptr< Periphery > perifery_;
     //! Boundarie conditions
-    std::unique_ptr<  FacetFunction< size_t > > boundaries_;
+    boost::shared_ptr<  FacetFunction< size_t > > boundaries_;
     
   private:
     std::mutex critical_zone_;

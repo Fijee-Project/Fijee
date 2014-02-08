@@ -10,7 +10,7 @@ LIBS    = -ldolfin -lboost_mpi -lboost_math_tr1 -lpugixml
 #
 UFL_SRC    = SLS_model.ufl SLD_model.ufl tCS_model.ufl
 UFL_HEADER = $(UFL_SRC:.ufl=.h)
-SRC        = main.cxx  Conductivity.cxx Source.cxx SL_subtraction.cxx SL_direct.cxx tCS_tDCS.cxx PDE_solver_parameters.cxx Spheres_electric_monopole.cxx #Spheres_electric_dipole.cxx
+SRC        = main.cxx  Conductivity.cxx Source.cxx Electrodes_injection.cxx Intensity.cxx SL_subtraction.cxx SL_direct.cxx tCS_tDCS.cxx PDE_solver_parameters.cxx Spheres_electric_monopole.cxx Electrodes_setup.cxx Electrodes_surface.cxx #Spheres_electric_dipole.cxx
 OBJ        = $(SRC:.cxx=.o)
 #
 #

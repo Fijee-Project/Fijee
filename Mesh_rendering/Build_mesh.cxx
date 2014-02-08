@@ -218,14 +218,17 @@ Domains_build_mesh::Output_FEniCS_xml()
 
   //
   // Output FEniCS xml files
-  std::string output_mesh_XML       = (Domains::Access_parameters::get_instance())->get_files_path_output_();
-  std::string output_subdomains_XML = (Domains::Access_parameters::get_instance())->get_files_path_output_();
+  std::string output_mesh_XML              = (Domains::Access_parameters::get_instance())->get_files_path_output_();
+  std::string output_subdomains_XML        = (Domains::Access_parameters::get_instance())->get_files_path_output_();
+  std::string output_facets_subdomains_XML = (Domains::Access_parameters::get_instance())->get_files_path_output_();
   //
-  output_mesh_XML       += std::string("mesh.xml");
-  output_subdomains_XML += std::string("mesh_subdomains.xml");
+  output_mesh_XML              += std::string("mesh.xml");
+  output_subdomains_XML        += std::string("mesh_subdomains.xml");
+  output_facets_subdomains_XML += std::string("mesh_facets_subdomains.xml");
   //
   std::ofstream FEniCS_xml_file(output_mesh_XML.c_str());
   std::ofstream FEniCS_xml_subdomains_file(output_subdomains_XML.c_str());
+  std::ofstream FEniCS_xml_facets_subdomains_file(output_facets_subdomains_XML.c_str());
   FEniCS_xml_file << std::setprecision(20);
   
   //
@@ -237,6 +240,10 @@ Domains_build_mesh::Output_FEniCS_xml()
   FEniCS_xml_subdomains_file << "<?xml version=\"1.0\"?>" << std::endl << std::endl;
   FEniCS_xml_subdomains_file << "<dolfin xmlns:dolfin=\"http://www.fenicsproject.org\">" << std::endl;
   FEniCS_xml_subdomains_file << "  <mesh_function>" << std::endl;
+  //
+  FEniCS_xml_facets_subdomains_file << "<?xml version=\"1.0\"?>" << std::endl << std::endl;
+  FEniCS_xml_facets_subdomains_file << "<dolfin xmlns:dolfin=\"http://www.fenicsproject.org\">" << std::endl;
+  FEniCS_xml_facets_subdomains_file << "  <mesh_function>" << std::endl;
 
   // FEniCS_xml_file << "" << std::endl;
 
@@ -248,6 +255,9 @@ Domains_build_mesh::Output_FEniCS_xml()
   Vertex_pmap          vertex_pmap( mesh_, cell_pmap, facet_pmap );
   //
   FEniCS_xml_file << "    <vertices size=\"" << triangulation.number_of_vertices() << "\">" << std::endl;
+
+
+  //
   //
   std::map<Vertex_handle, int> V;
   int inum = 0;
@@ -273,6 +283,17 @@ Domains_build_mesh::Output_FEniCS_xml()
       V[vit] = inum;
     }
 
+
+//  //
+//  //
+//  std::map<int, C3t3::Facet> F;
+//  inum = 0;
+//  for( Facet_iterator fit = mesh_.facets_in_complex_begin() ;
+//       fit != mesh_.facets_in_complex_end() ;
+//       ++fit )
+//    F[inum++] = *fit;
+
+
   // 
   // End of vertices
   FEniCS_xml_file << "    </vertices>" << std::endl;
@@ -284,6 +305,10 @@ Domains_build_mesh::Output_FEniCS_xml()
   FEniCS_xml_subdomains_file << "    <mesh_value_collection type=\"uint\" dim=\"3\" size=\"" 
 			     << mesh_.number_of_cells_in_complex() << "\">" << std::endl;
   //
+  FEniCS_xml_facets_subdomains_file << "    <mesh_value_collection  name=\"f\" type=\"uint\" dim=\"2\" size=\"" 
+				    << 4 * mesh_.number_of_cells_in_complex() << "\">" << std::endl;
+  //
+  int ifacet = 0;
   inum = 0;
   for( Cell_iterator cit = mesh_.cells_in_complex_begin() ;
        cit != mesh_.cells_in_complex_end() ;
@@ -296,17 +321,60 @@ Domains_build_mesh::Output_FEniCS_xml()
 		      << V[cit->vertex( 3 )] - 1 << "\"/>"
 		      << std::endl;
       //
-      FEniCS_xml_subdomains_file << "      <value cell_index=\"" << inum++ 
+      FEniCS_xml_subdomains_file << "      <value cell_index=\"" << inum 
 				 << "\" local_entity=\"0\" value=\"" 
 				 << cell_pmap.subdomain_index( cit ) << "\" />"
 				 << std::endl;
+      //
+      for (int vertex = 0 ; vertex < 4 ; vertex++ )
+	{
+	  FEniCS_xml_facets_subdomains_file << "      <value cell_index=\"" << inum
+					    << "\" local_entity=\"" << ifacet++
+					    << "\" value=\"";
+	  //
+	  FEniCS_xml_facets_subdomains_file << cell_pmap.subdomain_index( cit )  << "\" />"
+//	  FEniCS_xml_facets_subdomains_file << facet_pmap.surface_index( C3t3::Facet(cit, vertex) ) << "\" />"
+					    << std::endl;
+   
+	}
+      //
+      ifacet = 0;
+      inum++;
     }
+
+
+//  //
+//  // Facets
+//  FEniCS_xml_facets_subdomains_file << "    <mesh_value_collection type=\"uint\" dim=\"3\" size=\"" 
+//				    << mesh_.number_of_facets_in_complex() << "\">" << std::endl;
+//  //
+//  inum = 0;
+//  int ifacet = 0;
+//  for( Facet_iterator fit = mesh_.facets_in_complex_begin() ;
+//       fit != mesh_.facets_in_complex_end() ;
+//       ++fit )
+//    {
+//      //
+//      FEniCS_xml_facets_subdomains_file << "      <value cell_index=\"" << inum 
+//					<< "\" local_entity=\"" << ifacet++
+//					<< "\" value=\"" 
+//					<< facet_pmap.surface_index( *fit ) << "\" />"
+//					<< std::endl;
+//      //
+//      if (ifacet == 4) 
+//	{
+//	  ifacet = 0;
+//	  inum++;
+//	}
+//    }
 
   //
   // End of tetrahedra
   FEniCS_xml_file << "    </cells>" << std::endl;
   //
   FEniCS_xml_subdomains_file << "    </mesh_value_collection>" << std::endl;
+  //
+  FEniCS_xml_facets_subdomains_file << "    </mesh_value_collection>" << std::endl;
 
   //
   // Tail
@@ -315,11 +383,15 @@ Domains_build_mesh::Output_FEniCS_xml()
   //
   FEniCS_xml_subdomains_file << "  </mesh_function>" << std::endl;
   FEniCS_xml_subdomains_file << "</dolfin>" << std::endl;
+  //
+  FEniCS_xml_facets_subdomains_file << "  </mesh_function>" << std::endl;
+  FEniCS_xml_facets_subdomains_file << "</dolfin>" << std::endl;
 
   //  //
   //  //
   //  FEniCS_xml_file.close();
   //  FEniCS_xml_subdomains_file.close();
+  //  FEniCS_xml_facets_subdomains_file.close();
 }
 //
 //
