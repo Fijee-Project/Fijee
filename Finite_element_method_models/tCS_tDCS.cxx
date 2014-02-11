@@ -372,19 +372,52 @@ Solver::tCS_tDCS::tCS_tDCS()
   //
   info( *mesh_ );
 
+  //
+  // Load Sub_domains
+  std::cout << "Load Sub_domains" << std::endl;
+  //
+  std::string subdomains_xml = (SDEsp::get_instance())->get_files_path_output_();
+  subdomains_xml += "mesh_subdomains.xml";
+  //
+  domains_.reset( new MeshFunction< long unsigned int >(mesh_, subdomains_xml.c_str()) );
+  // write domains
+  std::string domains_file_name = (SDEsp::get_instance())->get_files_path_result_();
+  domains_file_name            += std::string("domains.pvd");
+  File domains_file( domains_file_name.c_str() );
+  domains_file << *domains_;
 
+  //
+  // Load the conductivity. Anisotrope conductivity
+  std::cout << "Load the conductivity" << std::endl;
+  sigma_.reset( new Solver::Tensor_conductivity(mesh_) );
+
+  //
+  // Define the function space
+  V_.reset( new tCS_model::FunctionSpace(mesh_) );
+
+  //
+  // Read the electrodes xml file
+  electrodes_.reset( new Electrodes_setup() );
+
+
+
+  //
+  // Boundary marking
+  //
+  
+  //
+  // Boundary conditions
+  std::cout << "Load boundaries" << std::endl;
 
   //
   // Load the facets collection
-  //
   std::cout << "Load facets collection" << std::endl;
   std::string facets_collection_xml = (SDEsp::get_instance())->get_files_path_output_();
   facets_collection_xml += "mesh_facets_subdomains.xml";
-  std::cout << facets_collection_xml  << std::endl;
   //
   mesh_facets_collection_.reset( new MeshValueCollection< std::size_t > (*mesh_, facets_collection_xml) );
-  
 
+  //
   // MeshDataCollection methode
   // Recreate the connectivity
   // Get mesh connectivity D --> d
@@ -400,11 +433,12 @@ Solver::tCS_tDCS::tCS_tDCS()
   dolfin_assert(!connectivity.empty());
   
   //
-  // Iterate over all values
-//  boost::unordered_set<std::size_t> entities_values_set;
+  // Map the facet index with cell index
+  std::map< std::size_t, std::size_t > map_index_cell;
   typename std::map<std::pair<std::size_t, std::size_t>, std::size_t>::const_iterator it;
   const std::map<std::pair<std::size_t, std::size_t>, std::size_t>& values
     = mesh_facets_collection_->values();
+  // Iterate over all values
   for ( it = values.begin() ; it != values.end() ; ++it )
     {
       // Get value collection entry data
@@ -415,59 +449,27 @@ Solver::tCS_tDCS::tCS_tDCS()
       std::size_t entity_index = 0;
       // Get global (local to to process) entity index
       dolfin_assert(cell_index < _mesh->num_cells());
-      map_index_cell_[connectivity(cell_index)[local_entity]] = cell_index;
+      map_index_cell[connectivity(cell_index)[local_entity]] = cell_index;
  
       // Set value for entity
       dolfin_assert(entity_index < _size);
     }
 
-
-  //
-  // Load Sub_domains
-  std::cout << "Load Sub_domains" << std::endl;
-  //
-  std::string subdomains_xml = (SDEsp::get_instance())->get_files_path_output_();
-  subdomains_xml += "mesh_subdomains.xml";
-  //
-  domains_.reset( new MeshFunction< long unsigned int >(mesh_, subdomains_xml.c_str()) );
-  // write domains
-  std::string domains_file_name = (SDEsp::get_instance())->get_files_path_result_();
-  domains_file_name            += std::string("domains.pvd");
-  File domains_file( domains_file_name.c_str() );
-  domains_file << *domains_;
-
-
-  //
-  // Load the conductivity. Anisotrope conductivity
-  std::cout << "Load the conductivity" << std::endl;
-  sigma_.reset( new Solver::Tensor_conductivity(mesh_) );
-
-
-  //
-  // Define the function space
-  V_.reset( new tCS_model::FunctionSpace(mesh_) );
-
-
-  //
-  // Read the electrodes xml file
-  electrodes_.reset( new Electrodes_setup() );
-
-
   
   //
   // Define boundary condition
-   std::cout << "Load boundaries" << std::endl;
-//  //
-//  std::string boundaries_xml = (SDEsp::get_instance())->get_files_path_output_();
-//  boundaries_xml += "mesh_facets_subdomains.xml";
-//  boundaries_.reset( new MeshFunction< std::size_t >( mesh_, boundaries_xml.c_str()) );
+  boundaries_.reset( new MeshFunction< std::size_t >(mesh_) );
+  *boundaries_ = *mesh_facets_collection_;
   //
-   boundaries_.reset( new MeshFunction< std::size_t >(mesh_) );
-   *boundaries_ = *mesh_facets_collection_;
-   //
-   boundaries_->rename(mesh_facets_collection_->name(),
-		       mesh_facets_collection_->label());
+  boundaries_->rename( mesh_facets_collection_->name(),
+		       mesh_facets_collection_->label() );
 
+  //
+  // Boundary definition
+  Electrodes_surface electrodes_101( electrodes_, boundaries_, map_index_cell );
+  //
+  electrodes_101.mark(*boundaries_, 101);
+  electrodes_101.surface_vertices_per_electrodes();
   // write boundaries
   std::string boundaries_file_name = (SDEsp::get_instance())->get_files_path_result_();
   boundaries_file_name            += std::string("boundaries.pvd");
@@ -510,23 +512,16 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
   //////////////////////////////////////////////////////
       
 
-  //
-  //
-  Electrodes_surface electrodes_101( electrodes_, boundaries_, map_index_cell_ );
-  electrodes_101.mark(*boundaries_, 101);
-  electrodes_101.surface_vertices_per_electrodes();
-  //
-  File tempo_101_file( "tempo_boundaries_101.pvd" );
-  tempo_101_file << *boundaries_;
+
 
   //
-  //
+  // PDE boundary conditions
   DirichletBC bc(*V_, *(electrodes_->get_potential()), *boundaries_, 101);
 
   //
   // Define variational forms
-  tCS_model::BilinearForm a(*V_, *V_);
-  tCS_model::LinearForm L(*V_);
+  tCS_model::BilinearForm a(V_, V_);
+  tCS_model::LinearForm L(V_);
       
   //
   // Anisotropy
@@ -540,7 +535,6 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
   L.ds = *boundaries_;
   // L.Se = Se;
 
-  std::cout << "**** COMPUTATION TIME ****" << std::endl;
   //
   // Compute solution
   Function u(*V_);
@@ -560,16 +554,8 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
 
   //
   // Filter function over a subdomain
-//  Function uu(*V_);
-//  function_filter(u, uu, 5);
-//  //
-//  std::string file_brain_name = (SDEsp::get_instance())->get_files_path_result_() + 
-//    std::string("tDCS_brain.pvd");
-//  File file_brain( file_brain_name.c_str() );
-//  //
-//  file_brain << uu;
-
-  output_filter(u, 5);
+  std::list<std::size_t> sub_domains{4,5};
+  solution_domain_extraction(u, sub_domains);
 
 
 //  //
@@ -596,138 +582,7 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
 //
 //
 void
-Solver::tCS_tDCS::function_filter(const Function& u, Function& u_filtered, std::size_t Sub_domain)
-{
-  //
-  // Check that we don't have a sub-function
-  if(!u.function_space()->component().empty())
-    {
-      dolfin_error("XMLFunctionData.cpp",
-		   "write Function to XML file",
-		   "Cannot write sub-Functions (views) to XML files");
-    }
-
-  //
-  //
-  u_filtered = u;
-
-  //
-  //
-  std::vector<double> x;
-  dolfin_assert(u_filtered.vector());
-  if (MPI::num_processes() > 1)
-    u_filtered.vector()->gather_on_zero(x);
-  else
-    u_filtered.vector()->get_local(x);
-
-  //
-  // Get function space
-  dolfin_assert(u.function_space());
-  const FunctionSpace& V = *u.function_space();
-  
-  //
-  // Build map
-  Global_dof_to_cell_dof global_dof_to_cell_dof;
-  build_global_to_cell_dof(global_dof_to_cell_dof, V);
-
-  if ( MPI::process_number() == 0 )
-    {
-      // Add vector node
-      //    pugi::xml_node function_node = xml_node.append_child("function_data");
-      //    function_node.append_attribute("size") = (unsigned int) x.size();
-
-      // Add data
-      for (std::size_t i = 0; i < x.size(); ++i)
-	{
-	  dolfin_assert(i < global_dof_to_cell_dof.size());
-	  if ( (*domains_)[ global_dof_to_cell_dof[i][0].first ] != Sub_domain )
-	    x[i] = 0.;
-	  //      pugi::xml_node dof_node = function_node.append_child("dof");
-	  //      dof_node.append_attribute("index") = (unsigned int) i;
-	  //      dof_node.append_attribute("value")
-	  //        = boost::lexical_cast<std::string>(x[i]).c_str();
-	  //      dof_node.append_attribute("cell_index")
-	  //        = (unsigned int) global_dof_to_cell_dof[i][0].first;
-	  //      dof_node.append_attribute("cell_dof_index")
-	  //        = (unsigned int) global_dof_to_cell_dof[i][0].second;
-	}
-
-     //
-     u_filtered.vector()->set_local(x);
-    }
-}
-//
-//
-//
-void
-Solver::tCS_tDCS::build_global_to_cell_dof(Global_dof_to_cell_dof& G_dof_C_dof /*global_dof_to_cell_dof*/,
-					   const FunctionSpace& V)
-{
-  // Get mesh and dofmap
-  dolfin_assert(V.mesh());
-  dolfin_assert(V.dofmap());
-  const Mesh& mesh = *V.mesh();
-  const GenericDofMap& dofmap = *V.dofmap();
-
-  std::vector<std::vector<std::vector<dolfin::la_index > > > gathered_dofmap;
-  std::vector<std::vector<dolfin::la_index > > local_dofmap(mesh.num_cells());
-
-  if (MPI::num_processes() > 1)
-    {
-      // Check that local-to-global cell numbering is available
-      const std::size_t D = mesh.topology().dim();
-      dolfin_assert(mesh.topology().have_global_indices(D));
-
-      // Build dof map data with global cell indices
-      for (CellIterator cell(mesh); !cell.end(); ++cell)
-	{
-	  const std::size_t local_cell_index = cell->index();
-	  const std::size_t global_cell_index = cell->global_index();
-	  local_dofmap[local_cell_index] = dofmap.cell_dofs(local_cell_index);
-	  local_dofmap[local_cell_index].push_back(global_cell_index);
-	}
-    }
-  else
-    {
-      // Build dof map data
-      for (CellIterator cell(mesh); !cell.end(); ++cell)
-	{
-	  const std::size_t local_cell_index = cell->index();
-	  local_dofmap[local_cell_index] = dofmap.cell_dofs(local_cell_index);
-	  local_dofmap[local_cell_index].push_back(local_cell_index);
-	}
-    }
-
-  // Gather dof map data on root process
-  MPI::gather(local_dofmap, gathered_dofmap);
-
-  // Build global dof - (global cell, local dof) map on root process
-  if (MPI::process_number() == 0)
-    {
-      G_dof_C_dof.resize(dofmap.global_dimension());
-      
-      std::vector<std::vector<std::vector<dolfin::la_index>
-			      > > ::const_iterator proc_dofmap;
-      for (proc_dofmap = gathered_dofmap.begin();
-	   proc_dofmap != gathered_dofmap.end(); ++proc_dofmap)
-	{
-	  std::vector<std::vector<dolfin::la_index> >::const_iterator cell_dofmap;
-	  for (cell_dofmap = proc_dofmap->begin();
-	       cell_dofmap != proc_dofmap->end(); ++cell_dofmap)
-	    {
-	      const std::vector<dolfin::la_index>& cell_dofs = *cell_dofmap;
-	      const std::size_t global_cell_index = cell_dofs.back();
-	      for (std::size_t i = 0; i < cell_dofs.size() - 1; ++i)
-		G_dof_C_dof[cell_dofs[i]].push_back(std::make_pair(global_cell_index, i));
-	    }
-	}
-    }
-}
-//
-//
-//
-void
-Solver::tCS_tDCS::output_filter(const Function& u, std::size_t Sub_domain)
+Solver::tCS_tDCS::solution_domain_extraction(const Function& u, std::list<std::size_t>& Sub_domains)
 {
   // 
   const std::size_t num_vertices = mesh_->num_vertices();
@@ -736,7 +591,15 @@ Solver::tCS_tDCS::output_filter(const Function& u, std::size_t Sub_domain)
   const std::size_t dim = u.value_size();
   
   // Open file
-  std::ofstream VTU_xml_file("test.vtu");
+  std::string sub_dom("tDCS");
+  for ( auto sub : Sub_domains )
+    sub_dom += std::string("_") + std::to_string(sub);
+  sub_dom += std::string(".vtu");
+  //
+  std::string extracted_solution = (SDEsp::get_instance())->get_files_path_result_();
+  extracted_solution            += sub_dom;
+  //
+  std::ofstream VTU_xml_file(extracted_solution);
   VTU_xml_file.precision(16);
 
   // Allocate memory for function values at vertices
@@ -745,7 +608,7 @@ Solver::tCS_tDCS::output_filter(const Function& u, std::size_t Sub_domain)
   u.compute_vertex_values(values, *mesh_);
  
   //
-  //
+  // 
   std::vector<int> V(num_vertices, -1);
 
 
@@ -762,13 +625,12 @@ Solver::tCS_tDCS::output_filter(const Function& u, std::size_t Sub_domain)
     offsets_string,
     cells_type_string,
     point_data;
-  //
+  // loop over mesh cells
   for ( CellIterator cell(*mesh_) ; !cell.end() ; ++cell )
-    {
-      if ( (*domains_)[cell->index()] == Sub_domain )
+    // loop over extraction sub-domains
+    for( auto sub_domain : Sub_domains ) 
+      if ( (*domains_)[cell->index()] == sub_domain )
 	{
-//	  std::cout << "cut: " << cut << " - cell: " << cell->index() << std::endl;
-	  //
 	  //  vertex id
 	  for ( VertexIterator vertex(*cell) ; !vertex.end() ; ++vertex )
 	    {
@@ -803,7 +665,6 @@ Solver::tCS_tDCS::output_filter(const Function& u, std::size_t Sub_domain)
 	  //
 	  num_tetrahedra++;
 	}
-    }
 
   //
   // header
@@ -848,5 +709,4 @@ Solver::tCS_tDCS::output_filter(const Function& u, std::size_t Sub_domain)
   // Tail
   VTU_xml_file << "  </UnstructuredGrid>" << std::endl;
   VTU_xml_file << "</VTKFile>" << std::endl;
-
 }

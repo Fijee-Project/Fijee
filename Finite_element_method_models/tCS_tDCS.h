@@ -72,7 +72,7 @@ namespace Solver
     //! Boundarie conditions
     boost::shared_ptr< MeshFunction< std::size_t > > boundaries_;
 
-  std::map< std::size_t, std::size_t > map_index_cell_;
+    // std::map< std::size_t, std::size_t > map_index_cell_;
 
     
   private:
@@ -112,7 +112,7 @@ namespace Solver
      *  Operator () of the class tCS_tDCS
      *
      */
-    void operator () ();
+    void operator ()();
     
   public:
     /*!
@@ -123,26 +123,16 @@ namespace Solver
     inline
       int get_number_of_physical_event(){return 1; };
     /*!
-     *  \brief function filter
+     *  \brief Solution domain extraction
      *
+     *  This method extract from the Function solution U the sub solution covering the sub-domains Sub_domains.
+     *  The result is a file with the name tDCS_{Sub_domains}.vtu
      *
-     */
-    void function_filter(const Function& u, Function& u_filtered, std::size_t );
-    /*!
-     *  \brief function filter
-     *
-     *
-     */
-    void output_filter(const Function& u, std::size_t );
-
-  private:
-    /*!
-     *  \brief 
-     *
+     *  \param U: Function solution of the Partial Differential Equation.
+     *  \param Sub_domains: array of sub-domain we want to extract from U.
      *
      */
-    void build_global_to_cell_dof(Global_dof_to_cell_dof&, const FunctionSpace& );
-
+    void solution_domain_extraction(const Function& , std::list<std::size_t>& );
   };
 }
 #endif

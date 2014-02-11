@@ -26,4 +26,4 @@ a  = inner( a_sigma * grad(u), grad(v) ) * dx
 
 
 # Linear form
-L  = I*v * ds(101)
+L  = I * v * ds(101)
