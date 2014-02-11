@@ -127,7 +127,7 @@ namespace Solver
      *  This method returns the intensity at the electrode.
      *
      */
-    double eval( const Array<double>& , const ufc::cell& )const;
+    double eval( const Point& , const ufc::cell& )const;
   };
   /*!
    *  \brief Dump values for Intensity

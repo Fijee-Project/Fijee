@@ -509,16 +509,15 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
   // Transcranial direct current stimulation equation //
   //////////////////////////////////////////////////////
       
-  std::cout << "**** 101 ****" << std::endl;
-  //  ElectrodesSurface electrodes_101( electrodes_, boundaries_, map_index_cell_ );
+
+  //
+  //
   Electrodes_surface electrodes_101( electrodes_, boundaries_, map_index_cell_ );
-  std::cout << "**** 101 ****" << std::endl;
   electrodes_101.mark(*boundaries_, 101);
+  electrodes_101.surface_vertices_per_electrodes();
+  //
   File tempo_101_file( "tempo_boundaries_101.pvd" );
   tempo_101_file << *boundaries_;
-//  std::cout << "**** 101 ****" << std::endl;
-  electrodes_101.surface_vertices_per_electrodes();
-  std::cout << "**** 101 ****" << std::endl;
 
   //
   //
@@ -552,12 +551,25 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
     = (SDEsp::get_instance())->get_linear_solver_();
   solver.parameters("krylov_solver")["maximum_iterations"] 
     = (SDEsp::get_instance())->get_maximum_iterations_();
-  solver.parameters("krylov_solver")["relative_tolerance"] = 1.e-8;
-//    = (SDEsp::get_instance())->get_relative_tolerance_();
+  solver.parameters("krylov_solver")["relative_tolerance"] 
+    = (SDEsp::get_instance())->get_relative_tolerance_();
   solver.parameters["preconditioner"] 
     = (SDEsp::get_instance())->get_preconditioner_();
   //
   solver.solve();
+
+  //
+  // Filter function over a subdomain
+//  Function uu(*V_);
+//  function_filter(u, uu, 5);
+//  //
+//  std::string file_brain_name = (SDEsp::get_instance())->get_files_path_result_() + 
+//    std::string("tDCS_brain.pvd");
+//  File file_brain( file_brain_name.c_str() );
+//  //
+//  file_brain << uu;
+
+  output_filter(u, 5);
 
 
 //  //
@@ -575,9 +587,266 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
   //  * XYZ    (.xyz)
   //  * VTK    (.pvd) // paraview
   std::string file_name = (SDEsp::get_instance())->get_files_path_result_() + 
-    //  source.get_name_() + std::string(".pvd");
     std::string("tDCS.pvd");
   File file( file_name.c_str() );
   //
   file << u;
 };
+//
+//
+//
+void
+Solver::tCS_tDCS::function_filter(const Function& u, Function& u_filtered, std::size_t Sub_domain)
+{
+  //
+  // Check that we don't have a sub-function
+  if(!u.function_space()->component().empty())
+    {
+      dolfin_error("XMLFunctionData.cpp",
+		   "write Function to XML file",
+		   "Cannot write sub-Functions (views) to XML files");
+    }
+
+  //
+  //
+  u_filtered = u;
+
+  //
+  //
+  std::vector<double> x;
+  dolfin_assert(u_filtered.vector());
+  if (MPI::num_processes() > 1)
+    u_filtered.vector()->gather_on_zero(x);
+  else
+    u_filtered.vector()->get_local(x);
+
+  //
+  // Get function space
+  dolfin_assert(u.function_space());
+  const FunctionSpace& V = *u.function_space();
+  
+  //
+  // Build map
+  Global_dof_to_cell_dof global_dof_to_cell_dof;
+  build_global_to_cell_dof(global_dof_to_cell_dof, V);
+
+  if ( MPI::process_number() == 0 )
+    {
+      // Add vector node
+      //    pugi::xml_node function_node = xml_node.append_child("function_data");
+      //    function_node.append_attribute("size") = (unsigned int) x.size();
+
+      // Add data
+      for (std::size_t i = 0; i < x.size(); ++i)
+	{
+	  dolfin_assert(i < global_dof_to_cell_dof.size());
+	  if ( (*domains_)[ global_dof_to_cell_dof[i][0].first ] != Sub_domain )
+	    x[i] = 0.;
+	  //      pugi::xml_node dof_node = function_node.append_child("dof");
+	  //      dof_node.append_attribute("index") = (unsigned int) i;
+	  //      dof_node.append_attribute("value")
+	  //        = boost::lexical_cast<std::string>(x[i]).c_str();
+	  //      dof_node.append_attribute("cell_index")
+	  //        = (unsigned int) global_dof_to_cell_dof[i][0].first;
+	  //      dof_node.append_attribute("cell_dof_index")
+	  //        = (unsigned int) global_dof_to_cell_dof[i][0].second;
+	}
+
+     //
+     u_filtered.vector()->set_local(x);
+    }
+}
+//
+//
+//
+void
+Solver::tCS_tDCS::build_global_to_cell_dof(Global_dof_to_cell_dof& G_dof_C_dof /*global_dof_to_cell_dof*/,
+					   const FunctionSpace& V)
+{
+  // Get mesh and dofmap
+  dolfin_assert(V.mesh());
+  dolfin_assert(V.dofmap());
+  const Mesh& mesh = *V.mesh();
+  const GenericDofMap& dofmap = *V.dofmap();
+
+  std::vector<std::vector<std::vector<dolfin::la_index > > > gathered_dofmap;
+  std::vector<std::vector<dolfin::la_index > > local_dofmap(mesh.num_cells());
+
+  if (MPI::num_processes() > 1)
+    {
+      // Check that local-to-global cell numbering is available
+      const std::size_t D = mesh.topology().dim();
+      dolfin_assert(mesh.topology().have_global_indices(D));
+
+      // Build dof map data with global cell indices
+      for (CellIterator cell(mesh); !cell.end(); ++cell)
+	{
+	  const std::size_t local_cell_index = cell->index();
+	  const std::size_t global_cell_index = cell->global_index();
+	  local_dofmap[local_cell_index] = dofmap.cell_dofs(local_cell_index);
+	  local_dofmap[local_cell_index].push_back(global_cell_index);
+	}
+    }
+  else
+    {
+      // Build dof map data
+      for (CellIterator cell(mesh); !cell.end(); ++cell)
+	{
+	  const std::size_t local_cell_index = cell->index();
+	  local_dofmap[local_cell_index] = dofmap.cell_dofs(local_cell_index);
+	  local_dofmap[local_cell_index].push_back(local_cell_index);
+	}
+    }
+
+  // Gather dof map data on root process
+  MPI::gather(local_dofmap, gathered_dofmap);
+
+  // Build global dof - (global cell, local dof) map on root process
+  if (MPI::process_number() == 0)
+    {
+      G_dof_C_dof.resize(dofmap.global_dimension());
+      
+      std::vector<std::vector<std::vector<dolfin::la_index>
+			      > > ::const_iterator proc_dofmap;
+      for (proc_dofmap = gathered_dofmap.begin();
+	   proc_dofmap != gathered_dofmap.end(); ++proc_dofmap)
+	{
+	  std::vector<std::vector<dolfin::la_index> >::const_iterator cell_dofmap;
+	  for (cell_dofmap = proc_dofmap->begin();
+	       cell_dofmap != proc_dofmap->end(); ++cell_dofmap)
+	    {
+	      const std::vector<dolfin::la_index>& cell_dofs = *cell_dofmap;
+	      const std::size_t global_cell_index = cell_dofs.back();
+	      for (std::size_t i = 0; i < cell_dofs.size() - 1; ++i)
+		G_dof_C_dof[cell_dofs[i]].push_back(std::make_pair(global_cell_index, i));
+	    }
+	}
+    }
+}
+//
+//
+//
+void
+Solver::tCS_tDCS::output_filter(const Function& u, std::size_t Sub_domain)
+{
+  // 
+  const std::size_t num_vertices = mesh_->num_vertices();
+  
+  // Get number of components
+  const std::size_t dim = u.value_size();
+  
+  // Open file
+  std::ofstream VTU_xml_file("test.vtu");
+  VTU_xml_file.precision(16);
+
+  // Allocate memory for function values at vertices
+  const std::size_t size = num_vertices * dim; // dim = 1
+  std::vector<double> values(size);
+  u.compute_vertex_values(values, *mesh_);
+ 
+  //
+  //
+  std::vector<int> V(num_vertices, -1);
+
+
+  //
+  //
+  int 
+    num_tetrahedra = 0,
+    offset = 0,
+    inum = 0;
+  //
+  std::string 
+    vertices_position_string,
+    vertices_associated_to_tetra_string,
+    offsets_string,
+    cells_type_string,
+    point_data;
+  //
+  for ( CellIterator cell(*mesh_) ; !cell.end() ; ++cell )
+    {
+      if ( (*domains_)[cell->index()] == Sub_domain )
+	{
+//	  std::cout << "cut: " << cut << " - cell: " << cell->index() << std::endl;
+	  //
+	  //  vertex id
+	  for ( VertexIterator vertex(*cell) ; !vertex.end() ; ++vertex )
+	    {
+	      if( V[ vertex->index() ] == -1 )
+		{
+		  //
+		  V[ vertex->index() ] = inum++;
+		  vertices_position_string += 
+		    std::to_string( vertex->point().x() ) + " " + 
+		    std::to_string( vertex->point().y() ) + " " +
+		    std::to_string( vertex->point().z() ) + " " ;
+		  point_data += std::to_string( values[vertex->index()] ) + " ";
+		  std::cout << "vertex: " << vertex->index() 
+			    << " inum: " << inum 
+			    << " = V[ vertex->index() ] + 1: " << V[ vertex->index() ]
+			    << " values[vertex->index()]: " << values[vertex->index()]
+			    << std::endl;
+		}
+
+	      //
+	      // Volume associated
+	      vertices_associated_to_tetra_string += 
+		std::to_string( V[vertex->index()] ) + " " ;
+	    }
+      
+	  //
+	  // Offset for each volumes
+	  offset += 4;
+	  offsets_string += std::to_string( offset ) + " ";
+	  //
+	  cells_type_string += "10 ";
+	  //
+	  num_tetrahedra++;
+	}
+    }
+
+  //
+  // header
+  VTU_xml_file << "<?xml version=\"1.0\"?>" << std::endl;
+  VTU_xml_file << "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">" << std::endl;
+  VTU_xml_file << "  <UnstructuredGrid>" << std::endl;
+
+  // 
+  // vertices and values
+  VTU_xml_file << "    <Piece NumberOfPoints=\"" << inum
+	       << "\" NumberOfCells=\"" << num_tetrahedra << "\">" << std::endl;
+  VTU_xml_file << "      <Points>" << std::endl;
+  VTU_xml_file << "        <DataArray type = \"Float32\" NumberOfComponents=\"3\" format=\"ascii\">" << std::endl;
+  VTU_xml_file << vertices_position_string << std::endl;
+  VTU_xml_file << "        </DataArray>" << std::endl;
+  VTU_xml_file << "      </Points>" << std::endl;
+  
+  //
+  // Point data
+  VTU_xml_file << "      <PointData Scalars=\"scalars\">" << std::endl;
+  VTU_xml_file << "        <DataArray type=\"Float32\" Name=\"scalars\" format=\"ascii\">" << std::endl; 
+  VTU_xml_file << point_data << std::endl; 
+  VTU_xml_file << "         </DataArray>" << std::endl; 
+  VTU_xml_file << "      </PointData>" << std::endl; 
+ 
+  //
+  // Tetrahedra
+  VTU_xml_file << "      <Cells>" << std::endl;
+  VTU_xml_file << "        <DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">" << std::endl;
+  VTU_xml_file << vertices_associated_to_tetra_string << std::endl;
+  VTU_xml_file << "        </DataArray>" << std::endl;
+  VTU_xml_file << "        <DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">" << std::endl;
+  VTU_xml_file << offsets_string << std::endl;
+  VTU_xml_file << "        </DataArray>" << std::endl;
+  VTU_xml_file << "        <DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\">" << std::endl;
+  VTU_xml_file << cells_type_string << std::endl;
+  VTU_xml_file << "        </DataArray>" << std::endl;
+  VTU_xml_file << "      </Cells>" << std::endl;
+  VTU_xml_file << "    </Piece>" << std::endl;
+
+  //
+  // Tail
+  VTU_xml_file << "  </UnstructuredGrid>" << std::endl;
+  VTU_xml_file << "</VTKFile>" << std::endl;
+
+}

@@ -30,7 +30,9 @@
 //
 //
 //
-//using namespace dolfin;
+typedef std::vector<std::vector<std::pair<dolfin::la_index, dolfin::la_index> > > Global_dof_to_cell_dof;
+//
+//
 //
 /*!
  * \file tCS_tDCS.h
@@ -114,9 +116,33 @@ namespace Solver
     
   public:
     /*!
+     *  \brief number of physical event
+     *
+     *
      */
     inline
       int get_number_of_physical_event(){return 1; };
+    /*!
+     *  \brief function filter
+     *
+     *
+     */
+    void function_filter(const Function& u, Function& u_filtered, std::size_t );
+    /*!
+     *  \brief function filter
+     *
+     *
+     */
+    void output_filter(const Function& u, std::size_t );
+
+  private:
+    /*!
+     *  \brief 
+     *
+     *
+     */
+    void build_global_to_cell_dof(Global_dof_to_cell_dof&, const FunctionSpace& );
+
   };
 }
 #endif

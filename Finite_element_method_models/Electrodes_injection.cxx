@@ -23,20 +23,17 @@ Solver::Electrodes_injection::eval(Array<double>& values, const Array<double>& x
 {
 
   Point vertex( x[0], x[1], x[2] );
-  std::cout << vertex << std::endl;
-  //  std::cout << "##############################" << std::endl;
-  //  std::cout << "Cell index: " << cell.index << std::endl;
-  //  std::cout << "x: " << x[0] << " ; y: " << x[1] << " ; z: " << x[2] << std::endl;
+//  std::cout << vertex << std::endl;
 
   //
   // Copy the value
   double tempo_val = 0.;
+  // go through all electrodes and check if we have a value.
   for ( int intensity = 0 ; intensity < electrodes_vector_.size() ; intensity++ )
-    {
-      tempo_val += electrodes_vector_[intensity].eval( x, cell );
-      //      if (tempo_val != 0.)
-      //	std::cout << "####################### " << tempo_val << std::endl;;
-    }
+    tempo_val += electrodes_vector_[intensity].eval( vertex, cell );
+
+  //
+  //
   values[0] = tempo_val;
 }
 //

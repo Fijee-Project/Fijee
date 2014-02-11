@@ -45,8 +45,8 @@ main()
   //   - Domains::Spheres_labeled_domain 
   //   - Domains::Spheres_conductivity_tensor
   //   - Domains::Build_mesh
-  Domains::Mesh_generator< Domains::Spheres_labeled_domain, 
-			   Domains::Spheres_conductivity_tensor,
+  Domains::Mesh_generator< Domains::Head_labeled_domain, 
+			   Domains::Head_conductivity_tensor,
 			   Domains::Build_mesh > generator;
   //
   generator.make_inrimage();

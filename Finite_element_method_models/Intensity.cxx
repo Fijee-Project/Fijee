@@ -42,13 +42,11 @@ Solver::Intensity::Intensity( std::string Electric_variable, int Index,
 //
 //
 double 
-Solver::Intensity::eval( const Array<double>& x, const ufc::cell& cell) const
+Solver::Intensity::eval( const Point& x, const ufc::cell& cell) const
 {
-  Point mid_point(x[0], x[1], x[2]);
-
   if( I_ != 0 )
     {
-      if ( r0_values_.squared_distance(mid_point) < 5 * 5  /*&& not_yet_*/ )
+      if ( r0_values_.squared_distance( x ) < 5 * 5 + 3.  /*&& not_yet_*/ )
 	{
 //	  std::cout << "##############################" << std::endl;
 //	  std::cout << mid_point << " electric_var: " << electric_variable_ << " label: " << label_ << std::endl;
