@@ -41,12 +41,12 @@ namespace Solver
     boost::shared_ptr< MeshFunction< std::size_t > > boundaries_;
     //! 
     mutable std::list< std::tuple< 
-    std::string, // electrode label
-      Point,        // vertex (can't take vertex directly: no operator =)
-      std::size_t,  // vertex index (mesh)
-      std::size_t,  // cell index (tetrahedron)
-      bool,         // vertex: true ; midpoint: false
-      bool>         // criteria satisfaction
+    std::string,    // 0 - electrode label
+      Point,        // 1 - vertex (can't take vertex directly: no operator =)
+      std::size_t,  // 2 - vertex index (mesh)
+      std::size_t,  // 3 - cell index (tetrahedron)
+      bool,         // 4 - vertex: true ; midpoint: false
+      bool>         // 5 - criteria satisfaction
       > list_vertices_;
   
   
@@ -77,9 +77,9 @@ namespace Solver
 
   public:
     /*!
-     *  \brief 
+     *  \brief Surface vertices per electrodes
      *
-     * 
+     *  This method tracks the cells on the boundaries. For each electrodes_ it provides subdomain boundary information. 
      *
      */
     void surface_vertices_per_electrodes();
@@ -88,7 +88,12 @@ namespace Solver
     /*!
      *  \brief 
      *
-     * 
+     *  This method return true for points (Array) inside the subdomain.
+     *
+     * \param x (_Array_ <double>): The coordinates of the point.
+     * \param on_boundary: True if x is on the boundary
+     *
+     * \return True for points inside the subdomain.
      *
      */
     virtual bool inside(const Array<double>& , bool ) const;

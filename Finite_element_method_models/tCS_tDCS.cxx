@@ -514,9 +514,9 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
 
 
 
-  //
-  // PDE boundary conditions
-  DirichletBC bc(*V_, *(electrodes_->get_potential()), *boundaries_, 101);
+//  //
+//  // PDE boundary conditions
+//  DirichletBC bc(*V_, *(electrodes_->get_potential()), *boundaries_, 101);
 
   //
   // Define variational forms
@@ -532,13 +532,13 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
   
   // Linear
   L.I  = *(electrodes_->get_current());
-  L.ds = *boundaries_;
+  //  L.ds = *boundaries_;
   // L.Se = Se;
 
   //
   // Compute solution
   Function u(*V_);
-  LinearVariationalProblem problem(a, L, u, bc);
+  LinearVariationalProblem problem(a, L, u/*, bc*/);
   LinearVariationalSolver  solver(problem);
   // krylov
   solver.parameters["linear_solver"]  
@@ -551,6 +551,35 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
     = (SDEsp::get_instance())->get_preconditioner_();
   //
   solver.solve();
+
+ //
+ // Regulation terme
+ //  \int u dx = 0
+ double old_u_bar = 0.;
+ double u_bar = 1.e+6;
+ double U_bar = 0.;
+ double N = u.vector()->size();
+ int iteration = 0;
+ double Sum = 1.e+6;
+ //
+ //  while ( abs( u_bar - old_u_bar ) > 0.1 )
+ while ( abs(Sum) > 1.e-3 )
+   {
+     old_u_bar = u_bar;
+     u_bar  = u.vector()->sum();
+     u_bar /= N;
+     (*u.vector()) -= u_bar;
+     //
+     U_bar += u_bar;
+     Sum = u.vector()->sum();
+     std::cout << ++iteration << " ~ " << Sum  << std::endl;
+   }
+ 
+ std::cout << "int u dx = " << Sum << " " << U_bar << std::endl;
+  
+//  std::list<std::size_t> test;
+//  regulation_factor(u, test);
+
 
   //
   // Filter function over a subdomain
@@ -643,11 +672,160 @@ Solver::tCS_tDCS::solution_domain_extraction(const Function& u, std::list<std::s
 		    std::to_string( vertex->point().y() ) + " " +
 		    std::to_string( vertex->point().z() ) + " " ;
 		  point_data += std::to_string( values[vertex->index()] ) + " ";
-		  std::cout << "vertex: " << vertex->index() 
-			    << " inum: " << inum 
-			    << " = V[ vertex->index() ] + 1: " << V[ vertex->index() ]
-			    << " values[vertex->index()]: " << values[vertex->index()]
-			    << std::endl;
+		}
+
+	      //
+	      // Volume associated
+	      vertices_associated_to_tetra_string += 
+		std::to_string( V[vertex->index()] ) + " " ;
+	    }
+      
+	  //
+	  // Offset for each volumes
+	  offset += 4;
+	  offsets_string += std::to_string( offset ) + " ";
+	  //
+	  cells_type_string += "10 ";
+	  //
+	  num_tetrahedra++;
+	}
+
+  //
+  // header
+  VTU_xml_file << "<?xml version=\"1.0\"?>" << std::endl;
+  VTU_xml_file << "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">" << std::endl;
+  VTU_xml_file << "  <UnstructuredGrid>" << std::endl;
+
+  // 
+  // vertices and values
+  VTU_xml_file << "    <Piece NumberOfPoints=\"" << inum
+	       << "\" NumberOfCells=\"" << num_tetrahedra << "\">" << std::endl;
+  VTU_xml_file << "      <Points>" << std::endl;
+  VTU_xml_file << "        <DataArray type = \"Float32\" NumberOfComponents=\"3\" format=\"ascii\">" << std::endl;
+  VTU_xml_file << vertices_position_string << std::endl;
+  VTU_xml_file << "        </DataArray>" << std::endl;
+  VTU_xml_file << "      </Points>" << std::endl;
+  
+  //
+  // Point data
+  VTU_xml_file << "      <PointData Scalars=\"scalars\">" << std::endl;
+  VTU_xml_file << "        <DataArray type=\"Float32\" Name=\"scalars\" format=\"ascii\">" << std::endl; 
+  VTU_xml_file << point_data << std::endl; 
+  VTU_xml_file << "         </DataArray>" << std::endl; 
+  VTU_xml_file << "      </PointData>" << std::endl; 
+ 
+  //
+  // Tetrahedra
+  VTU_xml_file << "      <Cells>" << std::endl;
+  VTU_xml_file << "        <DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">" << std::endl;
+  VTU_xml_file << vertices_associated_to_tetra_string << std::endl;
+  VTU_xml_file << "        </DataArray>" << std::endl;
+  VTU_xml_file << "        <DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">" << std::endl;
+  VTU_xml_file << offsets_string << std::endl;
+  VTU_xml_file << "        </DataArray>" << std::endl;
+  VTU_xml_file << "        <DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\">" << std::endl;
+  VTU_xml_file << cells_type_string << std::endl;
+  VTU_xml_file << "        </DataArray>" << std::endl;
+  VTU_xml_file << "      </Cells>" << std::endl;
+  VTU_xml_file << "    </Piece>" << std::endl;
+
+  //
+  // Tail
+  VTU_xml_file << "  </UnstructuredGrid>" << std::endl;
+  VTU_xml_file << "</VTKFile>" << std::endl;
+}
+//
+//
+//
+void
+Solver::tCS_tDCS::regulation_factor(const Function& u, std::list<std::size_t>& Sub_domains)
+{
+  // 
+  const std::size_t num_vertices = mesh_->num_vertices();
+  
+  // Get number of components
+  const std::size_t dim = u.value_size();
+  
+  // Open file
+  std::string sub_dom("tDCS");
+  for ( auto sub : Sub_domains )
+    sub_dom += std::string("_") + std::to_string(sub);
+  sub_dom += std::string("_bis.vtu");
+  //
+  std::string extracted_solution = (SDEsp::get_instance())->get_files_path_result_();
+  extracted_solution            += sub_dom;
+  //
+  std::ofstream VTU_xml_file(extracted_solution);
+  VTU_xml_file.precision(16);
+
+  // Allocate memory for function values at vertices
+  const std::size_t size = num_vertices * dim; // dim = 1
+  std::vector<double> values(size);
+  u.compute_vertex_values(values, *mesh_);
+ 
+  //
+  // 
+  std::vector<int> V(num_vertices, -1);
+
+  //
+  // int u dx = 0
+  double old_u_bar = 0.;
+  double u_bar = 1.e+6;
+  double U_bar = 0.;
+  double N = size;
+  int iteration = 0;
+  double Sum = 1.e+6;
+  //
+  //  while ( abs( u_bar - old_u_bar ) > 0.1 )
+  while ( abs(Sum) > .01 || abs((old_u_bar - u_bar) / old_u_bar) > 1. /* % */ )
+    {
+      old_u_bar = u_bar;
+      u_bar = 0.;
+      for ( double val : values ) u_bar += val;
+      u_bar /= N;
+      std::for_each(values.begin(), values.end(), [&u_bar](double& val){val -= u_bar;});
+      //
+      U_bar += u_bar;
+      Sum = 0;
+      for ( double val : values ) Sum += val;
+      std::cout << ++iteration << " ~ " << Sum  << " ~ " << u_bar << std::endl;
+    }
+
+  std::cout << "int u dx = " << Sum << " " << U_bar << std::endl;
+  std::cout << "Size = " << Sub_domains.size()  << std::endl;
+ 
+
+  //
+  //
+  int 
+    num_tetrahedra = 0,
+    offset = 0,
+    inum = 0;
+  //
+  std::string 
+    vertices_position_string,
+    vertices_associated_to_tetra_string,
+    offsets_string,
+    cells_type_string,
+    point_data;
+  // loop over mesh cells
+  for ( CellIterator cell(*mesh_) ; !cell.end() ; ++cell )
+    // loop over extraction sub-domains
+//    for( auto sub_domain : Sub_domains ) 
+//     if ( (*domains_)[cell->index()] == sub_domain || Sub_domains.size() == 0 )
+	{
+	  //  vertex id
+	  for ( VertexIterator vertex(*cell) ; !vertex.end() ; ++vertex )
+	    {
+	      if( V[ vertex->index() ] == -1 )
+		{
+		  //
+		  V[ vertex->index() ] = inum++;
+		  vertices_position_string += 
+		    std::to_string( vertex->point().x() ) + " " + 
+		    std::to_string( vertex->point().y() ) + " " +
+		    std::to_string( vertex->point().z() ) + " " ;
+		  point_data += std::to_string( values[vertex->index()] ) + " ";
 		}
 
 	      //

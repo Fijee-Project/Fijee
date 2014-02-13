@@ -24,19 +24,20 @@ Solver::Intensity::Intensity(const Intensity& that):
   r0_values_(that.r0_values_), e_values_(that.e_values_),
   impedance_(that.impedance_), surface_(that.surface_), radius_(that.radius_)
 {
-
   not_yet_ = true;
+  boundary_cells_ = that.boundary_cells_;
 }
 //
 //
 //
 Solver::Intensity::Intensity( std::string Electric_variable, int Index, 
-					      std::string Label, double Intensity,
-					      Point X, Point V,double Re_z_l, double Im_z_l,
-					      double Surface, double Radius): 
+			      std::string Label, double Intensity,
+			      Point X, Point V,double Re_z_l, double Im_z_l,
+			      double Surface, double Radius): 
   electric_variable_(Electric_variable), index_( Index ), label_( Label ), I_( Intensity ), 
   r0_values_(X), e_values_(V), impedance_( (Re_z_l,Im_z_l) ), surface_(Surface), radius_(Radius) 
 {
+  not_yet_ = true;
 }
 //
 //
@@ -46,11 +47,15 @@ Solver::Intensity::eval( const Point& x, const ufc::cell& cell) const
 {
   if( I_ != 0 )
     {
-      if ( r0_values_.squared_distance( x ) < 5 * 5 + 3.  /*&& not_yet_*/ )
+      //
+      auto boundary_cells_it = boundary_cells_.find( cell.index );
+      //
+      //      if ( r0_values_.squared_distance( x ) < 5 * 5 + 3.  /*&& not_yet_*/ )
+      if ( boundary_cells_it !=  boundary_cells_.end() /*&& not_yet_*/ )
 	{
 //	  std::cout << "##############################" << std::endl;
 //	  std::cout << mid_point << " electric_var: " << electric_variable_ << " label: " << label_ << std::endl;
-	  //	  not_yet_ = false;
+	  not_yet_ = false;
 	  return I_;
 	}
       else
@@ -78,6 +83,10 @@ Solver::Intensity::operator =( const Intensity& that )
   //
   surface_   = that.get_surface_();
   radius_    = that.get_radius_();
+  //
+  boundary_cells_ = that.boundary_cells_;
+  not_yet_ = that.not_yet_;
+
   
   //
   //

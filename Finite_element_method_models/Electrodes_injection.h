@@ -35,7 +35,7 @@ namespace Solver
   class Electrodes_injection : public Expression
   {
     //! Electrodes list
-    std::vector< Solver::Intensity > electrodes_vector_;
+    std::map< std::string, Solver::Intensity > electrodes_map_;
 
   public:
     /*!
@@ -126,6 +126,13 @@ namespace Solver
      *
      */
     std::tuple<std::string, bool> inside_probe( const Point&  )const;
+    /*!
+     *  \brief 
+     *
+     *  
+     *
+     */
+    void set_boundary_cells( const std::map< std::string, std::set< std::size_t > >& ) const;
   };
   /*!
    *  \brief Dump values for Electrodes_injection

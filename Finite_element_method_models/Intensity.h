@@ -30,12 +30,13 @@ namespace Solver
   class Intensity// : public Expression
   {
   private:
+    //
+    // Physical properties
+    //
     //! Electric variable
     std::string electric_variable_;
     //! Electrode index
     int index_;
-//    //! Cell index where the electrode is located
-//    int index_cell_;
     //! Electrode position
     Point r0_values_;  
     //! Electrode direction vector
@@ -51,6 +52,12 @@ namespace Solver
     //! Contact suface radius between the electrode and the scalp
     double radius_;
 
+    //
+    // Geometry propterties
+    //
+    //! Set of boundaries mesh cells
+    mutable std::set<std::size_t> boundary_cells_;
+    //!
     mutable bool not_yet_;
     
 
@@ -95,8 +102,10 @@ namespace Solver
     Intensity& operator =( const Intensity& );
 
   public:
+    //
+    // Physical properties
+    //
     int    get_index_()const{return index_;};
-//    int    get_index_cell_()const{return index_cell_;};
     double get_I_()const{return I_;};
     //
     Point  get_r0_values_()const{return r0_values_;};
@@ -118,7 +127,11 @@ namespace Solver
     double get_surface_()const{return surface_;};
     double get_radius_()const{return radius_;};
     
-    void add_hit(){};
+    //
+    // Geometry propterties
+    //
+    void set_boundary_cells_(const std::set<std::size_t>& Boundary_cells)const{ boundary_cells_ = Boundary_cells;};
+    const std::set<std::size_t>& get_boundary_cells_()const{ return boundary_cells_;};
 
   public:
     /*!

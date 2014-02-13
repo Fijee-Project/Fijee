@@ -108,3 +108,12 @@ Solver::Electrodes_setup::inside_probe( const Point& Vertex ) const
 {
   return current_injection_->inside_probe(Vertex);
 }
+//
+//
+//
+void
+Solver::Electrodes_setup::set_boundary_cells( const std::map< std::string, std::set< std::size_t > >& Map_electrode_cell  ) const
+{
+  current_injection_->set_boundary_cells( Map_electrode_cell );
+  potential_injection_->set_boundary_cells( Map_electrode_cell );
+}

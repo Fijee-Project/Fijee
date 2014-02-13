@@ -108,6 +108,13 @@ namespace Solver
      *
      */
     std::tuple<std::string, bool> inside_probe( const Point& ) const;
-  };
+     /*!
+     *  \brief 
+     *
+     *  
+     *
+     */
+    void set_boundary_cells( const std::map< std::string, std::set< std::size_t > >& ) const;
+ };
 }
 #endif

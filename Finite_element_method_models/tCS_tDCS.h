@@ -133,6 +133,17 @@ namespace Solver
      *
      */
     void solution_domain_extraction(const Function& , std::list<std::size_t>& );
+    /*!
+     *  \brief Solution domain extraction
+     *
+     *  This method extract from the Function solution U the sub solution covering the sub-domains Sub_domains.
+     *  The result is a file with the name tDCS_{Sub_domains}.vtu
+     *
+     *  \param U: Function solution of the Partial Differential Equation.
+     *  \param Sub_domains: array of sub-domain we want to extract from U.
+     *
+     */
+    void regulation_factor(const Function& , std::list<std::size_t>& );
   };
 }
 #endif
