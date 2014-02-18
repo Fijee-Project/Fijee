@@ -12,6 +12,7 @@
 #include <dolfin.h>
 // transcranial current stimulation
 #include "tCS_model.h"
+#include "tCS_field_model.h"
 //
 // pugixml
 // same resources than Dolfin
@@ -67,6 +68,8 @@ namespace Solver
     boost::shared_ptr< Solver::Tensor_conductivity > sigma_;
     //! Function space
     boost::shared_ptr< tCS_model::FunctionSpace > V_;
+    //! Function space
+    boost::shared_ptr< tCS_field_model::FunctionSpace > V_field_;
     //! Periphery
     boost::shared_ptr< Periphery > perifery_;
     //! Boundarie conditions

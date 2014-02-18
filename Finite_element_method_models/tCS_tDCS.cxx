@@ -394,6 +394,7 @@ Solver::tCS_tDCS::tCS_tDCS()
   //
   // Define the function space
   V_.reset( new tCS_model::FunctionSpace(mesh_) );
+  V_field_.reset( new tCS_field_model::FunctionSpace(mesh_) );
 
   //
   // Read the electrodes xml file
@@ -552,6 +553,9 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
   //
   solver.solve();
 
+
+
+
  //
  // Regulation terme
  //  \int u dx = 0
@@ -582,6 +586,43 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
 
 
   //
+  // Define variational forms
+  tCS_field_model::BilinearForm a_field(V_field_, V_field_);
+  tCS_field_model::LinearForm L_field(V_field_);
+//      
+//  //
+//  // Anisotropy
+//  // Bilinear
+//  //  a.a_sigma  = *sigma_;
+//  // a.dx       = *domains_;
+//  
+//  
+//  // Linear
+  L_field.u       = u;
+  L_field.a_sigma = *sigma_;
+//  //  L.ds = *boundaries_;
+//  // L.Se = Se;
+//
+//  //
+  // Compute solution
+  Function J(*V_field_);
+  LinearVariationalProblem problem_field(a_field, L_field, J/*, bc*/);
+  LinearVariationalSolver  solver_field(problem_field);
+  // krylov
+  solver_field.parameters["linear_solver"]  
+    = (SDEsp::get_instance())->get_linear_solver_();
+  solver_field.parameters("krylov_solver")["maximum_iterations"] 
+    = (SDEsp::get_instance())->get_maximum_iterations_();
+  solver_field.parameters("krylov_solver")["relative_tolerance"] 
+    = (SDEsp::get_instance())->get_relative_tolerance_();
+  solver_field.parameters["preconditioner"] 
+    = (SDEsp::get_instance())->get_preconditioner_();
+  //
+  solver_field.solve();
+
+
+
+  //
   // Filter function over a subdomain
   std::list<std::size_t> sub_domains{4,5};
   solution_domain_extraction(u, sub_domains);
@@ -606,6 +647,12 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
   File file( file_name.c_str() );
   //
   file << u;
+  //
+  std::string field_name = (SDEsp::get_instance())->get_files_path_result_() + 
+    std::string("tDCS_field.pvd");
+  File field( field_name.c_str() );
+  //
+  field << J;
 };
 //
 //

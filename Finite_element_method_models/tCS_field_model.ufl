@@ -1,0 +1,30 @@
+## transcranial current stimulation (tCS)
+## tDCS
+## tACS
+## Current density field
+
+cell          = tetrahedron
+scalarElement = FiniteElement("Lagrange", cell, 1)
+vectorElement = VectorElement("Lagrange", cell, 1)
+tensorElement = TensorElement("Lagrange", cell, 1)
+
+#
+# Function definition
+#
+J = TrialFunction(vectorElement)
+w = TestFunction(vectorElement)
+
+a_sigma = Coefficient(tensorElement)
+u       = Coefficient(scalarElement) 
+
+
+#
+# Weak variational form
+#
+
+# Bilinear form
+a = inner(J, w) * dx
+
+# Linear form
+L = -inner(  a_sigma * grad(u), w ) * dx
+
