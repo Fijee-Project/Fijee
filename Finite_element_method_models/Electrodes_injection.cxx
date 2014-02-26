@@ -29,14 +29,11 @@ Solver::Electrodes_injection::eval(Array<double>& values, const Array<double>& x
   //
   //
   double tempo_val = 0.;
-//  // go through all electrodes and check if we have a value.
-//  for ( int intensity = 0 ; intensity < electrodes_vector_.size() ; intensity++ )
-//    tempo_val += electrodes_vector_[intensity].eval( vertex, cell );
   // go through all electrodes and check if we have a value.
   for ( auto intensity = electrodes_map_.begin() ; intensity != electrodes_map_.end() ; intensity++ )
-//  for ( auto intensity : electrodes_map_ )
     tempo_val += ( intensity->second ).eval( vertex, cell );
 
+  std::cout << "Electrodes_inj eval return: " << tempo_val << std::endl;
   //
   //
   values[0] = tempo_val;
@@ -106,13 +103,6 @@ Solver::Electrodes_injection::inside( const Point& Vertex ) const
   //
   //
   bool inside_electrode = false;
-//  //
-//  for( auto electrode : electrodes_vector_ )
-//    if ( electrode.get_I_() != 0. )
-//      if( electrode.get_r0_values_().distance(Vertex) < electrode.get_radius_() + 3. /* mm */ )
-//	{
-//	  inside_electrode = true;
-//	}
   //
   for( auto electrode : electrodes_map_ )
     if ( (electrode.second).get_I_() != 0. )
@@ -135,14 +125,6 @@ Solver::Electrodes_injection::inside_probe( const Point& Vertex ) const
   //
   bool inside_electrode = false;
   std::string label;
-//  //
-//  for( auto electrode : electrodes_vector_ )
-//    if ( electrode.get_I_() != 0. )
-//      if( electrode.get_r0_values_().distance(Vertex) < electrode.get_radius_() + 3. /* mm */ )
-//	{
-//	  inside_electrode = true;
-//	  label =  electrode.get_label_();
-//	}
   //
   for( auto electrode : electrodes_map_ )
     if ( (electrode.second).get_I_() != 0. )
@@ -160,10 +142,10 @@ Solver::Electrodes_injection::inside_probe( const Point& Vertex ) const
 //
 //
 void
-Solver::Electrodes_injection::set_boundary_cells( const std::map< std::string, std::set< std::size_t > >& Map_electrode_cell  ) const
+Solver::Electrodes_injection::set_boundary_cells( const std::map< std::string, std::map< std::size_t, std::list< MeshEntity  >  >  >& Map_electrode_cells  )
 {
   //
-  for ( auto electrode = Map_electrode_cell.begin() ;  electrode != Map_electrode_cell.end() ; electrode++ )
+  for ( auto electrode = Map_electrode_cells.begin() ;  electrode != Map_electrode_cells.end() ; electrode++ )
     {
       //
       auto electrode_it = electrodes_map_.find( electrode->first );
@@ -171,6 +153,24 @@ Solver::Electrodes_injection::set_boundary_cells( const std::map< std::string, s
       if( electrode_it != electrodes_map_.end() )
 	{
 	  (electrode_it->second).set_boundary_cells_(electrode->second);
+	}
+    }
+}
+//
+//
+//
+void
+Solver::Electrodes_injection::set_boundary_vertices( const std::map< std::string, std::set< std::size_t > >& Map_electrode_vertices  )
+{
+  //
+  for ( auto electrode = Map_electrode_vertices.begin() ;  electrode != Map_electrode_vertices.end() ; electrode++ )
+    {
+      //
+      auto electrode_it = electrodes_map_.find( electrode->first );
+      //
+      if( electrode_it != electrodes_map_.end() )
+	{
+	  (electrode_it->second).set_boundary_vertices_(electrode->second);
 	}
     }
 }

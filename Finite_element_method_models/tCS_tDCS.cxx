@@ -3,359 +3,6 @@
 
 typedef Solver::PDE_solver_parameters SDEsp;
 
-//#include <tuple>        // std::tuple, std::get, std::tie, std::ignore
-//class ElectrodesSurface : public SubDomain
-//{
-//private:
-//  //!
-//  boost::shared_ptr< Solver::Electrodes_setup > electrodes_;
-//  boost::shared_ptr< MeshFunction< std::size_t > > boundaries_;
-//  std::list<Point> list_electrode_surface_;
-////  mutable std::list< std::tuple< Point,        // vertex (can't take vertex directly: no operator =)
-////				 std::size_t,  // vertex id (mesh 2D)
-////				 std::size_t,  // cell id (facet)
-////				 bool,         // vertex: true ; midpoint: false
-////				 bool,         // satisfaction criteria
-////				 std::string > // electrode label
-////		     > list_facet_vertex_;
-//  mutable std::map< std::string, std::tuple< std::string, // electrode label
-//				             Point,        // vertex (can't take vertex directly: no operator =)
-//					     std::size_t,  // vertex index (mesh)
-//					     std::size_t,  // cell index (tetrahedron)
-//					     bool,         // vertex: true ; midpoint: false
-//					     bool>         // criteria satisfaction
-//		    > map_vertices_;
-//  mutable std::list< std::tuple< std::string, // electrode label
-//				 Point,        // vertex (can't take vertex directly: no operator =)
-//				 std::size_t,  // vertex index (mesh)
-//				 std::size_t,  // cell index (tetrahedron)
-//				 bool,         // vertex: true ; midpoint: false
-//				 bool>         // criteria satisfaction
-//		    > list_vertices_;
-//
-//public:
-//  ElectrodesSurface():SubDomain(){};
-//  ElectrodesSurface( const boost::shared_ptr< Solver::Electrodes_setup > Electrodes,
-//		     const boost::shared_ptr< MeshFunction< std::size_t > > Boundaries,
-//		     const std::map< std::size_t, std::size_t >& Map_Index_Cell ):
-//    SubDomain(),
-//    electrodes_(Electrodes), boundaries_(Boundaries)
-//  {
-//    // 
-//    //
-////    for( SubsetIterator facet(*Boundaries,  100) ; !facet.end() ; ++facet )
-////      {
-//////	std::cout /*<< facet->mesh_id() << " " */
-//////		  << facet->index() << " " 
-//////		  << (*Boundaries)[*facet] << " " 
-//////	  /*<< facet->midpoint() << " " 
-//////	    << facet->midpoint().norm() */<< std::endl;
-//////
-//////	int num_vertices = 0;
-//////	for (VertexIterator v(*facet); !v.end(); ++v)
-//////	  {
-//////	    std::cout << "vertex " << num_vertices++ << ": " << v->point() << std::endl;
-//////	  }
-////	list_electrode_surface_.push_back( facet->midpoint() );
-////
-////	
-////	int num_vertices = 0;
-////	
-////	if ( electrodes_->inside(facet->midpoint()) )
-////	  {
-////	    
-//////	    map_vertices_[std::to_string( facet->midpoint().dot(facet->midpoint()) )] = 
-//////	      std::make_tuple ( facet->midpoint(), 
-//////				facet->index(),
-//////				0,
-//////				false);
-////	    list_facet_vertex_.push_back( std::make_tuple ( facet->midpoint(),
-////							    0,
-////							    facet->index(),
-////							    false,
-////							    false,
-////							    "") );
-////	    
-////	    //
-////	    for (VertexIterator v(*facet); !v.end(); ++v)
-////	      {
-//////		std::cout << "vertex " << num_vertices++ << ": " << v->point() << " " << v->index() << std::endl;
-//////		map_vertices_[std::to_string( v->point().dot(v->point()) )] = 
-//////		  std::make_tuple ( v->point(), 
-//////				    facet->index(),
-//////				    v->index(),
-//////				    false);
-////		list_facet_vertex_.push_back( std::make_tuple ( v->point(),
-////								v->index(),
-////								facet->index(),
-////								true,
-////								false,
-////								"") );
-////	      }
-////	  }
-////      } 
-//
-//    //
-//    // 
-//    //
-//
-//    //
-//    // Map the mesh tetrahedron entities
-//    std::vector<MeshEntity> cell_entity( Boundaries->mesh()->num_cells() );
-//    //
-//    for ( MeshEntityIterator entity((*Boundaries->mesh()), /*dim cell = */3) ;
-//	  !entity.end() ; ++entity )
-//      cell_entity[entity->index()] = *entity;
-//
-//    
-//    //
-//    //  Sub domain iteration in electrodes volume
-//    auto it_facet_cell_index = Map_Index_Cell.begin();
-//    std::size_t cell_index = 0.;
-//    bool        in_electrode = false;
-//    std::string electrode_label;
-//    //
-//    for (MeshEntityIterator facet( *(Boundaries->mesh()), Boundaries->dim() );
-//	 !facet.end(); ++facet)
-//      {
-//	if ( (*Boundaries)[*facet] == 100 )
-//	  {
-//	    //
-//	    std::tie(electrode_label, in_electrode) = electrodes_->inside_probe( facet->midpoint() );
-//	    if( in_electrode )
-//	      {
-//		// which cell belong the facet
-//		it_facet_cell_index = Map_Index_Cell.find( facet->index() );
-//		if ( it_facet_cell_index ==  Map_Index_Cell.end() )
-//		  {
-//		    std::cerr << "Error: no cell mapping for facet: " << facet->index() << std::endl;
-//		    abort();
-//		  }
-//		//
-//		cell_index = it_facet_cell_index->second;
-//		
-////	    std::cout << facet->mesh_id() << " " 
-////		      << facet->index() << " " 
-////	      //	      << facet->global_index() << " " 
-////		      <<  cell_index << " " 
-////		      << (*Boundaries)[*facet] << " " 
-////	      /*<< facet->midpoint() << " " 
-////		<< facet->midpoint().norm() */<< std::endl;
-//
-//		// The facet midpoint is required for the boundary check
-//		Point midpoint = facet->midpoint();
-//		list_vertices_.push_back(std::make_tuple ( electrode_label,
-//							   midpoint, 
-//							   -1,
-//							   cell_index,
-//							   false, 
-//							   false ));
-//	    
-//	    
-//	    
-//////		int num_vertices = 0;
-////		for (VertexIterator v(*facet); !v.end(); ++v)
-////		  {
-//////		    std::cout << "vertex facet " << num_vertices++ << ": " 
-//////			      << v->point() << " " << v->index() << std::endl;
-////		    //
-////		    list_vertices_.push_back(std::make_tuple ( electrode_label,
-////							       v->point(), 
-////							       v->index(),
-////							       cell_index,
-////							       true, 
-////							       false ));
-////		    
-////		  }
-////		num_vertices = 0;
-//		for (VertexIterator v( cell_entity[ cell_index ] ); !v.end(); ++v)
-//		  {
-////		    std::cout << "vertex tetra " << num_vertices++ << ": " << v->point() << " " << v->index() << std::endl;
-//		    list_vertices_.push_back(std::make_tuple ( electrode_label,
-//							       v->point(), 
-//							       v->index(),
-//							       cell_index,
-//							       true, 
-//							       false ));
-//		  }
-////	    list_electrode_surface_.push_back( facet->midpoint() );
-//	      }
-//	  }
-//      }
-//  };
-//
-//public:
-//  /*!
-//   *
-//   *
-//   * 
-//   *
-//   */
-//  int num_hit()
-//  {
-//    //
-//    //
-//    std::vector<int>  check(10, 0);
-//    std::vector< std::set< std::size_t > >  tetrahedron( boundaries_->mesh()->num_cells() );
-//    std::vector<int>  facet_hit(boundaries_->size(), 0);
-//    std::vector<bool> facet_on(boundaries_->size(), false);
-//    std::map< std::string, std::set< std::size_t > > map_electrode_cell_vertices;
-//
-//    //
-//    // List the cells with a vertex touching the boundaries
-//    for ( auto vertex_101 : list_vertices_ )
-//      if( /*vertex*/std::get<4>(vertex_101)  && 
-//	  /*boundary*/std::get<5>(vertex_101) )
-//	{
-////	  std::cout 
-////	    << std::get<0>(vertex_101) << " "
-////	    << std::get<2>(vertex_101) << " "
-////	    << std::get<3>(vertex_101) << " "
-////	    << std::get<4>(vertex_101) << " "
-////	    << std::get<5>(vertex_101) << "\n"
-////	    << std::get<1>(vertex_101) 
-////	    << std::endl;
-//	  int hit = (int)std::get<3>(vertex_101);
-//	  tetrahedron[hit].insert( std::get<2>(vertex_101) );
-//	}
-//
-//
-//    //
-//    // 
-//    for ( int cell_101 = 0 ; cell_101 < tetrahedron.size() ; cell_101++ )
-//      {
-//	// Depending on the topography of the geometry, we can have 3 or 4 vertices of 
-//	// a same tetrahedron on boundary
-//	if( tetrahedron[cell_101].size() == 3 || tetrahedron[cell_101].size() == 4)
-//	  {
-//	    //
-//	    for ( auto vertex_101 : list_vertices_ )
-//	      if ( std::get<3>(vertex_101) ==  cell_101 && std::get<4>(vertex_101) )
-//		{
-//		  map_electrode_cell_vertices[std::get<0>(vertex_101)].insert(std::get<2>(vertex_101));
-//		  //		  std::cout << std::get<1>(vertex_101) << std::endl;
-//		}
-//	  }
-//	check[ tetrahedron[cell_101].size() ] += 1;
-//      }
-//
-////   //
-////   int num_hit = 0;
-////   for ( int facet_101 = 0 ; facet_101 < facet_hit.size() ; facet_101++ )
-////     {
-////	if( facet_hit[facet_101] == 3 )
-////	  {
-////	    //	    facet_on[facet_101] = true;
-////	    for ( auto vertex_101 : list_facet_vertex_ )
-////	      if( std::get<2>(vertex_101) ==  facet_101 &&  std::get<3>(vertex_101) )
-////		{
-////		  map_vertex_electrodes[std::get<1>(vertex_101)] = std::get<5>(vertex_101);
-////		  ++num_hit;
-////		  std::cout << std::get<0>(vertex_101) << std::endl;
-////		}
-////	  }
-////	check[ facet_hit[facet_101] ] += 1;
-////     }
-//
-//    for ( auto test :  check )
-//      std::cout << test << " ";
-//    std::cout << std::endl;
-//
-//    for (auto electrode : map_electrode_cell_vertices)
-//      std::cout << electrode.first << ": " << electrode.second.size() << std::endl;
-// 
-//    //
-//    //
-//    return 0.;
-//  };
-//
-//private:
-//  virtual bool inside(const Array<double>& x, bool on_boundary) const
-//  {
-////    //
-////    //
-//    Point vertex_point( x[0], x[1], x[2]);
-//    //    std::string vertex_finger_print = std::to_string( vertex_point.dot(vertex_point) );
-//    bool on_electrode = false;
-//
-////    if(on_boundary)
-////      for ( auto point : list_electrode_surface_ )
-////	if ( point.squared_distance(vertex_point) < 1. )
-////	  {
-////	    on_electrode = electrodes_->inside( vertex_point );
-////	  }
-//    
-//
-////    //
-////    if(on_boundary)
-////      if( electrodes_->inside( vertex_point ) )
-////	{
-////	  //
-////	  auto it_vertex = map_vertices_.find( vertex_finger_print );
-////	  //
-////	  if ( it_vertex != map_vertices_.end() )
-////	    // second check on point
-////	    if( (std::get<1>(it_vertex->second)).distance( vertex_point ) < 1.e-3 ) 
-////	      {
-////		// Satisfaction criteria fulfilled 
-////		std::get<5>(it_vertex->second) = true;
-////		on_electrode                   = true;
-////	      }
-////	}
-//
-//    //
-//    if( on_boundary )
-//      if( electrodes_->inside( vertex_point ) )
-//	{
-//	  for( auto it_vertex = list_vertices_.begin() ; it_vertex != list_vertices_.end() ;
-//	       it_vertex++ )
-//	    if( std::get<1>(*it_vertex).distance( vertex_point ) < 1.e-3 ) 
-//	      {
-//		// Satisfaction criteria fulfilled 
-//		std::get<5>(*it_vertex) = true;
-//		on_electrode            = true;
-//	      }
-//	}   
-//
-////    if(on_boundary)
-////      {
-////	//
-////	bool in_electrode = false;
-////	std::string electrode_label;
-////	//
-////	std::tie(electrode_label, in_electrode) = electrodes_->inside_probe( vertex_point );
-////	if( in_electrode )
-////	  {
-////	    for ( auto vertex_tuple = list_facet_vertex_.begin() ; 
-////		  vertex_tuple != list_facet_vertex_.end() ; 
-////		  vertex_tuple++)
-////	      if( (std::get<0>(*vertex_tuple)).distance(vertex_point) < 1.e-3 )
-////		{
-////		  std::get<4>(*vertex_tuple) = true;
-////		  std::get<5>(*vertex_tuple) = electrode_label;
-////		  on_electrode = true;
-////		}
-////	  }
-////      }
-//
-////   if (on_electrode)
-////     std::cout << list_vertices_.size() << std::endl;
-//
-////    if(on_boundary)
-////      if( electrodes_->inside( vertex_point ) )
-////	on_electrode = true;
-//    
-//
-//
-//    //
-//    
-//    //
-//    //
-//    return ( on_electrode );
-//  }
-//};
-
-
 //
 //
 //
@@ -449,11 +96,11 @@ Solver::tCS_tDCS::tCS_tDCS()
 
       std::size_t entity_index = 0;
       // Get global (local to to process) entity index
-      dolfin_assert(cell_index < _mesh->num_cells());
+      //      dolfin_assert(cell_index < mesh_->num_cells());
       map_index_cell[connectivity(cell_index)[local_entity]] = cell_index;
  
       // Set value for entity
-      dolfin_assert(entity_index < _size);
+      //  dolfin_assert(entity_index < _size);
     }
 
   
@@ -464,13 +111,15 @@ Solver::tCS_tDCS::tCS_tDCS()
   //
   boundaries_->rename( mesh_facets_collection_->name(),
 		       mesh_facets_collection_->label() );
+  //
+  mesh_facets_collection_.reset();
 
   //
   // Boundary definition
   Electrodes_surface electrodes_101( electrodes_, boundaries_, map_index_cell );
   //
-  electrodes_101.mark(*boundaries_, 101);
-  electrodes_101.surface_vertices_per_electrodes();
+  electrodes_101.mark( *boundaries_, 101 );
+  electrodes_101.surface_vertices_per_electrodes( 101 );
   // write boundaries
   std::string boundaries_file_name = (SDEsp::get_instance())->get_files_path_result_();
   boundaries_file_name            += std::string("boundaries.pvd");
@@ -513,7 +162,9 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
   //////////////////////////////////////////////////////
       
 
-
+  //
+  // tDCS electric potential u
+  //
 
 //  //
 //  // PDE boundary conditions
@@ -533,8 +184,7 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
   
   // Linear
   L.I  = *(electrodes_->get_current());
-  //  L.ds = *boundaries_;
-  // L.Se = Se;
+  L.ds = *boundaries_;
 
   //
   // Compute solution
@@ -554,11 +204,8 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
   solver.solve();
 
 
-
-
  //
- // Regulation terme
- //  \int u dx = 0
+ // Regulation terme:  \int u dx = 0
  double old_u_bar = 0.;
  double u_bar = 1.e+6;
  double U_bar = 0.;
@@ -579,53 +226,52 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
      std::cout << ++iteration << " ~ " << Sum  << std::endl;
    }
  
- std::cout << "int u dx = " << Sum << " " << U_bar << std::endl;
-  
-//  std::list<std::size_t> test;
-//  regulation_factor(u, test);
+ std::cout << "int u dx = " << Sum << std::endl;
 
+ //
+ // tDCS electric current density field \vec{J}
+ // 
+ 
+ //
+ // Define variational forms
+ tCS_field_model::BilinearForm a_field(V_field_, V_field_);
+ tCS_field_model::LinearForm L_field(V_field_);
+ 
+ //
+ // Anisotropy
+ // Bilinear
+ // a.dx       = *domains_;
+ 
+ 
+ // Linear
+ L_field.u       = u;
+ L_field.a_sigma = *sigma_;
+ //  L.ds = *boundaries_;
 
-  //
-  // Define variational forms
-  tCS_field_model::BilinearForm a_field(V_field_, V_field_);
-  tCS_field_model::LinearForm L_field(V_field_);
-//      
-//  //
-//  // Anisotropy
-//  // Bilinear
-//  //  a.a_sigma  = *sigma_;
-//  // a.dx       = *domains_;
-//  
-//  
-//  // Linear
-  L_field.u       = u;
-  L_field.a_sigma = *sigma_;
-//  //  L.ds = *boundaries_;
-//  // L.Se = Se;
-//
-//  //
-  // Compute solution
-  Function J(*V_field_);
-  LinearVariationalProblem problem_field(a_field, L_field, J/*, bc*/);
-  LinearVariationalSolver  solver_field(problem_field);
-  // krylov
-  solver_field.parameters["linear_solver"]  
-    = (SDEsp::get_instance())->get_linear_solver_();
-  solver_field.parameters("krylov_solver")["maximum_iterations"] 
-    = (SDEsp::get_instance())->get_maximum_iterations_();
-  solver_field.parameters("krylov_solver")["relative_tolerance"] 
-    = (SDEsp::get_instance())->get_relative_tolerance_();
-  solver_field.parameters["preconditioner"] 
-    = (SDEsp::get_instance())->get_preconditioner_();
-  //
-  solver_field.solve();
+ //
+ // Compute solution
+ Function J(*V_field_);
+ LinearVariationalProblem problem_field(a_field, L_field, J/*, bc*/);
+ LinearVariationalSolver  solver_field(problem_field);
+ // krylov
+ solver_field.parameters["linear_solver"]  
+   = (SDEsp::get_instance())->get_linear_solver_();
+ solver_field.parameters("krylov_solver")["maximum_iterations"] 
+   = (SDEsp::get_instance())->get_maximum_iterations_();
+ solver_field.parameters("krylov_solver")["relative_tolerance"] 
+   = (SDEsp::get_instance())->get_relative_tolerance_();
+ solver_field.parameters["preconditioner"] 
+   = (SDEsp::get_instance())->get_preconditioner_();
+ //
+ solver_field.solve();
 
 
 
   //
   // Filter function over a subdomain
-  std::list<std::size_t> sub_domains{4,5};
-  solution_domain_extraction(u, sub_domains);
+  std::list<std::size_t> test_sub_domains{4,5};
+  solution_domain_extraction(J, test_sub_domains, "tDCS_Current_density");
+  solution_domain_extraction(u, test_sub_domains, "tDCS_potential");
 
 
 //  //
@@ -658,16 +304,19 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
 //
 //
 void
-Solver::tCS_tDCS::solution_domain_extraction(const Function& u, std::list<std::size_t>& Sub_domains)
+Solver::tCS_tDCS::solution_domain_extraction( const Function& u, 
+					      std::list<std::size_t>& Sub_domains,
+					      const char* name)
 {
   // 
   const std::size_t num_vertices = mesh_->num_vertices();
   
   // Get number of components
   const std::size_t dim = u.value_size();
-  
+  const std::size_t rank = u.value_rank();
+
   // Open file
-  std::string sub_dom("tDCS");
+  std::string sub_dom(name);
   for ( auto sub : Sub_domains )
     sub_dom += std::string("_") + std::to_string(sub);
   sub_dom += std::string(".vtu");
@@ -718,7 +367,11 @@ Solver::tCS_tDCS::solution_domain_extraction(const Function& u, std::list<std::s
 		    std::to_string( vertex->point().x() ) + " " + 
 		    std::to_string( vertex->point().y() ) + " " +
 		    std::to_string( vertex->point().z() ) + " " ;
-		  point_data += std::to_string( values[vertex->index()] ) + " ";
+
+		  //
+		  int index = vertex->index();
+		  for ( int i = 0 ; i < dim ; i ++)
+		    point_data += std::to_string( values[index + i*num_vertices] ) + " ";
 		}
 
 	      //
@@ -755,9 +408,28 @@ Solver::tCS_tDCS::solution_domain_extraction(const Function& u, std::list<std::s
   
   //
   // Point data
-  VTU_xml_file << "      <PointData Scalars=\"scalars\">" << std::endl;
-  VTU_xml_file << "        <DataArray type=\"Float32\" Name=\"scalars\" format=\"ascii\">" << std::endl; 
-  VTU_xml_file << point_data << std::endl; 
+  if (rank == 0) 
+  {
+    VTU_xml_file << "<PointData  Scalars=\"" << u.name() << "\"> " << std::endl;
+    VTU_xml_file << "<DataArray  type=\"Float32\"  Name=\"" << u.name() 
+		 << "\"  format=\"ascii\">" << std::endl;
+  }
+  else if (rank == 1)
+  {
+    VTU_xml_file << "<PointData  Vectors=\"" << u.name() << "\"> " << std::endl;
+    VTU_xml_file << "<DataArray  type=\"Float32\"  Name=\"" << u.name() 
+		 << "\"  NumberOfComponents=\"3\" format=\"ascii\">" << std::endl;
+  }
+  else if (rank == 2)
+  {
+    VTU_xml_file << "<PointData  Tensors=\"" << u.name() << "\"> " << std::endl;
+    VTU_xml_file << "<DataArray  type=\"Float32\"  Name=\"" << u.name() 
+		 << "\"  NumberOfComponents=\"9\" format=\"ascii\">" << std::endl;
+  }
+//  VTU_xml_file << "      <PointData Scalars=\"scalars\">" << std::endl;
+//  VTU_xml_file << "        <DataArray type=\"Float32\" Name=\"scalars\" format=\"ascii\">" << std::endl; 
+  //
+  VTU_xml_file << point_data;
   VTU_xml_file << "         </DataArray>" << std::endl; 
   VTU_xml_file << "      </PointData>" << std::endl; 
  

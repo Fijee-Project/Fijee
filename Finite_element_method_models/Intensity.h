@@ -47,7 +47,7 @@ namespace Solver
     std::string label_;
     //! Electrode impedance
     std::complex<double> impedance_;
-    //! Contact suface between the electrode and the scalp
+    //! Contact suface between the electrode and the scalp [S] = mm^2
     double surface_;
     //! Contact suface radius between the electrode and the scalp
     double radius_;
@@ -56,10 +56,15 @@ namespace Solver
     // Geometry propterties
     //
     //! Set of boundaries mesh cells
-    mutable std::set<std::size_t> boundary_cells_;
-    //!
+    std::map< std::size_t, std::list< MeshEntity  >  > boundary_cells_;
+    //! Set of boundaries mesh cells
+    std::set<std::size_t> boundary_vertices_;
+    //! Imposed one source point. It is used for the validation comparison
     mutable bool not_yet_;
-    
+
+    mutable std::set<Point> points_Dirac_;
+    mutable std::list<std::size_t> facet_reservoir_;
+   
 
   public:
     /*!
@@ -83,7 +88,7 @@ namespace Solver
      *
      */
     Intensity( std::string, int, std::string, double,
-		       Point,Point, double, double, double, double );
+	       Point,Point, double, double, double, double );
     /*!
      *  \brief destructor
      *
@@ -130,8 +135,11 @@ namespace Solver
     //
     // Geometry propterties
     //
-    void set_boundary_cells_(const std::set<std::size_t>& Boundary_cells)const{ boundary_cells_ = Boundary_cells;};
-    const std::set<std::size_t>& get_boundary_cells_()const{ return boundary_cells_;};
+    void set_boundary_cells_(const std::map< std::size_t, std::list< MeshEntity  >  >& Boundary_cells )
+    { boundary_cells_ = Boundary_cells;};
+    void set_boundary_vertices_(const std::set<std::size_t>& Boundary_vertices){ boundary_vertices_ = Boundary_vertices;};
+    const std::map< std::size_t, std::list< MeshEntity  >  >& get_boundary_cells_()const{ return boundary_cells_;};
+    const std::set<std::size_t>& get_boundary_vertices_()const{ return boundary_vertices_;};
 
   public:
     /*!

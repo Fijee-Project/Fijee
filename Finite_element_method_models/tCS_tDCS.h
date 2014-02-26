@@ -135,7 +135,7 @@ namespace Solver
      *  \param Sub_domains: array of sub-domain we want to extract from U.
      *
      */
-    void solution_domain_extraction(const Function& , std::list<std::size_t>& );
+    void solution_domain_extraction(const Function&, std::list<std::size_t>&, const char* );
     /*!
      *  \brief Solution domain extraction
      *

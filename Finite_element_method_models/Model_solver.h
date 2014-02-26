@@ -101,7 +101,7 @@ namespace Solver
       for( int physical_event = 0 ;
 	   physical_event != model_.get_number_of_physical_event() ; 
 	   physical_event++ )
-	if( ++tempo < 5 )
+	if( ++tempo < 10 )
 	  {
 	    //
 	    // Enqueue tasks

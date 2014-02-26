@@ -233,17 +233,17 @@ Domains_build_mesh::Output_FEniCS_xml()
   
   //
   // header
-  FEniCS_xml_file << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl << std::endl;
+  FEniCS_xml_file << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
   FEniCS_xml_file << "<dolfin xmlns:dolfin=\"http://www.fenicsproject.org\">" << std::endl;
   FEniCS_xml_file << "  <mesh celltype=\"tetrahedron\" dim=\"3\">" << std::endl;
   //
-  FEniCS_xml_subdomains_file << "<?xml version=\"1.0\"?>" << std::endl << std::endl;
+  FEniCS_xml_subdomains_file << "<?xml version=\"1.0\"?>" << std::endl;
   FEniCS_xml_subdomains_file << "<dolfin xmlns:dolfin=\"http://www.fenicsproject.org\">" << std::endl;
   FEniCS_xml_subdomains_file << "  <mesh_function>" << std::endl;
   //
-  FEniCS_xml_facets_subdomains_file << "<?xml version=\"1.0\"?>" << std::endl << std::endl;
+  FEniCS_xml_facets_subdomains_file << "<?xml version=\"1.0\"?>" << std::endl;
   FEniCS_xml_facets_subdomains_file << "<dolfin xmlns:dolfin=\"http://www.fenicsproject.org\">" << std::endl;
-  FEniCS_xml_facets_subdomains_file << "  <mesh_function>" << std::endl;
+//  FEniCS_xml_facets_subdomains_file << "  <mesh_function>" << std::endl;
 
   // FEniCS_xml_file << "" << std::endl;
 
@@ -384,7 +384,7 @@ Domains_build_mesh::Output_FEniCS_xml()
   FEniCS_xml_subdomains_file << "  </mesh_function>" << std::endl;
   FEniCS_xml_subdomains_file << "</dolfin>" << std::endl;
   //
-  FEniCS_xml_facets_subdomains_file << "  </mesh_function>" << std::endl;
+//  FEniCS_xml_facets_subdomains_file << "  </mesh_function>" << std::endl;
   FEniCS_xml_facets_subdomains_file << "</dolfin>" << std::endl;
 
   //  //

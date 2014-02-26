@@ -25,7 +25,9 @@ Solver::Intensity::Intensity(const Intensity& that):
   impedance_(that.impedance_), surface_(that.surface_), radius_(that.radius_)
 {
   not_yet_ = true;
-  boundary_cells_ = that.boundary_cells_;
+  //
+  boundary_cells_    = that.boundary_cells_;
+  boundary_vertices_ = that.boundary_vertices_;
 }
 //
 //
@@ -45,18 +47,38 @@ Solver::Intensity::Intensity( std::string Electric_variable, int Index,
 double 
 Solver::Intensity::eval( const Point& x, const ufc::cell& cell) const
 {
+  std::size_t cell_label[2] = {130,37697};
+  //
   if( I_ != 0 )
     {
       //
       auto boundary_cells_it = boundary_cells_.find( cell.index );
-      //
-      //      if ( r0_values_.squared_distance( x ) < 5 * 5 + 3.  /*&& not_yet_*/ )
-      if ( boundary_cells_it !=  boundary_cells_.end() /*&& not_yet_*/ )
-	{
-//	  std::cout << "##############################" << std::endl;
-//	  std::cout << mid_point << " electric_var: " << electric_variable_ << " label: " << label_ << std::endl;
-	  not_yet_ = false;
-	  return I_;
+      // We check if the vertex belong to a cell which has, at least, one facet on boundary
+      if ( boundary_cells_it != boundary_cells_.end() )
+	{ 
+//	  if( boundary_cells_it->second.size() == 1 ) // only top facets
+//	    {
+	      // we check if the vertex belong to a boundary facet for the list
+	      for ( MeshEntity facet : boundary_cells_it->second )
+		{
+		  for (VertexIterator v( facet ); !v.end(); ++v)
+		    {
+		      if ( v->point().distance(x) < 1.e-3 
+			   /*&& ( cell_label[0] == cell.index || cell_label[1] == cell.index ) */ 
+			   /*&& facet_reservoir_.size() < 3*/ )
+			{
+			  facet_reservoir_.push_back(v->index());
+			  std::cout << label_ << " Cell index: " << cell.index << std::endl;
+			  return I_;
+			}
+		    }
+		}    
+	      //
+	      // if no vertex found: x does not belong to the boundary
+	      return 0.;
+//	    }
+//	  else
+//	    return 0.;
 	}
       else
 	return 0.;
@@ -84,7 +106,8 @@ Solver::Intensity::operator =( const Intensity& that )
   surface_   = that.get_surface_();
   radius_    = that.get_radius_();
   //
-  boundary_cells_ = that.boundary_cells_;
+  boundary_cells_    = that.boundary_cells_;
+  boundary_vertices_ = that.boundary_vertices_;
   not_yet_ = that.not_yet_;
 
   

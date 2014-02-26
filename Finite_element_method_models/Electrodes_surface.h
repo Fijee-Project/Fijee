@@ -41,11 +41,11 @@ namespace Solver
     boost::shared_ptr< MeshFunction< std::size_t > > boundaries_;
     //! 
     mutable std::list< std::tuple< 
-    std::string,    // 0 - electrode label
+      std::string,  // 0 - electrode label
       Point,        // 1 - vertex (can't take vertex directly: no operator =)
-      std::size_t,  // 2 - vertex index (mesh)
+      MeshEntity,   // 2 - facet
       std::size_t,  // 3 - cell index (tetrahedron)
-      bool,         // 4 - vertex: true ; midpoint: false
+      std::size_t,  // 4 - vertex index (-1 for midpoint)
       bool>         // 5 - criteria satisfaction
       > list_vertices_;
   
@@ -64,7 +64,7 @@ namespace Solver
      *  Constructor of the class Electrodes_surface
      *
      */
-    Electrodes_surface( const boost::shared_ptr< Solver::Electrodes_setup > ,
+    Electrodes_surface( boost::shared_ptr< Solver::Electrodes_setup > ,
 			const boost::shared_ptr< MeshFunction< std::size_t > > ,
 			const std::map< std::size_t, std::size_t >&  );
     /*!
@@ -82,7 +82,7 @@ namespace Solver
      *  This method tracks the cells on the boundaries. For each electrodes_ it provides subdomain boundary information. 
      *
      */
-    void surface_vertices_per_electrodes();
+    void surface_vertices_per_electrodes( const std::size_t );
 
   private:
     /*!

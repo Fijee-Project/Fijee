@@ -26,7 +26,7 @@ Solver::SL_subtraction::SL_subtraction()
   std::string subdomains_xml = (SDEsp::get_instance())->get_files_path_output_();
   subdomains_xml += "mesh_subdomains.xml";
   //
-  domains_.reset( new MeshFunction< long unsigned int >(*mesh_, subdomains_xml.c_str()) );
+  domains_.reset( new MeshFunction< long unsigned int >(mesh_, subdomains_xml.c_str()) );
   // write domains
   std::string domains_file_name = (SDEsp::get_instance())->get_files_path_result_();
   domains_file_name            += std::string("domains.pvd");
@@ -44,7 +44,7 @@ Solver::SL_subtraction::SL_subtraction()
   //
   //
   // Define the function space
-  V_.reset( new SLS_model::FunctionSpace(*mesh_) );
+  V_.reset( new SLS_model::FunctionSpace(mesh_) );
   
   //
   // Define boundary condition
@@ -175,25 +175,25 @@ Solver::SL_subtraction::operator () ( /*Solver::Phi& source,
       
   //
   // Define variational forms
-  SLS_model::BilinearForm a(*V_, *V_);
-  SLS_model::LinearForm L(*V_);
+  SLS_model::BilinearForm a(V_, V_);
+  SLS_model::LinearForm L(V_);
       
   //
   // Anisotropy
   // Bilinear
   a.a_sigma = *sigma_;
-  a.dx      = *domains_;
+  //  a.dx      = *domains_;
   // Linear
   L.a_inf   =  a_inf;
   L.a_sigma = *sigma_;
   L.Phi_0   =  source;
   //
-  L.dx    = *domains_;
-  L.ds    = *boundaries_;
+  //  L.dx    = *domains_;
+  //  L.ds    = *boundaries_;
 
   //
   // Compute solution
-  Function u(*V_);
+  Function u(V_);
   //
   LinearVariationalProblem problem(a, L, u);
   LinearVariationalSolver  solver(problem);
@@ -209,6 +209,30 @@ Solver::SL_subtraction::operator () ( /*Solver::Phi& source,
   //
   solver.solve();
 
+ //
+ // Regulation terme:  \int u dx = 0
+ double old_u_bar = 0.;
+ double u_bar = 1.e+6;
+ double U_bar = 0.;
+ double N = u.vector()->size();
+ int iteration = 0;
+ double Sum = 1.e+6;
+ //
+ //  while ( abs( u_bar - old_u_bar ) > 0.1 )
+ while ( abs(Sum) > 1.e-3 )
+   {
+     old_u_bar = u_bar;
+     u_bar  = u.vector()->sum();
+     u_bar /= N;
+     (*u.vector()) -= u_bar;
+     //
+     U_bar += u_bar;
+     Sum = u.vector()->sum();
+     std::cout << ++iteration << " ~ " << Sum  << std::endl;
+   }
+ 
+ std::cout << "int u dx = " << Sum << std::endl;
+
 //  // Theoric Potential
 //  Function Phi_th(*V_);
 //  Phi_th.interpolate(source);
@@ -216,7 +240,7 @@ Solver::SL_subtraction::operator () ( /*Solver::Phi& source,
   //
   // V_{tot} = \sum_{i=1}^{n} U_{i} \phi_{i}. where \{\phi_i\}_{i=1}^{n} is a basis for V_h, 
   // and U is a vector of expansion coefficients for V_{tot,h}.
-  Function Phi_tot(*V_);
+  Function Phi_tot(V_);
   Phi_tot.interpolate(source);
   *Phi_tot.vector()  += *u.vector();
   

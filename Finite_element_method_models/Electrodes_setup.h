@@ -80,41 +80,38 @@ namespace Solver
     Electrodes_setup& operator = (const Electrodes_setup& ){return *this;};
 
   public:
-    /*!
-     *  \brief 
-     *
-     *  
-     *
-     */
     boost::shared_ptr< Solver::Electrodes_injection > get_current() const { return current_injection_;};
-    /*!
-     *  \brief 
-     *
-     *  
-     *
-     */
     boost::shared_ptr< Solver::Electrodes_injection > get_potential() const { return potential_injection_;};
+
+  public:
     /*!
-     *  \brief 
+     *  \brief Inside
      *
-     *  
+     *   This method 
      *
      */
     bool inside( const Point& ) const;
     /*!
-     *  \brief 
+     *  \brief Inside probe
      *
-     *  
+     *  This method 
      *
      */
     std::tuple<std::string, bool> inside_probe( const Point& ) const;
      /*!
-     *  \brief 
+     *  \brief Set boundary cells
      *
-     *  
+     *  This method record the cell index per probes.
      *
      */
-    void set_boundary_cells( const std::map< std::string, std::set< std::size_t > >& ) const;
+    void set_boundary_cells( const std::map< std::string, std::map< std::size_t, std::list< MeshEntity  >  >  > & );
+     /*!
+     *  \brief Set boundary vertices
+     *
+     *  This method record the vertex index per probes.
+     *
+     */
+    void set_boundary_vertices( const std::map< std::string, std::set< std::size_t > >& );
  };
 }
 #endif

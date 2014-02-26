@@ -103,9 +103,12 @@ SDEsp::init()
   // ilut - ilu0 - block_ilu{t,0} - jacobi - row_scaling
   preconditioner_ = "row_scaling";
   //
-  maximum_iterations_ = 10000;
+  maximum_iterations_ = 10000000;
   //
-  relative_tolerance_ = 1.e-08 /*1.e-06*/;
+//  relative_tolerance_ = 1.e-8 /*1.e-8*/;
+//  relative_tolerance_ = 7.e-4 /*tDCS_spheres*/;
+  relative_tolerance_ = 1.e-3 /*tDCS_spheres*/;
+//  relative_tolerance_ = 5.e-3 /*tDCS_head*/;
 
   //
   // Dispatching information

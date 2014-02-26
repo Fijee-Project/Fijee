@@ -112,8 +112,19 @@ Solver::Electrodes_setup::inside_probe( const Point& Vertex ) const
 //
 //
 void
-Solver::Electrodes_setup::set_boundary_cells( const std::map< std::string, std::set< std::size_t > >& Map_electrode_cell  ) const
+Solver::Electrodes_setup::set_boundary_cells( const std::map<std::string, 
+							     std::map<std::size_t, 
+								      std::list< MeshEntity  >  >  >& Map_electrode_cells  )
 {
-  current_injection_->set_boundary_cells( Map_electrode_cell );
-  potential_injection_->set_boundary_cells( Map_electrode_cell );
+  current_injection_->set_boundary_cells( Map_electrode_cells );
+  potential_injection_->set_boundary_cells( Map_electrode_cells );
+}
+//
+//
+//
+void
+Solver::Electrodes_setup::set_boundary_vertices( const std::map< std::string, std::set< std::size_t > >& Map_electrode_vertices  )
+{
+  current_injection_->set_boundary_vertices( Map_electrode_vertices );
+  potential_injection_->set_boundary_vertices( Map_electrode_vertices );
 }
