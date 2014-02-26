@@ -133,13 +133,6 @@ namespace Solver
      *
      */
     void set_boundary_cells( const std::map< std::string, std::map< std::size_t, std::list< MeshEntity  >  >  >& );
-    /*!
-     *  \brief Set boundary vertices
-     *
-     *  This method record the vertices index per probes.
-     *
-     */
-    void set_boundary_vertices( const std::map< std::string, std::set< std::size_t > >& );
   };
   /*!
    *  \brief Dump values for Electrodes_injection

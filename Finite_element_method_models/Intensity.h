@@ -39,6 +39,8 @@ namespace Solver
     int index_;
     //! Electrode position
     Point r0_values_;  
+    //! Electrode position projected on the boundary
+    Point r0_projection_;  
     //! Electrode direction vector
     Point e_values_;  
     //! Electrode intensity [I_] = A
@@ -55,7 +57,7 @@ namespace Solver
     //
     // Geometry propterties
     //
-    //! Set of boundaries mesh cells
+    //! map of cells on boundaries with their facets effectivily on the boundaries
     std::map< std::size_t, std::list< MeshEntity  >  > boundary_cells_;
     //! Set of boundaries mesh cells
     std::set<std::size_t> boundary_vertices_;
@@ -118,6 +120,11 @@ namespace Solver
     double get_Y_()const{return r0_values_.y();};
     double get_Z_()const{return r0_values_.z();};
     //
+    Point  get_r0_projection_()const{return r0_projection_;};
+    double get_projection_X_()const{return  r0_projection_.x();};
+    double get_projection_Y_()const{return  r0_projection_.y();};
+    double get_projection_Z_()const{return  r0_projection_.z();};
+    //
     Point  get_e_values_()const{return e_values_;};
     double get_VX_()const{return e_values_.x();};
     double get_VY_()const{return e_values_.y();};
@@ -135,9 +142,8 @@ namespace Solver
     //
     // Geometry propterties
     //
-    void set_boundary_cells_(const std::map< std::size_t, std::list< MeshEntity  >  >& Boundary_cells )
-    { boundary_cells_ = Boundary_cells;};
-    void set_boundary_vertices_(const std::set<std::size_t>& Boundary_vertices){ boundary_vertices_ = Boundary_vertices;};
+    void set_boundary_cells_(const std::map< std::size_t, std::list< MeshEntity  >  >& );
+    //
     const std::map< std::size_t, std::list< MeshEntity  >  >& get_boundary_cells_()const{ return boundary_cells_;};
     const std::set<std::size_t>& get_boundary_vertices_()const{ return boundary_vertices_;};
 

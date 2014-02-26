@@ -156,21 +156,3 @@ Solver::Electrodes_injection::set_boundary_cells( const std::map< std::string, s
 	}
     }
 }
-//
-//
-//
-void
-Solver::Electrodes_injection::set_boundary_vertices( const std::map< std::string, std::set< std::size_t > >& Map_electrode_vertices  )
-{
-  //
-  for ( auto electrode = Map_electrode_vertices.begin() ;  electrode != Map_electrode_vertices.end() ; electrode++ )
-    {
-      //
-      auto electrode_it = electrodes_map_.find( electrode->first );
-      //
-      if( electrode_it != electrodes_map_.end() )
-	{
-	  (electrode_it->second).set_boundary_vertices_(electrode->second);
-	}
-    }
-}
