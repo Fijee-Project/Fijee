@@ -50,57 +50,57 @@ double
 Solver::Intensity::eval( const Point& x, const ufc::cell& cell) const
 {
 
-////version v2
-//  std::size_t cell_label[2] = {130,37697};
-//  //
-//  if( I_ != 0 )
-//    {
-//      //
-//      if ( r0_projection_.distance(x) < 1.e-3 )
-//	{
-//	  std::cout << label_ << " position: " << x << std::endl;
-//	  return I_ ;
-//	}
-//      else
-//	return 0.;
-//    }
-//  else
-//    return 0.;
-
-//version v1
+//version v2
   std::size_t cell_label[2] = {130,37697};
   //
   if( I_ != 0 )
     {
       //
-      auto boundary_cells_it = boundary_cells_.find( cell.index );
-      // We check if the vertex belong to a cell which has, at least, one facet on boundary
-      if ( boundary_cells_it != boundary_cells_.end() )
-	{ 
-	  // we check if the vertex belong to a boundary facet for the list
-	  for ( MeshEntity facet : boundary_cells_it->second )
-	    {
-	      for (VertexIterator v( facet ); !v.end(); ++v)
-		{
-		  if ( v->point().distance(x) < 1.e-3 
-		       /*&& ( cell_label[0] == cell.index || cell_label[1] == cell.index ) */ 
-		       /*&& facet_reservoir_.size() < 3*/ )
-		    {
-		      facet_reservoir_.push_back(v->index());
-		      std::cout << label_ << " Cell index: " << cell.index << std::endl;
-		      return I_ / boundary_vertices_.size();
-		    }
-		}
-	    }    
-	  //
-	  // if no vertex found: x does not belong to the boundary
-	  return 0.;
+      if ( r0_projection_.distance(x) < 1.e-3 )
+	{
+	  std::cout << label_ << " position: " << x << std::endl;
+	  return I_ ;
 	}
       else
 	return 0.;
     }
   else
     return 0.;
+
+//version v1
+//  std::size_t cell_label[2] = {130,37697};
+//  //
+//  if( I_ != 0 )
+//    {
+//      //
+//      auto boundary_cells_it = boundary_cells_.find( cell.index );
+//      // We check if the vertex belong to a cell which has, at least, one facet on boundary
+//      if ( boundary_cells_it != boundary_cells_.end() )
+//	{ 
+//	  // we check if the vertex belong to a boundary facet for the list
+//	  for ( MeshEntity facet : boundary_cells_it->second )
+//	    {
+//	      for (VertexIterator v( facet ); !v.end(); ++v)
+//		{
+//		  if ( v->point().distance(x) < 1.e-3 
+//		       /*&& ( cell_label[0] == cell.index || cell_label[1] == cell.index ) */ 
+//		       /*&& facet_reservoir_.size() < 3*/ )
+//		    {
+//		      facet_reservoir_.push_back(v->index());
+//		      std::cout << label_ << " Cell index: " << cell.index << std::endl;
+//		      return I_ / boundary_vertices_.size();
+//		    }
+//		}
+//	    }    
+//	  //
+//	  // if no vertex found: x does not belong to the boundary
+//	  return 0.;
+//	}
+//      else
+//	return 0.;
+//    }
+//  else
+//    return 0.;
 
 // version v0
 //  std::size_t cell_label[2] = {130,37697};

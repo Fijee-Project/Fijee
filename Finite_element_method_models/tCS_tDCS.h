@@ -21,6 +21,7 @@
 //
 // UCSF project
 //
+#include "Physics.h"
 #include "Electrodes_setup.h"
 #include "Electrodes_surface.h"
 #include "Conductivity.h"
@@ -50,22 +51,16 @@ typedef std::vector<std::vector<std::pair<dolfin::la_index, dolfin::la_index> > 
 namespace Solver
 {
   /*! \class tCS_tDCS
-   * \brief classe representing the source localisation with direct method.
+   * \brief classe representing tDCS simulation.
    *
-   *  This class representing the Physical model for the source localisation using the direct method.
+   *  This class representing the Physical model for the transcranial Direct Current Stimulation (tDCS) simulation.
    */
-  class tCS_tDCS
+  class tCS_tDCS : Physics
   {
     //! Electrodes list
     boost::shared_ptr< Solver::Electrodes_setup > electrodes_;
-    //! Head model mesh
-    boost::shared_ptr< Mesh > mesh_;
     //! Head model facets collection
     boost::shared_ptr< MeshValueCollection< std::size_t > > mesh_facets_collection_;
-    //! Head model sub domains
-    boost::shared_ptr< MeshFunction< long unsigned int > > domains_;
-    //! Anisotropic conductivity
-    boost::shared_ptr< Solver::Tensor_conductivity > sigma_;
     //! Function space
     boost::shared_ptr< tCS_model::FunctionSpace > V_;
     //! Function space
@@ -123,20 +118,8 @@ namespace Solver
      *
      *
      */
-    inline
-      int get_number_of_physical_event(){return 1; };
-    /*!
-     *  \brief Solution domain extraction
-     *
-     *  This method extract from the Function solution U the sub solution covering the sub-domains Sub_domains.
-     *  The result is a file with the name tDCS_{Sub_domains}.vtu
-     *
-     *  \param U: Function solution of the Partial Differential Equation.
-     *  \param Sub_domains: array of sub-domain we want to extract from U.
-     *
-     */
-    void solution_domain_extraction(const Function&, std::list<std::size_t>&, const char* );
-    /*!
+    inline int get_number_of_physical_event(){return 1; };
+   /*!
      *  \brief Solution domain extraction
      *
      *  This method extract from the Function solution U the sub solution covering the sub-domains Sub_domains.

@@ -19,8 +19,8 @@
 //
 // UCSF project
 //
+#include "Physics.h"
 #include "Source.h"
-#include "Conductivity.h"
 #include "Boundaries.h"
 #include "Sub_domaines.h"
 #include "PDE_solver_parameters.h"
@@ -49,16 +49,10 @@ namespace Solver
    *
    *  This class representing the Physical model for the source localisation using the subtraction method.
    */
-  class SL_subtraction
+  class SL_subtraction : Physics
   {
     //! Dipoles list
     std::list< Solver::Phi > dipoles_list_;
-    //! Head model mesh
-    boost::shared_ptr< Mesh > mesh_;
-    //! Head model sub domains
-    boost::shared_ptr< MeshFunction< long unsigned int > > domains_;
-    //! Anisotropic conductivity
-    boost::shared_ptr< Solver::Tensor_conductivity > sigma_;
     //! Function space
     boost::shared_ptr< SLS_model::FunctionSpace > V_;
     //! Boundarie conditions
@@ -94,7 +88,7 @@ namespace Solver
      *  Operator = of the class SL_subtraction
      *
      */
-    SL_subtraction& operator = ( const SL_subtraction& ){};
+    SL_subtraction& operator = ( const SL_subtraction& ){return *this;};
     /*!
      *  \brief Operator ()
      *

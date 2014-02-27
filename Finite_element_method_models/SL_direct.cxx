@@ -6,42 +6,8 @@ typedef Solver::PDE_solver_parameters SDEsp;
 //
 //
 //
-Solver::SL_direct::SL_direct()
+Solver::SL_direct::SL_direct():Physics()
 {
-  //
-  // Load the mesh
-  std::cout << "Load the mesh" << std::endl;
-  //
-  std::string mesh_xml = (SDEsp::get_instance())->get_files_path_output_();
-  mesh_xml += "mesh.xml";
-  //
-  mesh_.reset( new Mesh(mesh_xml.c_str()) );
-  //
-  info( *mesh_ );
-
-  //
-  // Load Sub_domains
-  std::cout << "Load Sub_domains" << std::endl;
-  //
-  std::string subdomains_xml = (SDEsp::get_instance())->get_files_path_output_();
-  subdomains_xml += "mesh_subdomains.xml";
-  //
-  domains_.reset( new MeshFunction< long unsigned int >(mesh_, subdomains_xml.c_str()) );
-  // write domains
-  std::string domains_file_name = (SDEsp::get_instance())->get_files_path_result_();
-  domains_file_name            += std::string("domains.pvd");
-  File domains_file( domains_file_name.c_str() );
-  domains_file << *domains_;
-
-
-  //
-  // Load the conductivity. Anisotrope conductivity
-  std::cout << "Load the conductivity" << std::endl;
-  sigma_.reset( new Solver::Tensor_conductivity(mesh_) );
-
-
-  //
-  //
   //
   // Define the function space
   V_.reset( new SLD_model::FunctionSpace(*mesh_) );

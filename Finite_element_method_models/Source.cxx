@@ -257,10 +257,10 @@ Solver::Current_density::eval(Array<double>& values, const Array<double>& x, con
       
       // 
       // \vec{J}_{source} = \vec{Q} \delta(\vec{dist})
-      // if the distance is less than 0.5 mm, the value is Q; 0 otherwise.
-      values[0] = e_values_[0] * Q_ / 1.73;
-      values[1] = e_values_[1] * Q_ / 1.73;
-      values[2] = e_values_[2] * Q_ / 1.73;
+      // When the cell will be selected: the 4 vertices will go through the condition
+      values[0] = e_values_[0] * Q_ / 4.;
+      values[1] = e_values_[1] * Q_ / 4.;
+      values[2] = e_values_[2] * Q_ / 4.;
     }
   else
     {

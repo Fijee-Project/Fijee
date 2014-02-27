@@ -19,6 +19,7 @@
 //
 // UCSF project
 //
+#include "Physics.h"
 #include "Source.h"
 #include "Conductivity.h"
 #include "Boundaries.h"
@@ -49,16 +50,10 @@ namespace Solver
    *
    *  This class representing the Physical model for the source localisation using the direct method.
    */
-  class SL_direct
+  class SL_direct : Physics
   {
     //! Dipoles list
     std::list< Solver::Current_density > dipoles_list_;
-    //! Head model mesh
-    boost::shared_ptr< Mesh > mesh_;
-    //! Head model sub domains
-    boost::shared_ptr< MeshFunction< long unsigned int > > domains_;
-    //! Anisotropic conductivity
-    boost::shared_ptr< Solver::Tensor_conductivity > sigma_;
     //! Function space
     boost::shared_ptr< SLD_model::FunctionSpace > V_;
     //! Periphery
@@ -96,7 +91,7 @@ namespace Solver
      *  Operator = of the class SL_direct
      *
      */
-    SL_direct& operator = ( const SL_direct& ){};
+    SL_direct& operator = ( const SL_direct& ){return *this;};
     /*!
      *  \brief Operator ()
      *

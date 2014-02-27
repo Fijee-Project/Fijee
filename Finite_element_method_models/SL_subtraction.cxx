@@ -6,40 +6,8 @@ typedef Solver::PDE_solver_parameters SDEsp;
 //
 //
 //
-Solver::SL_subtraction::SL_subtraction()
+Solver::SL_subtraction::SL_subtraction():Physics()
 {
-  //
-  // Load the mesh
-  std::cout << "Load the mesh" << std::endl;
-  //
-  std::string mesh_xml = (SDEsp::get_instance())->get_files_path_output_();
-  mesh_xml += "mesh.xml";
-  //
-  mesh_.reset( new Mesh(mesh_xml.c_str()) );
-  //
-  info( *mesh_ );
-
-  //
-  // Load Sub_domains
-  std::cout << "Load Sub_domains" << std::endl;
-  //
-  std::string subdomains_xml = (SDEsp::get_instance())->get_files_path_output_();
-  subdomains_xml += "mesh_subdomains.xml";
-  //
-  domains_.reset( new MeshFunction< long unsigned int >(mesh_, subdomains_xml.c_str()) );
-  // write domains
-  std::string domains_file_name = (SDEsp::get_instance())->get_files_path_result_();
-  domains_file_name            += std::string("domains.pvd");
-  File domains_file( domains_file_name.c_str() );
-  domains_file << *domains_;
-
-
-  //
-  // Load the conductivity. Anisotrope conductivity
-  std::cout << "Load the conductivity" << std::endl;
-  sigma_.reset( new Solver::Tensor_conductivity(mesh_) );
-
-
   //
   //
   //
@@ -243,16 +211,13 @@ Solver::SL_subtraction::operator () ( /*Solver::Phi& source,
   Function Phi_tot(V_);
   Phi_tot.interpolate(source);
   *Phi_tot.vector()  += *u.vector();
+
+
+ //
+ // Filter function over a subdomain
+ std::list<std::size_t> test_sub_domains{4,5};
+ solution_domain_extraction(Phi_tot, test_sub_domains, "Source_localization");
   
-//  //
-//  // 
-//  for ( CellIterator cell(*mesh_) ; !cell.end() ; ++cell)
-//    {
-//      if((*domains_)[*cell] != 5 )
-//	{
-//	  (*Phi_tot.vector())[cell->index];
-//	}
-//    }
 
 
   //
