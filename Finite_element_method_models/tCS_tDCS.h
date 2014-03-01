@@ -6,6 +6,7 @@
 #include <mutex>
 #include <stdexcept>      // std::logic_error
 #include <map>
+#include <thread>         // std::thread
 //
 // FEniCS
 //
@@ -29,6 +30,8 @@
 #include "Sub_domaines.h"
 #include "PDE_solver_parameters.h"
 //#include "Utils/Thread_dispatching.h"
+// Validation
+#include "Spheres_electric_monopole.h"
 //
 //
 //

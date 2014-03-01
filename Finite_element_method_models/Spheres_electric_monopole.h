@@ -11,6 +11,7 @@
 // Boost
 //
 #include <boost/math/special_functions/legendre.hpp>
+#include <boost/math/special_functions/spherical_harmonic.hpp>
 //
 // Eigen
 //
@@ -19,7 +20,7 @@
 //
 //
 #define NUM_SPHERES 4
-#define NUM_ITERATIONS 100
+#define NUM_ITERATIONS 300
 //
 //
 //
@@ -47,9 +48,7 @@ namespace Solver
   {
   private:
     //! Position of the injection
-    std::vector<double> r0_values_;
-    //! Position norm vector
-    double r0_values_norm_;
+    Point r0_values_;
     //! Intensity of the injection [I_] = A
     double I_;
 
@@ -91,7 +90,7 @@ namespace Solver
      *  Constructor of the class Spheres_electric_monopole
      *
      */
-    Spheres_electric_monopole(double, double, double);
+    Spheres_electric_monopole(const double, const Point&);
     /*!
      *  \brief Copy Constructor
      *
@@ -126,7 +125,7 @@ namespace Solver
      *  This method process the radial part of the solution at \vec{r} = \vec{x} and the rank {\it n}
      * 
      */
-    double R( const int, const Array<double>& ) const;
+    double R( const int, const Point& ) const;
     /*!
      *  \brief Radial sub part
      *
@@ -140,7 +139,14 @@ namespace Solver
      *
      *  This method process the angular part of the solution  \vec{r} = \vec{x} and the rank {\it n}. The solution has an azimuthal symetry, the the function are Legendre polynomial of the first kind.
      */
-    double P( const int, const Array<double>& )const;
+    double P( const int, const Point& )const;
+    /*!
+     *
+     *  \brief Spherical harmonics
+     *
+     *  This method process the angular part of the solution  \vec{r} = \vec{x} and the rank {\it n}.
+     */
+    double Yn( const int, const Point& )const;
   };
   /*!
    *  \brief Dump values for Spheres_electric_monopole

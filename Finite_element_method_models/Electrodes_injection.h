@@ -133,6 +133,23 @@ namespace Solver
      *
      */
     void set_boundary_cells( const std::map< std::string, std::map< std::size_t, std::list< MeshEntity  >  >  >& );
+    /*!
+     *  \brief 
+     *
+     *  This method record the cell index per probes.
+     *
+     */
+    const Solver::Intensity& information( const std::string label ) const
+      {
+	//
+	//
+	auto electrode = electrodes_map_.find(label);
+	//
+	if( electrode !=  electrodes_map_.end() )
+	  return electrode->second;
+	else
+	  abort();
+      };
   };
   /*!
    *  \brief Dump values for Electrodes_injection

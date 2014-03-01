@@ -15,8 +15,7 @@
 //
 #include "Electrodes_injection.h"
 #include "Conductivity.h"
-//#include "Boundaries.h"
-//#include "Sub_domaines.h"
+#include "Intensity.h"
 #include "PDE_solver_parameters.h"
 using namespace dolfin;
 //
@@ -72,12 +71,19 @@ namespace Solver
      */
     ~Electrodes_setup(){/*Do nothing*/};
     /*!
-     *  \brief Default Constructor
+     *  \brief Operator =
      *
-     *  Constructor of the class Electrodes_setup
+     *  Operator = of the class Electrodes_setup
      *
      */
     Electrodes_setup& operator = (const Electrodes_setup& ){return *this;};
+    /*!
+     *  \brief Operator []
+     *
+     *  Operator [] the class Electrodes_setup
+     *
+     */
+    const Solver::Intensity& operator [] (const char * label )const{return get_current()->information(label);};
 
   public:
     boost::shared_ptr< Solver::Electrodes_injection > get_current() const { return current_injection_;};

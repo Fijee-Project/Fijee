@@ -201,10 +201,6 @@ Solver::SL_subtraction::operator () ( /*Solver::Phi& source,
  
  std::cout << "int u dx = " << Sum << std::endl;
 
-//  // Theoric Potential
-//  Function Phi_th(*V_);
-//  Phi_th.interpolate(source);
-
   //
   // V_{tot} = \sum_{i=1}^{n} U_{i} \phi_{i}. where \{\phi_i\}_{i=1}^{n} is a basis for V_h, 
   // and U is a vector of expansion coefficients for V_{tot,h}.
