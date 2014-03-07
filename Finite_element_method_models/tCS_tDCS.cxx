@@ -182,7 +182,7 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
  double Sum = 1.e+6;
  //
  //  while ( abs( u_bar - old_u_bar ) > 0.1 )
- while ( abs(Sum) > 1.e-3 )
+ while ( fabs(Sum) > 1.e-3 )
    {
      old_u_bar = u_bar;
      u_bar  = u.vector()->sum();
@@ -244,42 +244,45 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
  // Validation process
  // !! WARNING !!
  // This process must be pluged only for spheres model
- std::cout << "Validation processing" << std::endl;
- //
- //
- std::cout << "je passe create T7" << std::endl;
- Solver::Spheres_electric_monopole mono_T7( (*electrodes_)["C5"].get_I_(),  
-					    (*electrodes_)["C5"].get_r0_projection_() );
- //
- std::cout << "je passe create T8" << std::endl;
- Solver::Spheres_electric_monopole mono_T8( (*electrodes_)["C6"].get_I_(),  
-					    (*electrodes_)["C6"].get_r0_projection_() );
- //
- //
- Function 
-   Injection_T7(V_),
-   Injection_T8(V_);
- Function & Injection = Injection_T7;
+ if( true )
+   {
+     std::cout << "Validation processing" << std::endl;
+     //
+     //
+     std::cout << "je passe create T7" << std::endl;
+     Solver::Spheres_electric_monopole mono_T7( (*electrodes_)["T7"].get_I_(),  
+						(*electrodes_)["T7"].get_r0_projection_() );
+     //
+     std::cout << "je passe create T8" << std::endl;
+     Solver::Spheres_electric_monopole mono_T8( (*electrodes_)["T8"].get_I_(),  
+						(*electrodes_)["T8"].get_r0_projection_() );
+     //
+     //
+     Function 
+       Injection_T7(V_),
+       Injection_T8(V_);
+     //Function & Injection = Injection_T7;
 
- //
- std::cout << "je passe T7" << std::endl;
- Injection_T7.interpolate( mono_T7 );
- // std::thread T7(Injection_T7.interpolate, mono_T7);
- std::cout << "je passe T8" << std::endl;
- Injection_T8.interpolate( mono_T8 );
- //
- std::cout << "je passe T7+T8" << std::endl;
- *(Injection_T7.vector()) += *(Injection_T8.vector());
- std::cout << "je passe T7+T8 end" << std::endl;
+     //
+     std::cout << "je passe T7" << std::endl;
+     Injection_T7.interpolate( mono_T7 );
+     // std::thread T7(Injection_T7.interpolate, mono_T7);
+     std::cout << "je passe T8" << std::endl;
+     Injection_T8.interpolate( mono_T8 );
+     //
+     std::cout << "je passe T7+T8" << std::endl;
+     *(Injection_T7.vector()) += *(Injection_T8.vector());
+     std::cout << "je passe T7+T8 end" << std::endl;
 
- //
- // Produce outputs
- std::string file_validation = (SDEsp::get_instance())->get_files_path_result_() + 
-   std::string("validation.pvd");
- File validation( file_validation.c_str() );
- //
- validation << Injection;
- std::cout << "je passe" << std::endl;
+     //
+     // Produce outputs
+     std::string file_validation = (SDEsp::get_instance())->get_files_path_result_() + 
+       std::string("validation.pvd");
+     File validation( file_validation.c_str() );
+     //
+     validation << Injection_T7;
+     std::cout << "je passe" << std::endl;
+   }
 
 
 //  //

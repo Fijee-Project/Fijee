@@ -1,6 +1,26 @@
 #include "Spheres_electric_monopole.h"
 //
 //
+double Pr( double r, double nu )
+{
+  return pow( r, nu );
+}
+double PPr( double r, double nu )
+{
+  return nu * pow( r, nu - 1 );
+}
+double Qr( double r, double nu )
+{
+  return pow( r, -(nu+1) );
+}
+double QPr( double r, double nu )
+{
+  return -(nu+1) * pow( r, -(nu + 2) );
+}
+
+
+//
+//
 //
 Solver::Spheres_electric_monopole::Spheres_electric_monopole(): 
   Expression(),
@@ -16,9 +36,10 @@ Solver::Spheres_electric_monopole::Spheres_electric_monopole( const double I, co
   //
   //
   //
-  r0_values_ = Point( Injection.x()*1.e-3, Injection.y()*1.e-3, Injection.z()*1.e-3 );
+  r0_values_ = Point( Injection.x() * 1.e-3, Injection.y() * 1.e-3, Injection.z() * 1.e-3 );
   //
   //
+  std::cout << "LALALA\n" << r0_values_ << std::endl;
   r_sphere_[0] = r0_values_.norm(); // scalp (medium 1) r = 92mm
   r_sphere_[1] = 86. * 1.e-3;               // skull (medium 2)
   r_sphere_[2] = 80. * 1.e-3;               // CSF   (medium 3)
@@ -53,6 +74,12 @@ Solver::Spheres_electric_monopole::Spheres_electric_monopole( const double I, co
       //
       //
       M_[0][j] <<
+	0., 0.,
+	0., 0.;
+      //
+      M_det[0][j] = 0.;
+      //
+      M_Inv[0][j] <<
 	0., 0.,
 	0., 0.;
       //
@@ -105,7 +132,82 @@ Solver::Spheres_electric_monopole::Spheres_electric_monopole( const double I, co
 	      M_[n][j] <<
 		M00, M01,
 		M10, M11;
+	      // Determinant
+	      double delta;
+	      //
+	      delta  = ((nu_[n][j]+1) + nu_[n][j-1]*lambda) * ((nu_[n][j-1]+1)*lambda + nu_[n][j]);
+	      delta -= (nu_[n][j-1]*lambda - nu_[n][j]) * ((nu_[n][j-1]+1)*lambda - (nu_[n][j]+1));
+	      delta /= (2*nu_[n][j] + 1)*(2*nu_[n][j] + 1);
+	      //
+	      M_det[n][j] = delta;
+	      // Inverse
+	      M_Inv[n][j] <<
+		M11, -M01,
+		-M10, M00;
+	      //
+	      M_Inv[n][j] /= delta;
 	      
+	      
+	      if ( false )
+		{
+		  Eigen::Matrix<double, 2,2> alpha, beta, M_test;
+		  //
+		  alpha <<
+		    Pr( r_sphere_[j], nu_[n][j] ),               Qr( r_sphere_[j], nu_[n][j] ),
+		    sigma_[j][0]*PPr( r_sphere_[j], nu_[n][j] ), sigma_[j][0]*QPr( r_sphere_[j], nu_[n][j] );
+		  //
+		  beta << 
+		    Pr( r_sphere_[j], nu_[n][j-1] ),                 Qr( r_sphere_[j], nu_[n][j-1] ),
+		    sigma_[j-1][0]*PPr( r_sphere_[j], nu_[n][j-1] ), sigma_[j-1][0]*QPr( r_sphere_[j], nu_[n][j-1] );
+		  //
+		  M_test = alpha.inverse() * beta;
+		  //
+		  std::cout << "transfer matrix m: \n" << M_[n][j] << std::endl;
+		  std::cout << "transfer test   m: \n" << M_test << std::endl;
+		  
+		  //
+		  // Determinant
+		  double delta;
+		  //
+		  delta  = ((nu_[n][j]+1) + nu_[n][j-1]*lambda) * ((nu_[n][j-1]+1)*lambda + nu_[n][j]);
+		  delta -= (nu_[n][j-1]*lambda - nu_[n][j]) * ((nu_[n][j-1]+1)*lambda - (nu_[n][j]+1));
+		  delta /= (2*nu_[n][j] + 1)*(2*nu_[n][j] + 1);
+		  //
+		  std::cout << "|m|: " << M_[n][j].determinant() << std::endl;
+		  std::cout << "delta: " << delta << std::endl;
+		  
+		  //
+		  // Inverse
+		  double 
+		    M_Inv00, 
+		    M_Inv01, 
+		    M_Inv10, 
+		    M_Inv11;
+		  //
+		  M_coeff /= delta;
+		  //
+		  M_Inv00  = M_coeff * pow( r_sphere_[j], nu_[n][j] - nu_[n][j-1] );
+		  M_Inv00 *= (nu_[n][j-1] + 1) * lambda + nu_[n][j];
+		  //
+		  M_Inv01  = M_coeff / pow( r_sphere_[j], nu_[n][j] + nu_[n][j-1] + 1 );
+		  M_Inv01 *= (nu_[n][j-1] + 1) * lambda - (nu_[n][j] + 1);
+		  //
+		  M_Inv10  = M_coeff * pow( r_sphere_[j], nu_[n][j] + nu_[n][j-1] + 1 );
+		  M_Inv10 *= nu_[n][j-1] * lambda - nu_[n][j];
+		  //
+		  M_Inv11  = M_coeff * pow( r_sphere_[j], nu_[n][j-1] - nu_[n][j] );
+		  M_Inv11 *= (nu_[n][j] + 1) + lambda * nu_[n][j-1];
+		  //
+		  Eigen::Matrix< double, 2, 2 > M_Inv;
+		  M_Inv << 
+		    M_Inv00, M_Inv01, 
+		    M_Inv10, M_Inv11;
+		  //
+		  //
+		  std::cout << "transfer matrix m^-1: \n" << M_[n][j].inverse() << std::endl;
+		  std::cout << "transfer test   m^-1: \n" << M_Inv << std::endl;
+		}
+
 //	      std::cout << "Mcoeff = " << M_coeff << " r_sphere_[" << j << "]: " << r_sphere_[j] 
 //			<< " lambda: " << lambda << "\n"
 //			<< " nu_[" << n << "][" << j-1 << "]: " << nu_[n][j-1] 
@@ -145,7 +247,7 @@ Solver::Spheres_electric_monopole::Spheres_electric_monopole( const double I, co
 	    {
 	      //
 	      // A_{j}^{(1,2)}  B_{j}^{(1,2)}
-	      A_B_[n][NUM_SPHERES - j - 1][0] = M_[n][NUM_SPHERES - j].inverse() * A_B_[n][NUM_SPHERES - j][0] ;
+	      A_B_[n][NUM_SPHERES - j - 1][0] = M_Inv[n][NUM_SPHERES - j] * A_B_[n][NUM_SPHERES - j][0] ;
 	      //
 	      A_B_[n][j][1] = M_[n][j] * A_B_[n][j-1][1];
 	    }
@@ -185,78 +287,125 @@ Solver::Spheres_electric_monopole::Spheres_electric_monopole(const Spheres_elect
 //
 //
 void 
-Solver::Spheres_electric_monopole::eval(Array<double>& values, const Array<double>& x) const
+Solver::Spheres_electric_monopole::eval(Array<double>& values, const Array<double>& x, const ufc::cell& cell) const
 {
   //
   //
   Point evaluation_point(x[0] * 1.e-3, x[1] * 1.e-3, x[2] * 1.e-3);
+  double point_norm = evaluation_point.norm();
+  //
+//  if( fabs( point_norm - r_sphere_[3] ) < 0.001 ) point_norm = r_sphere_[3];
+//  else if( fabs( point_norm - r_sphere_[2] ) < 0.001 ) point_norm = r_sphere_[2];
+//  else if( fabs( point_norm - r_sphere_[1] ) < 0.001 ) point_norm = r_sphere_[1];
+//  else if( fabs( point_norm - r_sphere_[0] ) < 0.001 ) point_norm = r_sphere_[0];
 
   //
   //
   double 
     tempo_value  = 1.e+6,
     return_value = 0.;
+  //
+  int n = 0;
 
+  //
+  //
+  while( std::abs(return_value - tempo_value ) > 1.e-4 )
+    {
+      //
+      //
+      tempo_value = return_value;
+      //
+      if (++n > NUM_ITERATIONS )
+	{
+	  std::cerr << "Not enough iteration asked for the validation process!!" << std::endl;
+	  abort();
+	}
+  
+//      std::cout << cell.index
+//		<< " " << n 
+//		<< " " << evaluation_point.norm()
+//		<< " " << r0_values_.norm()
+//		<< " " << evaluation_point.dot(r0_values_) /(evaluation_point.norm() * r0_values_.norm());
 
-  //
-  //
-  //
-//  if (++n > NUM_ITERATIONS )
-//    {
-//      std::cerr << "Not enough iteration asked for the validation process!!" << std::endl;
-//      abort();
-//    }
+      //
+      return_value += I_ * (2*n + 1) * R(n,point_norm) * P(n,evaluation_point)  / ( 4 * 3.14159 );
+   }
 
      //
-  for (int n = 1 ; n < NUM_ITERATIONS ; n++)
-    {
-    return_value += I_ * (2*n + 1) * R(n,evaluation_point) * P(n,evaluation_point);
-
-//      std::cout << "I_: " << I_
-//		<< " n: " << n 
-//		<< " R: " << R(n,evaluation_point)
-//		<< " P: " << P(n,evaluation_point)
+      std::cout << " n: " << n 
+		<< " r: " << point_norm
+		<< " r0: " << r0_values_.norm()
+//		<< " cos: " <<  evaluation_point.dot(r0_values_) /(evaluation_point.norm() * r0_values_.norm())
+		<< " R: " << R(n,point_norm)
+		<< " P: " << P(n,evaluation_point)
 //		<< " return: " << return_value
-//		<< std::endl;
-    }
+		<< std::endl;
+      //      std::cout << "n: " << n << " " << return_value << " " << tempo_value << std::endl;
 
   //
   //
-  values[0] = return_value;
+      values[0] = ( n > 100 ? 0. : return_value );
 }
 //
 //
 //
 double 
-Solver::Spheres_electric_monopole::R(const int n,  const Point& x ) const
+Solver::Spheres_electric_monopole::R(const int n,  const double r ) const
 {
   //
   //
-  double r = x.norm();
+  //  double r = x.norm();
   
   //
   // r_{j} >= r >= r_{j+1}
   int j = 0;
   //
-  if( r > r_sphere_[1] ) 
+  if( r >= r_sphere_[1] ) 
     j = 0;
- else if( r <= r_sphere_[1] &&  r > r_sphere_[2] )
-    j = 1;
-  else if( r <= r_sphere_[2] &&  r > r_sphere_[3] )
-    j = 2;
+ else if( r <= r_sphere_[1] &&  r >= r_sphere_[2] )
+   {
+     if( fabs( r - r_sphere_[1] ) < 0.001 ) 
+       {
+	 if( R(n, 0, 0, r) <  R(n, 1, 0, r))
+	   j = 0;
+	 else
+	   j = 1;
+       }
+     else if ( fabs( r - r_sphere_[2] ) < 0.001 )
+       {
+	 if( R(n, 1, 0, r) <=  R(n, 2, 0, r))
+	   j = 1;
+	 else
+	   j = 2;
+       }
+     else
+       j = 1;
+   }
+  else if( r <= r_sphere_[2] &&  r >= r_sphere_[3] )
+    {
+      if( fabs( r - r_sphere_[2] ) < 0.001 ) 
+       {
+	 if( R(n, 1, 0, r) <  R(n, 2, 0, r))
+	   j = 1;
+	 else
+	   j = 2;
+       }
+     else if ( fabs( r - r_sphere_[3] ) < 0.001 )
+       {
+	 if( R(n, 2, 0, r) <=  R(n, 3, 0, r))
+	   j = 2;
+	 else
+	   j = 3;
+       }
+     else
+       j = 2;
+    }
   else
     j = 3;
 
 //  std::cout 
-//    << "n: " << n 
-//    << " j: " << j
-//    << "  r0: " << r0_values_.norm()
-//    << "  r: " << r
-//    << "\n  R_coeff_[n]: " << R_coeff_[n]
-//    << " R(n, J, 1, r0): " << R(n, j, 1, r_sphere_[0])
-//    << " R(n, J, 0, r): " << R(n, j, 0, r)
-//    << " return: " << R_coeff_[n] * R(n, j, 1, r_sphere_[0]) * R(n, j, 0, r)
-//    << std::endl << std::endl;
+//    << " " << j
+//    << " " << R_coeff_[n];
 
   //
   // The injection is done on the scalp
@@ -269,6 +418,16 @@ double
 Solver::Spheres_electric_monopole::R( const int n, const int j,  
 				      const int i, const double r ) const
 {
+//  std::cout 
+//    << " " << i
+//    << " " << A_B_[n][j][i][0] 
+//    << " " << pow(r,nu_[n][j])
+//    << " " << A_B_[n][j][i][1]
+//    << " " << pow(r,- (nu_[n][j] + 1) );
+//  
+//  if (i == 0)
+//    std::cout << std::endl;
+
   return A_B_[n][j][i][0] * pow(r,nu_[n][j]) + A_B_[n][j][i][1] / pow(r,nu_[n][j] + 1);
 }
 //

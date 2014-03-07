@@ -72,6 +72,10 @@ namespace Solver
     Eigen::Matrix <double, 2, 1>  A_B_[NUM_ITERATIONS][NUM_SPHERES][2];
     //! Transfere matrix
     Eigen::Matrix <double, 2, 2> M_[NUM_ITERATIONS][NUM_SPHERES];
+    //! Transfere matrix inv
+    Eigen::Matrix <double, 2, 2> M_Inv[NUM_ITERATIONS][NUM_SPHERES];
+    //! Transfere matrix deter
+    double M_det[NUM_ITERATIONS][NUM_SPHERES];
     //! Radial function coefficient
     double R_coeff_[NUM_ITERATIONS];
 
@@ -118,14 +122,14 @@ namespace Solver
   private:
     /*!
      */
-    virtual void eval(Array<double>& values, const Array<double>& x) const;
+    virtual void eval(Array<double>& values, const Array<double>& x, const ufc::cell&) const;
     /*!
      *  \brief Radial part
      *
      *  This method process the radial part of the solution at \vec{r} = \vec{x} and the rank {\it n}
      * 
      */
-    double R( const int, const Point& ) const;
+    double R( const int, const double ) const;
     /*!
      *  \brief Radial sub part
      *
