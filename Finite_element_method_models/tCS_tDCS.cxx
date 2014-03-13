@@ -244,7 +244,7 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
  // Validation process
  // !! WARNING !!
  // This process must be pluged only for spheres model
- if( true )
+ if( false )
    {
      std::cout << "Validation processing" << std::endl;
      //

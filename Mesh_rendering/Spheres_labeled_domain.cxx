@@ -218,10 +218,10 @@ Domains_Spheres_labeled::model_segmentation()
   Labeled_domain< Spheres_implicite_domain, GT::Point_3, std::list< Point_vector > > 
     brain( "../share/sphere_brain.xyz" );
   //  
-  //  scalp( data_position_ );
-  //  skull( data_position_ );
-  //  CSF  ( data_position_ );
-  //  brain( data_position_ );
+//    scalp( data_position_ );
+//    skull( data_position_ );
+//    CSF  ( data_position_ );
+//    brain( data_position_ );
   std::thread scalp_thread(std::ref(scalp), data_position_);
   std::thread skull_thread(std::ref(skull), data_position_);
   std::thread CSF_thread  (std::ref(CSF),   data_position_);

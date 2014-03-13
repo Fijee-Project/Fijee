@@ -72,7 +72,7 @@ namespace Domains
      *  Operator = of the class Electrode_shape_sphere
      *
      */
-    Electrode_shape_sphere& operator = ( const Electrode_shape_sphere& ){};
+    Electrode_shape_sphere& operator = ( const Electrode_shape_sphere& ){return *this;};
 
   public:
     ucsf_get_macro(radius_, float);

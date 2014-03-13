@@ -5,7 +5,7 @@ export PREFIX =
 export PATH_SOFT =/home/cobigo/devel/CPP/
 DEBUG         = no
 VERSION       = 1.0
-DIST          = fijee
+DIST          = Fijee
 
 #################
 ## COMPILATION ##
@@ -23,11 +23,11 @@ ifeq ($(DEBUG),yes)
 CXXFLAGS_MODE  = -g -DDEBUG
 CUDAFLAGS_MODE = 
 else
-CXXFLAGS_MODE  = -O3 #-DGPU
+CXXFLAGS_MODE  = # bug Dolfin -O3 #-DGPU
 CUDAFLAGS_MODE = -O3 -m64 -gencode arch=compute_20,code=sm_20 
 endif
 #
-export CXXFLAGS  += $(CXXFLAGS_MODE) -Wno-deprecated -std=c++0x -frounding-math -DCGAL_EIGEN3_ENABLED -DDEBUG_UCSF #-DDEBUG_TRACE
+export CXXFLAGS  += $(CXXFLAGS_MODE) -Wno-deprecated -std=c++11 -frounding-math -DCGAL_EIGEN3_ENABLED -DDEBUG_UCSF #-DDEBUG_TRACE -std=c++0x -std=c++11 or -std=gnu++11
 export CUDAFLAGS += $(CUDAFLAGS_MODE)
 export UFL = ffc
 
@@ -38,7 +38,13 @@ export UFL = ffc
 ####################
 CGAL_DIR  = $(PATH_SOFT)/CGAL/
 NIFTI_DIR = $(PATH_SOFT)/nifti
-VTK_DIR   = $(PATH_SOFT)/VTK
+#
+# VTK
+#
+VTK_DIR     = $(PATH_SOFT)/VTK
+export VTK_VERSION = vtk-5.10
+export VTK_LIBS    = -lvtkCommon -lvtkFiltering -lvtkGenericFiltering -lvtkGraphics -lvtkIO -lvtkRendering -lvtksys -lvtkVolumeRendering -lvtkzlib -lvtkfreetype -lvtkftgl -lvtkImaging -lvtkhdf5 -lvtkhdf5_hl -lvtkexpat -lvtktiff -lvtkjpeg -lvtkpng -lvtksqlite -lvtkmetaio -lLSDyna -lvtkNetCDF -lvtkDICOMParser -lvtkverdict -lvtkNetCDF -lvtkHybrid -lvtkNetCDF_cxx -lvtkexoIIc -lvtklibxml2 -lvtkalglib -lvtkproj4  
+
 #
 ifeq ($(DEBUG),yes)
 export CGAL   = $(CGAL_DIR)/install
@@ -52,7 +58,7 @@ endif
 #
 export EIGEN3   = $(PATH_SOFT)/Eigen/install
 export FENICS   = $(PATH_SOFT)/FEniCS/install/
-export CUDA_LIB = /usr/local/cuda-5.0/lib64/
+export CUDA_LIB = /usr/local/cuda/lib64/
 
 ######################
 ## Main DIRECTORIES ##
