@@ -55,7 +55,7 @@ namespace Solver
      *  Constructor of the class Tensor_conductivity
      *
      */
-    Tensor_conductivity( boost::shared_ptr< const Mesh > );
+    Tensor_conductivity( std::shared_ptr< const Mesh > );
     /*!
      *  \brief destructor
      *

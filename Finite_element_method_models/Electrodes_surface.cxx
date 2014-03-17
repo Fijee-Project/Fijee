@@ -6,8 +6,8 @@ typedef Solver::PDE_solver_parameters SDEsp;
 //
 //
 //
-Solver::Electrodes_surface::Electrodes_surface( boost::shared_ptr< Solver::Electrodes_setup > Electrodes,
-						const boost::shared_ptr< MeshFunction< std::size_t > > Boundaries,
+Solver::Electrodes_surface::Electrodes_surface( std::shared_ptr< Solver::Electrodes_setup > Electrodes,
+						const std::shared_ptr< MeshFunction< std::size_t > > Boundaries,
 						const std::map< std::size_t, std::size_t >& Map_Index_Cell ):
   SubDomain(), electrodes_(Electrodes), boundaries_(Boundaries)
 {

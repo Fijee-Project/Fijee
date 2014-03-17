@@ -36,9 +36,9 @@ namespace Solver
   {
   private:
     //! Electrodes setup
-    boost::shared_ptr< Solver::Electrodes_setup > electrodes_;
+    std::shared_ptr< Solver::Electrodes_setup > electrodes_;
     //! Boundary mesh function
-    boost::shared_ptr< MeshFunction< std::size_t > > boundaries_;
+    std::shared_ptr< MeshFunction< std::size_t > > boundaries_;
     //! 
     mutable std::list< std::tuple< 
       std::string,  // 0 - electrode label
@@ -64,8 +64,8 @@ namespace Solver
      *  Constructor of the class Electrodes_surface
      *
      */
-    Electrodes_surface( boost::shared_ptr< Solver::Electrodes_setup > ,
-			const boost::shared_ptr< MeshFunction< std::size_t > > ,
+    Electrodes_surface( std::shared_ptr< Solver::Electrodes_setup > ,
+			const std::shared_ptr< MeshFunction< std::size_t > > ,
 			const std::map< std::size_t, std::size_t >&  );
     /*!
      *  \brief destructor

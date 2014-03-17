@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <complex>
+#include <Eigen/Dense>
 
 using namespace dolfin;
 /*!

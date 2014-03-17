@@ -63,7 +63,7 @@ Solver::Physics::solution_domain_extraction( const dolfin::Function& u,
   std::string extracted_solution = (SDEsp::get_instance())->get_files_path_result_();
   extracted_solution            += sub_dom;
   //
-  std::ofstream VTU_xml_file(extracted_solution);
+  std::ofstream VTU_xml_file(extracted_solution.c_str(), std::ofstream::out);
   VTU_xml_file.precision(16);
 
   // Allocate memory for function values at vertices

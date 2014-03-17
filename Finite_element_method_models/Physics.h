@@ -1,5 +1,6 @@
 #ifndef _PHYSICS_H
 #define _PHYSICS_H
+#include <fstream>  
 //
 // FEniCS
 //
@@ -31,11 +32,11 @@ namespace Solver
   {
   protected:
     //! Head model mesh
-    boost::shared_ptr< dolfin::Mesh > mesh_;
+    std::shared_ptr< dolfin::Mesh > mesh_;
     //! Head model sub domains
-    boost::shared_ptr< MeshFunction< std::size_t > > domains_;
+    std::shared_ptr< MeshFunction< std::size_t > > domains_;
     //! Anisotropic conductivity
-    boost::shared_ptr< Solver::Tensor_conductivity > sigma_;
+    std::shared_ptr< Solver::Tensor_conductivity > sigma_;
 
 
   public:

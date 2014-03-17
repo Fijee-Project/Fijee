@@ -55,11 +55,11 @@ namespace Solver
     //! Dipoles list
     std::list< Solver::Current_density > dipoles_list_;
     //! Function space
-    boost::shared_ptr< SLD_model::FunctionSpace > V_;
+    std::shared_ptr< SLD_model::FunctionSpace > V_;
     //! Periphery
-    boost::shared_ptr< Periphery > perifery_;
+    std::shared_ptr< Periphery > perifery_;
     //! Boundarie conditions
-    boost::shared_ptr<  FacetFunction< size_t > > boundaries_;
+    std::shared_ptr<  FacetFunction< size_t > > boundaries_;
     
   private:
     std::mutex critical_zone_;

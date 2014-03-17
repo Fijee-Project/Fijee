@@ -16,6 +16,7 @@ tensorElement = TensorElement("Lagrange", cell, 1)
 Phi_s   = TrialFunction(scalarElement)
 v       = TestFunction(scalarElement)
 n       = scalarElement.cell().n
+#n       = FacetNormal(cell)
 
 a_inf   = Coefficient(tensorElement)
 a_sigma = Coefficient(tensorElement)

@@ -42,9 +42,9 @@ namespace Solver
   {
   private:
     //! Electrodes list for current injected
-    boost::shared_ptr< Solver::Electrodes_injection > current_injection_;
+    std::shared_ptr< Solver::Electrodes_injection > current_injection_;
     //! Electrodes list for potential applied
-    boost::shared_ptr< Solver::Electrodes_injection > potential_injection_;
+    std::shared_ptr< Solver::Electrodes_injection > potential_injection_;
     //! number of electrodes
     int number_electrodes_;
 
@@ -86,8 +86,8 @@ namespace Solver
     const Solver::Intensity& operator [] (const char * label )const{return get_current()->information(label);};
 
   public:
-    boost::shared_ptr< Solver::Electrodes_injection > get_current() const { return current_injection_;};
-    boost::shared_ptr< Solver::Electrodes_injection > get_potential() const { return potential_injection_;};
+    std::shared_ptr< Solver::Electrodes_injection > get_current() const { return current_injection_;};
+    std::shared_ptr< Solver::Electrodes_injection > get_potential() const { return potential_injection_;};
 
   public:
     /*!

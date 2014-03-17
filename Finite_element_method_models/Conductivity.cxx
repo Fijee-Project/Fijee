@@ -6,7 +6,7 @@ typedef Solver::PDE_solver_parameters SDEsp;
 //
 //
 //
-Solver::Tensor_conductivity::Tensor_conductivity( boost::shared_ptr< const Mesh > Mesh_head ): 
+Solver::Tensor_conductivity::Tensor_conductivity( std::shared_ptr< const Mesh > Mesh_head ): 
   Expression(3,3)
 {
   //

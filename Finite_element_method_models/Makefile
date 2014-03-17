@@ -9,11 +9,6 @@ LIBS    = -ldolfin  -lpugixml -lboost_mpi #-lboost_math_tr1
 #LIBS   += -L$(VTK)/lib/$(VTK_VERSION)/ $(VTK_LIBS)
 
 #
-#
-#
-CXXFLAGS += -pthread 
-
-#
 # Sources
 #
 UFL_SRC    = SLS_model.ufl SLD_model.ufl tCS_model.ufl tCS_field_model.ufl

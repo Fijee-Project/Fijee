@@ -54,9 +54,9 @@ namespace Solver
     //! Dipoles list
     std::list< Solver::Phi > dipoles_list_;
     //! Function space
-    boost::shared_ptr< SLS_model::FunctionSpace > V_;
+    std::shared_ptr< SLS_model::FunctionSpace > V_;
     //! Boundarie conditions
-    boost::shared_ptr<  FacetFunction< size_t > > boundaries_;
+    std::shared_ptr<  FacetFunction< size_t > > boundaries_;
     
   private:
     std::mutex critical_zone_;

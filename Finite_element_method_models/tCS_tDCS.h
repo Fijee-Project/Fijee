@@ -61,17 +61,17 @@ namespace Solver
   class tCS_tDCS : Physics
   {
     //! Electrodes list
-    boost::shared_ptr< Solver::Electrodes_setup > electrodes_;
+    std::shared_ptr< Solver::Electrodes_setup > electrodes_;
     //! Head model facets collection
-    boost::shared_ptr< MeshValueCollection< std::size_t > > mesh_facets_collection_;
+    std::shared_ptr< MeshValueCollection< std::size_t > > mesh_facets_collection_;
     //! Function space
-    boost::shared_ptr< tCS_model::FunctionSpace > V_;
+    std::shared_ptr< tCS_model::FunctionSpace > V_;
     //! Function space
-    boost::shared_ptr< tCS_field_model::FunctionSpace > V_field_;
+    std::shared_ptr< tCS_field_model::FunctionSpace > V_field_;
     //! Periphery
-    boost::shared_ptr< Periphery > perifery_;
+    std::shared_ptr< Periphery > perifery_;
     //! Boundarie conditions
-    boost::shared_ptr< MeshFunction< std::size_t > > boundaries_;
+    std::shared_ptr< MeshFunction< std::size_t > > boundaries_;
 
     // std::map< std::size_t, std::size_t > map_index_cell_;
 
