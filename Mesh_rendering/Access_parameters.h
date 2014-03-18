@@ -93,6 +93,8 @@ namespace Domains
     std::string outer_skull_surface_;
     //! Inner skull surface
     std::string inner_skull_surface_;
+    //! Inner brain surface
+    std::string inner_brain_surface_;
     //! Left hemisphere's pial
     std::string lh_pial_;
     //! Right hemisphere's pial
@@ -311,6 +313,13 @@ namespace Domains
      */
     ucsf_get_string_macro(inner_skull_surface_);
    /*!
+     *  \brief Get inner_brain_surface_
+     *
+     *  This method return the inner brain surface.
+     *
+     */
+    ucsf_get_string_macro(inner_brain_surface_);   
+    /*!
      *  \brief Get lh_pial_
      *
      *  This method return the left hemisphere's pial.

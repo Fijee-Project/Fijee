@@ -33,6 +33,7 @@ DAp::Access_parameters():
   outer_skin_surface_  = skull_scalp_files_path + "_outer_skin_surface.stl";
   outer_skull_surface_ = skull_scalp_files_path + "_outer_skull_surface.stl";
   inner_skull_surface_ = skull_scalp_files_path + "_inner_skull_surface.stl";
+  inner_brain_surface_ = skull_scalp_files_path + "_brain_surface.stl";
 
   //
   // Cortical segmentation

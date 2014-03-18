@@ -4,8 +4,9 @@
 //
 // UCSF
 //
-#include "Head_labeled_domain.h"
 #include "Utils/enum.h"
+#include "Head_labeled_domain.h"
+#include "CGAL_image_filtering.h"
 #include "Labeled_domain.h"
 #include "VTK_implicite_domain.h"
 #include "Access_parameters.h"
@@ -31,6 +32,7 @@ typedef CGAL::Point_with_normal_3<Kernel> Point_with_normal;
 typedef CGAL::Surface_mesh_default_triangulation_3 Triangle_surface;
 typedef Triangle_surface::Geom_traits GT;
 typedef CGAL::Mesh_3::Image_to_labeled_function_wrapper<CGAL::Image_3, Kernel > Image_wrapper;
+typedef Domains::CGAL_image_filtering<CGAL::Image_3, Kernel > Image_filter;
 //
 // We give a comprehensive type name
 //
@@ -232,6 +234,8 @@ Domains_Head_labeled::model_segmentation()
     outside_skull( (DAp::get_instance())->get_outer_skull_surface_() );
   Labeled_domain< VTK_implicite_domain, GT::Point_3, std::list< Point_vector > > 
     inside_skull( (DAp::get_instance())->get_inner_skull_surface_() );
+  Labeled_domain< VTK_implicite_domain, GT::Point_3, std::list< Point_vector > > 
+    inside_brain( (DAp::get_instance())->get_inner_brain_surface_() );
   //  
   //  outside_scalp( data_position_ );
   //  outside_skull( data_position_ );
@@ -239,9 +243,11 @@ Domains_Head_labeled::model_segmentation()
   std::thread outside_scalp_thread(std::ref(outside_scalp), data_position_);
   std::thread outside_skull_thread(std::ref(outside_skull), data_position_);
   std::thread inside_skull_thread (std::ref(inside_skull), data_position_);
+  std::thread inside_brain_thread (std::ref(inside_brain), data_position_);
   outside_scalp_thread.join();
   outside_skull_thread.join();
   inside_skull_thread.join();
+  inside_brain_thread.join();
 
   //
   // Cortical segmentation
@@ -292,6 +298,26 @@ Domains_Head_labeled::model_segmentation()
   Image_wrapper subcortical_brain ( aseg );
 
   //
+  // SPM volumes
+  //
+  CGAL::Image_3 SPM_air;
+  SPM_air.read( "/home/cobigo/NIFTI_Skull/smask_air.hdr" );
+  //  Image_wrapper spm_air( SPM_air );
+  Image_filter  air( SPM_air, data_position_ );
+  air.init( 0 /* % of outliers to remove */);
+  //
+  CGAL::Image_3 SPM_bones;
+  SPM_bones.read( "/home/cobigo/NIFTI_Skull/smask_bone.hdr" );
+  Image_filter spm_bones( SPM_bones, data_position_ );
+  spm_bones.init( 0 /* % of outliers to remove */);
+  //
+  CGAL::Image_3 SPM_csf;
+  SPM_csf.read( "/home/cobigo/NIFTI_Skull/smask_csf.hdr" );
+  Image_filter spm_csf( SPM_csf, data_position_ );
+  spm_csf.init( 0 /* % of outliers to remove */);
+
+
+  //
   // main loop building inrimage data
 #ifdef DEBUG_UCSF
   timerLog->MarkEvent("building inrimage data");
@@ -337,19 +363,48 @@ Domains_Head_labeled::model_segmentation()
 	  if( outside_scalp.inside_domain( cell_center ) ) 
 	    data_label_[ idx ] = OUTSIDE_SCALP; 
 	  //
-	  if( outside_skull.inside_domain( cell_center ) ) 
-	    data_label_[ idx ] = OUTSIDE_SKULL; 
+//	  if( outside_skull.inside_domain( cell_center ) ) 
+//	    data_label_[ idx ] = OUTSIDE_SKULL; 
+//	  //
+//	  if( inside_skull.inside_domain( cell_center ) ||
+//	      subcortical_brain(cell_center_aseg) == CSF )
+//	    {
+//	      data_label_[ idx ] = CEREBROSPINAL_FLUID; 
+//	      is_in_CSF = true;
+//	    }
+//	  else
+//	    is_in_CSF = false;
 	  //
-	  if( inside_skull.inside_domain( cell_center ) ||
-	      subcortical_brain(cell_center_aseg) == CSF )
+	  if( spm_bones.inside(cell_center_aseg) )
+	    {
+	      data_label_[ idx ] = OUTSIDE_SKULL; 
+	    }
+	  //
+	  //
+	  if( ( spm_csf.inside(cell_center_aseg) || 
+		subcortical_brain(cell_center_aseg) == CSF) &&
+	      !spm_bones.inside(cell_center_aseg) )
 	    {
 	      data_label_[ idx ] = CEREBROSPINAL_FLUID; 
 	      is_in_CSF = true;
 	    }
 	  else
 	    is_in_CSF = false;
+	  //
+//1	  if( air.inside(cell_center_aseg) )
+//1	    {
+//1	      data_label_[ idx ] = AIR_IN_SKULL; 
+//1	    }
 
-	  if ( is_in_CSF ) 
+	  //
+	  //
+	  if ( !inside_skull.inside_domain( cell_center ) && is_in_CSF ) 
+	    {
+	      // Eyes
+	    }
+	  //
+	  //
+	  if ( inside_skull.inside_domain( cell_center )/*is_in_CSF*/ ) 
 	    {
 	      //
 	      // Gray-matter

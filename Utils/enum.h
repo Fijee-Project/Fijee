@@ -277,6 +277,10 @@ enum Brain_segmentation
     //
     //
     ELECTRODE                 = 100,
+    //
+    //
+    AIR_IN_SKULL              = 130,
+    EYE                       = 131,
   }; 
 //
 //
