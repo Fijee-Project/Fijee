@@ -631,6 +631,7 @@ DHct::make_conductivity( const C3t3& Mesh )
 	  cell_pmap.subdomain_index( cit ) != OUTSIDE_SKULL       &&
 	  cell_pmap.subdomain_index( cit ) != CEREBROSPINAL_FLUID &&
 	  cell_pmap.subdomain_index( cit ) != AIR_IN_SKULL        &&
+	  cell_pmap.subdomain_index( cit ) != SPONGIOSA_SKULL     &&
 	  cell_pmap.subdomain_index( cit ) != EYE                 &&
 	  cell_pmap.subdomain_index( cit ) != ELECTRODE )
 	{
@@ -729,18 +730,46 @@ DHct::make_conductivity( const C3t3& Mesh )
 	  Cell_conductivity 
 	    cell_parameters ( cell_id, cell_subdomain,
 			      cell_vertices[4](0),cell_vertices[4](1),cell_vertices[4](2),/* centroid */
-			      0.0132,/* l1 */
+			      0.007,/* l1 */
 			      1., 0., 0., /* eigenvec V1 */
-			      0.0132,/* l2 */
+			      0.007,/* l2 */
 			      0., 1., 0., /* eigenvec V2 */
-			      0.0132,/* l3 */
+			      0.007,/* l3 */
 			      0., 0., 1., /* eigenvec V3 */
-			      0.0132, /*C00*/
+			      0.007, /*C00*/
 			      0.00,   /*C01*/
 			      0.00,   /*C02*/
-			      0.0132, /*C11*/
+			      0.007, /*C11*/
 			      0.00,   /*C12*/
-			      0.0132  /*C22*/ );
+			      0.007  /*C22*/ );
+	  
+	  //
+	  // Add link to the list
+	  list_cell_conductivity_.push_back( std::move(cell_parameters) );
+	} // and of scalp and skull //
+
+      /////////////////////
+      // Skull spongiosa //
+      /////////////////////
+      else if ( cell_pmap.subdomain_index( cit ) == SPONGIOSA_SKULL )
+	{
+	  //
+	  //
+	  Cell_conductivity 
+	    cell_parameters ( cell_id, cell_subdomain,
+			      cell_vertices[4](0),cell_vertices[4](1),cell_vertices[4](2),/* centroid */
+			      0.025,/* l1 */
+			      1., 0., 0., /* eigenvec V1 */
+			      0.025,/* l2 */
+			      0., 1., 0., /* eigenvec V2 */
+			      0.025,/* l3 */
+			      0., 0., 1., /* eigenvec V3 */
+			      0.025, /*C00*/
+			      0.00,   /*C01*/
+			      0.00,   /*C02*/
+			      0.025, /*C11*/
+			      0.00,   /*C12*/
+			      0.025  /*C22*/ );
 	  
 	  //
 	  // Add link to the list

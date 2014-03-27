@@ -37,7 +37,7 @@ namespace Domains
    *
    *  This class is an example of class I will have to use
    */
-  class Head_conductivity_tensor : public Conductivity_tensor//, public Utils::Statistical_analysis
+  class Head_conductivity_tensor : public Conductivity_tensor
   {
   private:
     //

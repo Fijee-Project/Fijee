@@ -88,7 +88,7 @@ Domains_build_mesh::Tetrahedrization()
   // Coarse in the midle fine on boundaries
 //  Mesh_criteria criteria(facet_angle=25, facet_size=1., facet_distance=.5,
 //                         cell_radius_edge_ratio=2., cell_size=8.);
-  Mesh_criteria criteria(facet_angle=30, facet_size=1.2, facet_distance=.6,
+  Mesh_criteria criteria(facet_angle=30, facet_size=1., facet_distance=.5,
                          cell_radius_edge_ratio=2., cell_size=8.);
   //  Mesh_criteria criteria(facet_angle=30, facet_size=2.5, facet_distance=1.5,
   //                         cell_radius_edge_ratio=2., cell_size=8.);
