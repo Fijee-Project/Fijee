@@ -379,9 +379,9 @@ namespace Domains
     centroids[3]  = boost::make_tuple( Point_3(128.,128.,128.), 3 );
     // nose
     centroids[4]  = boost::make_tuple( Point_3(128.,170.,185.), 4 );
-    // right cheeck
+    // right cheek
     centroids[5]  = boost::make_tuple( Point_3( 70.,170.,160.), 5 );
-    // left cheeck
+    // left cheek
     centroids[6]  = boost::make_tuple( Point_3(190.,170.,160.), 6 );
     // jaw
     centroids[7]  = boost::make_tuple( Point_3(128.,230.,160.), 7 );
@@ -540,14 +540,14 @@ namespace Domains
     for (auto point : holes_to_bone[4] )
       points_.push_back(point);
     //
-    // right cheeck
+    // right cheek
     //
     filter_cluster( clusters[5], holes_to_bone[5],  23);
     // noise -> bone & remove cluster
     for (auto point : holes_to_bone[5] )
       points_.push_back(point);
     //
-    // left cheeck
+    // left cheek
     //
     filter_cluster( clusters[6], holes_to_bone[6],  23);
     // noise -> bone & remove cluster

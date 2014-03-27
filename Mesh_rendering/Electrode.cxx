@@ -46,7 +46,7 @@ DE::Electrode( int Index, std::string Label,
       {
 	// ToDo Parameter from Access_parameters
 	float radius = 5 /*mm*/;
-	float height = 2 /*mm*/;
+	float height = 3 /*mm*/;
 	shape_.reset( new Electrode_shape_cylinder(radius, height) );
 	break;
       }

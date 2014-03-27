@@ -300,6 +300,13 @@ Domains_Head_labeled::model_segmentation()
   //
   // SPM volumes
   //
+  // Skin
+  CGAL::Image_3 SPM_skin;
+  SPM_skin.read( "/home/cobigo/Dropbox/Protocol-test-2/sc5T1-3.hdr" );
+  Image_filter  spm_skin( SPM_skin, data_position_ );
+  spm_skin.init( 10 /* % of outliers to remove */,
+		 85 /* % of the signal */);
+
   // Air
   CGAL::Image_3 SPM_air;
   SPM_air.read( "/home/cobigo/NIFTI_Skull/smask_air.hdr" );
@@ -380,11 +387,16 @@ Domains_Head_labeled::model_segmentation()
 	  //
 	  
 	  //
-	  // Scalp and skull
+	  // Scalp
 	  if( outside_scalp.inside_domain( cell_center ) )
 	    {
 	      data_label_[ idx ] = OUTSIDE_SCALP; 
 	      is_in_Scalp = true;
+	    }
+	  //
+	  if (!is_in_Scalp && spm_skin.inside(cell_center_aseg) )
+	    {
+	      data_label_[ idx ] = OUTSIDE_SCALP;
 	    }
 	  //
 	  if( inside_skull.inside_domain( cell_center ) )
@@ -392,18 +404,8 @@ Domains_Head_labeled::model_segmentation()
 	      is_in_CSF = true;
 	    }
 
-//	  if( outside_skull.inside_domain( cell_center ) ) 
-//	    data_label_[ idx ] = OUTSIDE_SKULL; 
-	  //
-//	  if( inside_skull.inside_domain( cell_center ) ||
-//	      subcortical_brain(cell_center_aseg) == CSF )
-//	    {
-//	      data_label_[ idx ] = CEREBROSPINAL_FLUID; 
-//	      is_in_CSF = true;
-//	    }
-//	  else
-//	    is_in_CSF = false;
-	  //
+	  // 
+	  // Skull compacta and songiosa
 	  if ( is_in_Scalp )
 	    {
 	      if( spm_bones.inside(cell_center_aseg) )
@@ -416,22 +418,8 @@ Domains_Head_labeled::model_segmentation()
 		}
 	    }
 
-
-//	  if( inside_skull.inside_domain( cell_center ) )
-//	    {
-//	      data_label_[ idx ] = WHITE_MATTER; 
-//	    }
-//	  if( inside_brain.inside_domain( cell_center ) )
-//	    {
-//	      data_label_[ idx ] = WHITE_MATTER; 
-//	    }
-//	  if( right_gray_matter.inside_domain( cell_center ) || 
-//	      left_gray_matter.inside_domain( cell_center ) )
-//	    {
-//	      data_label_[ idx ] = GRAY_MATTER; 
-//	    }
 	  //
-	  //
+	  // CSF
 	  if( inside_brain.inside_domain( cell_center ) ||
 	      spm_csf.inside(cell_center_aseg) /*&&
 	      !spm_bones.inside(cell_center_aseg)*/  )
@@ -441,7 +429,9 @@ Domains_Head_labeled::model_segmentation()
 	    }
 	  else
 	    is_in_CSF = false;
-	  //
+
+	  // 
+	  // Air
 //AIR	  if( air.inside(cell_center_aseg) )
 //AIR	    {
 //AIR	      data_label_[ idx ] = AIR_IN_SKULL; 
@@ -458,7 +448,7 @@ Domains_Head_labeled::model_segmentation()
 	  // Brain segmentation
 	  //
 	  
-	  if ( is_in_CSF ) 
+	  if ( is_in_CSF && false ) 
 	    {
 	      //
 	      // Gray-matter
