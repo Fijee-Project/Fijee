@@ -448,7 +448,7 @@ Domains_Head_labeled::model_segmentation()
 	  // Brain segmentation
 	  //
 	  
-	  if ( is_in_CSF && false ) 
+	  if ( is_in_CSF ) 
 	    {
 	      //
 	      // Gray-matter
