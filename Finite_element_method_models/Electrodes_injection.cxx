@@ -106,7 +106,7 @@ Solver::Electrodes_injection::inside( const Point& Vertex ) const
   //
   for( auto electrode : electrodes_map_ )
     if ( (electrode.second).get_I_() != 0. )
-      if( (electrode.second).get_r0_values_().distance(Vertex) < (electrode.second).get_radius_() + 3. /* mm */ )
+      if( (electrode.second).get_r0_values_().distance(Vertex) < (electrode.second).get_radius_() + .003 /* m */ )
 	{
 	  inside_electrode = true;
 	}
@@ -128,7 +128,7 @@ Solver::Electrodes_injection::inside_probe( const Point& Vertex ) const
   //
   for( auto electrode : electrodes_map_ )
     if ( (electrode.second).get_I_() != 0. )
-      if( (electrode.second).get_r0_values_().distance(Vertex) < (electrode.second).get_radius_() + 3. /* mm */ )
+      if( (electrode.second).get_r0_values_().distance(Vertex) < (electrode.second).get_radius_() + .003 /* m */ )
 	{
 	  inside_electrode = true;
 	  label = electrode.first;

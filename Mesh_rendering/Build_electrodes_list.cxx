@@ -99,9 +99,11 @@ DBel::Build_electrodes_list()
 	    //
 	    phi += PI/2.;
 
-	    //
+	    // [mm] to [m]
 	    electrodes_.push_back( Domains::Electrode( index, label, 
-						       position_x, position_y, position_z,
+						       position_x, 
+						       position_y, 
+						       position_z,
 						       radius, phi, theta ) );
 	  }
 	//

@@ -56,10 +56,10 @@ Solver::Intensity::eval( const Point& x, const ufc::cell& cell) const
   if( I_ != 0 )
     {
       //
-      if ( r0_projection_.distance(x) < 1.e-3 )
+      if ( r0_projection_.distance(x) < 1.e-6 )
 	{
 	  std::cout << label_ << " position: " << x << std::endl;
-	  return I_ ;
+	  return I_ / surface_;
 	}
       else
 	return 0.;
@@ -74,7 +74,7 @@ Solver::Intensity::eval( const Point& x, const ufc::cell& cell) const
 //    {
 //      //
 //      auto boundary_cells_it = boundary_cells_.find( cell.index );
-//      // We check if the vertex belong to a cell which has, at least, one facet on boundary
+//      // We check if the vertex belongs to a cell which has, at least, one facet on boundary
 //      if ( boundary_cells_it != boundary_cells_.end() )
 //	{ 
 //	  // we check if the vertex belong to a boundary facet for the list

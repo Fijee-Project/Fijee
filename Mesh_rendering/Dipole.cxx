@@ -84,10 +84,19 @@ Domains::operator << ( std::ostream& stream,
 		       const DD& that)
 {
   //
+  // 
+  Domains::Point_vector position_normal = static_cast<Domains::Point_vector> (that);
+  // [mm] to [m]
+  position_normal.x() *= 1.e-3;
+  position_normal.y() *= 1.e-3;
+  position_normal.z() *= 1.e-3;
+
+
+  //
   //
   stream 
     // Position Direction
-    << static_cast<Domains::Point_vector> (that)
+    << position_normal
     // Dipole intensity
     << "I=\"" << that.weight() << "\" "
     // Cell id
