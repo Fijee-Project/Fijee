@@ -274,6 +274,8 @@ Domains_build_mesh::Output_FEniCS_xml()
 	(float)vit->point().z();
       //
       position = rotation * position + translation;
+      // [mm] to [m]
+      position *= 1.e-3;
       //      Point_3 p = vit->point();
       FEniCS_xml_file << "      <vertex index=\"" << inum++ << "\" x=\""
 		      << position(0,0) << "\" y=\""

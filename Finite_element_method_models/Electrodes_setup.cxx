@@ -50,9 +50,9 @@ Solver::Electrodes_setup::Electrodes_setup()
 	  {
 	    int index = electrode.attribute("index").as_uint();
 	    // position
-	    double position_x = electrode.attribute("x").as_double(); /* mm */
-	    double position_y = electrode.attribute("y").as_double(); /* mm */
-	    double position_z = electrode.attribute("z").as_double(); /* mm */
+	    double position_x = electrode.attribute("x").as_double(); /* m */
+	    double position_y = electrode.attribute("y").as_double(); /* m */
+	    double position_z = electrode.attribute("z").as_double(); /* m */
 	    // Direction
 	    double direction_vx = electrode.attribute("vx").as_double();
 	    double direction_vy = electrode.attribute("vy").as_double();
@@ -67,8 +67,8 @@ Solver::Electrodes_setup::Electrodes_setup()
 	    double Re_z_l = electrode.attribute("Re_z_l").as_double();
 	    double Im_z_l = electrode.attribute("Im_z_l").as_double();
 	    // Contact surface between Electrode and the scalp
-	    double surface = electrode.attribute("surface").as_double(); /* mm^2 */
-	    double radius  = electrode.attribute("radius").as_double();  /* mm */
+	    double surface = electrode.attribute("surface").as_double(); /* m^2 */
+	    double radius  = electrode.attribute("radius").as_double();  /* m */
 	    //
  	    current_injection_->add_electrode( "Current", index/*, index_cell*/, label, I,
 					       Point(position_x, position_y, position_z), 

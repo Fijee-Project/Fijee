@@ -56,7 +56,7 @@
 // [sig_{nu}] = S/m
 //
 #define K_MAPPING 0.844 // 10^{9} S.s . m^{-3}
-#define D_EPS     0.124 // 10^{-9} m^{2} ; s^{-1}
+#define D_EPS     0.124 // 10^{-9} m^{2} . s^{-1}
 //
 // We give a comprehensive type name
 //
