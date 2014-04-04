@@ -52,10 +52,26 @@ namespace Domains
     Tree filtered_out_point_;
     
     public:
+    /*!
+     *  \brief Default Constructor
+     *
+     *  Constructor of the class CGAL_image_filtering
+     *
+     */
     CGAL_image_filtering(const Image_& image, double** Positions ): 
     r_im_( image ), positions_( Positions ){};
+    /*!
+     *  \brief Destructeur
+     *
+     *  Destructor of the class CGAL_image_filtering
+     */
    ~CGAL_image_filtering(){/* Do nothing */}
-
+    /*!
+     *  \brief Operator ()
+     *
+     *  Object function for
+     *
+     */
     int operator()(const Point_3& p, const bool = true) const
     {
       return static_cast<int>( r_im_.labellized_trilinear_interpolation(CGAL::to_double(p.x()),
@@ -64,10 +80,35 @@ namespace Domains
 									word_type(0)) );
     }
 
+    public:
+    /*!
+     *  \brief initialization
+     *
+     *  This method 
+     *
+     */
     void init( const double, const double );
-
-    void holes_detection( const double );
-
+    /*!
+     *  \brief Holes detection
+     *
+     *  This method 
+     *
+     */
+    void holes_detection();
+    /*!
+     *  \brief Eyes detection
+     *
+     *  This method 
+     *
+     */
+    void eyes_detection();
+     /*!
+     *  \brief inside
+     *
+     *  This method 
+     * 
+     * Density-based spatial clustering of applications with noise (DBSCAN)
+     */
     bool inside(Point_3& p)
     {
       // Compute the nearest neighbor
@@ -77,7 +118,28 @@ namespace Domains
       //
       return ( near->second < 1.e-3 ? true : false );
     }
-
+     /*!
+     *  \brief 
+     *
+     *  This method 
+     * 
+     * Density-based spatial clustering of applications with noise (DBSCAN)
+     */
+//    void region_query( std::list< boost::tuple<typename BGT::Point_3, int /*index*/>  >& list,  
+//		       boost::tuple<typename BGT::Point_3& point, 
+//		       double eps )
+//    {
+//      // Compute the nearest neighbor
+//      Neighbor_search search( filtered_point_, p, /* neraest neighbor */ 1 );
+//      typename Neighbor_search::iterator near = search.begin();
+//
+//    }
+    /*!
+     *  \brief In spongiosa space
+     *
+     *  This method 
+     *
+     */
     bool in_hole(Point_3& p)
     {
       if( filtered_out_point_.size() == 0 )
@@ -94,7 +156,19 @@ namespace Domains
     }
     
     private:
-    void k_means_clustering(std::vector<Point_3>& /*, int , int */);
+    /*!
+     *  \brief K-means clustering
+     *
+     *  This method 
+     *
+     */
+    void k_means_clustering(std::vector<Point_3>& );
+    /*!
+     *  \brief Filter a cluster
+     *
+     *  This method 
+     *
+     */
     void filter_cluster( std::vector<Point_3>& Cluster, std::vector<Point_3>& Noise, 
 			 double Removed_percentage )
     {
@@ -256,7 +330,7 @@ namespace Domains
   //
   //
   template< class Image_, class BGT, typename word_type>
-    void CGAL_image_filtering<Image_, BGT, word_type >::holes_detection( const double Removed_percentage )
+    void CGAL_image_filtering<Image_, BGT, word_type >::holes_detection()
     {
       //
       //
@@ -345,7 +419,164 @@ namespace Domains
       filtered_point_.clear();
       //
       for( auto point_it = points_.begin() ; point_it != points_.end() ; point_it++ )
-	filtered_point_.insert(*point_it);
+	filtered_point_.insert( *point_it );
+    }
+  //
+  //
+  //
+  template< class Image_, class BGT, typename word_type>
+    void CGAL_image_filtering<Image_, BGT, word_type >::eyes_detection()
+    {
+      std::cout << "Density-based spatial clustering" << std::endl;
+      //
+      // CGLA
+      typedef boost::tuple<typename BGT::Point_3, int /*index*/> Point_3;
+      typedef CGAL::Search_traits_3< BGT > TreeTraits;
+      typedef CGAL::Search_traits_adapter< Point_3, CGAL::Nth_of_tuple_property_map< 0, Point_3 >,
+	TreeTraits > Traits;
+      typedef CGAL::Orthogonal_k_neighbor_search<Traits> K_neighbor_search;
+      typedef typename K_neighbor_search::Tree Tree;
+      // 
+      typedef boost::tuple< typename BGT::Point_3, bool /*unvisited*/, int /*cluster*/ > Point_cluster;
+
+      //
+      // 
+      int size_points_contenair = points_.size();
+      std::vector< Point_cluster > points_tuples(size_points_contenair);
+      Tree Neighbor;
+      //
+      for ( int point = 0 ; point < size_points_contenair ; point++ )
+	{
+	  points_tuples[point] = boost::make_tuple(points_[point], false, 0);
+	  Neighbor.insert(boost::make_tuple(points_[point], point));
+	}
+      // These contenairs will be used for the CSF and eyes
+      points_.clear();
+      out_points_.clear();
+
+      //
+      // Main density-based spatial clustering loop
+      // epsilon and min density
+      double epsilon_2   = 16.; // 10 x 10 mm
+      int    min_density = 55;  // 50 neighbors
+      // clusters
+      int    cluster     = 0;
+      //
+      for( int point = 0 ; point < size_points_contenair ; point++ )
+	{
+	  // point not yet visited
+	  if( !boost::get< 1 /* visited */ >( points_tuples[point] ) )
+	    {
+	      // 
+	      // make the point as visited
+	      boost::get< 1 /* visited */ >( points_tuples[point] ) = true;
+	      //
+	      std::list< Point_3 > neighbor_points;
+	      // add the fisrt point
+	      neighbor_points.push_back( boost::make_tuple(boost::get<0>(points_tuples[point]), 
+							   point) );
+	      K_neighbor_search search( Neighbor, boost::get<0>(points_tuples[point]), 100 );
+	      // 
+	      for( typename K_neighbor_search::iterator it = search.begin() ; 
+		   it != search.end() ; it++)
+		if ( it->second < epsilon_2 )
+		  neighbor_points.push_back( it->first );
+	      
+	      //
+	      // expand the cluster
+	      if( neighbor_points.size() > min_density )
+		{
+		  // increment the clusters
+		  cluster++;
+		  boost::get< 2 /* cluster */ >( points_tuples[point] ) = cluster;
+		  
+		  // 
+		  // 
+		  for( auto cluster_point : neighbor_points )
+		    {
+		      if(!boost::get<1/*visited*/>( points_tuples[boost::get<1>(cluster_point)] ))
+			{
+			  boost::get<1/*visited*/>(points_tuples[boost::get<1>(cluster_point)]) = true;
+			  //
+			  std::list< Point_3 > sub_neighbor_points;
+			  // add the fisrt point
+			  sub_neighbor_points.push_back( cluster_point );
+			  K_neighbor_search sub_search( Neighbor, 
+							boost::get<0/*point*/>(cluster_point), 
+							100 );
+			  // 
+			  for( typename K_neighbor_search::iterator it = sub_search.begin() ; 
+			       it != sub_search.end() ; it++)
+			    if ( it->second < epsilon_2 )
+			      sub_neighbor_points.push_back( it->first );
+
+			  // 
+			  // Append the neighbors list
+			  if( sub_neighbor_points.size() > min_density )
+			    neighbor_points.splice( neighbor_points.end(), sub_neighbor_points );
+			  // 
+			  if(boost::get<2/*clus*/>(points_tuples[boost::get<1>(cluster_point)]) == 0)
+			    boost::get<2>( points_tuples[boost::get<1>(cluster_point)] ) = cluster;
+			}
+		    }
+		}
+	    }
+	}
+      //
+      std::cout << "Density-based spatial clustering - ended" << std::endl;
+
+      //
+      // Rebuild points_ and out_points_, discard the other clusters
+      std::vector< typename BGT::Point_3 > clusters[ cluster + 1 ];
+      std::multimap< int, std::vector< typename BGT::Point_3 > > clusters_map;
+      // create the cluster contenairs
+      for ( auto point : points_tuples )
+	clusters[boost::get<2>(point)].push_back( boost::get<0>(point) );
+      // order the contenairs
+      for ( int clus = 0 ; clus < cluster + 1 ; clus++)
+	clusters_map.insert( std::pair< int, std::vector< typename BGT::Point_3 > >(clusters[ clus ].size(), clusters[ clus ]) );
+      // recreate points_ and out_points_
+      typename std::multimap< int, std::vector< typename BGT::Point_3 > >::reverse_iterator 
+	reverse_it = clusters_map.rend();
+      // Fill up CSF
+      reverse_it++;
+      points_.insert( points_.begin(), (reverse_it->second).begin(), (reverse_it->second).end() );
+      // Fill up the eyes right and left
+      reverse_it++; // first eye
+      out_points_.insert(out_points_.begin(),(reverse_it->second).begin(),(reverse_it->second).end());
+      reverse_it++; // second eye
+      out_points_.insert(out_points_.end(),(reverse_it->second).begin(),(reverse_it->second).end() );
+      
+      //
+      // rebuild the trees
+      // Reinitialize the trees
+      filtered_point_.clear();
+      filtered_out_point_.clear();
+      // Build the points_ neirest neighbor tree
+      for( auto point_it = points_.begin() ; point_it != points_.end() ; point_it++ )
+	filtered_point_.insert( *point_it );
+      // Build the neirest neighbor tree
+      for( auto point_it = out_points_.begin() ; point_it != out_points_.end() ; point_it++ )
+	filtered_out_point_.insert( *point_it );
+
+
+//      //
+//      // 
+//      std::stringstream output_stream;
+//      output_stream
+//	<< "X Y Z "
+//	<< "visited k\n";
+//      //
+//      for ( auto point : points_tuples )
+//	output_stream
+//	  << boost::get<0>(point) << " "
+//	  << boost::get<1>(point) << " "
+//	  << boost::get<2>(point) << "\n";
+//      // 
+//      std::ofstream file_;
+//      file_.open( "Data_clusters.frame" );
+//      file_ << output_stream.rdbuf();
+//      file_.close();  
     }
   // 
   // 
@@ -353,7 +584,7 @@ namespace Domains
   template< class Image_, class BGT, typename word_type>
     void CGAL_image_filtering<Image_, BGT, word_type >::k_means_clustering(std::vector<typename BGT::Point_3>& Spongiosa )
   {
-    std::cout << "K-means clustering" << std::endl;
+    std::cout << "K-means clustering skull" << std::endl;
     //
     // 
     typedef boost::tuple<typename BGT::Point_3,int> Centroid;
@@ -397,7 +628,7 @@ namespace Domains
     // Convergence
     bool not_converged = true;
     int  iterations    = 0;
-
+    // 
     while( not_converged )
       {
 	// 
