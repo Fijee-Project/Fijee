@@ -835,25 +835,27 @@ DHct::make_conductivity( const C3t3& Mesh )
       /////////
       // EYE //
       /////////
-      else if ( cell_pmap.subdomain_index( cit ) == ELECTRODE )
+      else if ( cell_pmap.subdomain_index( cit ) == EYE )
 	{
 	  //
-	  //
+	  // http://onlinelibrary.wiley.com/doi/10.1002/cnm.2483/pdf
+	  // resistance 300 Ohm.cm -> 0.33 S/m -> 0.25 S/m
+	  // Wolter 1.5 S/m
 	  Cell_conductivity 
 	    cell_parameters ( cell_id, cell_subdomain,
 			      cell_vertices[4](0),cell_vertices[4](1),cell_vertices[4](2),/* centroid */
-			      1.5,/* l1 */
+			      0.25,/* l1 */
 			      1., 0., 0., /* eigenvec V1 */
-			      1.5,/* l2 */
+			      0.25,/* l2 */
 			      0., 1., 0., /* eigenvec V2 */
-			      1.5,/* l3 */
+			      0.25,/* l3 */
 			      0., 0., 1., /* eigenvec V3 */
-			      1.5,  /*C00*/
+			      0.25,  /*C00*/
 			      0.00, /*C01*/
 			      0.00, /*C02*/
-			      1.5,  /*C11*/
+			      0.25,  /*C11*/
 			      0.00, /*C12*/
-			      1.5   /*C22*/ );
+			      0.25   /*C22*/ );
 	  
 	  //
 	  // Add link to the list

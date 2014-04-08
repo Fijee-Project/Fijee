@@ -300,6 +300,19 @@ Domains_Head_labeled::model_segmentation()
   //
   // SPM volumes
   //
+
+  // Skull
+  CGAL::Image_3 SPM_bones;
+  //  SPM_bones.read( "/home/cobigo/NIFTI_Skull/smask_bone.hdr" );
+  //  SPM_bones.read( "/home/cobigo/NIFTI_Skull/c4T1.hdr" );
+  SPM_bones.read( "/home/cobigo/Dropbox/Protocol-test-3/sc4T1-1.5.hdr" );
+  Image_filter spm_bones( SPM_bones, data_position_ );
+  spm_bones.init( 5 /* % of outliers to remove */,
+		  85 /* % of the signal */);
+  //  spm_bones.holes_detection();
+  std::thread bones_thread( std::ref(spm_bones) );
+
+
   // Skin
   CGAL::Image_3 SPM_skin;
   SPM_skin.read( "/home/cobigo/Dropbox/Protocol-test-3/sc5T1-3.0.hdr" );
@@ -315,16 +328,6 @@ Domains_Head_labeled::model_segmentation()
   air.init( 10 /* % of outliers to remove */,
 	    70 /* % of the signal */);
 
-  // Skull
-  CGAL::Image_3 SPM_bones;
-  //  SPM_bones.read( "/home/cobigo/NIFTI_Skull/smask_bone.hdr" );
-  //  SPM_bones.read( "/home/cobigo/NIFTI_Skull/c4T1.hdr" );
-  SPM_bones.read( "/home/cobigo/Dropbox/Protocol-test-3/sc4T1-1.5.hdr" );
-  Image_filter spm_bones( SPM_bones, data_position_ );
-  spm_bones.init( 5 /* % of outliers to remove */,
-		  80 /* % of the signal */);
-  spm_bones.holes_detection();
-
   // CSF
   CGAL::Image_3 SPM_csf;
   //  SPM_csf.read( "/home/cobigo/NIFTI_Skull/smask_csf.hdr" );
@@ -332,9 +335,13 @@ Domains_Head_labeled::model_segmentation()
   SPM_csf.read( "/home/cobigo/Dropbox/Protocol-test-3/sc3T1-2.0.hdr" );
   Image_filter spm_csf( SPM_csf, data_position_ );
   spm_csf.init( 10 /* % of outliers to remove */,
-		80 /* % of the signal */);
+		70 /* % of the signal */);
   spm_csf.eyes_detection();
 
+  //
+  // 
+  bones_thread.join();
+  
 
   //
   // main loop building inrimage data
@@ -412,7 +419,7 @@ Domains_Head_labeled::model_segmentation()
 
 	  // 
 	  // Skull compacta and songiosa
-	  if ( is_in_Scalp )
+	  if ( is_in_Skull )
 	    {
 	      if( spm_bones.inside(cell_center_aseg) )
 		{
@@ -428,9 +435,10 @@ Domains_Head_labeled::model_segmentation()
 
 	  //
 	  // CSF
-	  if( is_in_Scalp /*&& !is_in_Bone*/ )
+	  if( is_in_Scalp )
 	    {
-	      if( inside_brain.inside_domain(cell_center) || spm_csf.inside(cell_center_aseg) )
+	      if( (inside_brain.inside_domain(cell_center) && !is_in_Bone ) || 
+		  spm_csf.inside(cell_center_aseg) )
 		{
 		  data_label_[ idx ] = CEREBROSPINAL_FLUID; 
 		  is_in_CSF = true;
@@ -449,7 +457,7 @@ Domains_Head_labeled::model_segmentation()
 
 	  //
 	  // Eyes
-	  if ( is_in_Scalp && !is_in_CSF )
+	  if ( is_in_Scalp && !is_in_CSF  )
 	    if ( spm_csf.in_hole(cell_center_aseg) ) 
 	      {
 		data_label_[ idx ] = EYE;

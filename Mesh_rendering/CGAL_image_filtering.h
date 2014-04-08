@@ -80,6 +80,17 @@ namespace Domains
 									word_type(0)) );
     }
 
+    /*!
+     *  \brief Operator ()
+     *
+     *  Object function for
+     *
+     */
+    void operator()()
+    {
+      holes_detection();
+    }
+
     public:
     /*!
      *  \brief initialization
@@ -408,11 +419,26 @@ namespace Domains
 //				out_point_vector.end() );
 
       //
-      // Build the neirest neighbor tree
+      // Build the nearest neighbor tree for spongiosa
       for( auto point_it = out_point_vector.begin() ; 
 	   point_it != out_point_vector.end() ; 
 	   point_it++ )
 	filtered_out_point_.insert( *point_it );
+
+      //
+      // Clean the skull spongiosa.
+      // Spongiosa cannot be near a point from out_point_
+      for ( auto out_point = out_points_.begin() ; 
+	    out_point != out_points_.end() ;
+	    out_point++ )
+	{
+	  Neighbor_search search( filtered_out_point_, *out_point, /* nearest neighbors */ 1 );
+	  typename Neighbor_search::iterator near = search.begin();
+	  // the distance from the out_point to the nearest in_point is less than 5mm
+	  if( near->second < 2 /* ~ mm*/ && near->second > 1.e-3 )
+	    points_.push_back( *out_point );
+	}
+
 
       //
       // Reinitialize the filtered_point tree
@@ -803,45 +829,6 @@ namespace Domains
     for (auto point : clusters[9] )
       points_.push_back(point);
 
-
-
-//    clusters[0].erase( CGAL::remove_outliers( clusters[0].begin(), 
-//					      clusters[0].end(), 
-//					      nb_neighbors, 23 ),
-//		       clusters[0].end() );
-//    clusters[3].erase( CGAL::remove_outliers( clusters[3].begin(), 
-//					      clusters[3].end(), 
-//					      nb_neighbors, 23 ),
-//		       clusters[3].end() );
-//    clusters[4].erase( CGAL::remove_outliers( clusters[4].begin(), 
-//					      clusters[4].end(), 
-//					      nb_neighbors, 23 ),
-//		       clusters[4].end() );
-//    clusters[5].erase( CGAL::remove_outliers( clusters[5].begin(), 
-//					      clusters[5].end(), 
-//					      nb_neighbors, 23 ),
-//		       clusters[5].end() );
-//    clusters[6].erase( CGAL::remove_outliers( clusters[6].begin(), 
-//					      clusters[6].end(), 
-//					      nb_neighbors, 23 ),
-//		       clusters[6].end() );
-//    clusters[7].erase( CGAL::remove_outliers( clusters[7].begin(), 
-//					      clusters[7].end(), 
-//					      nb_neighbors, 23 ),
-//		       clusters[7].end() );
-//    // Medium clusters
-//    clusters[1].erase( CGAL::remove_outliers( clusters[1].begin(), 
-//					      clusters[1].end(), 
-//					      nb_neighbors, 26 ),
-//		       clusters[1].end() );
-//    clusters[2].erase( CGAL::remove_outliers( clusters[2].begin(), 
-//					      clusters[2].end(), 
-//					      nb_neighbors, 26 ),
-//		       clusters[2].end() );
-//    clusters[9].erase( CGAL::remove_outliers( clusters[9].begin(), 
-//					      clusters[9].end(), 
-//					      nb_neighbors, 25 ),
-//		       clusters[9].end() );
    
 //    std::stringstream output_stream_filtered;
 //    output_stream_filtered
