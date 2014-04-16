@@ -105,6 +105,15 @@ namespace Domains
     std::string rh_smoothwm_;
     //! All segmentation header 
     std::string aseg_hdr_;
+    // SPM
+    //! SPM CSF (C3T1)
+    std::string sc3T1_;
+    //! SPM skull (C4T1)
+    std::string sc4T1_;
+    //! SPM skin (C5T1)
+    std::string sc5T1_;
+    //! SPM air (C6T1)
+    std::string sc6T1_;
     
     //
     // Surfaces contenairs
@@ -354,6 +363,34 @@ namespace Domains
      *
      */
     ucsf_get_string_macro(aseg_hdr_);
+   /*!
+     *  \brief Get sc3T1_
+     *
+     *  This method return the SPM/CSF header.
+     *
+     */
+    ucsf_get_string_macro(sc3T1_);
+   /*!
+     *  \brief Get sc4T1_
+     *
+     *  This method return the SPM/skull header.
+     *
+     */
+    ucsf_get_string_macro(sc4T1_);
+   /*!
+     *  \brief Get sc5T1_
+     *
+     *  This method return the SPM/skin header.
+     *
+     */
+    ucsf_get_string_macro(sc5T1_);
+   /*!
+     *  \brief Get sc6T1_
+     *
+     *  This method return the SPM/air header.
+     *
+     */
+    ucsf_get_string_macro(sc6T1_);
     /*!
      *  \brief Get eigenvalues_number_of_pixels_x_
      *

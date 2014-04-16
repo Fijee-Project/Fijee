@@ -303,9 +303,8 @@ Domains_Head_labeled::model_segmentation()
 
   // Skull
   CGAL::Image_3 SPM_bones;
-  //  SPM_bones.read( "/home/cobigo/NIFTI_Skull/smask_bone.hdr" );
-  //  SPM_bones.read( "/home/cobigo/NIFTI_Skull/c4T1.hdr" );
-  SPM_bones.read( "/home/cobigo/Dropbox/Protocol-test-3/sc4T1-1.5.hdr" );
+//  SPM_bones.read( "/home/cobigo/Dropbox/Protocol-test-3/sc4T1-1.5.hdr" );
+  SPM_bones.read( (DAp::get_instance())->get_sc4T1_() );
   Image_filter spm_bones( SPM_bones, data_position_ );
   spm_bones.init( 5 /* % of outliers to remove */,
 		  85 /* % of the signal */);
@@ -315,14 +314,16 @@ Domains_Head_labeled::model_segmentation()
 
   // Skin
   CGAL::Image_3 SPM_skin;
-  SPM_skin.read( "/home/cobigo/Dropbox/Protocol-test-3/sc5T1-3.0.hdr" );
+//  SPM_skin.read( "/home/cobigo/Dropbox/Protocol-test-3/sc5T1-3.0.hdr" );
+  SPM_skin.read( (DAp::get_instance())->get_sc5T1_() );
   Image_filter  spm_skin( SPM_skin, data_position_ );
   spm_skin.init( 10 /* % of outliers to remove */,
 		 80 /* % of the signal */);
 
   // Air
   CGAL::Image_3 SPM_air;
-  SPM_air.read( "/home/cobigo/Dropbox/Protocol-test-3/c6T1.hdr" );
+//  SPM_air.read( "/home/cobigo/Dropbox/Protocol-test-3/c6T1.hdr" );
+  SPM_air.read( (DAp::get_instance())->get_sc6T1_() );
   //  Image_wrapper spm_air( SPM_air );
   Image_filter  air( SPM_air, data_position_ );
   air.init( 10 /* % of outliers to remove */,
@@ -330,9 +331,8 @@ Domains_Head_labeled::model_segmentation()
 
   // CSF
   CGAL::Image_3 SPM_csf;
-  //  SPM_csf.read( "/home/cobigo/NIFTI_Skull/smask_csf.hdr" );
-  //  SPM_csf.read( "/home/cobigo/Dropbox/Protocol-test-2/sc3T1-1.5.hdr" );
-  SPM_csf.read( "/home/cobigo/Dropbox/Protocol-test-3/sc3T1-2.0.hdr" );
+//  SPM_csf.read( "/home/cobigo/Dropbox/Protocol-test-3/sc3T1-2.0.hdr" );
+  SPM_csf.read( (DAp::get_instance())->get_sc3T1_() );
   Image_filter spm_csf( SPM_csf, data_position_ );
   spm_csf.init( 10 /* % of outliers to remove */,
 		70 /* % of the signal */);
