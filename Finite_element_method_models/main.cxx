@@ -17,7 +17,7 @@ int main()
   solver_parameters->init();
   
   //
-  // physical models:
+  // Physical models:
   //  - Source localization
   //    - Solver::SL_subtraction
   //    - Solver::SL_direct
@@ -26,8 +26,8 @@ int main()
   //    - Solver::tCS_tACS
   //
   // export OMP_NUM_THREADS=2
-  Solver::Model_solver< /* physical model */ Solver::tCS_tDCS,
-			/*solver_parameters->get_number_of_threads_()*/ 2 >  model;
+  Solver::Model_solver< /* physical model */ Solver::SL_subtraction,
+			/*solver_parameters->get_number_of_threads_()*/ 1 >  model;
 
   //
   //
