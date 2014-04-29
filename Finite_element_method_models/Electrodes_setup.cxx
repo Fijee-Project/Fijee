@@ -103,6 +103,14 @@ Solver::Electrodes_setup::inside( const Point& Vertex ) const
 //
 //
 //
+bool
+Solver::Electrodes_setup::add_potential( const Point& Vertex, const double U ) 
+{
+  return potential_injection_->add_potential(Vertex, U);
+}
+//
+//
+//
 std::tuple<std::string, bool> 
 Solver::Electrodes_setup::inside_probe( const Point& Vertex ) const
 {

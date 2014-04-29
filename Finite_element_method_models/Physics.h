@@ -10,6 +10,7 @@
 //
 #include "PDE_solver_parameters.h"
 #include "Conductivity.h"
+#include "Electrodes_setup.h"
 
 //using namespace dolfin;
 
@@ -77,10 +78,22 @@ namespace Solver
      *
      *  \param U: Function solution of the Partial Differential Equation.
      *  \param Sub_domains: array of sub-domain we want to extract from U.
+     *  \param name: file name.
      *
      */
     void solution_domain_extraction( const dolfin::Function&, std::list<std::size_t>&, 
 				     const char* );
+    /*!
+     *  \brief Solution electrodes extraction
+     *
+     *  This method extract from the Function solution U the electrodes potential values.
+     *
+     *  \param U: Function solution of the Partial Differential Equation.
+     *  \param Electrodes: Electrodes set up.
+     *
+     */
+    void solution_electrodes_extraction( const dolfin::Function&, 
+					 std::shared_ptr< Solver::Electrodes_setup >  );
    };
 };
 

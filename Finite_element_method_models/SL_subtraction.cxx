@@ -145,7 +145,7 @@ Solver::SL_subtraction::operator () ( /*Solver::Phi& source,
   // Define variational forms
   SLS_model::BilinearForm a(V_, V_);
   SLS_model::LinearForm L(V_);
-      
+
   //
   // Anisotropy
   // Bilinear

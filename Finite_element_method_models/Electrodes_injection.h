@@ -35,7 +35,8 @@ namespace Solver
   class Electrodes_injection : public Expression
   {
     //! Electrodes list
-    std::map< std::string, Solver::Intensity > electrodes_map_;
+    std::map< /* label */ std::string, 
+      /* electrode caracteristics */Solver::Intensity > electrodes_map_;
 
   public:
     /*!
@@ -119,6 +120,13 @@ namespace Solver
      *
      */
     bool inside( const Point&  )const;
+    /*!
+     *  \brief inside
+     *
+     *  This method check if a point is inside an electrode
+     *
+     */
+    bool add_potential( const Point&, const double );
     /*!
      *  \brief inside
      *

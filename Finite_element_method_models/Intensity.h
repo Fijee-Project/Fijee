@@ -66,6 +66,11 @@ namespace Solver
 
     mutable std::set<Point> points_Dirac_;
     mutable std::list<std::size_t> facet_reservoir_;
+
+    //
+    // Electrode electrical potential calculation
+    // 
+    std::list< double > electrical_potential_list_;
    
 
   public:
@@ -138,6 +143,8 @@ namespace Solver
     //
     double get_surface_()const{return surface_;};
     double get_radius_()const{return radius_;};
+    // 
+    double get_electrical_potential() const;
     
     //
     // Geometry propterties
@@ -155,6 +162,13 @@ namespace Solver
      *
      */
     double eval( const Point& , const ufc::cell& )const;
+    /*!
+     *  \brief Add potential
+     *
+     *  This method create the electrical potential mapping at the electrode contact surface.
+     *
+     */
+    double add_potential( const double U ){ electrical_potential_list_.push_back( U );};
   };
   /*!
    *  \brief Dump values for Intensity

@@ -118,6 +118,27 @@ Solver::Electrodes_injection::inside( const Point& Vertex ) const
 //
 //
 //
+bool 
+Solver::Electrodes_injection::add_potential( const Point& Vertex, double U )
+{
+  //
+  //
+  bool inside_electrode = false;
+  //
+  for( auto electrode : electrodes_map_ )
+    if( (electrode.second).get_r0_values_().distance(Vertex) < (electrode.second).get_radius_() + .003 /* m */ )
+      {
+	(electrode.second).add_potential( U );
+	inside_electrode = true;
+      }
+
+  //
+  //
+  return inside_electrode;
+}
+//
+//
+//
 std::tuple<std::string, bool> 
 Solver::Electrodes_injection::inside_probe( const Point& Vertex ) const
 {

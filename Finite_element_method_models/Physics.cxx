@@ -190,3 +190,48 @@ Solver::Physics::solution_domain_extraction( const dolfin::Function& u,
   VTU_xml_file << "  </UnstructuredGrid>" << std::endl;
   VTU_xml_file << "</VTKFile>" << std::endl;
 }
+//
+//
+//
+void
+Solver::Physics::solution_electrodes_extraction( const dolfin::Function& u, 
+						 std::shared_ptr< Solver::Electrodes_setup > Electrodes )
+{
+  // 
+  const std::size_t num_vertices = mesh_->num_vertices();
+  
+  // Get number of components
+  const std::size_t dim = u.value_size();
+  const std::size_t rank = u.value_rank();
+
+  // Allocate memory for function values at vertices
+  const std::size_t size = num_vertices * dim; // dim = 1
+  std::vector<double> values(size);
+  u.compute_vertex_values(values, *mesh_);
+ 
+  //
+  // 
+  std::vector<int> V(num_vertices, -1);
+
+
+  //
+  //
+  int 
+    inum = 0;
+  //
+  std::string 
+    vertices_position_string,
+    point_data;
+  // loop over mesh cells
+  for ( dolfin::CellIterator cell(*mesh_) ; !cell.end() ; ++cell )
+    // Only the electrodes contact surfaces
+    if ( (*domains_)[cell->index()] == 101 )
+      {
+	//  Calcul of the cell potential
+	double local_potential_value = 0.;
+	for ( dolfin::VertexIterator vertex(*cell) ; !vertex.end() ; ++vertex )
+	  local_potential_value += values[ vertex->index() ];
+	// 
+	Electrodes->add_potential( cell->midpoint(), local_potential_value / 4. );
+      }
+}

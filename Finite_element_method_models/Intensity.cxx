@@ -29,6 +29,8 @@ Solver::Intensity::Intensity(const Intensity& that):
   //
   boundary_cells_    = that.boundary_cells_;
   boundary_vertices_ = that.boundary_vertices_;
+  //
+  electrical_potential_list_ = that.electrical_potential_list_;
 }
 //
 //
@@ -166,6 +168,8 @@ Solver::Intensity::operator =( const Intensity& that )
   boundary_cells_    = that.boundary_cells_;
   boundary_vertices_ = that.boundary_vertices_;
   not_yet_ = that.not_yet_;
+  // 
+  electrical_potential_list_ = that.electrical_potential_list_;
 
   
   //
@@ -197,6 +201,26 @@ Solver::Intensity::set_boundary_cells_( const std::map< std::size_t, std::list< 
 	  //
 	  boundary_vertices_.insert( v->index() );
 	}
+}
+//
+//
+//
+double
+Solver::Intensity::get_electrical_potential() const
+{
+  if ( electrical_potential_list_.size() != 0 )
+    {
+      double cumul_potential = 0.;
+      //
+      for( auto potential : electrical_potential_list_ )
+	cumul_potential += potential;
+      
+      //
+      // 
+      return cumul_potential / electrical_potential_list_.size();
+    }
+  else
+    return 0.0;
 }
 //
 //

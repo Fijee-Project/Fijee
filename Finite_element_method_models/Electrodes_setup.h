@@ -98,6 +98,13 @@ namespace Solver
      */
     bool inside( const Point& ) const;
     /*!
+     *  \brief Add electrical potential
+     *
+     *   This method 
+     *
+     */
+    bool add_potential( const Point&, const double );
+    /*!
      *  \brief Inside probe
      *
      *  This method 
