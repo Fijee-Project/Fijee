@@ -105,7 +105,7 @@ Solver::Electrodes_injection::inside( const Point& Vertex ) const
   bool inside_electrode = false;
   //
   for( auto electrode : electrodes_map_ )
-    if ( (electrode.second).get_I_() != 0. )
+//    if ( (electrode.second).get_I_() != 0. )
       if( (electrode.second).get_r0_values_().distance(Vertex) < (electrode.second).get_radius_() + .003 /* m */ )
 	{
 	  inside_electrode = true;
@@ -119,7 +119,7 @@ Solver::Electrodes_injection::inside( const Point& Vertex ) const
 //
 //
 bool 
-Solver::Electrodes_injection::add_potential( const Point& Vertex, double U )
+Solver::Electrodes_injection::add_potential_value( const Point& Vertex, const double U )
 {
   //
   //
@@ -128,9 +128,30 @@ Solver::Electrodes_injection::add_potential( const Point& Vertex, double U )
   for( auto electrode : electrodes_map_ )
     if( (electrode.second).get_r0_values_().distance(Vertex) < (electrode.second).get_radius_() + .003 /* m */ )
       {
-	(electrode.second).add_potential( U );
+	(electrode.second).add_potential_value( U );
 	inside_electrode = true;
       }
+
+  //
+  //
+  return inside_electrode;
+}
+//
+//
+//
+bool 
+Solver::Electrodes_injection::add_potential_value( const std::string Electrode_label, const double U )
+{
+  //
+  //
+  bool inside_electrode = false;
+  auto electrode = electrodes_map_.find( Electrode_label );
+  // 
+  if ( electrode != electrodes_map_.end() )
+    {
+      (electrode->second).add_potential_value( U );
+      inside_electrode = true;
+    }
 
   //
   //
@@ -148,12 +169,11 @@ Solver::Electrodes_injection::inside_probe( const Point& Vertex ) const
   std::string label;
   //
   for( auto electrode : electrodes_map_ )
-    if ( (electrode.second).get_I_() != 0. )
-      if( (electrode.second).get_r0_values_().distance(Vertex) < (electrode.second).get_radius_() + .003 /* m */ )
-	{
-	  inside_electrode = true;
-	  label = electrode.first;
-	}
+    if( (electrode.second).get_r0_values_().distance(Vertex) < (electrode.second).get_radius_() + .003 /* m */ )
+      {
+	inside_electrode = true;
+	label = electrode.first;
+      }
 
   //
   //

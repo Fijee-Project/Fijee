@@ -39,8 +39,10 @@ namespace Solver
     int index_;
     //! Electrode position
     Point r0_values_;  
-    //! Electrode position projected on the boundary
+    //! Electrode position projected on the closest boundary vertex
     Point r0_projection_;  
+    //! Index of the electrode position projected vertex
+    std::size_t r0_projection_index_;
     //! Electrode direction vector
     Point e_values_;  
     //! Electrode intensity [I_] = A
@@ -126,6 +128,7 @@ namespace Solver
     double get_Z_()const{return r0_values_.z();};
     //
     Point  get_r0_projection_()const{return r0_projection_;};
+    std::size_t get_r0_projection_index_()const{return r0_projection_index_;};
     double get_projection_X_()const{return  r0_projection_.x();};
     double get_projection_Y_()const{return  r0_projection_.y();};
     double get_projection_Z_()const{return  r0_projection_.z();};
@@ -168,7 +171,7 @@ namespace Solver
      *  This method create the electrical potential mapping at the electrode contact surface.
      *
      */
-    double add_potential( const double U ){ electrical_potential_list_.push_back( U );};
+    double add_potential_value( const double U ){ electrical_potential_list_.push_back( U );};
   };
   /*!
    *  \brief Dump values for Intensity

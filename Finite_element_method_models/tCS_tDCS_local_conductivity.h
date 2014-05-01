@@ -7,6 +7,7 @@
 #include <stdexcept>      // std::logic_error
 #include <map>
 #include <thread>         // std::thread
+#include <random>
 //
 // FEniCS
 //
@@ -60,6 +61,15 @@ namespace Solver
    */
   class tCS_tDCS_local_conductivity : Physics
   {
+    typedef std::tuple< 
+      double,  /* - 0 - estimation */
+      double,  /* - 1 - sigma skin */ 
+      double,  /* - 2 - sigma skull spongiosa */ 
+      double,  /* - 3 - sigma skull compacta */ 
+      bool,    /* - 4 - initialized */
+      bool     /* - 5 - updated */ > Estimation_tuple;
+      
+
     //! Electrodes list
     std::shared_ptr< Solver::Electrodes_setup > electrodes_;
     //! Head model facets collection
@@ -73,7 +83,13 @@ namespace Solver
     //! Boundarie conditions
     std::shared_ptr< MeshFunction< std::size_t > > boundaries_;
 
-    // std::map< std::size_t, std::size_t > map_index_cell_;
+    //
+    // Local conductivity estimation
+    // 
+    //! Simplex for downhill simplex estimation
+    std::vector< Estimation_tuple > simplex_;
+    std::map< Brain_segmentation, std::tuple<double, double> > conductivity_boundaries_;
+
 
     
   private:

@@ -93,6 +93,40 @@ Solver::tCS_tDCS_local_conductivity::tCS_tDCS_local_conductivity():Physics()
   boundaries_file_name            += std::string("boundaries.pvd");
   File boundaries_file( boundaries_file_name.c_str() );
   boundaries_file << *boundaries_;
+
+  //
+  // Local conductivity estimation - initialization
+  // 
+  
+  // 
+  // Limites of conductivities
+  conductivity_boundaries_[OUTSIDE_SCALP]   = std::make_tuple(0.005, 1.);
+  conductivity_boundaries_[OUTSIDE_SKULL]   = std::make_tuple(4.33e-03, 6.86e-03);
+  conductivity_boundaries_[SPONGIOSA_SKULL] = std::make_tuple(5.66e-03, 23.2e-03);
+  // 
+  unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+  std::default_random_engine generator(seed);
+  std::uniform_real_distribution<double> uniform_dist_skin(0.005, 1.);
+  std::uniform_real_distribution<double> uniform_dist_skull_compacta(4.33e-03, 6.86e-03);
+  std::uniform_real_distribution<double> uniform_dist_skull_spongiosa(5.66e-03, 23.2e-03);
+
+  
+  // 
+  // 
+  simplex_.resize(4);
+  for ( int i = 0 ; i < 4 ; i++ )
+    {
+      double 
+	sigma_skin            = uniform_dist_skin(generator),
+	sigma_skull_spongiosa = uniform_dist_skull_compacta(generator),
+	sigma_skull_compact   = uniform_dist_skull_spongiosa(generator);
+      
+      simplex_[i] = std::make_tuple( 0.0, 
+				     sigma_skin,
+				     sigma_skull_spongiosa,
+				     sigma_skull_compact,
+				     false, false);
+    }
 }
 //
 //
@@ -204,6 +238,13 @@ Solver::tCS_tDCS_local_conductivity::operator () ( /*Solver::Phi& source,
  //
  // Filter function over the electrodes
  solution_electrodes_extraction(u, electrodes_);
+
+ std::cout << "electrode CP6 " 
+	   << electrodes_->get_current()->information( "CP6" ).get_electrical_potential() 
+	   << std::endl;
+// std::cout << "electrode T7 " 
+//	   << electrodes_->get_current()->information( "T7" ).get_electrical_potential() 
+//	   << std::endl;
 
 
 //  //

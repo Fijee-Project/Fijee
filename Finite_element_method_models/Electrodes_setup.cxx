@@ -42,7 +42,6 @@ Solver::Electrodes_setup::Electrodes_setup()
 	// Get the number of electrodes
 	number_electrodes_ = electrodes_node.attribute("size").as_int();
 	current_injection_.reset( new Solver::Electrodes_injection() );
-	potential_injection_.reset( new Solver::Electrodes_injection() );
 
 	//
 	//
@@ -74,11 +73,6 @@ Solver::Electrodes_setup::Electrodes_setup()
 					       Point(position_x, position_y, position_z), 
 					       Point(direction_vx, direction_vy, direction_vz),
 					       Re_z_l, Im_z_l, surface, radius );
-	    //
- 	    potential_injection_->add_electrode( "Potential", index/*, index_cell*/, label, V,
-						 Point(position_x, position_y, position_z), 
-						 Point(direction_vx, direction_vy, direction_vz),
-						 Re_z_l, Im_z_l, surface, radius );
 	  }
 	
 	//
@@ -104,9 +98,17 @@ Solver::Electrodes_setup::inside( const Point& Vertex ) const
 //
 //
 bool
-Solver::Electrodes_setup::add_potential( const Point& Vertex, const double U ) 
+Solver::Electrodes_setup::add_potential_value( const std::string Electrode_label, const double U ) 
 {
-  return potential_injection_->add_potential(Vertex, U);
+  return current_injection_->add_potential_value(Electrode_label, U);
+}
+//
+//
+//
+bool
+Solver::Electrodes_setup::add_potential_value( const Point& Vertex, const double U ) 
+{
+  return current_injection_->add_potential_value(Vertex, U);
 }
 //
 //
@@ -121,9 +123,8 @@ Solver::Electrodes_setup::inside_probe( const Point& Vertex ) const
 //
 void
 Solver::Electrodes_setup::set_boundary_cells( const std::map<std::string, 
-							     std::map<std::size_t, 
-								      std::list< MeshEntity  >  >  >& Map_electrode_cells  )
+					      std::map<std::size_t, 
+					      std::list< MeshEntity  >  >  >& Map_electrode_cells  )
 {
   current_injection_->set_boundary_cells( Map_electrode_cells );
-  potential_injection_->set_boundary_cells( Map_electrode_cells );
 }

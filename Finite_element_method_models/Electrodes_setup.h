@@ -43,8 +43,6 @@ namespace Solver
   private:
     //! Electrodes list for current injected
     std::shared_ptr< Solver::Electrodes_injection > current_injection_;
-    //! Electrodes list for potential applied
-    std::shared_ptr< Solver::Electrodes_injection > potential_injection_;
     //! number of electrodes
     int number_electrodes_;
 
@@ -87,7 +85,6 @@ namespace Solver
 
   public:
     std::shared_ptr< Solver::Electrodes_injection > get_current() const { return current_injection_;};
-    std::shared_ptr< Solver::Electrodes_injection > get_potential() const { return potential_injection_;};
 
   public:
     /*!
@@ -103,7 +100,14 @@ namespace Solver
      *   This method 
      *
      */
-    bool add_potential( const Point&, const double );
+    bool add_potential_value( const Point&, const double );
+    /*!
+     *  \brief Add electrical potential
+     *
+     *   This method 
+     *
+     */
+    bool add_potential_value( const std::string, const double );
     /*!
      *  \brief Inside probe
      *

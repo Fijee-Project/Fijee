@@ -210,28 +210,51 @@ Solver::Physics::solution_electrodes_extraction( const dolfin::Function& u,
   u.compute_vertex_values(values, *mesh_);
  
   //
-  // 
-  std::vector<int> V(num_vertices, -1);
-
-
-  //
-  //
-  int 
-    inum = 0;
   //
   std::string 
     vertices_position_string,
     point_data;
   // loop over mesh cells
   for ( dolfin::CellIterator cell(*mesh_) ; !cell.end() ; ++cell )
-    // Only the electrodes contact surfaces
-    if ( (*domains_)[cell->index()] == 101 )
+    // Only electrode cells
+    if ( (*domains_)[cell->index()] == 100 )
       {
-	//  Calcul of the cell potential
-	double local_potential_value = 0.;
-	for ( dolfin::VertexIterator vertex(*cell) ; !vertex.end() ; ++vertex )
-	  local_potential_value += values[ vertex->index() ];
-	// 
-	Electrodes->add_potential( cell->midpoint(), local_potential_value / 4. );
+	std::string electrode_label;
+	bool in_electrode = false;
+	// Which electrode the cell belong
+	std::tie(electrode_label, in_electrode) = Electrodes->inside_probe( cell->midpoint() );
+	//
+	if ( in_electrode )
+	  {
+	    if ( Electrodes->get_current()->information( electrode_label ).get_I_() == 0. )
+	      {
+		// 
+		// Ponctual measure
+//		values[ Electrodes->get_current()
+//			->information( electrode_label ).get_r0_projection_index_() ] 
+
+		// 
+		// Does the cell has facets on the surface
+		auto boundary_cells_it = Electrodes->get_current()->information( electrode_label ).get_boundary_cells_().find( cell->index() );
+		// 
+		if ( boundary_cells_it != Electrodes->get_current()->information( electrode_label ).get_boundary_cells_().end() )
+		  {
+		    // 
+		    // Retrieves the list of cell's facets and compute 
+		    // the average electrical potential on the surface
+		    for ( MeshEntity facet : boundary_cells_it->second )
+		      {
+			double local_potential_value = 0.;
+			for ( VertexIterator vertex( facet ); !vertex.end(); ++vertex )
+			  {
+			    //  Calcul of the cell potential
+			    local_potential_value += values[ vertex->index() ];
+			  }
+			// We have 3 vertices on a facet
+			Electrodes->add_potential_value(electrode_label, local_potential_value/3.);
+		      }
+		  }
+	      }
+	  }
       }
 }

@@ -8,9 +8,10 @@ Solver::Intensity::Intensity():
 {
   //
   //
-  r0_values_     = Point();
-  r0_projection_ = Point();
-  e_values_      = Point();
+  r0_values_           = Point();
+  r0_projection_       = Point();
+  r0_projection_index_ = -1;
+  e_values_            = Point();
   //
   impedance_ = std::complex<double>(0.,0.);
 
@@ -22,7 +23,8 @@ Solver::Intensity::Intensity():
 Solver::Intensity::Intensity(const Intensity& that): 
   electric_variable_(that.electric_variable_), index_(that.index_), 
   I_(that.I_), label_(that.label_),
-  r0_values_(that.r0_values_), r0_projection_(that.r0_projection_), e_values_(that.e_values_),
+  r0_values_(that.r0_values_), r0_projection_(that.r0_projection_), 
+  r0_projection_index_(that.r0_projection_index_), e_values_(that.e_values_),
   impedance_(that.impedance_), surface_(that.surface_), radius_(that.radius_)
 {
   not_yet_ = true;
@@ -42,7 +44,8 @@ Solver::Intensity::Intensity( std::string Electric_variable, int Index,
   electric_variable_(Electric_variable), index_( Index ), label_( Label ), I_( Intensity ), 
   r0_values_(X), e_values_(V), impedance_( (Re_z_l,Im_z_l) ), surface_(Surface), radius_(Radius) 
 {
-  r0_projection_ = Point();
+  r0_projection_       = Point();
+  r0_projection_index_ = -1;
   not_yet_ = true;
 }
 //
@@ -156,9 +159,10 @@ Solver::Intensity::operator =( const Intensity& that )
   label_  = that.label_;
   //
   //
-  r0_values_     = that.get_r0_values_();
-  r0_projection_ = that.get_r0_projection_();
-  e_values_      = that.get_e_values_();
+  r0_values_           = that.get_r0_values_();
+  r0_projection_       = that.get_r0_projection_();
+  r0_projection_index_ = that.get_r0_projection_index_();
+  e_values_            = that.get_e_values_();
   //
   impedance_ = that.get_impedance_();
   //
@@ -195,7 +199,10 @@ Solver::Intensity::set_boundary_cells_( const std::map< std::size_t, std::list< 
 	  //
 	  //
 	  if( r0_values_.distance ( v->point() ) < r0_values_.distance ( r0_projection_ ) )
-	    r0_projection_ = v->point();
+	    {
+	      r0_projection_       = v->point();
+	      r0_projection_index_ = v->index();
+	    }
 
 	  //
 	  //

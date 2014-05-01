@@ -121,14 +121,21 @@ namespace Solver
      */
     bool inside( const Point&  )const;
     /*!
-     *  \brief inside
+     *  \brief Add potential value
      *
-     *  This method check if a point is inside an electrode
+     *  This method check if a point is inside an electrode and add the potential value to the electrode list of potential
      *
      */
-    bool add_potential( const Point&, const double );
+    bool add_potential_value( const Point&, const double );
     /*!
-     *  \brief inside
+     *  \brief 
+     *
+     *  This method Add potential value
+     *
+     */
+    bool add_potential_value( const std::string, const double );
+    /*!
+     *  \brief Inside electrode probe
      *
      *  This method check if a point is inside an electrode
      *
