@@ -9,7 +9,7 @@ Solver::Physics::Physics()
 {
   //
   // Load the mesh
-  std::cout << "Load the mesh" << std::endl;
+  std::cout << "Load mesh file" << std::endl;
   //
   std::string mesh_xml = (SDEsp::get_instance())->get_files_path_output_();
   mesh_xml += "mesh.xml";
@@ -21,7 +21,7 @@ Solver::Physics::Physics()
 
   //
   // Load Sub_domains
-  std::cout << "Load Sub_domains" << std::endl;
+  std::cout << "Load Sub_domains file" << std::endl;
   //
   std::string subdomains_xml = (SDEsp::get_instance())->get_files_path_output_();
   subdomains_xml += "mesh_subdomains.xml";
@@ -36,7 +36,7 @@ Solver::Physics::Physics()
 
   //
   // Load the conductivity. Anisotrope conductivity
-  std::cout << "Load the conductivity" << std::endl;
+  std::cout << "Load conductivity files" << std::endl;
   sigma_.reset( new Solver::Tensor_conductivity(mesh_) );
 }
 //
@@ -210,10 +210,6 @@ Solver::Physics::solution_electrodes_extraction( const dolfin::Function& u,
   u.compute_vertex_values(values, *mesh_);
  
   //
-  //
-  std::string 
-    vertices_position_string,
-    point_data;
   // loop over mesh cells
   for ( dolfin::CellIterator cell(*mesh_) ; !cell.end() ; ++cell )
     // Only electrode cells
@@ -228,11 +224,6 @@ Solver::Physics::solution_electrodes_extraction( const dolfin::Function& u,
 	  {
 	    if ( Electrodes->get_current()->information( electrode_label ).get_I_() == 0. )
 	      {
-		// 
-		// Ponctual measure
-//		values[ Electrodes->get_current()
-//			->information( electrode_label ).get_r0_projection_index_() ] 
-
 		// 
 		// Does the cell has facets on the surface
 		auto boundary_cells_it = Electrodes->get_current()->information( electrode_label ).get_boundary_cells_().find( cell->index() );
@@ -254,6 +245,7 @@ Solver::Physics::solution_electrodes_extraction( const dolfin::Function& u,
 			Electrodes->add_potential_value(electrode_label, local_potential_value/3.);
 		      }
 		  }
+
 	      }
 	  }
       }

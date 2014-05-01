@@ -72,7 +72,10 @@ namespace Solver
     //
     // Electrode electrical potential calculation
     // 
+    //! Electrical potential list
     std::list< double > electrical_potential_list_;
+    //! Electrical potential
+    double V_;
    
 
   public:
@@ -121,6 +124,8 @@ namespace Solver
     //
     int    get_index_()const{return index_;};
     double get_I_()const{return I_;};
+    double get_V_()const{return V_;};
+    void   set_V_( double V ){V_ = V;};
     //
     Point  get_r0_values_()const{return r0_values_;};
     double get_X_()const{return r0_values_.x();};

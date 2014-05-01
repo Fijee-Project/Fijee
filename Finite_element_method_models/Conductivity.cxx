@@ -72,17 +72,17 @@ Solver::Tensor_conductivity::conductivity_update( const std::shared_ptr< MeshFun
 	{
 	case SPONGIOSA_SKULL:
 	  {
-	    std::cout << "spongiosa: " << C00_[cell->index()] << std::endl;
+	    //	    std::cout << "spongiosa: " << C00_[cell->index()] << std::endl;
 	    break;
 	  }
 	case OUTSIDE_SKULL/* compacta skull */:
 	  {
-	    std::cout << "compacta: " << C00_[cell->index()] << std::endl;
+	    // 	    std::cout << "compacta: " << C00_[cell->index()] << std::endl;
 	    break;
 	  }
 	case OUTSIDE_SCALP/* skin */:
 	  {
-	    std::cout << "skin: " << C00_[cell->index()] << std::endl;
+	    // 	    std::cout << "skin: " << C00_[cell->index()] << std::endl;
 	    break;
 	  }
 	}

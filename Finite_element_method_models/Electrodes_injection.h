@@ -36,7 +36,7 @@ namespace Solver
   {
     //! Electrodes list
     std::map< /* label */ std::string, 
-      /* electrode caracteristics */Solver::Intensity > electrodes_map_;
+      /* electrode caracteristics */ Solver::Intensity > electrodes_map_;
 
   public:
     /*!
@@ -148,7 +148,29 @@ namespace Solver
      *
      */
     void set_boundary_cells( const std::map< std::string, std::map< std::size_t, std::list< MeshEntity  >  >  >& );
-    /*!
+     /*!
+     *  \brief Punctual potential evaluation
+     *
+     *  This method 
+     *
+     *  \param U: function solution of the Partial Differential Equation.
+     *  \param Mesh: Tetrahedrization mesh
+     *
+     */
+    void punctual_potential_evaluation( const dolfin::Function&, 
+					const std::shared_ptr< const Mesh >  );
+     /*!
+     *  \brief Punctual potential evaluation
+     *
+     *  This method 
+     *
+     *  \param U: function solution of the Partial Differential Equation.
+     *  \param Mesh: Tetrahedrization mesh
+     *
+     */
+    void surface_potential_evaluation( const dolfin::Function&, 
+				       const std::shared_ptr< const Mesh >  );
+   /*!
      *  \brief 
      *
      *  This method record the cell index per probes.

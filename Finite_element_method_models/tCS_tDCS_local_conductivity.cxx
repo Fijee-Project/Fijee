@@ -18,7 +18,7 @@ Solver::tCS_tDCS_local_conductivity::tCS_tDCS_local_conductivity():Physics()
   electrodes_.reset( new Electrodes_setup() );
 
   //
-  // Boundary marking
+  // Boundary making
   //
   
   //
@@ -27,7 +27,7 @@ Solver::tCS_tDCS_local_conductivity::tCS_tDCS_local_conductivity():Physics()
 
   //
   // Load the facets collection
-  std::cout << "Load facets collection" << std::endl;
+  std::cout << "Load facets collection file" << std::endl;
   std::string facets_collection_xml = (SDEsp::get_instance())->get_files_path_output_();
   facets_collection_xml += "mesh_facets_subdomains.xml";
   //
@@ -237,14 +237,19 @@ Solver::tCS_tDCS_local_conductivity::operator () ( /*Solver::Phi& source,
  
  //
  // Filter function over the electrodes
- solution_electrodes_extraction(u, electrodes_);
+ // solution_electrodes_extraction(u, electrodes_);
+ electrodes_->get_current()->punctual_potential_evaluation(u, mesh_);
 
- std::cout << "electrode CP6 " 
+ std::cout << "electrode punctual CP6 " 
+	   << electrodes_->get_current()->information( "CP6" ).get_V_() 
+	   << std::endl;
+
+ electrodes_->get_current()->surface_potential_evaluation(u, mesh_);
+
+
+ std::cout << "electrode surface CP6 " 
 	   << electrodes_->get_current()->information( "CP6" ).get_electrical_potential() 
 	   << std::endl;
-// std::cout << "electrode T7 " 
-//	   << electrodes_->get_current()->information( "T7" ).get_electrical_potential() 
-//	   << std::endl;
 
 
 //  //

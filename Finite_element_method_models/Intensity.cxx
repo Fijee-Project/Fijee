@@ -3,7 +3,7 @@
 //
 //
 Solver::Intensity::Intensity():
-  electric_variable_(""), index_( 0 ), I_( 0. ), surface_(0.), radius_(0.),
+  electric_variable_(""), index_( 0 ), I_( 0. ), V_( 0. ), surface_(0.), radius_(0.),
   label_("no_name")
 {
   //
@@ -22,7 +22,7 @@ Solver::Intensity::Intensity():
 //
 Solver::Intensity::Intensity(const Intensity& that): 
   electric_variable_(that.electric_variable_), index_(that.index_), 
-  I_(that.I_), label_(that.label_),
+  I_(that.I_),  V_(that.V_), label_(that.label_),
   r0_values_(that.r0_values_), r0_projection_(that.r0_projection_), 
   r0_projection_index_(that.r0_projection_index_), e_values_(that.e_values_),
   impedance_(that.impedance_), surface_(that.surface_), radius_(that.radius_)
@@ -47,6 +47,9 @@ Solver::Intensity::Intensity( std::string Electric_variable, int Index,
   r0_projection_       = Point();
   r0_projection_index_ = -1;
   not_yet_ = true;
+
+  // Electrical potential
+  V_ = 0.;
 }
 //
 //
@@ -156,6 +159,7 @@ Solver::Intensity::operator =( const Intensity& that )
   electric_variable_ = that.electric_variable_;
   index_  = that.index_;
   I_      = that.I_;
+  V_      = that.V_;
   label_  = that.label_;
   //
   //

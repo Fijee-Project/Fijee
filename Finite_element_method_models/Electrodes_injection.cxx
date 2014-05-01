@@ -33,7 +33,7 @@ Solver::Electrodes_injection::eval(Array<double>& values, const Array<double>& x
   for ( auto intensity = electrodes_map_.begin() ; intensity != electrodes_map_.end() ; intensity++ )
     tempo_val += ( intensity->second ).eval( vertex, cell );
 
-  std::cout << "Electrodes_inj eval return: " << tempo_val << std::endl;
+//  std::cout << "Electrodes_inj eval return: " << tempo_val << std::endl;
   //
   //
   values[0] = tempo_val;
@@ -194,6 +194,83 @@ Solver::Electrodes_injection::set_boundary_cells( const std::map< std::string, s
       if( electrode_it != electrodes_map_.end() )
 	{
 	  (electrode_it->second).set_boundary_cells_(electrode->second);
+	}
+    }
+}
+// 
+// 
+// 
+void 
+Solver::Electrodes_injection::punctual_potential_evaluation(const dolfin::Function& U, 
+							    const std::shared_ptr< const Mesh > Mesh)
+{
+  // 
+  const std::size_t num_vertices = Mesh->num_vertices();
+  
+  // Get number of components
+  const std::size_t dim  = U.value_size();
+  const std::size_t rank = U.value_rank();
+
+  // Allocate memory for function values at vertices
+  const std::size_t size = num_vertices * dim; // dim = 1
+  std::vector<double> values(size);
+  U.compute_vertex_values(values, *Mesh);
+
+  
+  // 
+  // 
+  for ( auto electrode = electrodes_map_.begin() ; 
+	electrode != electrodes_map_.end() ; 
+	electrode++ )
+    {
+      // Get the potential at the surface projection of the electrode center
+      double potential = values[ (electrode->second).get_r0_projection_index_() ];
+      // 
+      (electrode->second).set_V_(potential);
+    }
+}
+// 
+// 
+// 
+void 
+Solver::Electrodes_injection::surface_potential_evaluation(const dolfin::Function& U, 
+							   const std::shared_ptr< const Mesh > Mesh)
+{
+  // 
+  const std::size_t num_vertices = Mesh->num_vertices();
+  
+  // Get number of components
+  const std::size_t dim  = U.value_size();
+  const std::size_t rank = U.value_rank();
+
+  // Allocate memory for function values at vertices
+  const std::size_t size = num_vertices * dim; // dim = 1
+  std::vector<double> values(size);
+  U.compute_vertex_values(values, *Mesh);
+
+  
+  // 
+  // 
+  for ( auto electrode = electrodes_map_.begin() ; 
+	electrode != electrodes_map_.end() ; 
+	electrode++ )
+    {
+      for( auto cells_map : (electrode->second).get_boundary_cells_() )
+	{
+	  // 
+	  // Retrieves the list of cell's facets and compute 
+	  // the average electrical potential on the surface
+	  for ( MeshEntity facet : cells_map.second )
+	    {
+	      double local_potential_value = 0.;
+	      for ( VertexIterator vertex( facet ); !vertex.end(); ++vertex )
+		{
+		  //  Calcul of the cell potential
+		  local_potential_value += values[ vertex->index() ];
+		}
+	      // We have 3 vertices on a facet
+	      (electrode->second).add_potential_value( local_potential_value/3. );
+	    }
 	}
     }
 }
