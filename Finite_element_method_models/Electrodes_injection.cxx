@@ -255,6 +255,9 @@ Solver::Electrodes_injection::surface_potential_evaluation(const dolfin::Functio
 	electrode != electrodes_map_.end() ; 
 	electrode++ )
     {
+      // Clear old values
+      (electrode->second).clear_electrical_potential_list();
+      // Process new values
       for( auto cells_map : (electrode->second).get_boundary_cells_() )
 	{
 	  // 

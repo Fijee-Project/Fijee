@@ -83,17 +83,15 @@ namespace Solver
      */
     void solution_domain_extraction( const dolfin::Function&, std::list<std::size_t>&, 
 				     const char* );
+
+  public:
     /*!
-     *  \brief Solution electrodes extraction
+     *  \brief Operator ()
      *
-     *  This method extract from the Function solution U the electrodes potential values.
-     *
-     *  \param U: Function solution of the Partial Differential Equation.
-     *  \param Electrodes: Electrodes set up.
+     *  Operator () of the class Physics
      *
      */
-    void solution_electrodes_extraction( const dolfin::Function&, 
-					 std::shared_ptr< Solver::Electrodes_setup >  );
+    //    virtual void operator ()() ;
    };
 };
 

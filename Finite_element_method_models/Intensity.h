@@ -152,6 +152,7 @@ namespace Solver
     double get_surface_()const{return surface_;};
     double get_radius_()const{return radius_;};
     // 
+    void   clear_electrical_potential_list(){electrical_potential_list_.clear();};
     double get_electrical_potential() const;
     
     //

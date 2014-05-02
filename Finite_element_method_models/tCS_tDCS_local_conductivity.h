@@ -57,7 +57,7 @@ namespace Solver
   /*! \class tCS_tDCS_local_conductivity
    * \brief classe representing tDCS simulation.
    *
-   *  This class representing the Physical model for the transcranial Direct Current Stimulation (tDCS) simulation.
+   *  This class representing the Physical model for the estimation of skinn/skull conductivity tensors using the transcranial Direct Current Stimulation (tDCS) simulation.
    */
   class tCS_tDCS_local_conductivity : Physics
   {

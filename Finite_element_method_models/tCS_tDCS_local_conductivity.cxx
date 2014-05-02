@@ -18,7 +18,7 @@ Solver::tCS_tDCS_local_conductivity::tCS_tDCS_local_conductivity():Physics()
   electrodes_.reset( new Electrodes_setup() );
 
   //
-  // Boundary making
+  // Boundary marking
   //
   
   //
@@ -132,145 +132,154 @@ Solver::tCS_tDCS_local_conductivity::tCS_tDCS_local_conductivity():Physics()
 //
 //
 void 
-Solver::tCS_tDCS_local_conductivity::operator () ( /*Solver::Phi& source,
-				  SLD_model::FunctionSpace& V,
-				  FacetFunction< size_t >& boundaries*/)
+Solver::tCS_tDCS_local_conductivity::operator () ( )
 {
-//  //
-//  // Mutex the electrodes vector poping process
-//  //
-//  Solver::Current_density source;
-//    try {
-//      // lock the electrode list
-//      std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
-//      source = electrodes_list_.front();
-//      electrodes_list_.pop_front();
-//    }
-//    catch (std::logic_error&) {
-//      std::cout << "[exception caught]\n";
-//    }
-//
-//  //
-//  //
-//  std::cout << source.get_name_() << std::endl;
-//  
-////  //
-////  // Define Dirichlet boundary conditions 
-////  DirichletBC boundary_conditions(*V, source, perifery);
-
 
   //////////////////////////////////////////////////////
   // Transcranial direct current stimulation equation //
   //////////////////////////////////////////////////////
-      
-  //
-  // Update the conductivity
+
   // 
-  sigma_->conductivity_update( domains_ );
+  // incrementation loop
+  int simplex_vertex = 0;
+  int stop = 0;
+  // 
+  while( ++stop < 8 || !(std::get</* initialized */ 4 >(simplex_[0]) & 
+			 std::get<4>(simplex_[1]) & std::get<4>(simplex_[2]) & 
+			 std::get<4>(simplex_[3])) )
+    {
+      std::cout << "Yeah: " << simplex_vertex << " " << stop << std::endl;
+      std::cout << (std::get</* initialized */ 4 >(simplex_[0]) & 
+		    std::get<4>(simplex_[1]) & std::get<4>(simplex_[2]) & 
+		    std::get<4>(simplex_[3])) << std::endl;
+      for (int i = 0 ; i < simplex_.size()  ; i++ )
+	std::cout << "~ " << i << " ~ " << std::get</* initialized */ 4 >(simplex_[i]) << std::endl;
 
-  //
-  // tDCS electric potential u
-  //
+      //
+      // Update the conductivity
+      if ( simplex_vertex < simplex_.size() )
+	{
+	  sigma_->conductivity_update( domains_, simplex_[simplex_vertex] );
+	  std::get</* initialized */ 4 >(simplex_[simplex_vertex]) = true;
+	  simplex_vertex++;
+	}
+      else
+	{
+	  int updated_simplex = -1;
+	  for ( int i = 0 ; i < 4 ; i++ )
+	    if ( std::get< /* updated */ 4 >(simplex_[i]) )
+	      updated_simplex = i;
+	  // 
+	  if ( updated_simplex != -1)
+	    sigma_->conductivity_update( domains_, simplex_[updated_simplex] );	  
+	  else
+	    {
+	      std::cerr << "No update of the conductivity has been done" << std::endl;
+	      abort();
+	    }
+	}
 
-//  //
-//  // PDE boundary conditions
-//  DirichletBC bc(*V_, *(electrodes_->get_current()), *boundaries_, 101);
+      //
+      // tDCS electrical potential u
+      //
 
-  //
-  // Define variational forms
-  tCS_model::BilinearForm a(V_, V_);
-  tCS_model::LinearForm L(V_);
+      //
+      // Define variational forms
+      tCS_model::BilinearForm a(V_, V_);
+      tCS_model::LinearForm L(V_);
       
-  //
-  // Anisotropy
-  // Bilinear
-  a.a_sigma  = *sigma_;
-  // a.dx       = *domains_;
+      //
+      // Anisotropy
+      // Bilinear
+      a.a_sigma  = *sigma_;
+      // a.dx       = *domains_;
   
   
-  // Linear
-  L.I  = *(electrodes_->get_current());
-  L.ds = *boundaries_;
+      // Linear
+      L.I  = *(electrodes_->get_current());
+      L.ds = *boundaries_;
 
-  //
-  // Compute solution
-  Function u(*V_);
-  LinearVariationalProblem problem(a, L, u/*, bc*/);
-  LinearVariationalSolver  solver(problem);
-  // krylov
-  solver.parameters["linear_solver"]  
-    = (SDEsp::get_instance())->get_linear_solver_();
-  solver.parameters("krylov_solver")["maximum_iterations"] 
-    = (SDEsp::get_instance())->get_maximum_iterations_();
-  solver.parameters("krylov_solver")["relative_tolerance"] 
-    = (SDEsp::get_instance())->get_relative_tolerance_();
-  solver.parameters["preconditioner"] 
-    = (SDEsp::get_instance())->get_preconditioner_();
-  //
-  solver.solve();
+      //
+      // Compute solution
+      Function u(*V_);
+      LinearVariationalProblem problem(a, L, u/*, bc*/);
+      LinearVariationalSolver  solver(problem);
+      // krylov
+      solver.parameters["linear_solver"]  
+	= (SDEsp::get_instance())->get_linear_solver_();
+      solver.parameters("krylov_solver")["maximum_iterations"] 
+	= (SDEsp::get_instance())->get_maximum_iterations_();
+      solver.parameters("krylov_solver")["relative_tolerance"] 
+	= (SDEsp::get_instance())->get_relative_tolerance_();
+      solver.parameters["preconditioner"] 
+	= (SDEsp::get_instance())->get_preconditioner_();
+      //
+      solver.solve();
 
 
- //
- // Regulation terme:  \int u dx = 0
- double old_u_bar = 0.;
- double u_bar = 1.e+6;
- double U_bar = 0.;
- double N = u.vector()->size();
- int iteration = 0;
- double Sum = 1.e+6;
- //
- //  while ( abs( u_bar - old_u_bar ) > 0.1 )
- while ( fabs(Sum) > 1.e-3 )
-   {
-     old_u_bar = u_bar;
-     u_bar  = u.vector()->sum();
-     u_bar /= N;
-     (*u.vector()) -= u_bar;
-     //
-     U_bar += u_bar;
-     Sum = u.vector()->sum();
-     std::cout << ++iteration << " ~ " << Sum  << std::endl;
-   }
+      //
+      // Regulation terme:  \int u dx = 0
+      double old_u_bar = 0.;
+      double u_bar = 1.e+6;
+      double U_bar = 0.;
+      double N = u.vector()->size();
+      int iteration = 0;
+      double Sum = 1.e+6;
+      //
+      //  while ( abs( u_bar - old_u_bar ) > 0.1 )
+      while ( fabs(Sum) > 1.e-3 )
+	{
+	  old_u_bar = u_bar;
+	  u_bar  = u.vector()->sum();
+	  u_bar /= N;
+	  (*u.vector()) -= u_bar;
+	  //
+	  U_bar += u_bar;
+	  Sum = u.vector()->sum();
+	  std::cout << ++iteration << " ~ " << Sum  << std::endl;
+	}
  
- std::cout << "int u dx = " << Sum << std::endl;
+      std::cout << "int u dx = " << Sum << std::endl;
 
  
- //
- // Filter function over the electrodes
- // solution_electrodes_extraction(u, electrodes_);
- electrodes_->get_current()->punctual_potential_evaluation(u, mesh_);
+      //
+      // Filter function over the electrodes
+      // solution_electrodes_extraction(u, electrodes_);
+      electrodes_->get_current()->punctual_potential_evaluation(u, mesh_);
 
- std::cout << "electrode punctual CP6 " 
-	   << electrodes_->get_current()->information( "CP6" ).get_V_() 
-	   << std::endl;
+      std::cout << "electrode punctual CP6 " 
+		<< electrodes_->get_current()->information( "CP6" ).get_V_() 
+		<< std::endl;
 
- electrodes_->get_current()->surface_potential_evaluation(u, mesh_);
-
-
- std::cout << "electrode surface CP6 " 
-	   << electrodes_->get_current()->information( "CP6" ).get_electrical_potential() 
-	   << std::endl;
+      electrodes_->get_current()->surface_potential_evaluation(u, mesh_);
 
 
-//  //
-//  // Extract subfunctions
-//  Function potential = u[0];
+      std::cout << "electrode surface CP6 " 
+		<< electrodes_->get_current()->information( "CP6" ).get_electrical_potential() 
+		<< std::endl;
 
-  //
-  // Save solution in VTK format
-  //  * Binary (.bin)
-  //  * RAW    (.raw)
-  //  * SVG    (.svg)
-  //  * XD3    (.xd3)
-  //  * XDMF   (.xdmf)
-  //  * XML    (.xml) // FEniCS xml
-  //  * XYZ    (.xyz)
-  //  * VTK    (.pvd) // paraview
-  std::string file_name = (SDEsp::get_instance())->get_files_path_result_() + 
-    std::string("tDCS.pvd");
-  File file( file_name.c_str() );
-  //
-  file << u;
+      // 
+      // Estimate the the sum-of_squares
+      // 
+      if ( simplex_vertex > 3 )
+	{}
+      
+      //
+      // Save solution in VTK format
+      //  * Binary (.bin)
+      //  * RAW    (.raw)
+      //  * SVG    (.svg)
+      //  * XD3    (.xd3)
+      //  * XDMF   (.xdmf)
+      //  * XML    (.xml) // FEniCS xml
+      //  * XYZ    (.xyz)
+      //  * VTK    (.pvd) // paraview
+      std::string file_name = (SDEsp::get_instance())->get_files_path_result_() + 
+	std::string("tDCS.pvd");
+      File file( file_name.c_str() );
+      //
+      file << u;
+    }
 };
 //
 //

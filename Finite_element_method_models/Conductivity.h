@@ -108,7 +108,8 @@ namespace Solver
      *  This method update the conductivity in the skin/skull electrical conductivity estimation 
      *
      */
-    void conductivity_update(const std::shared_ptr< MeshFunction< std::size_t > > );
+    void conductivity_update( const std::shared_ptr< MeshFunction< std::size_t > >,
+			      std::tuple< double, double, double, double, bool, bool >& );
   };
   
   /*! \class Sigma_isotrope

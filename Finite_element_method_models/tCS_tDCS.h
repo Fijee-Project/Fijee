@@ -60,6 +60,7 @@ namespace Solver
    */
   class tCS_tDCS : Physics
   {
+  protected:
     //! Electrodes list
     std::shared_ptr< Solver::Electrodes_setup > electrodes_;
     //! Head model facets collection
