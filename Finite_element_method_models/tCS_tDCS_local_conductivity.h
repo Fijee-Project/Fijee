@@ -30,6 +30,9 @@
 #include "Boundaries.h"
 #include "Sub_domaines.h"
 #include "PDE_solver_parameters.h"
+#include "Utils/Minimizers/Minimizer.h"
+#include "Utils/Minimizers/Downhill_simplex.h"
+#include "Utils/Minimizers/Iterative_minimizer.h"
 //#include "Utils/Thread_dispatching.h"
 // Validation
 #include "Spheres_electric_monopole.h"

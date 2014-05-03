@@ -2,7 +2,7 @@ UFLFLAG = -l dolfin
 #
 # Libraries and includes
 #
-INC     = -I$(FIJEE)/ -I$(FENICS)/include/ -I$(EIGEN3)/include/eigen3/ 
+INC     = -I$(FIJEE)/ -I$(FIJEE)/Utils/Minimizers/ -I$(FENICS)/include/ -I$(EIGEN3)/include/eigen3/ 
 LIB_DIR = -L$(FIJEE)/Utils/pugi/ -L$(FENICS)/lib -L/usr/lib64/mpich/lib/ 
 LIBS    = -ldolfin  -lpugixml -lboost_mpi #-lboost_math_tr1
 #########

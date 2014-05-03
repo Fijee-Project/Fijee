@@ -148,13 +148,6 @@ Solver::tCS_tDCS_local_conductivity::operator () ( )
 			 std::get<4>(simplex_[1]) & std::get<4>(simplex_[2]) & 
 			 std::get<4>(simplex_[3])) )
     {
-      std::cout << "Yeah: " << simplex_vertex << " " << stop << std::endl;
-      std::cout << (std::get</* initialized */ 4 >(simplex_[0]) & 
-		    std::get<4>(simplex_[1]) & std::get<4>(simplex_[2]) & 
-		    std::get<4>(simplex_[3])) << std::endl;
-      for (int i = 0 ; i < simplex_.size()  ; i++ )
-	std::cout << "~ " << i << " ~ " << std::get</* initialized */ 4 >(simplex_[i]) << std::endl;
-
       //
       // Update the conductivity
       if ( simplex_vertex < simplex_.size() )
@@ -262,7 +255,12 @@ Solver::tCS_tDCS_local_conductivity::operator () ( )
       // Estimate the the sum-of_squares
       // 
       if ( simplex_vertex > 3 )
-	{}
+	{
+//	  Utils::Minimizers::Downhill_simplex minimizer_ago;
+//	  minimizer_ago.minimize();
+	  Utils::Minimizers::Iterative_minimizer<Utils::Minimizers::Downhill_simplex> minimizer_ago;
+	  minimizer_ago.minimize();
+	}
       
       //
       // Save solution in VTK format

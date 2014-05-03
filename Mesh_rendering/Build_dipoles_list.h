@@ -1,5 +1,5 @@
-#ifndef BUILD_DIPOLES_LIST_H_
-#define BUILD_DIPOLES_LIST_H_
+#ifndef BUILD_DIPOLES_LIST_H
+#define BUILD_DIPOLES_LIST_H
 //http://franckh.developpez.com/tutoriels/outils/doxygen/
 /*!
  * \file Build_dipoles_list.h
