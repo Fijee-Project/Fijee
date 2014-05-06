@@ -18,6 +18,7 @@ export VTK=/data1/devel/CPP/VTK/
 export VTK_RELEASE=vtk-5.10
 export CGAL=/data1/devel/CPP/CGAL/
 export VIENNACL=/data1/devel/CPP/ViennaCL
+export NIFTI=/data1/devel/CPP/nifti
 # Solver PETSc
 export PETSC_DIR=/usr/lib/petscdir/3.1/
 export PETSC_ARCH=linux-gnu-c-opt
@@ -30,7 +31,7 @@ export FENICS=/data1/devel/CPP/FEniCS
 # Freesurfer data #
 ###################
 export SUBJECTS_DIR=/data1/data/subjects
-export SUBJECT=GazzDCS0004mgh_GPU2
+export SUBJECT=GazzDCS0004mgh_GPU3
 # MRI imaging
 T1_DICOM=/data1/data/dicom/tDCS/GazzDCS0004mgh/MEMPRAGE_4e_p2_1mm_isoRMS_12
 FIRST_T1_DICOM=IM-0012-0001.dcm
@@ -78,7 +79,7 @@ FIJEE_INPUT=$SUBJECTS_DIR/$SUBJECT/fem/input
 ############################
 export LD_LIBRARY_PATH=$CUDA_LIB:$CUDA_OLD_LIB:$AMDAPPSDKROOT/lib/x86_64/:$VTK/install/lib/$VTK_RELEASE/:$CGAL/install/lib:$MNE_ROOT/lib:$FSL_LIB:$FENICS/install/lib:$FENICS/install/lib:$LD_LIBRARY_PATH
 #
-export PATH=$MNE_ROOT/bin:$PATH
+export PATH=$NIFTI/install/bin:$MNE_ROOT/bin:$PATH
 
 
 ################################################################################
@@ -98,6 +99,7 @@ check()
     test ! -d $PETSC_DIR && echo "Directory $PETSC_DIR not found!";
     test ! -d $PETSC_DIR/$PETSC_ARCH && echo "Directory $PETSC_DIR$PETSC_ARCH not found!";
     test ! -d $TRILINOS && echo "Directory $TRILINOS not found!";
+    test ! -d $NIFTI && echo "Directory $NIFTI not found!";
 
     #
     test ! -d $SUBJECTS_DIR && echo "Directory $SUBJECTS_DIR not found!";
@@ -119,9 +121,11 @@ check()
     test ! -d $MNE_ROOT && echo "Directory $MNE_ROOT not found!";
 
     # commands
-    command -v matlab >/dev/null 2>&1 || { echo >&2 "I require matlab but it's not installed.  Aborting."; exit 1; }
+    command -v matlab >/dev/null 2>&1 || { echo >&2 "Matlab required but it's not installed.  Aborting."; exit 1; }
     command -v $FREESURFER_HOME/bin/recon-all >/dev/null 2>&1 || \
-	{ echo >&2 "I require Freesurfer but it's not installed.  Aborting."; exit 1; }
+	{ echo >&2 "Freesurfer required but it's not installed.  Aborting."; exit 1; }
+    command -v $NIFTI/install/bin/nifti1_test >/dev/null 2>&1 || \
+	{ echo >&2 "Nifti tools required but not installed.  Aborting."; exit 1; }
 
 }
 
@@ -359,9 +363,9 @@ spm()
     #
     SPM_COMMAND="addpath ('$SPM_DIR'); addpath ('$FIJEE/scripts/matlab/'); " 
     SPM_COMMAND=$SPM_COMMAND"nii_newseg('$T1W','false','$FIJEE/scripts/matlab/eTPM.nii','$T2W'); " 
-    SPM_COMMAND=$SPM_COMMAND"nii_smooth('c3T1.nii',1.5); " 
+    SPM_COMMAND=$SPM_COMMAND"nii_smooth('c3T1.nii',2.0); " 
     SPM_COMMAND=$SPM_COMMAND"nii_smooth('c4T1.nii',1.5); " 
-    SPM_COMMAND=$SPM_COMMAND"nii_smooth('c5T1.nii',1.5); " 
+    SPM_COMMAND=$SPM_COMMAND"nii_smooth('c5T1.nii',3.0); " 
     SPM_COMMAND=$SPM_COMMAND"nii_smooth('c6T1.nii',1.5); exit; " 
     #
     SPM_EXEC_TIME_FILE=$PWD/SPM_$SUBJECT.timelog
@@ -377,7 +381,7 @@ spm()
     #
     for i in {3..6} ; do \
     test -s sc${i}T1.nii && \
-	($FREESURFER_HOME/bin/mri_convert sc${i}T1.nii sc${i}T1.img) \
+	($NIFTI/install/bin/nifti1_test -a2 sc${i}T1 sc${i}T1) \
 	|| echo "SPM file num $i not found!"; \
 	done
     

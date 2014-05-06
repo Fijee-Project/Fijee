@@ -2,16 +2,18 @@
 ## CONFIGURE ##
 ###############
 export PREFIX =
-export PATH_SOFT =/home/cobigo/devel/CPP/
+export PATH_SOFT =/data1/devel/CPP/
 DEBUG         = no
 VERSION       = 1.0
-DIST          = Fijee
+DIST          = fijee
 
 #################
 ## COMPILATION ##
 #################
+#export CXX  = /data1/devel/GCC/install/bin/g++
+#export CC   = /data1/devel/GCC/install/bin/g++
 export CXX  = g++
-export CC   = g++
+export CC   = g++-4.4
 export CUDA = nvcc
 #-lineinfo CUDA
 #  -gencode arch=compute_10,code=sm_10 
@@ -27,7 +29,7 @@ CXXFLAGS_MODE  = -O3 #-DGPU
 CUDAFLAGS_MODE = -O3 -m64 -gencode arch=compute_20,code=sm_20 
 endif
 #
-export CXXFLAGS  += $(CXXFLAGS_MODE) -Wno-deprecated -std=c++11 -frounding-math -DCGAL_EIGEN3_ENABLED -DDEBUG_UCSF #-DDEBUG_TRACE -std=c++0x -std=c++11 or -std=gnu++11
+export CXXFLAGS  += $(CXXFLAGS_MODE) -Wno-deprecated -std=c++0x -frounding-math -DCGAL_EIGEN3_ENABLED -DDEBUG_UCSF #-DDEBUG_TRACE
 export CUDAFLAGS += $(CUDAFLAGS_MODE)
 export UFL = ffc
 
@@ -59,7 +61,7 @@ endif
 #
 export EIGEN3   = $(PATH_SOFT)/Eigen/install
 export FENICS   = $(PATH_SOFT)/FEniCS/install/
-export CUDA_LIB = /usr/local/cuda/lib64/
+export CUDA_LIB = /usr/local/cuda-5.5/targets/x86_64-linux/lib/
 
 ######################
 ## Main DIRECTORIES ##
@@ -84,7 +86,7 @@ $(EXEC):
 	( cd $(FEM_MODELS_DIR) && $(MAKE) )
 	( cd $(MESH_RENDERING_DIR) && $(MAKE) )
 	@echo""
-	@echo "export LD_LIBRARY_PATH=$(CUDA_LIB):$(VTK)/lib/vtk-5.10:$(CGAL)/lib:$(LD_LIBRARY_PATH)"
+	@echo "export LD_LIBRARY_PATH=$(CUDA_LIB):$(VTK)/lib/vtk-5.10:$(CGAL)/lib:$(PWD)/Utils/pugi/:$(LD_LIBRARY_PATH)"
 	@echo""
 
 
