@@ -75,7 +75,7 @@ namespace Utils
        *
        *  This method launch the minimization algorithm
        */
-      virtual void minimize()
+      void minimize()
       {
 	minimizer_.minimize();
       };
