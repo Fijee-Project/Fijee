@@ -8,11 +8,8 @@
  * \version 0.1
  */
 #include <iostream>
-//#include <stdlib.h>     /* getenv */
 #include <string>
 #include <sstream>
-//#include <errno.h>      /* builtin errno */
-//#include <sys/stat.h>   /* mkdir */
 #include <list>
 #include <tuple>
 #include <algorithm>    /* copy */
@@ -20,6 +17,7 @@
 // UCSF
 //
 #include "Utils/Fijee_environment.h"
+#include "Utils/Fijee_log_management.h"
 #include "Point_vector.h"
 #include "Distance.h"
 #define PI 3.14159265359
@@ -28,11 +26,7 @@
 //
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Point_with_normal_3.h>
-
-//#include <CGAL/Simple_cartesian.h>
-//#include <CGAL/Orthogonal_incremental_neighbor_search.h>
 #include <CGAL/Orthogonal_k_neighbor_search.h>
-//#include <CGAL/Search_traits_3.h>
 #include <CGAL/Search_traits.h>
 //
 typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;

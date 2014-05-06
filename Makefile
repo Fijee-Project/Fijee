@@ -44,7 +44,8 @@ NIFTI_DIR = $(PATH_SOFT)/nifti
 VTK_DIR     = $(PATH_SOFT)/VTK
 export VTK_VERSION = vtk-5.10
 export VTK_LIBS    = -lvtkCommon -lvtkFiltering -lvtkGenericFiltering -lvtkGraphics -lvtkIO -lvtkRendering -lvtksys -lvtkVolumeRendering -lvtkzlib -lvtkfreetype -lvtkftgl -lvtkImaging -lvtkhdf5 -lvtkhdf5_hl -lvtkexpat -lvtktiff -lvtkjpeg -lvtkpng -lvtksqlite -lvtkmetaio -lLSDyna -lvtkNetCDF -lvtkDICOMParser -lvtkverdict -lvtkNetCDF -lvtkHybrid -lvtkNetCDF_cxx -lvtkexoIIc -lvtklibxml2 -lvtkalglib -lvtkproj4  
-
+#
+#
 #
 ifeq ($(DEBUG),yes)
 export CGAL   = $(CGAL_DIR)/install

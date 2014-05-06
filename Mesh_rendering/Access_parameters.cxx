@@ -17,11 +17,21 @@ DAp::Access_parameters():
 {
   //
   // Check on ENV variables
+  // 
   Utils::Fijee_environment fijee;
   //
   files_path_        = fijee.get_fem_path_();
   files_path_output_ = fijee.get_fem_output_path_();
 
+  // 
+  // Time profiler lof file
+  // It the file existes: empty it.
+#ifdef TIME_PROFILER
+  std::ofstream ofs ( "fijee_time.log", std::ofstream::app );
+  if( ofs.good() ) ofs.clear();
+  ofs.close();
+#endif
+  
 
   //
   // Mesh rendering
