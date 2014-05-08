@@ -42,6 +42,10 @@ namespace Solver
     std::shared_ptr< Solver::Tensor_conductivity > sigma_;
     //! Electrodes list
     std::shared_ptr< Solver::Electrodes_setup > electrodes_;
+    //! Head model facets collection
+    std::shared_ptr< MeshValueCollection< std::size_t > > mesh_facets_collection_;
+    //! Boundarie conditions
+    std::shared_ptr< MeshFunction< std::size_t > > boundaries_;
 
 
   public:
@@ -95,7 +99,7 @@ namespace Solver
      *  Operator () of the class Physics
      *
      */
-    //    virtual void operator ()() ;
+    virtual void operator ()() = 0;
    };
 };
 

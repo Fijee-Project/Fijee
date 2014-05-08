@@ -84,7 +84,7 @@ namespace Solver
      *
      *  Destructor of the class SL_direct
      */
-    ~SL_direct(){/* Do nothing */};
+    virtual ~SL_direct(){/* Do nothing */};
     /*!
      *  \brief Operator =
      *
@@ -98,7 +98,7 @@ namespace Solver
      *  Operator () of the class SL_direct
      *
      */
-    void operator () ();
+    virtual void operator () ();
     
   public:
     /*!

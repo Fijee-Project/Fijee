@@ -81,7 +81,7 @@ namespace Solver
      *
      *  Destructor of the class SL_subtraction
      */
-    ~SL_subtraction(){/* Do nothing */};
+    virtual ~SL_subtraction(){/* Do nothing */};
     /*!
      *  \brief Operator =
      *
@@ -95,7 +95,7 @@ namespace Solver
      *  Operator () of the class SL_subtraction
      *
      */
-    void operator () ();
+    virtual void operator () ();
     
   public:
     /*!

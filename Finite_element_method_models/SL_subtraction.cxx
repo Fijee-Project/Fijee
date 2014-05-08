@@ -115,15 +115,17 @@ Solver::SL_subtraction::operator () ( /*Solver::Phi& source,
   // Mutex the dipoles vector poping process
   //
   Solver::Phi source;
-    try {
-      // lock the dipole list
-      std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
-      source = dipoles_list_.front();
-      dipoles_list_.pop_front();
-    }
-    catch (std::logic_error&) {
-      std::cout << "[exception caught]\n";
-    }
+    try 
+      {
+	// lock the dipole list
+	std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
+	source = dipoles_list_.front();
+	dipoles_list_.pop_front();
+      }
+    catch (std::logic_error&) 
+      {
+	std::cerr << "[exception caught]\n" << std::endl;
+      }
 
   //
   //
@@ -186,8 +188,7 @@ Solver::SL_subtraction::operator () ( /*Solver::Phi& source,
  int iteration = 0;
  double Sum = 1.e+6;
  //
- //  while ( abs( u_bar - old_u_bar ) > 0.1 )
- while ( abs(Sum) > 1.e-3 )
+ while ( fabs(Sum) > 1.e-6 )
    {
      old_u_bar = u_bar;
      u_bar  = u.vector()->sum();
@@ -209,11 +210,26 @@ Solver::SL_subtraction::operator () ( /*Solver::Phi& source,
   *Phi_tot.vector()  += *u.vector();
 
 
- //
- // Filter function over a subdomain
- std::list<std::size_t> test_sub_domains{4,5};
- solution_domain_extraction(Phi_tot, test_sub_domains, "Source_localization");
+  //
+  // Filter function over a subdomain
+  std::list<std::size_t> test_sub_domains{4,5};
+  solution_domain_extraction(Phi_tot, test_sub_domains, "Source_localization");
   
+  //
+  // Mutex record potential at each electrods
+  //
+  try 
+    {
+      // lock the dipole list
+      std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
+      // 
+      electrodes_->get_current(0)->punctual_potential_evaluation(u, mesh_);
+      //	electrodes_->record_U_for_dipole( source.get_name_() );
+    }
+  catch (std::logic_error&) 
+    {
+      std::cerr << "[exception caught]\n" << std::endl;
+    }
 
 
   //

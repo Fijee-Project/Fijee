@@ -6,89 +6,32 @@ typedef Solver::PDE_solver_parameters SDEsp;
 //
 //
 //
-Solver::tCS_tDCS::tCS_tDCS():Physics()
+Solver::tCS_tDCS::tCS_tDCS():
+  Physics(), sample_(0)
 {
   //
   // Define the function space
   V_.reset( new tCS_model::FunctionSpace(mesh_) );
   V_field_.reset( new tCS_field_model::FunctionSpace(mesh_) );
 
-  //
-  // Boundary marking
-  //
+
+  // 
+  // Output files
+  // 
   
-  //
-  // Boundary conditions
-  std::cout << "Load boundaries" << std::endl;
-
-  //
-  // Load the facets collection
-  std::cout << "Load facets collection" << std::endl;
-  std::string facets_collection_xml = (SDEsp::get_instance())->get_files_path_output_();
-  facets_collection_xml += "mesh_facets_subdomains.xml";
-  //
-  mesh_facets_collection_.reset( new MeshValueCollection< std::size_t > (*mesh_, facets_collection_xml) );
-
-  //
-  // MeshDataCollection methode
-  // Recreate the connectivity
-  // Get mesh connectivity D --> d
-  const std::size_t d = mesh_facets_collection_->dim();
-  const std::size_t D = mesh_->topology().dim();
-  dolfin_assert(d == 2);
-  dolfin_assert(D == 3);
-
-  //
-  // Generate connectivity if it does not excist
-  mesh_->init(D, d);
-  const MeshConnectivity& connectivity = mesh_->topology()(D, d);
-  dolfin_assert(!connectivity.empty());
-  
-  //
-  // Map the facet index with cell index
-  std::map< std::size_t, std::size_t > map_index_cell;
-  typename std::map<std::pair<std::size_t, std::size_t>, std::size_t>::const_iterator it;
-  const std::map<std::pair<std::size_t, std::size_t>, std::size_t>& values
-    = mesh_facets_collection_->values();
-  // Iterate over all values
-  for ( it = values.begin() ; it != values.end() ; ++it )
-    {
-      // Get value collection entry data
-      const std::size_t cell_index = it->first.first;
-      const std::size_t local_entity = it->first.second;
-      const std::size_t value = it->second;
-
-      std::size_t entity_index = 0;
-      // Get global (local to to process) entity index
-      //      dolfin_assert(cell_index < mesh_->num_cells());
-      map_index_cell[connectivity(cell_index)[local_entity]] = cell_index;
- 
-      // Set value for entity
-      //  dolfin_assert(entity_index < _size);
-    }
-
-  
-  //
-  // Define boundary condition
-  boundaries_.reset( new MeshFunction< std::size_t >(mesh_) );
-  *boundaries_ = *mesh_facets_collection_;
-  //
-  boundaries_->rename( mesh_facets_collection_->name(),
-		       mesh_facets_collection_->label() );
-  //
-  mesh_facets_collection_.reset();
-
-  //
-  // Boundary definition
-  Electrodes_surface electrodes_101( electrodes_, boundaries_, map_index_cell );
-  //
-  electrodes_101.mark( *boundaries_, 101 );
-  electrodes_101.surface_vertices_per_electrodes( 101 );
-  // write boundaries
-  std::string boundaries_file_name = (SDEsp::get_instance())->get_files_path_result_();
-  boundaries_file_name            += std::string("boundaries.pvd");
-  File boundaries_file( boundaries_file_name.c_str() );
-  boundaries_file << *boundaries_;
+  // 
+  // Head time series potential output file
+  std::string file_head_potential_ts_name = (SDEsp::get_instance())->get_files_path_result_() + 
+    std::string("tDCS_time_series.pvd");
+  file_potential_time_series_ = new File( file_head_potential_ts_name.c_str() );
+  // 
+  std::string file_brain_potential_ts_name = (SDEsp::get_instance())->get_files_path_result_() + 
+    std::string("tDCS_brain_time_series.pvd");
+   file_brain_potential_time_series_ = nullptr; // new File( file_brain_potential_ts_name.c_str() );
+  // 
+  std::string file_filed_potential_ts_name = (SDEsp::get_instance())->get_files_path_result_() + 
+    std::string("tDCS_field_time_series.pvd");
+   file_field_time_series_ = nullptr; // new File( file_filed_potential_ts_name.c_str() );
 }
 //
 //
@@ -101,24 +44,25 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
 //  //
 //  // Mutex the electrodes vector poping process
 //  //
-//  Solver::Current_density source;
-//    try {
+//  int local_sample = 0;
+//  try
+//    {
 //      // lock the electrode list
 //      std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
-//      source = electrodes_list_.front();
-//      electrodes_list_.pop_front();
+//      local_sample = sample_++;
 //    }
-//    catch (std::logic_error&) {
-//      std::cout << "[exception caught]\n";
+//  catch (std::logic_error&)
+//    {
+//      std::cerr << "[exception caught]\n" << std::endl;
 //    }
 //
 //  //
 //  //
-//  std::cout << source.get_name_() << std::endl;
+//  std::cout << "Sample " << local_sample << std::endl;
 //  
-////  //
-////  // Define Dirichlet boundary conditions 
-////  DirichletBC boundary_conditions(*V, source, perifery);
+//  //  //
+//  //  // Define Dirichlet boundary conditions 
+//  //  DirichletBC boundary_conditions(*V, source, perifery);
 
 
   //////////////////////////////////////////////////////
@@ -130,9 +74,9 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
   // tDCS electric potential u
   //
 
-//  //
-//  // PDE boundary conditions
-//  DirichletBC bc(*V_, *(electrodes_->get_current(0)), *boundaries_, 101);
+  //  //
+  //  // PDE boundary conditions
+  //  DirichletBC bc(*V_, *(electrodes_->get_current(0)), *boundaries_, 101);
 
   //
   // Define variational forms
@@ -147,7 +91,7 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
   
   
   // Linear
-  L.I  = *(electrodes_->get_current(0));
+  L.I  = *(electrodes_->get_current(/*local_sample*/0));
   L.ds = *boundaries_;
 
   //
@@ -168,73 +112,103 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
   solver.solve();
 
 
- //
- // Regulation terme:  \int u dx = 0
- double old_u_bar = 0.;
- double u_bar = 1.e+6;
- double U_bar = 0.;
- double N = u.vector()->size();
- int iteration = 0;
- double Sum = 1.e+6;
- //
- //  while ( abs( u_bar - old_u_bar ) > 0.1 )
- while ( fabs(Sum) > 1.e-3 )
-   {
-     old_u_bar = u_bar;
-     u_bar  = u.vector()->sum();
-     u_bar /= N;
-     (*u.vector()) -= u_bar;
-     //
-     U_bar += u_bar;
-     Sum = u.vector()->sum();
-     std::cout << ++iteration << " ~ " << Sum  << std::endl;
-   }
+  //
+  // Regulation terme:  \int u dx = 0
+  double old_u_bar = 0.;
+  double u_bar = 1.e+6;
+  double U_bar = 0.;
+  double N = u.vector()->size();
+  int iteration = 0;
+  double Sum = 1.e+6;
+  //
+  //  while ( abs( u_bar - old_u_bar ) > 0.1 )
+  while ( fabs(Sum) > 1.e-6 )
+    {
+      old_u_bar = u_bar;
+      u_bar  = u.vector()->sum();
+      u_bar /= N;
+      (*u.vector()) -= u_bar;
+      //
+      U_bar += u_bar;
+      Sum = u.vector()->sum();
+      std::cout << ++iteration << " ~ " << Sum  << std::endl;
+    }
+  // 
+  std::cout << "int u dx = " << Sum << std::endl;
  
- std::cout << "int u dx = " << Sum << std::endl;
+  //
+  // Filter function over a subdomain
+  std::list<std::size_t> test_sub_domains{4,5};
+  solution_domain_extraction(u, test_sub_domains, "tDCS_potential");
+//  //
+//  // Filter function over a subdomain
+//  std::list<std::size_t> test_sub_domains{4,5};
+//  solution_domain_extraction(u, test_sub_domains, file_brain_potential_time_series_);
 
- //
- // tDCS electric current density field \vec{J}
- // 
- 
- //
- // Define variational forms
- tCS_field_model::BilinearForm a_field(V_field_, V_field_);
- tCS_field_model::LinearForm L_field(V_field_);
- 
- //
- // Anisotropy
- // Bilinear
- // a.dx       = *domains_;
- 
- 
- // Linear
- L_field.u       = u;
- L_field.a_sigma = *sigma_;
- //  L.ds = *boundaries_;
+  //
+  // Mutex in the critical zone
+  //
+  try
+    {
+      // lock the electrode list
+      std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
+      *file_potential_time_series_ << u;
+    }
+  catch (std::logic_error&)
+    {
+      std::cerr << "[exception caught]\n" << std::endl;
+    }
 
- //
- // Compute solution
- Function J(*V_field_);
- LinearVariationalProblem problem_field(a_field, L_field, J/*, bc*/);
- LinearVariationalSolver  solver_field(problem_field);
- // krylov
- solver_field.parameters["linear_solver"]  
-   = (SDEsp::get_instance())->get_linear_solver_();
- solver_field.parameters("krylov_solver")["maximum_iterations"] 
-   = (SDEsp::get_instance())->get_maximum_iterations_();
- solver_field.parameters("krylov_solver")["relative_tolerance"] 
-   = (SDEsp::get_instance())->get_relative_tolerance_();
- solver_field.parameters["preconditioner"] 
-   = (SDEsp::get_instance())->get_preconditioner_();
- //
- solver_field.solve();
+  //
+  // tDCS electric current density field \vec{J}
+  // 
+  
+  if (true)
+    {
+      //
+      // Define variational forms
+      tCS_field_model::BilinearForm a_field(V_field_, V_field_);
+      tCS_field_model::LinearForm L_field(V_field_);
+      
+      //
+      // Anisotropy
+      // Bilinear
+      // a.dx       = *domains_;
+      
+      
+      // Linear
+      L_field.u       = u;
+      L_field.a_sigma = *sigma_;
+      //  L.ds = *boundaries_;
+      
+      //
+      // Compute solution
+      Function J(*V_field_);
+      LinearVariationalProblem problem_field(a_field, L_field, J/*, bc*/);
+      LinearVariationalSolver  solver_field(problem_field);
+      // krylov
+      solver_field.parameters["linear_solver"]  
+	= (SDEsp::get_instance())->get_linear_solver_();
+      solver_field.parameters("krylov_solver")["maximum_iterations"] 
+	= (SDEsp::get_instance())->get_maximum_iterations_();
+      solver_field.parameters("krylov_solver")["relative_tolerance"] 
+	= (SDEsp::get_instance())->get_relative_tolerance_();
+      solver_field.parameters["preconditioner"] 
+	= (SDEsp::get_instance())->get_preconditioner_();
+      //
+      solver_field.solve();
+      
+      // 
+      // Output
+      solution_domain_extraction(J, test_sub_domains, "tDCS_Current_density");
+      //
+      std::string field_name = (SDEsp::get_instance())->get_files_path_result_() + 
+	std::string("tDCS_field.pvd");
+      File field( field_name.c_str() );
+      //
+      field << J;
+    }
 
-
- //
- // Filter function over a subdomain
- std::list<std::size_t> test_sub_domains{4,5};
- solution_domain_extraction(J, test_sub_domains, "tDCS_Current_density");
- solution_domain_extraction(u, test_sub_domains, "tDCS_potential");
  
  //
  // Validation process
@@ -283,33 +257,6 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
      validation << Injection_T7;
      std::cout << "je passe" << std::endl;
    }
-
-
-//  //
-//  // Extract subfunctions
-//  Function potential = u[0];
-
-  //
-  // Save solution in VTK format
-  //  * Binary (.bin)
-  //  * RAW    (.raw)
-  //  * SVG    (.svg)
-  //  * XD3    (.xd3)
-  //  * XDMF   (.xdmf)
-  //  * XML    (.xml) // FEniCS xml
-  //  * XYZ    (.xyz)
-  //  * VTK    (.pvd) // paraview
-  std::string file_name = (SDEsp::get_instance())->get_files_path_result_() + 
-    std::string("tDCS.pvd");
-  File file( file_name.c_str() );
-  //
-  file << u;
-  //
-  std::string field_name = (SDEsp::get_instance())->get_files_path_result_() + 
-    std::string("tDCS_field.pvd");
-  File field( field_name.c_str() );
-  //
-  field << J;
 };
 //
 //

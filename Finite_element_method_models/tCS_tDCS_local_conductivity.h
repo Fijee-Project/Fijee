@@ -67,7 +67,7 @@ namespace Solver
       bool,    /* - 4 - initialized */
       bool     /* - 5 - updated */ > Estimation_tuple;
       
-
+  private:
     //! Head model facets collection
     std::shared_ptr< MeshValueCollection< std::size_t > > mesh_facets_collection_;
     //! Function space
@@ -78,6 +78,14 @@ namespace Solver
     std::shared_ptr< Periphery > perifery_;
     //! Boundarie conditions
     std::shared_ptr< MeshFunction< std::size_t > > boundaries_;
+    //! Sample studied
+    int sample_;
+    // Head time series potential output file
+    File *file_potential_time_series_;
+    // Brain time series potential output file
+    File *file_brain_potential_time_series_;
+    // Time series potential field output file
+    File *file_field_time_series_;
 
     //
     // Local conductivity estimation
@@ -111,21 +119,21 @@ namespace Solver
      *
      *  Destructor of the class tCS_tDCS_local_conductivity
      */
-    ~tCS_tDCS_local_conductivity(){/* Do nothing */};
+    virtual ~tCS_tDCS_local_conductivity(){/* Do nothing */};
     /*!
      *  \brief Operator =
      *
      *  Operator = of the class tCS_tDCS_local_conductivity
      *
      */
-    tCS_tDCS_local_conductivity& operator = ( const tCS_tDCS_local_conductivity& ){};
+    tCS_tDCS_local_conductivity& operator = ( const tCS_tDCS_local_conductivity& ){return *this;};
     /*!
      *  \brief Operator ()
      *
      *  Operator () of the class tCS_tDCS_local_conductivity
      *
      */
-    void operator ()();
+    virtual void operator ()();
     
   public:
     /*!

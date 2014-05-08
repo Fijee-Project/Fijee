@@ -58,7 +58,7 @@ namespace Solver
    */
   class tCS_tDCS : Physics
   {
-  protected:
+  private:
     //! Head model facets collection
     std::shared_ptr< MeshValueCollection< std::size_t > > mesh_facets_collection_;
     //! Function space
@@ -69,6 +69,14 @@ namespace Solver
     std::shared_ptr< Periphery > perifery_;
     //! Boundarie conditions
     std::shared_ptr< MeshFunction< std::size_t > > boundaries_;
+    //! Sample studied
+    int sample_;
+    // Head time series potential output file
+    File *file_potential_time_series_;
+    // Brain time series potential output file
+    File *file_brain_potential_time_series_;
+    // Time series potential field output file
+    File *file_field_time_series_;
 
     // std::map< std::size_t, std::size_t > map_index_cell_;
 
@@ -96,21 +104,21 @@ namespace Solver
      *
      *  Destructor of the class tCS_tDCS
      */
-    ~tCS_tDCS(){/* Do nothing */};
+    virtual ~tCS_tDCS(){/* Do nothing */};
     /*!
      *  \brief Operator =
      *
      *  Operator = of the class tCS_tDCS
      *
      */
-    tCS_tDCS& operator = ( const tCS_tDCS& ){};
+    tCS_tDCS& operator = ( const tCS_tDCS& ){return *this;};
     /*!
      *  \brief Operator ()
      *
      *  Operator () of the class tCS_tDCS
      *
      */
-    void operator ()();
+    virtual void operator ()();
     
   public:
     /*!
