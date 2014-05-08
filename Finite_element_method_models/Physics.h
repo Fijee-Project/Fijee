@@ -8,6 +8,7 @@
 //
 // UCSF project
 //
+#include "Utils/Fijee_environment.h"
 #include "PDE_solver_parameters.h"
 #include "Conductivity.h"
 #include "Electrodes_setup.h"

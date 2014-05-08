@@ -1,5 +1,5 @@
-#ifndef TCS_TDCS__LOCAL_CONDUCTIVITY_H
-#define TCS_TDCS__LOCAL_CONDUCTIVITY_H
+#ifndef TCS_TACS_H
+#define TCS_TACS_H
 #include <list>
 #include <memory>
 #include <string>
@@ -7,7 +7,6 @@
 #include <stdexcept>      // std::logic_error
 #include <map>
 #include <thread>         // std::thread
-#include <random>
 //
 // FEniCS
 //
@@ -41,7 +40,7 @@ typedef std::vector<std::vector<std::pair<dolfin::la_index, dolfin::la_index> > 
 //
 //
 /*!
- * \file tCS_tDCS_local_conductivity.h
+ * \file tCS_tACS.h
  * \brief brief describe 
  * \author Yann Cobigo
  * \version 0.1
@@ -54,22 +53,14 @@ typedef std::vector<std::vector<std::pair<dolfin::la_index, dolfin::la_index> > 
  */
 namespace Solver
 {
-  /*! \class tCS_tDCS_local_conductivity
-   * \brief classe representing tDCS simulation.
+  /*! \class tCS_tACS
+   * \brief classe representing tACS simulation.
    *
-   *  This class representing the Physical model for the estimation of skinn/skull conductivity tensors using the transcranial Direct Current Stimulation (tDCS) simulation.
+   *  This class representing the Physical model for the transcranial Alternating Current Stimulation (tACS) simulation.
    */
-  class tCS_tDCS_local_conductivity : Physics
+  class tCS_tACS : Physics
   {
-    typedef std::tuple< 
-      double,  /* - 0 - estimation */
-      double,  /* - 1 - sigma skin */ 
-      double,  /* - 2 - sigma skull spongiosa */ 
-      double,  /* - 3 - sigma skull compacta */ 
-      bool,    /* - 4 - initialized */
-      bool     /* - 5 - updated */ > Estimation_tuple;
-      
-
+  private:
     //! Electrodes list
     std::shared_ptr< Solver::Electrodes_setup > electrodes_;
     //! Head model facets collection
@@ -82,14 +73,10 @@ namespace Solver
     std::shared_ptr< Periphery > perifery_;
     //! Boundarie conditions
     std::shared_ptr< MeshFunction< std::size_t > > boundaries_;
+    //! Sample studied
+    int sample_;
 
-    //
-    // Local conductivity estimation
-    // 
-    //! Simplex for downhill simplex estimation
-    std::vector< Estimation_tuple > simplex_;
-    std::map< Brain_segmentation, std::tuple<double, double> > conductivity_boundaries_;
-
+    // std::map< std::size_t, std::size_t > map_index_cell_;
 
     
   private:
@@ -99,34 +86,34 @@ namespace Solver
     /*!
      *  \brief Default Constructor
      *
-     *  Constructor of the class tCS_tDCS_local_conductivity
+     *  Constructor of the class tCS_tACS
      *
      */
-    tCS_tDCS_local_conductivity();
+    tCS_tACS();
     /*!
      *  \brief Copy Constructor
      *
      *  Constructor is a copy constructor
      *
      */
-    tCS_tDCS_local_conductivity( const tCS_tDCS_local_conductivity& ){};
+    tCS_tACS( const tCS_tACS& ){};
     /*!
      *  \brief Destructeur
      *
-     *  Destructor of the class tCS_tDCS_local_conductivity
+     *  Destructor of the class tCS_tACS
      */
-    ~tCS_tDCS_local_conductivity(){/* Do nothing */};
+    ~tCS_tACS(){/* Do nothing */};
     /*!
      *  \brief Operator =
      *
-     *  Operator = of the class tCS_tDCS_local_conductivity
+     *  Operator = of the class tCS_tACS
      *
      */
-    tCS_tDCS_local_conductivity& operator = ( const tCS_tDCS_local_conductivity& ){};
+    tCS_tACS& operator = ( const tCS_tACS& ){};
     /*!
      *  \brief Operator ()
      *
-     *  Operator () of the class tCS_tDCS_local_conductivity
+     *  Operator () of the class tCS_tACS
      *
      */
     void operator ()();
@@ -137,12 +124,12 @@ namespace Solver
      *
      *
      */
-    inline int get_number_of_physical_event(){return 1; };
+    inline int get_number_of_physical_event(){return electrodes_->get_number_samples_(); };
    /*!
      *  \brief Solution domain extraction
      *
      *  This method extract from the Function solution U the sub solution covering the sub-domains Sub_domains.
-     *  The result is a file with the name tDCS_{Sub_domains}.vtu
+     *  The result is a file with the name tACS_{Sub_domains}.vtu
      *
      *  \param U: Function solution of the Partial Differential Equation.
      *  \param Sub_domains: array of sub-domain we want to extract from U.

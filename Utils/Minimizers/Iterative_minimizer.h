@@ -71,15 +71,14 @@ namespace Utils
 
       public:
 	/*!
-       *  \brief minimize function
-       *
-       *  This method launch the minimization algorithm
-       */
-      void minimize()
-      {
-	minimizer_.minimize();
-      };
-
+	 *  \brief minimize function
+	 *
+	 *  This method launch the minimization algorithm
+	 */
+	void minimize()
+	{
+	  minimizer_.minimize();
+	};
       };
   }
 }

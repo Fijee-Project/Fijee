@@ -13,6 +13,7 @@
 //
 // UCSF project
 //
+#include "Utils/Fijee_environment.h"
 #include "Electrodes_injection.h"
 #include "Conductivity.h"
 #include "Intensity.h"
@@ -42,7 +43,11 @@ namespace Solver
   {
   private:
     //! Electrodes list for current injected
+    std::vector< std::shared_ptr< Solver::Electrodes_injection > > current_setup_;
+    //! Electrodes list for current injected
     std::shared_ptr< Solver::Electrodes_injection > current_injection_;
+    //! number of samples
+    int number_samples_;
     //! number of electrodes
     int number_electrodes_;
 
@@ -81,10 +86,33 @@ namespace Solver
      *  Operator [] the class Electrodes_setup
      *
      */
-    const Solver::Intensity& operator [] (const char * label )const{return get_current()->information(label);};
+    //    const Solver::Intensity& operator [] (const char * label )const{return get_current()->information(label);};
 
   public:
-    std::shared_ptr< Solver::Electrodes_injection > get_current() const { return current_injection_;};
+    /*!
+     *  \brief Get number samples
+     *
+     *  This method return the number_samples_ member.
+     *
+     */
+    ucsf_get_macro( number_samples_, int );
+    /*!
+     *  \brief Get number electrodes
+     *
+     *  This method return the number_electrodes_ member.
+     *
+     */
+    ucsf_get_macro( number_electrodes_, int );
+    /*!
+     *  \brief Get the current set up
+     *
+     *  This method return the current set up in electrodes for the sampling Sample.
+     *
+     *  \param Sample: sample selected from the electrode measures
+     *
+     */
+    std::shared_ptr< Solver::Electrodes_injection > get_current(const int Sample ) const 
+      { return current_setup_[Sample];};
 
   public:
     /*!

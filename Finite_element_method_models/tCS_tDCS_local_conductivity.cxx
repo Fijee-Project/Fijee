@@ -1,5 +1,11 @@
 #include <iostream>
 #include "tCS_tDCS_local_conductivity.h"
+//
+// UCSF project
+//
+#include "Utils/Minimizers/Minimizer.h"
+#include "Utils/Minimizers/Downhill_simplex.h"
+#include "Utils/Minimizers/Iterative_minimizer.h"
 
 typedef Solver::PDE_solver_parameters SDEsp;
 
@@ -189,7 +195,7 @@ Solver::tCS_tDCS_local_conductivity::operator () ( )
   
   
       // Linear
-      L.I  = *(electrodes_->get_current());
+      L.I  = *(electrodes_->get_current(0));
       L.ds = *boundaries_;
 
       //
@@ -238,17 +244,17 @@ Solver::tCS_tDCS_local_conductivity::operator () ( )
       //
       // Filter function over the electrodes
       // solution_electrodes_extraction(u, electrodes_);
-      electrodes_->get_current()->punctual_potential_evaluation(u, mesh_);
+      electrodes_->get_current(0)->punctual_potential_evaluation(u, mesh_);
 
       std::cout << "electrode punctual CP6 " 
-		<< electrodes_->get_current()->information( "CP6" ).get_V_() 
+		<< electrodes_->get_current(0)->information( "CP6" ).get_V_() 
 		<< std::endl;
 
-      electrodes_->get_current()->surface_potential_evaluation(u, mesh_);
+      electrodes_->get_current(0)->surface_potential_evaluation(u, mesh_);
 
 
       std::cout << "electrode surface CP6 " 
-		<< electrodes_->get_current()->information( "CP6" ).get_electrical_potential() 
+		<< electrodes_->get_current(0)->information( "CP6" ).get_electrical_potential() 
 		<< std::endl;
 
       // 
@@ -256,10 +262,10 @@ Solver::tCS_tDCS_local_conductivity::operator () ( )
       // 
       if ( simplex_vertex > 3 )
 	{
-//	  Utils::Minimizers::Downhill_simplex minimizer_ago;
-//	  minimizer_ago.minimize();
-	  Utils::Minimizers::Iterative_minimizer<Utils::Minimizers::Downhill_simplex> minimizer_ago;
-	  minimizer_ago.minimize();
+//	  Utils::Minimizers::Downhill_simplex minimizer_algo;
+//	  minimizer_algo.minimize();
+	  Utils::Minimizers::Iterative_minimizer<Utils::Minimizers::Downhill_simplex> minimizer_algo;
+	  minimizer_algo.minimize();
 	}
       
       //

@@ -7,6 +7,7 @@
 #include "SL_subtraction.h"
 #include "SL_direct.h"
 #include "tCS_tDCS.h"
+#include "tCS_tACS.h"
 #include "tCS_tDCS_local_conductivity.h"
 #include "Model_solver.h"
 
@@ -27,11 +28,10 @@ int main()
   //    - Solver::tCS_tACS
   //  - Local conductivity estimation
   //    - Solver::tCS_tDCS_local_conductivity
-  //    - Solver::tCS_tACS
   //
   // export OMP_NUM_THREADS=2
-  Solver::Model_solver< /* physical model */ Solver::tCS_tDCS_local_conductivity,
-			/*solver_parameters->get_number_of_threads_()*/ 1 >  model;
+  Solver::Model_solver< /* physical model */ Solver::tCS_tACS,
+			/*solver_parameters->get_number_of_threads_()*/ 2 >  model;
 
   //
   //
