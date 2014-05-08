@@ -20,10 +20,6 @@ Solver::tCS_tDCS_local_conductivity::tCS_tDCS_local_conductivity():Physics()
   V_field_.reset( new tCS_field_model::FunctionSpace(mesh_) );
 
   //
-  // Read the electrodes xml file
-  electrodes_.reset( new Electrodes_setup() );
-
-  //
   // Boundary marking
   //
   

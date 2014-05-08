@@ -6,8 +6,9 @@
 #include <algorithm>
 //#include <iterator>
 //
-// UCSF
+// UCSF project
 //
+#include "Utils/Fijee_environment.h"
 #include "Intensity.h"
 //
 //
@@ -37,6 +38,8 @@ namespace Solver
     //! Electrodes list
     std::map< /* label */ std::string, 
       /* electrode caracteristics */ Solver::Intensity > electrodes_map_;
+    //! Time injection/measure
+    double time_;
 
   public:
     /*!
@@ -46,6 +49,13 @@ namespace Solver
      *
      */
   Electrodes_injection();
+    /*!
+     *  \brief Default Constructor
+     *
+     *  Constructor of the class Electrodes_injection
+     *
+     */
+  Electrodes_injection(double);
     /*!
      *  \brief Copy Constructor
      *
@@ -102,6 +112,15 @@ namespace Solver
       {
 	return 3;
       }
+
+  public:
+    /*!
+     *  \brief Get the sampling time
+     *
+     *  This method return the time_ member.
+     *
+     */
+    ucsf_get_macro( time_, double );
 
   public:
     /*!

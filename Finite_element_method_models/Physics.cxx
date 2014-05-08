@@ -38,6 +38,10 @@ Solver::Physics::Physics()
   // Load the conductivity. Anisotrope conductivity
   std::cout << "Load conductivity files" << std::endl;
   sigma_.reset( new Solver::Tensor_conductivity(mesh_) );
+
+  //
+  // Read the electrodes xml file
+  electrodes_.reset( new Electrodes_setup() );
 }
 //
 //

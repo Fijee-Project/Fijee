@@ -2,20 +2,25 @@
 //
 //
 //
-Solver::Electrodes_injection::Electrodes_injection()
+Solver::Electrodes_injection::Electrodes_injection():
+  time_(0.)
+{}
+//
+//
+//
+Solver::Electrodes_injection::Electrodes_injection( double Time ):
+  time_(Time)
 {}
 //
 //
 //
 Solver::Electrodes_injection::Electrodes_injection(const Electrodes_injection& that)
 {
-//  //
-//  electrodes_vector_.resize( that.electrodes_vector_.size() );
-//  std::copy( that.electrodes_vector_.begin(), 
-//	     that.electrodes_vector_.end(), 
-//	     electrodes_vector_.begin() );
-
+  //
+  // 
   electrodes_map_ = that.electrodes_map_;
+  // 
+  time_ = that.time_;
 }
 //
 //
@@ -44,15 +49,11 @@ Solver::Electrodes_injection::eval(Array<double>& values, const Array<double>& x
 Solver::Electrodes_injection&
 Solver::Electrodes_injection::operator =( const Electrodes_injection& that )
 {
-//  //
-//  electrodes_vector_.resize( that.electrodes_vector_.size() );
-//  std::copy( that.electrodes_vector_.begin(), 
-//	     that.electrodes_vector_.end(), 
-//	     electrodes_vector_.begin() );
-
-  
+  // 
+  // 
   electrodes_map_ = that.electrodes_map_;
-
+  //
+  time_ = that.time_;
  
   //
   //

@@ -23,8 +23,6 @@
 // UCSF project
 //
 #include "Physics.h"
-#include "Electrodes_setup.h"
-#include "Electrodes_surface.h"
 #include "Conductivity.h"
 #include "Boundaries.h"
 #include "Sub_domaines.h"
@@ -61,8 +59,6 @@ namespace Solver
   class tCS_tDCS : Physics
   {
   protected:
-    //! Electrodes list
-    std::shared_ptr< Solver::Electrodes_setup > electrodes_;
     //! Head model facets collection
     std::shared_ptr< MeshValueCollection< std::size_t > > mesh_facets_collection_;
     //! Function space

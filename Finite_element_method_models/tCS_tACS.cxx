@@ -15,10 +15,6 @@ Solver::tCS_tACS::tCS_tACS():
   V_field_.reset( new tCS_field_model::FunctionSpace(mesh_) );
 
   //
-  // Read the electrodes xml file
-  electrodes_.reset( new Electrodes_setup() );
-
-  //
   // Boundary marking
   //
   
@@ -94,6 +90,25 @@ Solver::tCS_tACS::tCS_tACS():
   boundaries_file_name            += std::string("boundaries.pvd");
   File boundaries_file( boundaries_file_name.c_str() );
   boundaries_file << *boundaries_;
+
+
+  // 
+  // Output files
+  // 
+  
+  // 
+  // Head time series potential output file
+  std::string file_head_potential_ts_name = (SDEsp::get_instance())->get_files_path_result_() + 
+    std::string("tACS_time_series.pvd");
+   file_potential_time_series_ = new File( file_head_potential_ts_name.c_str() );
+  // 
+  std::string file_brain_potential_ts_name = (SDEsp::get_instance())->get_files_path_result_() + 
+    std::string("tACS_brain_time_series.pvd");
+   file_brain_potential_time_series_ = new File( file_brain_potential_ts_name.c_str() );
+  // 
+  std::string file_filed_potential_ts_name = (SDEsp::get_instance())->get_files_path_result_() + 
+    std::string("tACS_field_time_series.pvd");
+   file_field_time_series_ = new File( file_filed_potential_ts_name.c_str() );
 }
 //
 //
@@ -115,12 +130,12 @@ Solver::tCS_tACS::operator () ( /*Solver::Phi& source,
     }
   catch (std::logic_error&)
     {
-      std::cout << "[exception caught]\n";
+      std::cerr << "[exception caught]\n" << std::endl;
     }
 
   //
   //
-  std::cout << "Sample local_sample" << std::endl;
+  std::cout << "Sample " << local_sample << std::endl;
   
   //  //
   //  // Define Dirichlet boundary conditions 
@@ -184,7 +199,7 @@ Solver::tCS_tACS::operator () ( /*Solver::Phi& source,
   double Sum = 1.e+6;
   //
   //  while ( abs( u_bar - old_u_bar ) > 0.1 )
-  while ( fabs(Sum) > 1.e-3 )
+  while ( fabs(Sum) > 1.e-6 )
     {
       old_u_bar = u_bar;
       u_bar  = u.vector()->sum();
@@ -201,8 +216,28 @@ Solver::tCS_tACS::operator () ( /*Solver::Phi& source,
   //
   // Filter function over a subdomain
   std::list<std::size_t> test_sub_domains{4,5};
-  solution_domain_extraction(u, test_sub_domains, "tACS_potential");
+  solution_domain_extraction(u, test_sub_domains, file_brain_potential_time_series_);
+
+  //
+  // Mutex in the critical zone
+  //
+  try
+    {
+      // lock the electrode list
+      std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
+      *file_potential_time_series_ 
+	<< std::make_pair<const Function*, double>(&u, 
+						   electrodes_->get_current(local_sample)->get_time_() );
+    }
+  catch (std::logic_error&)
+    {
+      std::cerr << "[exception caught]\n" << std::endl;
+    }
+
  
+  // 
+  // Potential field calculation
+  // 
 
   if (false)
     {
@@ -246,34 +281,24 @@ Solver::tCS_tACS::operator () ( /*Solver::Phi& source,
 
       //
       // Filter function over a subdomain
-      solution_domain_extraction(J, test_sub_domains, "tACS_Current_density");
+      //
+      // Mutex in the critical zone
+      //
+      try
+	{
+	  // lock the electrode list
+	  std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
+	  *file_field_time_series_ 
+	    << std::make_pair<const Function*, double>(&J, 
+						       electrodes_
+						       ->get_current(local_sample)
+						       ->get_time_() );
+	}
+      catch (std::logic_error&)
+	{
+	  std::cerr << "[exception caught]\n" << std::endl;
+	}
     }
-
-  //  //
-  //  // Extract subfunctions
-  //  Function potential = u[0];
-
-  //
-  // Save solution in VTK format
-  //  * Binary (.bin)
-  //  * RAW    (.raw)
-  //  * SVG    (.svg)
-  //  * XD3    (.xd3)
-  //  * XDMF   (.xdmf)
-  //  * XML    (.xml) // FEniCS xml
-  //  * XYZ    (.xyz)
-  //  * VTK    (.pvd) // paraview
-  std::string file_name = (SDEsp::get_instance())->get_files_path_result_() + 
-    std::string("tACS.pvd");
-  File file( file_name.c_str() );
-  //
-  file << u;
-//  //
-//  std::string field_name = (SDEsp::get_instance())->get_files_path_result_() + 
-//    std::string("tACS_field.pvd");
-//  File field( field_name.c_str() );
-//  //
-//  field << J;
 };
 //
 //
@@ -428,4 +453,15 @@ Solver::tCS_tACS::regulation_factor(const Function& u, std::list<std::size_t>& S
   // Tail
   VTU_xml_file << "  </UnstructuredGrid>" << std::endl;
   VTU_xml_file << "</VTKFile>" << std::endl;
+}
+//
+// 
+//
+void 
+Solver::tCS_tACS::solution_domain_extraction( const dolfin::Function& U, 
+					      const std::list<std::size_t>& Sub_domains,
+					      File* File )
+{
+  // TODO Build a new time series to extract domains
+  // Don't forget to call the mutex while writting the output file.
 }

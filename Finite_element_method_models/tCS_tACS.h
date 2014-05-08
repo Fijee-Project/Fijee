@@ -23,8 +23,6 @@
 // UCSF project
 //
 #include "Physics.h"
-#include "Electrodes_setup.h"
-#include "Electrodes_surface.h"
 #include "Conductivity.h"
 #include "Boundaries.h"
 #include "Sub_domaines.h"
@@ -61,8 +59,6 @@ namespace Solver
   class tCS_tACS : Physics
   {
   private:
-    //! Electrodes list
-    std::shared_ptr< Solver::Electrodes_setup > electrodes_;
     //! Head model facets collection
     std::shared_ptr< MeshValueCollection< std::size_t > > mesh_facets_collection_;
     //! Function space
@@ -75,6 +71,12 @@ namespace Solver
     std::shared_ptr< MeshFunction< std::size_t > > boundaries_;
     //! Sample studied
     int sample_;
+    // Head time series potential output file
+    File *file_potential_time_series_;
+    // Brain time series potential output file
+    File *file_brain_potential_time_series_;
+    // Time series potential field output file
+    File *file_field_time_series_;
 
     // std::map< std::size_t, std::size_t > map_index_cell_;
 
@@ -109,7 +111,7 @@ namespace Solver
      *  Operator = of the class tCS_tACS
      *
      */
-    tCS_tACS& operator = ( const tCS_tACS& ){};
+    tCS_tACS& operator = ( const tCS_tACS& ){return *this;};
     /*!
      *  \brief Operator ()
      *
@@ -136,6 +138,20 @@ namespace Solver
      *
      */
     void regulation_factor(const Function& , std::list<std::size_t>& );
+    /*!
+     *  \brief Solution domain extraction
+     *
+     *  This method extract from the Function solution U the sub solution covering the sub-domains Sub_domains.
+     *  The result is a file with the name tDCS_{Sub_domains}.vtu
+     *
+     *  \param U: Function solution of the Partial Differential Equation.
+     *  \param Sub_domains: array of sub-domain we want to extract from U.
+     *  \param File: file .
+     *
+     */
+    void solution_domain_extraction( const dolfin::Function&, const std::list<std::size_t>&, 
+				     File* );
+
   };
 }
 #endif

@@ -51,7 +51,7 @@ Solver::Electrodes_setup::Electrodes_setup()
 	    int sample_number  = sample.attribute("index").as_int();
 	    double sample_time = sample.attribute("time").as_double();
 	    number_electrodes_ = sample.attribute("size").as_int();
-	    current_setup_[sample_number].reset( new Solver::Electrodes_injection() );
+	    current_setup_[sample_number].reset( new Solver::Electrodes_injection(sample_time) );
 
 	    //
 	    //
@@ -97,10 +97,6 @@ Solver::Electrodes_setup::Electrodes_setup()
 	exit(1);
       }
     }
-
-  for ( auto sample = current_setup_.begin() ; sample != current_setup_.end() ; sample++ )
-    std::cout << (*sample)->information("T7").get_I_() << std::endl;
-
 }
 //
 //

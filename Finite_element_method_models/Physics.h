@@ -12,6 +12,7 @@
 #include "PDE_solver_parameters.h"
 #include "Conductivity.h"
 #include "Electrodes_setup.h"
+#include "Electrodes_surface.h"
 
 //using namespace dolfin;
 
@@ -39,6 +40,8 @@ namespace Solver
     std::shared_ptr< MeshFunction< std::size_t > > domains_;
     //! Anisotropic conductivity
     std::shared_ptr< Solver::Tensor_conductivity > sigma_;
+    //! Electrodes list
+    std::shared_ptr< Solver::Electrodes_setup > electrodes_;
 
 
   public:
@@ -82,7 +85,7 @@ namespace Solver
      *  \param name: file name.
      *
      */
-    void solution_domain_extraction( const dolfin::Function&, std::list<std::size_t>&, 
+    void solution_domain_extraction( const dolfin::Function&,  std::list<std::size_t>&, 
 				     const char* );
 
   public:

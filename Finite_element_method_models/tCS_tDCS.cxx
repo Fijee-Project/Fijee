@@ -14,10 +14,6 @@ Solver::tCS_tDCS::tCS_tDCS():Physics()
   V_field_.reset( new tCS_field_model::FunctionSpace(mesh_) );
 
   //
-  // Read the electrodes xml file
-  electrodes_.reset( new Electrodes_setup() );
-
-  //
   // Boundary marking
   //
   
