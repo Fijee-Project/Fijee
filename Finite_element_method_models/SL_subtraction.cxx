@@ -9,8 +9,6 @@ typedef Solver::PDE_solver_parameters SDEsp;
 Solver::SL_subtraction::SL_subtraction():Physics()
 {
   //
-  //
-  //
   // Define the function space
   V_.reset( new SLS_model::FunctionSpace(mesh_) );
   
@@ -25,7 +23,7 @@ Solver::SL_subtraction::SL_subtraction():Physics()
 
   //
   // Read the dipoles xml file
-  std::cout << "Load the dipoles" << std::endl;
+  std::cout << "Load dipoles file" << std::endl;
   //
   std::string dipoles_xml = (SDEsp::get_instance())->get_files_path_output_();
   dipoles_xml += "dipoles.xml";
@@ -179,28 +177,28 @@ Solver::SL_subtraction::operator () ( /*Solver::Phi& source,
   //
   solver.solve();
 
- //
- // Regulation terme:  \int u dx = 0
- double old_u_bar = 0.;
- double u_bar = 1.e+6;
- double U_bar = 0.;
- double N = u.vector()->size();
- int iteration = 0;
- double Sum = 1.e+6;
- //
- while ( fabs(Sum) > 1.e-6 )
-   {
-     old_u_bar = u_bar;
-     u_bar  = u.vector()->sum();
-     u_bar /= N;
-     (*u.vector()) -= u_bar;
-     //
-     U_bar += u_bar;
-     Sum = u.vector()->sum();
-     std::cout << ++iteration << " ~ " << Sum  << std::endl;
-   }
+  //
+  // Regulation terme:  \int u dx = 0
+  double old_u_bar = 0.;
+  double u_bar = 1.e+6;
+  double U_bar = 0.;
+  double N = u.vector()->size();
+  int iteration = 0;
+  double Sum = 1.e+6;
+  //
+  while ( fabs(Sum) > 1.e-6 )
+    {
+      old_u_bar = u_bar;
+      u_bar  = u.vector()->sum();
+      u_bar /= N;
+      (*u.vector()) -= u_bar;
+      //
+      U_bar += u_bar;
+      Sum = u.vector()->sum();
+      std::cout << ++iteration << " ~ " << Sum  << std::endl;
+    }
  
- std::cout << "int u dx = " << Sum << std::endl;
+  std::cout << "int u dx = " << Sum << std::endl;
 
   //
   // V_{tot} = \sum_{i=1}^{n} U_{i} \phi_{i}. where \{\phi_i\}_{i=1}^{n} is a basis for V_h, 
@@ -213,7 +211,7 @@ Solver::SL_subtraction::operator () ( /*Solver::Phi& source,
   //
   // Filter function over a subdomain
   std::list<std::size_t> test_sub_domains{4,5};
-  solution_domain_extraction(Phi_tot, test_sub_domains, "Source_localization");
+  solution_domain_extraction(Phi_tot, test_sub_domains, source.get_name_().c_str());
   
   //
   // Mutex record potential at each electrods

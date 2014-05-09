@@ -21,7 +21,6 @@
 //
 #include "Physics.h"
 #include "Source.h"
-#include "Conductivity.h"
 #include "Boundaries.h"
 #include "Sub_domaines.h"
 #include "PDE_solver_parameters.h"
@@ -58,8 +57,6 @@ namespace Solver
     std::shared_ptr< SLD_model::FunctionSpace > V_;
     //! Periphery
     std::shared_ptr< Periphery > perifery_;
-    //! Boundarie conditions
-    std::shared_ptr<  FacetFunction< size_t > > boundaries_;
     
   private:
     std::mutex critical_zone_;
@@ -102,9 +99,14 @@ namespace Solver
     
   public:
     /*!
+     *  \brief Get number of physical events
+     *
+     *  This method return the number of parallel process for the Physics solver. 
+     *  In the case of source localization the number of events is the number of dipoles simulated.
+     *
      */
-    inline
-      int get_number_of_physical_event(){return number_dipoles_; };
+    virtual inline
+      int get_number_of_physical_events(){return number_dipoles_;};
 
 
   private:

@@ -8,7 +8,7 @@
 //
 #include <dolfin.h>
 // Source localization subtraction model
-#include "SLS_model.h"
+//#include "SLS_model.h"
 //
 // pugixml
 // same resources than Dolfin
@@ -60,8 +60,7 @@ namespace Solver
      *  Constructor of the class Model_solver
      *
      */
-  Model_solver()
-    {};
+  Model_solver(){};
     /*!
      *  \brief Copy Constructor
      *
@@ -75,14 +74,7 @@ namespace Solver
      *  Operator = of the class Model_solver
      *
      */
-    Model_solver& operator = ( const Model_solver& ){};
-//    /*!
-//     *  \brief Operator ()
-//     *
-//     *  Operator () of the class Model_solver
-//     *
-//     */
-//    void operator () ();
+  Model_solver& operator = ( const Model_solver& ){return *this;};
 
   public:
     /*!
@@ -99,7 +91,7 @@ namespace Solver
       //
       int tempo = 0;
       for( int physical_event = 0 ;
-	   physical_event != model_.get_number_of_physical_event() ; 
+	   physical_event != model_.get_number_of_physical_events() ; 
 	   physical_event++ )
 	if( tempo++ < 10 )
 	  {

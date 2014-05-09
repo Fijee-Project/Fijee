@@ -30,7 +30,7 @@ int main()
   //    - Solver::tCS_tDCS_local_conductivity
   //
   // export OMP_NUM_THREADS=2
-  Solver::Model_solver< /* physical model */ Solver::tCS_tACS,
+  Solver::Model_solver< /* physical model */ Solver::SL_subtraction,
 			/*solver_parameters->get_number_of_threads_()*/ 2 >  model;
 
   //

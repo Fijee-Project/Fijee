@@ -116,12 +116,15 @@ namespace Solver
     
   public:
     /*!
-     *  \brief number of physical event
+     *  \brief Get number of physical events
      *
+     *  This method return the number of parallel process for the Physics solver. 
+     *  In the case of tACS the number of events is the number of sampling in the time series.
      *
      */
-    inline int get_number_of_physical_event(){return electrodes_->get_number_samples_(); };
-   /*!
+    virtual inline
+      int get_number_of_physical_events(){return electrodes_->get_number_samples_();};
+    /*!
      *  \brief Solution domain extraction
      *
      *  This method extract from the Function solution U the sub solution covering the sub-domains Sub_domains.

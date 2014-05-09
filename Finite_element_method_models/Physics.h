@@ -100,6 +100,14 @@ namespace Solver
      *
      */
     virtual void operator ()() = 0;
+    /*!
+     *  \brief Get number of physical events
+     *
+     *  This method return the number of parallel process for the Physics solver. 
+     *
+     */
+    virtual inline
+      int get_number_of_physical_events() = 0;
    };
 };
 

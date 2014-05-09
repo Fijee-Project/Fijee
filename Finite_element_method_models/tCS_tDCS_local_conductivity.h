@@ -68,16 +68,10 @@ namespace Solver
       bool     /* - 5 - updated */ > Estimation_tuple;
       
   private:
-    //! Head model facets collection
-    std::shared_ptr< MeshValueCollection< std::size_t > > mesh_facets_collection_;
     //! Function space
     std::shared_ptr< tCS_model::FunctionSpace > V_;
     //! Function space
     std::shared_ptr< tCS_field_model::FunctionSpace > V_field_;
-    //! Periphery
-    std::shared_ptr< Periphery > perifery_;
-    //! Boundarie conditions
-    std::shared_ptr< MeshFunction< std::size_t > > boundaries_;
     //! Sample studied
     int sample_;
     // Head time series potential output file
@@ -137,11 +131,13 @@ namespace Solver
     
   public:
     /*!
-     *  \brief number of physical event
+     *  \brief Get number of physical events
      *
+     *  This method return the number of parallel process for the Physics solver. 
      *
      */
-    inline int get_number_of_physical_event(){return 1; };
+    virtual inline
+      int get_number_of_physical_events(){return 1;};
    /*!
      *  \brief Solution domain extraction
      *

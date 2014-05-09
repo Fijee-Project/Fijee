@@ -10,7 +10,7 @@ Solver::Electrodes_setup::Electrodes_setup()
 {
   //
   // Read the electrodes xml file
-  std::cout << "Load the electrodes" << std::endl;
+  std::cout << "Load electrodes file" << std::endl;
   //
   std::string electrodes_xml = (SDEsp::get_instance())->get_files_path_output_();
   electrodes_xml += "electrodes.xml";
@@ -43,7 +43,6 @@ Solver::Electrodes_setup::Electrodes_setup()
 	number_samples_ = setup_node.attribute("size").as_int();
 	current_setup_.resize( number_samples_ );
 	// loop over the samples
-	//	for ( int sample = 0 ; sample < number_samples_ ; sample++ )
 	for ( auto sample : setup_node )
 	  {
 	    //

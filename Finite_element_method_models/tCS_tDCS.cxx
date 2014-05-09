@@ -88,10 +88,10 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
   // Bilinear
   a.a_sigma  = *sigma_;
   // a.dx       = *domains_;
-  
+  //  std::cout << electrodes_->get_current(0)->information("T7").get_I_() << std::endl;  
   
   // Linear
-  L.I  = *(electrodes_->get_current(/*local_sample*/0));
+  L.I  = *(electrodes_->get_current( /*local_sample*/ 0));
   L.ds = *boundaries_;
 
   //

@@ -23,7 +23,7 @@ Solver::SL_direct::SL_direct():Physics()
 
   //
   // Read the dipoles xml file
-  std::cout << "Load the dipoles" << std::endl;
+  std::cout << "Load dipoles file" << std::endl;
   //
   std::string dipoles_xml = (SDEsp::get_instance())->get_files_path_output_();
   dipoles_xml += "dipoles.xml";
@@ -103,22 +103,24 @@ Solver::SL_direct::SL_direct():Physics()
 //
 void 
 Solver::SL_direct::operator () ( /*Solver::Phi& source,
-				        SLD_model::FunctionSpace& V,
-				        FacetFunction< size_t >& boundaries*/)
+				   SLD_model::FunctionSpace& V,
+				   FacetFunction< size_t >& boundaries*/)
 {
   //
   // Mutex the dipoles vector poping process
   //
   Solver::Current_density source;
-    try {
-      // lock the dipole list
-      std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
-      source = dipoles_list_.front();
-      dipoles_list_.pop_front();
-    }
-    catch (std::logic_error&) {
-      std::cout << "[exception caught]\n";
-    }
+    try 
+      {
+	// lock the dipole list
+	std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
+	source = dipoles_list_.front();
+	dipoles_list_.pop_front();
+      }
+    catch (std::logic_error&) 
+      {
+	std::cerr << "[exception caught]\n" << std::endl;
+      }
 
   //
   //
@@ -151,7 +153,8 @@ Solver::SL_direct::operator () ( /*Solver::Phi& source,
 
   //
   // Compute solution
-  Function u(*V_);
+  Function u(V_);
+  //
   LinearVariationalProblem problem(a, L, u);
   LinearVariationalSolver  solver(problem);
   // krylov
@@ -165,6 +168,29 @@ Solver::SL_direct::operator () ( /*Solver::Phi& source,
     = (SDEsp::get_instance())->get_preconditioner_();
   //
   solver.solve();
+
+  //
+  // Regulation terme:  \int u dx = 0
+  double old_u_bar = 0.;
+  double u_bar = 1.e+6;
+  double U_bar = 0.;
+  double N = u.vector()->size();
+  int iteration = 0;
+  double Sum = 1.e+6;
+  //
+  while ( fabs(Sum) > 1.e-6 )
+    {
+      old_u_bar = u_bar;
+      u_bar  = u.vector()->sum();
+      u_bar /= N;
+      (*u.vector()) -= u_bar;
+      //
+      U_bar += u_bar;
+      Sum = u.vector()->sum();
+      std::cout << ++iteration << " ~ " << Sum  << std::endl;
+    }
+  
+  std::cout << "int u dx = " << Sum << std::endl;
 
   //
   // Save solution in VTK format
