@@ -222,7 +222,8 @@ Solver::SL_subtraction::operator () ( /*Solver::Phi& source,
       std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
       // 
       electrodes_->get_current(0)->punctual_potential_evaluation(u, mesh_);
-      //	electrodes_->record_U_for_dipole( source.get_name_() );
+      electrodes_->record_potential( /*dipole idx*/ source.get_index_(), 
+				     /*time   idx*/ 0);
     }
   catch (std::logic_error&) 
     {

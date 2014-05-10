@@ -10,6 +10,7 @@
 // same resources than Dolfin
 //
 #include "Utils/pugi/pugixml.hpp"
+#include "Utils/XML_writer.h"
 //
 // UCSF project
 //
@@ -35,11 +36,11 @@ using namespace dolfin;
 namespace Solver
 {
   /*! \class Electrodes_setup
-   * \brief classe representing setup of electrodes
+   * \brief classe representing the set up of electrodes
    *
-   *  This class is an example of class I will have to use
+   *  This class holds the set of electrodes for each time's setp of the electrodes measure. Electrodes_setup is the interface between the electrodes and the Physical models. 
    */
-  class Electrodes_setup
+  class Electrodes_setup: public Utils::XML_writer
   {
   private:
     //! Electrodes list for current injected
@@ -51,6 +52,13 @@ namespace Solver
     //! number of electrodes
     int number_electrodes_;
 
+    // 
+    // Output file
+    //! XML output file: setup node
+    pugi::xml_node setup_node_;
+    //! XML output file: electrodes node
+    pugi::xml_node electrodes_node_;
+    
   public:
     /*!
      *  \brief Default Constructor
@@ -72,7 +80,7 @@ namespace Solver
      *  Constructor of the class Electrodes_setup
      *
      */
-    ~Electrodes_setup(){/*Do nothing*/};
+    virtual ~Electrodes_setup(){/*Do nothing*/};
     /*!
      *  \brief Operator =
      *
@@ -150,6 +158,13 @@ namespace Solver
      *
      */
     void set_boundary_cells( const std::map< std::string, std::map< std::size_t, std::list< MeshEntity  >  >  > & );
+    /*!
+     *  \brief 
+     *
+     *  This method 
+     *
+     */
+    void record_potential( int, int );
  };
 }
 #endif

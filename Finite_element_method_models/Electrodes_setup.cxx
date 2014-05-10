@@ -6,7 +6,8 @@ typedef Solver::PDE_solver_parameters SDEsp;
 //
 //
 //
-Solver::Electrodes_setup::Electrodes_setup()
+Solver::Electrodes_setup::Electrodes_setup(): 
+  Utils::XML_writer((SDEsp::get_instance())->get_files_path_result_()+std::string("eeg_forward.xml"))
 {
   //
   // Read the electrodes xml file
@@ -96,6 +97,13 @@ Solver::Electrodes_setup::Electrodes_setup()
 	exit(1);
       }
     }
+  
+  // 
+  // Output XML file initialization
+  // 
+  // 
+  setup_node_ = fijee_.append_child("setup");
+  setup_node_.append_attribute("size") = number_samples_;
 }
 //
 //
@@ -139,4 +147,32 @@ Solver::Electrodes_setup::set_boundary_cells( const std::map<std::string,
 {
   for ( auto sample = current_setup_.begin() ; sample != current_setup_.end() ; sample++ )
     (*sample)->set_boundary_cells( Map_electrode_cells );
+}
+//
+//
+//
+void
+Solver::Electrodes_setup::record_potential( int Dipole_idx, int Time_idx )
+{
+  // 
+  // 
+  electrodes_node_ = setup_node_.append_child("electrodes");
+  // 
+  electrodes_node_.append_attribute("index")  = Time_idx;
+  electrodes_node_.append_attribute("dipole") = Dipole_idx;
+  electrodes_node_.append_attribute("time")   = current_setup_[Time_idx]->get_time_();
+  // Number of attributes
+  int size = current_setup_[Time_idx]->get_electrodes_map_().size();
+  electrodes_node_.append_attribute("size") = size;
+  pugi::xml_node electrode_node;
+  // loop over electrodes  
+  for ( auto electrode : current_setup_[Time_idx]->get_electrodes_map_() )
+    {
+      electrode_node = electrodes_node_.append_child("electrode");
+      // 
+      electrode_node.append_attribute("index") = electrode.second.get_index_();
+      electrode_node.append_attribute("label") = electrode.first.c_str();
+      electrode_node.append_attribute("V")     = electrode.second.get_V_();
+      electrode_node.append_attribute("I")     = electrode.second.get_I_();
+    }
 }

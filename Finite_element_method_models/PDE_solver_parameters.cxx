@@ -105,11 +105,11 @@ SDEsp::init()
   //
   maximum_iterations_ = 10000000;
   //
-//   relative_tolerance_ = 1.e-8 /*1.e-8*/;
+   relative_tolerance_ = 1.e-8 /*1.e-8*/;
 //  relative_tolerance_ = 7.e-4 /*tDCS_spheres*/;
 //  relative_tolerance_ = 1.e-8 /*tDCS_spheres*/;
 //  relative_tolerance_ = 5.e-3 /*tDCS_head*/;
-  relative_tolerance_ = 1.e-2 /*tDCS_head*/;
+//  relative_tolerance_ = 1.e-2 /*tDCS_head*/;
 
   //
   // Dispatching information

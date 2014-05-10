@@ -23,9 +23,9 @@ using namespace dolfin;
 namespace Solver
 {
   /*! \class Intensity
-   * \brief classe representing whatever
+   * \brief classe representing an electrode intensity
    *
-   *  This class is an example of class I will have to use
+   *  This class implements the geometrical caracteristics of an electrode: shape, size, ... Intensity also implements the current injection and the measured/simulated potential.
    */
   class Intensity// : public Expression
   {

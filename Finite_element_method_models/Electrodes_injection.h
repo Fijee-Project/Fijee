@@ -29,9 +29,9 @@ using namespace dolfin;
 namespace Solver
 {
   /*! \class Electrodes_injection
-   * \brief classe representing whatever
+   * \brief classe representing a set of electrodes
    *
-   *  This class is an example of class I will have to use
+   *  This class implements a set of electrode. Typically, it is associated with a type of electroencephalogram.
    */
   class Electrodes_injection : public Expression
   {
@@ -80,6 +80,14 @@ namespace Solver
      */
     Electrodes_injection& operator =( const Electrodes_injection& );
 
+  public:
+    /*!
+     *  \brief value_dimension
+     *
+     *  This method return the dimension
+     *
+     */
+    std::map< std::string, Solver::Intensity > get_electrodes_map_()const{return electrodes_map_;};
 
   private:
     /*!
