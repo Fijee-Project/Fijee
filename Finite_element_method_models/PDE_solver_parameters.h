@@ -45,6 +45,7 @@ namespace Solver
     std::string files_path_;
     std::string files_path_output_;
     std::string files_path_result_;
+    std::string files_path_measure_;
 
     //
     // PDE solver parameters
@@ -115,6 +116,13 @@ namespace Solver
      *
      */
     ucsf_get_string_macro(files_path_result_);
+    /*!
+     *  \brief Get files_path_measure_
+     *
+     *  This method return the measure path
+     *
+     */
+    ucsf_get_string_macro(files_path_measure_);
     /*!
      *  \brief Get linear_solver_
      *

@@ -72,6 +72,8 @@ namespace Solver
     //
     // Electrode electrical potential calculation
     // 
+    //! Type of potential return true if the potential evaluation is punctual, false otherwise.
+    bool type_of_potential_;
     //! Electrical potential list
     std::list< double > electrical_potential_list_;
     //! Electrical potential
@@ -124,8 +126,16 @@ namespace Solver
     //
     int    get_index_()const{return index_;};
     double get_I_()const{return I_;};
-    double get_V_()const{return V_;};
-    void   set_V_( double V ){V_ = V;};
+    double get_V_()const
+    {
+      if( type_of_potential_ ) return V_;
+      else return get_electrical_potential();
+    };
+    void   set_V_( double V )
+    {
+      type_of_potential_ = true; // Punctual potential
+      V_ = V;
+    };
     //
     Point  get_r0_values_()const{return r0_values_;};
     double get_X_()const{return r0_values_.x();};
@@ -177,7 +187,11 @@ namespace Solver
      *  This method create the electrical potential mapping at the electrode contact surface.
      *
      */
-    double add_potential_value( const double U ){ electrical_potential_list_.push_back( U );};
+    double add_potential_value( const double U )
+    {
+      type_of_potential_ = false; // Surface potential
+      electrical_potential_list_.push_back( U );
+    };
   };
   /*!
    *  \brief Dump values for Intensity

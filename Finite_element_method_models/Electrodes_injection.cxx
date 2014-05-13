@@ -73,6 +73,26 @@ Solver::Electrodes_injection::add_electrode( std::string Electric_variable, int 
   electrodes_map_[Label] = Intensity(Electric_variable, Index, Label, I, 
 				     X, V, Re_z_l, Im_z_l, Surface, Radius);
 }
+// 
+// 
+// 
+void 
+Solver::Electrodes_injection::add_measured_potential( std::string Label, double V, double I )
+{
+  if ( I == information(Label).get_I_() )
+    {
+      potential_measured_map_[Label] = V;
+    }
+  else
+    {
+      std::cerr << "Error: there is a mismatch between the current injection of the simulation and the measure" << std::endl;
+      std::cerr << "Current at " << Label << " during the simulation is: " 
+		<< information(Label).get_I_()
+		<< ". For the measure, the current is: " << I
+		<< std::endl;
+      abort();
+    }
+}
 //
 //
 //
@@ -277,4 +297,35 @@ Solver::Electrodes_injection::surface_potential_evaluation(const dolfin::Functio
 	    }
 	}
     }
+}
+// 
+// 
+// 
+double 
+Solver::Electrodes_injection::sum_of_squares()const
+{
+  // 
+  // Dimention of the problem
+  std::size_t dim = potential_measured_map_.size();
+
+  //
+  // Create the vector of differences between the measured and simulated potential
+  Eigen::VectorXd U_phi;
+  //  U_phi.resize(dim,1);
+  U_phi = Eigen::VectorXd::Zero(dim,1);
+  // fill up the vector
+  for ( auto measure : potential_measured_map_ )
+    U_phi(information(measure.first).get_index_(), 0) 
+      = measure.second - information(measure.first).get_V_();
+
+  //
+  // Create the noise matrix
+  Eigen::MatrixXd sigma;
+  //  sigma.resize(dim, dim);
+  // 
+  sigma =  Eigen::MatrixXd::Identity(dim, dim);
+   
+  // 
+  // 
+  return U_phi.transpose() * sigma.inverse() * U_phi;
 }

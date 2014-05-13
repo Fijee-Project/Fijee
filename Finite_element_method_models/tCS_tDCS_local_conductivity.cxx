@@ -1,11 +1,5 @@
 #include <iostream>
 #include "tCS_tDCS_local_conductivity.h"
-//
-// UCSF project
-//
-#include "Utils/Minimizers/Minimizer.h"
-#include "Utils/Minimizers/Downhill_simplex.h"
-#include "Utils/Minimizers/Iterative_minimizer.h"
 
 typedef Solver::PDE_solver_parameters SDEsp;
 
@@ -32,15 +26,19 @@ Solver::tCS_tDCS_local_conductivity::tCS_tDCS_local_conductivity():
   // 
   std::string file_brain_potential_ts_name = (SDEsp::get_instance())->get_files_path_result_() + 
     std::string("tDCS_brain_time_series.pvd");
-   file_brain_potential_time_series_ = nullptr; // new File( file_brain_potential_ts_name.c_str() );
+  file_brain_potential_time_series_ = nullptr; // new File( file_brain_potential_ts_name.c_str() );
   // 
   std::string file_filed_potential_ts_name = (SDEsp::get_instance())->get_files_path_result_() + 
     std::string("tDCS_field_time_series.pvd");
-   file_field_time_series_ = nullptr; // new File( file_filed_potential_ts_name.c_str() );
+  file_field_time_series_ = nullptr; // new File( file_filed_potential_ts_name.c_str() );
 
   //
   // Local conductivity estimation - initialization
   // 
+  
+  // 
+  // Minimizer
+  minimizer_algo_.reset(new Utils::Minimizers::Iterative_minimizer< Algorithm >  );
   
   // 
   // Limites of conductivities
@@ -53,7 +51,7 @@ Solver::tCS_tDCS_local_conductivity::tCS_tDCS_local_conductivity():
   std::uniform_real_distribution<double> uniform_dist_skin(0.005, 1.);
   std::uniform_real_distribution<double> uniform_dist_skull_compacta(4.33e-03, 6.86e-03);
   std::uniform_real_distribution<double> uniform_dist_skull_spongiosa(5.66e-03, 23.2e-03);
-
+   
   
   // 
   // 
@@ -64,12 +62,78 @@ Solver::tCS_tDCS_local_conductivity::tCS_tDCS_local_conductivity():
 	sigma_skin            = uniform_dist_skin(generator),
 	sigma_skull_spongiosa = uniform_dist_skull_compacta(generator),
 	sigma_skull_compact   = uniform_dist_skull_spongiosa(generator);
-      
+       
       simplex_[i] = std::make_tuple( 0.0, 
 				     sigma_skin,
 				     sigma_skull_spongiosa,
 				     sigma_skull_compact,
 				     false, false);
+    }
+   
+  // 
+  // Read measured potential
+  std::cout << "Load electrical potential file" << std::endl;
+  //
+  std::string electrodes_xml = (SDEsp::get_instance())->get_files_path_measure_();
+  electrodes_xml += "eeg_readout.xml";
+  //
+  pugi::xml_document     xml_file;
+  pugi::xml_parse_result result = xml_file.load_file( electrodes_xml.c_str() );
+  //
+  switch( result.status )
+    {
+    case pugi::status_ok:
+      {
+	//
+	// Check that we have a FIJEE XML file
+	const pugi::xml_node fijee_node = xml_file.child("fijee");
+	if (!fijee_node)
+	  {
+	    std::cerr << "Read data from XML: Not a FIJEE XML file" << std::endl;
+	    exit(1);
+	  }
+
+	// 
+	// Get sampling
+	const pugi::xml_node setup_node = fijee_node.child("setup");
+	if (!setup_node)
+	  {
+	    std::cerr << "Read data from XML: no setup node" << std::endl;
+	    exit(1);
+	  }
+	// Get the number of samples
+	// loop over the samples
+	for ( auto sample : setup_node )
+	  {
+	    //
+	    // Get the number of electrodes
+	    int sample_number  = sample.attribute("index").as_int();
+
+	    //
+	    //
+	    for( auto electrode : sample )
+	      {
+		int index = electrode.attribute("index").as_uint();
+		// Label
+		std::string label = electrode.attribute("label").as_string(); 
+		// Intensity
+		double I = electrode.attribute("I").as_double(); /* Ampere */
+		// Potential
+		double V = electrode.attribute("V").as_double(); /* Volt */
+		//
+		electrodes_->get_current( sample_number )->add_measured_potential( label, V, I );
+	      }
+	  }
+
+	//
+	//
+	break;
+      };
+    default:
+      {
+	std::cerr << "Error reading XML file: " << result.description() << std::endl;
+	exit(1);
+      }
     }
 }
 //
@@ -204,47 +268,47 @@ Solver::tCS_tDCS_local_conductivity::operator () ( )
 
  
       //
-      // Filter function over the electrodes
-      // solution_electrodes_extraction(u, electrodes_);
-      electrodes_->get_current(0)->punctual_potential_evaluation(u, mesh_);
-
-      std::cout << "electrode punctual CP6 " 
-		<< electrodes_->get_current(0)->information( "CP6" ).get_V_() 
-		<< std::endl;
-
-      electrodes_->get_current(0)->surface_potential_evaluation(u, mesh_);
-
-
-      std::cout << "electrode surface CP6 " 
-		<< electrodes_->get_current(0)->information( "CP6" ).get_electrical_potential() 
-		<< std::endl;
-
-      // 
-      // Estimate the the sum-of_squares
-      // 
-      if ( simplex_vertex > 3 )
+      // Mutex record potential at each electrods
+      //
+      try 
 	{
-//	  Utils::Minimizers::Downhill_simplex minimizer_algo;
-//	  minimizer_algo.minimize();
-	  Utils::Minimizers::Iterative_minimizer<Utils::Minimizers::Downhill_simplex> minimizer_algo;
-	  minimizer_algo.minimize();
+	  // lock the dipole list
+	  std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
+	  //
+	  // Filter function over the electrodes
+	  // solution_electrodes_extraction(u, electrodes_);
+	  electrodes_->get_current(0)->punctual_potential_evaluation(u, mesh_);
+	  
+	  // 
+	  // Estimate the the sum-of_squares
+	  std::cout << electrodes_->get_current(0)->sum_of_squares() << std::endl; 
+
+	  // 
+	  // Minimize when estimations are done for 4 vertices of the tetrahedron simplex
+	  if ( simplex_vertex > 3 )
+	    minimizer_algo_->minimize();
+	}
+      catch (std::logic_error&) 
+	{
+	  std::cerr << "[exception caught]\n" << std::endl;
 	}
       
-      //
-      // Save solution in VTK format
-      //  * Binary (.bin)
-      //  * RAW    (.raw)
-      //  * SVG    (.svg)
-      //  * XD3    (.xd3)
-      //  * XDMF   (.xdmf)
-      //  * XML    (.xml) // FEniCS xml
-      //  * XYZ    (.xyz)
-      //  * VTK    (.pvd) // paraview
-      std::string file_name = (SDEsp::get_instance())->get_files_path_result_() + 
-	std::string("tDCS.pvd");
-      File file( file_name.c_str() );
-      //
-      file << u;
+      
+//      //
+//      // Save solution in VTK format
+//      //  * Binary (.bin)
+//      //  * RAW    (.raw)
+//      //  * SVG    (.svg)
+//      //  * XD3    (.xd3)
+//      //  * XDMF   (.xdmf)
+//      //  * XML    (.xml) // FEniCS xml
+//      //  * XYZ    (.xyz)
+//      //  * VTK    (.pvd) // paraview
+//      std::string file_name = (SDEsp::get_instance())->get_files_path_result_() + 
+//	std::string("tDCS.pvd");
+//      File file( file_name.c_str() );
+//      //
+//      file << u;
     }
 };
 //

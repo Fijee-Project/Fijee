@@ -80,10 +80,11 @@ all: models $(EXEC)
 
 $(EXEC):
 	( cd $(UTILS_DIR)/pugi/ && $(MAKE) )
+	( cd $(UTILS_DIR)/Minimizers/ && $(MAKE) )
 	( cd $(FEM_MODELS_DIR) && $(MAKE) )
 	( cd $(MESH_RENDERING_DIR) && $(MAKE) )
 	@echo""
-	@echo "export LD_LIBRARY_PATH=$(CUDA_LIB):$(VTK)/lib/vtk-5.10:$(CGAL)/lib:$(LD_LIBRARY_PATH)"
+	@echo "export LD_LIBRARY_PATH=$(FIJEE)/$(UTILS_DIR)/pugi/:$(FIJEE)/$(UTILS_DIR)/Minimizers/:$(CUDA_LIB):$(VTK)/lib/vtk-5.10:$(CGAL)/lib:$(LD_LIBRARY_PATH)"
 	@echo""
 
 
@@ -93,6 +94,7 @@ models:
 
 clean:
 	( cd $(UTILS_DIR)/pugi/ && $(MAKE) $@ )
+	( cd $(UTILS_DIR)/Minimizers/ && $(MAKE) $@ )
 	( cd $(FEM_MODELS_DIR) && $(MAKE) $@ )
 	( cd $(MESH_RENDERING_DIR) && $(MAKE) $@ )
 

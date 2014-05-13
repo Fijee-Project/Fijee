@@ -85,14 +85,14 @@ namespace Utils
        *
        *  This method launch the minimization algorithm
        */
-      virtual void minimize()
-      {
-	std::cerr << "This is not a minimization algorithm. Look for daughter classes, "
-		  << "e.g. Downhill simplex algorithm." 
-		  << std::endl;
-	abort();
-      };
+      virtual void minimize() = 0;
+//      {
+//	std::cerr << "This is not a minimization algorithm. Look for daughter classes, "
+//		  << "e.g. Downhill simplex algorithm." 
+//		  << std::endl;
+//	abort();
+//      };
     };
-  };
-};
+  }
+}
 #endif

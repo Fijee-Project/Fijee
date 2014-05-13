@@ -23,6 +23,10 @@
 //
 // UCSF project
 //
+#include "Utils/Minimizers/Minimizer.h"
+#include "Utils/Minimizers/Downhill_simplex.h"
+#include "Utils/Minimizers/Iterative_minimizer.h"
+// 
 #include "Physics.h"
 #include "Conductivity.h"
 #include "Boundaries.h"
@@ -86,9 +90,12 @@ namespace Solver
     // 
     //! Simplex for downhill simplex estimation
     std::vector< Estimation_tuple > simplex_;
+    //! Map of conductivity boundary values for each tissues
     std::map< Brain_segmentation, std::tuple<double, double> > conductivity_boundaries_;
-
-
+    //! Minimizer:
+    //!  - Downhill simplex: Utils::Minimizers::Downhill_simplex
+    typedef Utils::Minimizers::Downhill_simplex Algorithm;
+    std::shared_ptr< Utils::Minimizers::Iterative_minimizer< Algorithm >  > minimizer_algo_;
     
   private:
     std::mutex critical_zone_;

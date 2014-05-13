@@ -308,7 +308,7 @@ DBel::Build_stream( std::ofstream& stream )
 
   //
   //
-  stream << "    <electrodes index=\"0\", time=\"0.001\", size=\"" << electrodes_.size() << "\">\n";
+  stream << "    <electrodes index=\"0\" time=\"0.001\" size=\"" << electrodes_.size() << "\">\n";
   
   //
   //

@@ -146,6 +146,25 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
 //  solution_domain_extraction(u, test_sub_domains, file_brain_potential_time_series_);
 
   //
+  // Mutex record potential at each electrods
+  //
+  try 
+    {
+      // lock the dipole list
+      std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
+      // 
+      // electrodes_->get_current(0)->punctual_potential_evaluation(u, mesh_);
+      electrodes_->get_current(0)->surface_potential_evaluation(u, mesh_);
+      electrodes_->record_potential( /*dipole idx*/ 0, 
+				     /*time   idx*/ 0);
+    }
+  catch (std::logic_error&) 
+    {
+      std::cerr << "[exception caught]\n" << std::endl;
+    }
+
+
+  //
   // Mutex in the critical zone
   //
   try
@@ -163,7 +182,7 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
   // tDCS electric current density field \vec{J}
   // 
   
-  if (true)
+  if (false)
     {
       //
       // Define variational forms

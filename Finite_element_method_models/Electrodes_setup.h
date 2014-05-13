@@ -45,8 +45,8 @@ namespace Solver
   private:
     //! Electrodes list for current injected
     std::vector< std::shared_ptr< Solver::Electrodes_injection > > current_setup_;
-    //! Electrodes list for current injected
-    std::shared_ptr< Solver::Electrodes_injection > current_injection_;
+//    //! Electrodes list for current injected
+//    std::shared_ptr< Solver::Electrodes_injection > current_injection_;
     //! number of samples
     int number_samples_;
     //! number of electrodes

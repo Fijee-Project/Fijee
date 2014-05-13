@@ -38,6 +38,9 @@ namespace Solver
     //! Electrodes list
     std::map< /* label */ std::string, 
       /* electrode caracteristics */ Solver::Intensity > electrodes_map_;
+    //! Electrodes list
+    std::map< /* label */ std::string, 
+      /* electrical potential */ double > potential_measured_map_;
     //! Time injection/measure
     double time_;
 
@@ -141,6 +144,14 @@ namespace Solver
 			Point, Point,
 			double, double, double, double  );
     /*!
+     *  \brief add_measured_potential
+     *
+     *  This method add the measured potential at each electrode. 
+     *  This functionnality is used for the conductivity estimation.
+     *
+     */
+    void add_measured_potential( std::string, double, double  );
+    /*!
      *  \brief inside
      *
      *  This method check if a point is inside an electrode
@@ -198,9 +209,11 @@ namespace Solver
     void surface_potential_evaluation( const dolfin::Function&, 
 				       const std::shared_ptr< const Mesh >  );
    /*!
-     *  \brief 
+     *  \brief Information
      *
-     *  This method record the cell index per probes.
+     *  This method retrieves infomation for a specific electrode.
+     *
+     *  \param label: labe of the specific electrode
      *
      */
     const Solver::Intensity& information( const std::string label ) const
@@ -212,8 +225,21 @@ namespace Solver
 	if( electrode !=  electrodes_map_.end() )
 	  return electrode->second;
 	else
-	  abort();
+	  {
+	    std::cerr << "Error: electrode " 
+		      << label 
+		      << " does not belong the ste of electrodes!" << std::endl;
+	    abort();
+	  }
       };
+      /*!
+     *  \brief Sum of squares
+     *
+     *  This method process the sum of squares formula between the measured potential and the simulated potential:
+     * S(\beta) = (U - \phi(\beta))^{T} \Sigma^{-1} (U - \phi(\beta))
+     *
+     */
+    double sum_of_squares() const;
   };
   /*!
    *  \brief Dump values for Electrodes_injection

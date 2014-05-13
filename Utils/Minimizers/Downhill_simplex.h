@@ -78,7 +78,7 @@ namespace Utils
        *
        *  This method launch the minimization algorithm
        */
-      virtual void minimize();//{};
+      virtual void minimize();
     };
     /*!
      *  \brief Dump values for Electrode
@@ -87,14 +87,6 @@ namespace Utils
      *
      */
     std::ostream& operator << ( std::ostream&, const Downhill_simplex& );
-    // 
-    // 
-    // 
-    void
-      Downhill_simplex::minimize()
-    {
-      std::cout << "La vie est belle" << std::endl;
-    };
-  };
-};
+  }
+}
 #endif

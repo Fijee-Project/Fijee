@@ -4,7 +4,7 @@
 //
 Solver::Intensity::Intensity():
   electric_variable_(""), index_( 0 ), I_( 0. ), V_( 0. ), surface_(0.), radius_(0.),
-  label_("no_name")
+  label_("no_name"), type_of_potential_(true)
 {
   //
   //
@@ -25,7 +25,8 @@ Solver::Intensity::Intensity(const Intensity& that):
   I_(that.I_),  V_(that.V_), label_(that.label_),
   r0_values_(that.r0_values_), r0_projection_(that.r0_projection_), 
   r0_projection_index_(that.r0_projection_index_), e_values_(that.e_values_),
-  impedance_(that.impedance_), surface_(that.surface_), radius_(that.radius_)
+  impedance_(that.impedance_), surface_(that.surface_), radius_(that.radius_),
+  type_of_potential_(that.type_of_potential_)
 {
   not_yet_ = true;
   //
@@ -42,7 +43,8 @@ Solver::Intensity::Intensity( std::string Electric_variable, int Index,
 			      Point X, Point V,double Re_z_l, double Im_z_l,
 			      double Surface, double Radius): 
   electric_variable_(Electric_variable), index_( Index ), label_( Label ), I_( Intensity ), 
-  r0_values_(X), e_values_(V), impedance_( (Re_z_l,Im_z_l) ), surface_(Surface), radius_(Radius) 
+  r0_values_(X), e_values_(V), impedance_( (Re_z_l,Im_z_l) ), surface_(Surface), radius_(Radius),
+  type_of_potential_(true)
 {
   r0_projection_       = Point();
   r0_projection_index_ = -1;
@@ -178,7 +180,7 @@ Solver::Intensity::operator =( const Intensity& that )
   not_yet_ = that.not_yet_;
   // 
   electrical_potential_list_ = that.electrical_potential_list_;
-
+  type_of_potential_         = that.type_of_potential_;
   
   //
   //
@@ -218,9 +220,9 @@ Solver::Intensity::set_boundary_cells_( const std::map< std::size_t, std::list< 
 //
 double
 Solver::Intensity::get_electrical_potential() const
-{
+{std::cout << "je passe get_electrical_potential" << std::endl;
   if ( electrical_potential_list_.size() != 0 )
-    {
+    {std::cout << "je passe 1 get_electrical_potential" << std::endl;
       double cumul_potential = 0.;
       //
       for( auto potential : electrical_potential_list_ )

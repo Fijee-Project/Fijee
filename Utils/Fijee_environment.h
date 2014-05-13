@@ -56,6 +56,8 @@ namespace Utils
     std::string fem_output_path_;
     //! Finite element method result directory path.
     std::string fem_result_path_;
+    //! Finite element method measure directory path.
+    std::string fem_measure_path_;
 
   public:
     /*!
@@ -149,6 +151,41 @@ namespace Utils
 	//
 	// append the path line
 	fem_path_ += "/";
+
+	//
+	// Create measure path
+	status = 0;
+	//
+	fem_measure_path_ = fem_path_ + "/fem/measure/";
+	//
+	if ( stat( fem_measure_path_.c_str(), &st ) != 0 )
+	  {
+	    /* Directory does not exist */
+	    if ( mkdir( fem_measure_path_.c_str(), mode ) != 0 )
+	      status = -1;
+	  }
+	else if (!S_ISDIR(st.st_mode))
+	  {
+	    errno = ENOTDIR;
+	    status = -1;
+	  }
+	else
+	  {
+	    std::cerr << "Warning: directory " << fem_measure_path_
+		      << " already exist. " << std::endl;
+	  }
+	//
+	if (status == -1 )
+	  {
+	    std::cerr << "failed to create " << fem_measure_path_
+		      << ": " << strerror(errno) << std::endl;
+	    //
+	    exit(1);
+	  }
+
+	//
+	// append the path line
+	fem_path_ += "/";
       };
     /*!
      *  \brief Copy Constructor
@@ -207,6 +244,13 @@ namespace Utils
      *
      */
     ucsf_get_macro(fem_result_path_, std::string);
+   /*!
+     *  \brief Get fem_measure_path_
+     *
+     *  This method return the finite element method measure directory path.
+     *
+     */
+    ucsf_get_macro(fem_measure_path_, std::string);
 
     
   };
