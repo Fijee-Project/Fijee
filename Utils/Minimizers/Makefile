@@ -3,7 +3,7 @@ LDFLAGS   =  -shared
 #
 # Libraries and includes
 #
-INC     = 
+INC     = -I$(FIJEE)/ -I$(EIGEN3)/include/eigen3/ 
 LIB_DIR = 
 LIBS    = 
 #

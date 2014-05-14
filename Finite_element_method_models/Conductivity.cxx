@@ -60,7 +60,7 @@ Solver::Tensor_conductivity::eval(Array<double>& values, const Array<double>& x,
 //
 void 
 Solver::Tensor_conductivity::conductivity_update( const std::shared_ptr< MeshFunction<std::size_t> > Domains,
-						  std::tuple< double, double, double, double, bool, bool >& Simplex )
+						  const Eigen::Vector3d& Simplex )
 {
   //
   // 
@@ -74,27 +74,23 @@ Solver::Tensor_conductivity::conductivity_update( const std::shared_ptr< MeshFun
 	case SPONGIOSA_SKULL:
 	  {
 	    //	    std::cout << "spongiosa: " << C00_[cell->index()] << std::endl;
-	    C00_[cell->index()] = C00_[cell->index()] = C00_[cell->index()] = std::get<2>(Simplex);
+	    C00_[cell->index()] = C00_[cell->index()] = C00_[cell->index()] = Simplex(1);
 	    break;
 	  }
 	case OUTSIDE_SKULL/* compacta skull */:
 	  {
 	    // 	    std::cout << "compacta: " << C00_[cell->index()] << std::endl;
-	    C00_[cell->index()] = C00_[cell->index()] = C00_[cell->index()] = std::get<3>(Simplex);
+	    C00_[cell->index()] = C00_[cell->index()] = C00_[cell->index()] = Simplex(2);
 	    break;
 	  }
 	case OUTSIDE_SCALP/* skin */:
 	  {
 	    // 	    std::cout << "skin: " << C00_[cell->index()] << std::endl;
-	    C00_[cell->index()] = C00_[cell->index()] = C00_[cell->index()] = std::get<1>(Simplex);
+	    C00_[cell->index()] = C00_[cell->index()] = C00_[cell->index()] = Simplex(0);
 	    break;
 	  }
 	}
     }
-
-  // 
-  // 
-  std::get</* updated */ 5>(Simplex) = false;
 }
 //
 //

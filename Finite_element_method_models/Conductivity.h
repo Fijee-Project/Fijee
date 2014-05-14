@@ -3,6 +3,10 @@
 #include <dolfin.h>
 #include <vector>
 //
+// Eigen
+//
+#include <Eigen/Dense>
+//
 // UCSF
 //
 #include "PDE_solver_parameters.h"
@@ -109,7 +113,7 @@ namespace Solver
      *
      */
     void conductivity_update( const std::shared_ptr< MeshFunction< std::size_t > >,
-			      std::tuple< double, double, double, double, bool, bool >& );
+			      const Eigen::Vector3d& );
   };
   
   /*! \class Sigma_isotrope

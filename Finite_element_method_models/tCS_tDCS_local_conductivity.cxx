@@ -1,5 +1,14 @@
 #include <iostream>
 #include "tCS_tDCS_local_conductivity.h"
+inline double banana_helper(const double& x, const double& y) {
+	return (1 - x) * (1 - x) + 100 * (y - x * x) * (y - x * x);
+}
+double banana(Eigen::Vector3d& point) {
+	int x = point[0];
+	int y = point[1];
+	int z = point[2];
+	return banana_helper(x, y) + banana_helper(y, z);
+}
 
 typedef Solver::PDE_solver_parameters SDEsp;
 
@@ -35,11 +44,7 @@ Solver::tCS_tDCS_local_conductivity::tCS_tDCS_local_conductivity():
   //
   // Local conductivity estimation - initialization
   // 
-  
-  // 
-  // Minimizer
-  minimizer_algo_.reset(new Utils::Minimizers::Iterative_minimizer< Algorithm >  );
-  
+
   // 
   // Limites of conductivities
   conductivity_boundaries_[OUTSIDE_SCALP]   = std::make_tuple(0.005, 1.);
@@ -52,22 +57,18 @@ Solver::tCS_tDCS_local_conductivity::tCS_tDCS_local_conductivity():
   std::uniform_real_distribution<double> uniform_dist_skull_compacta(4.33e-03, 6.86e-03);
   std::uniform_real_distribution<double> uniform_dist_skull_spongiosa(5.66e-03, 23.2e-03);
    
-  
   // 
   // 
   simplex_.resize(4);
   for ( int i = 0 ; i < 4 ; i++ )
     {
-      double 
-	sigma_skin            = uniform_dist_skin(generator),
-	sigma_skull_spongiosa = uniform_dist_skull_compacta(generator),
-	sigma_skull_compact   = uniform_dist_skull_spongiosa(generator);
-       
-      simplex_[i] = std::make_tuple( 0.0, 
-				     sigma_skin,
-				     sigma_skull_spongiosa,
-				     sigma_skull_compact,
-				     false, false);
+      Eigen::Vector3d sigma;
+      sigma << 
+	uniform_dist_skin(generator),
+	uniform_dist_skull_compacta(generator),
+	uniform_dist_skull_spongiosa(generator);
+      // 
+      simplex_[i] = std::make_tuple( 0.0, sigma);
     }
    
   // 
@@ -135,12 +136,16 @@ Solver::tCS_tDCS_local_conductivity::tCS_tDCS_local_conductivity():
 	exit(1);
       }
     }
+  
+  // 
+  // Minimizer 
+  minimizer_algo_.reset( new Utils::Minimizers::Iterative_minimizer< Algorithm >());
 }
 //
 //
 //
 void 
-Solver::tCS_tDCS_local_conductivity::operator () ( )
+Solver::tCS_tDCS_local_conductivity::operator ()( )
 {
 //  //
 //  // Mutex the electrodes vector poping process
@@ -165,152 +170,127 @@ Solver::tCS_tDCS_local_conductivity::operator () ( )
 //  //  // Define Dirichlet boundary conditions 
 //  //  DirichletBC boundary_conditions(*V, source, perifery);
 
-
-  //////////////////////////////////////////////////////
-  // Transcranial direct current stimulation equation //
-  //////////////////////////////////////////////////////
-      
-
   // 
-  // incrementation loop
-  int simplex_vertex = 0;
-  int stop = 0;
-  // 
-  while( ++stop < 8 || !(std::get</* initialized */ 4 >(simplex_[0]) & 
-			 std::get<4>(simplex_[1]) & std::get<4>(simplex_[2]) & 
-			 std::get<4>(simplex_[3])) )
+  // Initialize the simplex
+  for( auto vertex = simplex_.begin() ; vertex != simplex_.end() ; vertex++ )
     {
-      //
-      // Update the conductivity
-      if ( simplex_vertex < simplex_.size() )
-	{
-	  sigma_->conductivity_update( domains_, simplex_[simplex_vertex] );
-	  std::get</* initialized */ 4 >(simplex_[simplex_vertex]) = true;
-	  simplex_vertex++;
-	}
-      else
-	{
-	  int updated_simplex = -1;
-	  for ( int i = 0 ; i < 4 ; i++ )
-	    if ( std::get< /* updated */ 4 >(simplex_[i]) )
-	      updated_simplex = i;
-	  // 
-	  if ( updated_simplex != -1)
-	    sigma_->conductivity_update( domains_, simplex_[updated_simplex] );	  
-	  else
-	    {
-	      std::cerr << "No update of the conductivity has been done" << std::endl;
-	      abort();
-	    }
-	}
-
-      //
-      // tDCS electrical potential u
-      //
-
-      //
-      // Define variational forms
-      tCS_model::BilinearForm a(V_, V_);
-      tCS_model::LinearForm L(V_);
-      
-      //
-      // Anisotropy
-      // Bilinear
-      a.a_sigma  = *sigma_;
-      // a.dx       = *domains_;
-  
-  
-      // Linear
-      L.I  = *(electrodes_->get_current(0));
-      L.ds = *boundaries_;
-
-      //
-      // Compute solution
-      Function u(*V_);
-      LinearVariationalProblem problem(a, L, u/*, bc*/);
-      LinearVariationalSolver  solver(problem);
-      // krylov
-      solver.parameters["linear_solver"]  
-	= (SDEsp::get_instance())->get_linear_solver_();
-      solver.parameters("krylov_solver")["maximum_iterations"] 
-	= (SDEsp::get_instance())->get_maximum_iterations_();
-      solver.parameters("krylov_solver")["relative_tolerance"] 
-	= (SDEsp::get_instance())->get_relative_tolerance_();
-      solver.parameters["preconditioner"] 
-	= (SDEsp::get_instance())->get_preconditioner_();
-      //
-      solver.solve();
-
-
-      //
-      // Regulation terme:  \int u dx = 0
-      double old_u_bar = 0.;
-      double u_bar = 1.e+6;
-      double U_bar = 0.;
-      double N = u.vector()->size();
-      int iteration = 0;
-      double Sum = 1.e+6;
-      //
-      //  while ( abs( u_bar - old_u_bar ) > 0.1 )
-      while ( fabs(Sum) > 1.e-3 )
-	{
-	  old_u_bar = u_bar;
-	  u_bar  = u.vector()->sum();
-	  u_bar /= N;
-	  (*u.vector()) -= u_bar;
-	  //
-	  U_bar += u_bar;
-	  Sum = u.vector()->sum();
-	  std::cout << ++iteration << " ~ " << Sum  << std::endl;
-	}
- 
-      std::cout << "int u dx = " << Sum << std::endl;
-
- 
-      //
-      // Mutex record potential at each electrods
-      //
-      try 
-	{
-	  // lock the dipole list
-	  std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
-	  //
-	  // Filter function over the electrodes
-	  // solution_electrodes_extraction(u, electrodes_);
-	  electrodes_->get_current(0)->punctual_potential_evaluation(u, mesh_);
-	  
-	  // 
-	  // Estimate the the sum-of_squares
-	  std::cout << electrodes_->get_current(0)->sum_of_squares() << std::endl; 
-
-	  // 
-	  // Minimize when estimations are done for 4 vertices of the tetrahedron simplex
-	  if ( simplex_vertex > 3 )
-	    minimizer_algo_->minimize();
-	}
-      catch (std::logic_error&) 
-	{
-	  std::cerr << "[exception caught]\n" << std::endl;
-	}
-      
-      
-//      //
-//      // Save solution in VTK format
-//      //  * Binary (.bin)
-//      //  * RAW    (.raw)
-//      //  * SVG    (.svg)
-//      //  * XD3    (.xd3)
-//      //  * XDMF   (.xdmf)
-//      //  * XML    (.xml) // FEniCS xml
-//      //  * XYZ    (.xyz)
-//      //  * VTK    (.pvd) // paraview
-//      std::string file_name = (SDEsp::get_instance())->get_files_path_result_() + 
-//	std::string("tDCS.pvd");
-//      File file( file_name.c_str() );
-//      //
-//      file << u;
+      // 
+      // Estimate the the sum-of_squares
+      double tempo = solve( std::get<1>( *vertex ) );
+      std::cout << tempo << std::endl; 
+      std::get< 0 >(*vertex) = tempo;
     }
-};
+
+  
+  for( auto vertex : simplex_ )
+    std::cout << std::get<0>(vertex) << std::endl;
+
+  	  
+  // 
+  // Minimize when estimations are done for 4 vertices of the tetrahedron simplex
+  minimizer_algo_->initialization( std::bind( &tCS_tDCS_local_conductivity::solve, 
+					      this, 
+					      std::placeholders::_1 ), 
+				   simplex_, conductivity_boundaries_ );
+  minimizer_algo_->minimize();
+}
+double 
+Solver::tCS_tDCS_local_conductivity::operator ()( const Eigen::Vector3d& A){return solve(A);};
+//
+//
+//
+double
+Solver::tCS_tDCS_local_conductivity::solve( const Eigen::Vector3d& Vertex )
+{
+  // 
+  // Update the conductivity
+  sigma_->conductivity_update( domains_, Vertex );
+
+  //
+  // tDCS electrical potential u
+  //
+
+  //
+  // Define variational forms
+  tCS_model::BilinearForm a(V_, V_);
+  tCS_model::LinearForm L(V_);
+      
+  //
+  // Anisotropy
+  // Bilinear
+  a.a_sigma  = *sigma_;
+  // a.dx       = *domains_;
+  
+  
+  // Linear
+  L.I  = *(electrodes_->get_current(0));
+  L.ds = *boundaries_;
+
+  //
+  // Compute solution
+  Function u(*V_);
+  LinearVariationalProblem problem(a, L, u/*, bc*/);
+  LinearVariationalSolver  solver(problem);
+  // krylov
+  solver.parameters["linear_solver"]  
+    = (SDEsp::get_instance())->get_linear_solver_();
+  solver.parameters("krylov_solver")["maximum_iterations"] 
+    = (SDEsp::get_instance())->get_maximum_iterations_();
+  solver.parameters("krylov_solver")["relative_tolerance"] 
+    = (SDEsp::get_instance())->get_relative_tolerance_();
+  solver.parameters["preconditioner"] 
+    = (SDEsp::get_instance())->get_preconditioner_();
+  //
+  solver.solve();
+
+
+  //
+  // Regulation terme:  \int u dx = 0
+  double old_u_bar = 0.;
+  double u_bar = 1.e+6;
+  double U_bar = 0.;
+  double N = u.vector()->size();
+  int iteration = 0;
+  double Sum = 1.e+6;
+  //
+  //  while ( abs( u_bar - old_u_bar ) > 0.1 )
+  while ( fabs(Sum) > 1.e-3 )
+    {
+      old_u_bar = u_bar;
+      u_bar  = u.vector()->sum();
+      u_bar /= N;
+      (*u.vector()) -= u_bar;
+      //
+      U_bar += u_bar;
+      Sum = u.vector()->sum();
+      std::cout << ++iteration << " ~ " << Sum  << std::endl;
+    }
+ 
+  std::cout << "int u dx = " << Sum << std::endl;
+
+ 
+  //
+  // Mutex record potential at each electrods
+  //
+  try 
+    {
+      // lock the list
+      std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
+      //
+      // Filter function over the electrodes
+      // solution_electrodes_extraction(u, electrodes_);
+      electrodes_->get_current(0)->punctual_potential_evaluation(u, mesh_);
+	  
+      // 
+      // Estimate the the sum-of_squares
+      return electrodes_->get_current(0)->sum_of_squares(); 
+	  
+    }
+  catch (std::logic_error&) 
+    {
+      std::cerr << "[exception caught]\n" << std::endl;
+    }
+}
 //
 //
 //

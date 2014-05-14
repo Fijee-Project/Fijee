@@ -3,6 +3,7 @@
 #include <list>
 #include <memory>
 #include <string>
+#include <functional>
 //
 // UCSF project
 //
@@ -28,7 +29,13 @@ namespace Utils
 {
   namespace Minimizers
   {
-    /*! \class Iterative_minimizer
+    typedef std::function< double( const Eigen::Vector3d& ) > Function;
+    typedef std::tuple< 
+      double,          /* - 0 - estimation */
+      Eigen::Vector3d /* - 1 - sigma (0) skin, (1) skull spongiosa, (2) skull compacta */
+      > Estimation_tuple;
+
+   /*! \class Iterative_minimizer
      * \brief classe representing the dipoles distribution
      *
      *  This class is an example of class I will have to use
@@ -70,6 +77,17 @@ namespace Utils
 	//    void operator () ();
 
       public:
+	/*!
+	 *  \brief initialization function
+	 *
+	 *  This method initialized the minimizer
+	 */
+	void initialization( Function Fun,  
+			     const std::vector< Estimation_tuple >& Simplex,
+			     const std::map< Brain_segmentation, std::tuple<double, double> >& Boundaries)
+	{
+	  minimizer_.initialization( Fun, Simplex, Boundaries );
+	};
 	/*!
 	 *  \brief minimize function
 	 *

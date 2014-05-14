@@ -2,16 +2,25 @@
 #define MINIMIZER_H
 //http://franckh.developpez.com/tutoriels/outils/doxygen/
 /*!
- * \file Electrode.h
+ * \file Minimization.h
  * \brief brief describe 
  * \author Yann Cobigo
  * \version 0.1
  */
 #include <iostream>
 #include <memory>
+#include <vector>
+#include <map>
+#include <tuple>
+#include <functional>
+//
+// Eigen
+//
+#include <Eigen/Dense>
 //
 // UCSF
 //
+#include "Utils/enum.h"
 /*! \namespace Utils
  * 
  * Name space for our new package
@@ -26,6 +35,11 @@ namespace Utils
    */
   namespace Minimizers
   {
+    typedef std::function< double( const Eigen::Vector3d& ) > Function;
+    typedef std::tuple< 
+      double,          /* - 0 - estimation */
+      Eigen::Vector3d /* - 1 - sigma (0) skin, (1) skull spongiosa, (2) skull compacta */
+      > Estimation_tuple;
     /*! \class Minimizer
      * \brief classe representing whatever
      *
@@ -38,6 +52,9 @@ namespace Utils
       virtual ~Minimizer(){/* Do nothing */};  
       
     public:
+      virtual void initialization( Function,  
+				   const std::vector< Estimation_tuple >&,
+				   const std::map< Brain_segmentation, std::tuple<double, double> >& ) = 0;
       virtual void minimize() = 0;
     };
     /*! \class It_minimizer
@@ -81,17 +98,19 @@ namespace Utils
 
     public:
       /*!
+       *  \brief initialization function
+       *
+       *  This method initialize the minimizer
+       */
+      virtual void initialization( Function,  
+				   const std::vector< Estimation_tuple >&,
+				   const std::map< Brain_segmentation, std::tuple<double, double> >& ) = 0;
+      /*!
        *  \brief minimize function
        *
        *  This method launch the minimization algorithm
        */
       virtual void minimize() = 0;
-//      {
-//	std::cerr << "This is not a minimization algorithm. Look for daughter classes, "
-//		  << "e.g. Downhill simplex algorithm." 
-//		  << std::endl;
-//	abort();
-//      };
     };
   }
 }

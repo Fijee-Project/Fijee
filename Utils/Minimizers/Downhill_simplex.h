@@ -4,10 +4,11 @@
 /*!
  * \file Downhill_simplex_sphere.h
  * \brief brief describe 
- * \author Yann Cobigo
+ * \author John Zheng He, Yann Cobigo
  * \version 0.1
  */
 #include <iostream>
+#include <vector>
 //
 // UCSF
 //
@@ -37,6 +38,13 @@ namespace Utils
      */
     class Downhill_simplex : public It_minimizer
     {
+    private:
+      //! Simplex vertices
+      std::vector< Estimation_tuple > simplex_;
+      //! Map of conductivity boundary values for each tissues
+      std::map< Brain_segmentation, std::tuple<double, double> > conductivity_boundaries_;
+      //! Funtion to minimize
+      Function function_;
 
     public:
       /*!
@@ -45,7 +53,7 @@ namespace Utils
        *  Constructor of the class Downhill_simplex_sphere
        *
        */
-    Downhill_simplex():It_minimizer(){};
+      Downhill_simplex();
       /*!
        *  \brief Destructeur
        *
@@ -73,6 +81,14 @@ namespace Utils
 
       
     public:
+      /*!
+       *  \brief minimize function
+       *
+       *  This method initialize the minimizer
+       */
+      virtual void initialization( Function,  
+				   const std::vector< Estimation_tuple >&,
+				   const std::map< Brain_segmentation, std::tuple<double, double> >& );
       /*!
        *  \brief minimize function
        *

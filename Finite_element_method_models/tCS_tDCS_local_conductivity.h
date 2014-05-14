@@ -9,6 +9,10 @@
 #include <thread>         // std::thread
 #include <random>
 //
+// Eigen
+//
+#include <Eigen/Dense>
+//
 // FEniCS
 //
 #include <dolfin.h>
@@ -64,12 +68,9 @@ namespace Solver
   class tCS_tDCS_local_conductivity : Physics
   {
     typedef std::tuple< 
-      double,  /* - 0 - estimation */
-      double,  /* - 1 - sigma skin */ 
-      double,  /* - 2 - sigma skull spongiosa */ 
-      double,  /* - 3 - sigma skull compacta */ 
-      bool,    /* - 4 - initialized */
-      bool     /* - 5 - updated */ > Estimation_tuple;
+      double,          /* - 0 - estimation */
+      Eigen::Vector3d  /* - 1 - sigma (0) skin, (1) skull spongiosa, (2) skull compacta */
+      > Estimation_tuple;
       
   private:
     //! Function space
@@ -137,6 +138,14 @@ namespace Solver
     virtual void operator ()();
     
   public:
+    /*!
+     *  \brief Operator ()
+     *
+     *  Operator () of the class tCS_tDCS_local_conductivity
+     *
+     */
+    double solve( const Eigen::Vector3d& );
+    double operator ()( const Eigen::Vector3d& A);
     /*!
      *  \brief Get number of physical events
      *
