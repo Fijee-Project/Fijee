@@ -84,7 +84,7 @@ namespace Utils
 	 */
 	void initialization( Function Fun,  
 			     const std::vector< Estimation_tuple >& Simplex,
-			     const std::map< Brain_segmentation, std::tuple<double, double> >& Boundaries)
+			     const std::vector< std::tuple<double, double> >& Boundaries)
 	{
 	  minimizer_.initialization( Fun, Simplex, Boundaries );
 	};

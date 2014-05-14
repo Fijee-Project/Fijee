@@ -91,8 +91,11 @@ namespace Solver
     // 
     //! Simplex for downhill simplex estimation
     std::vector< Estimation_tuple > simplex_;
-    //! Map of conductivity boundary values for each tissues
-    std::map< Brain_segmentation, std::tuple<double, double> > conductivity_boundaries_;
+    //! vector of conductivity boundary values for each tissues
+    //! - 0 - sigma skin
+    //! - 1 - sigma skull spongiosa
+    //! - 2 - sigma skull compacta
+    std::vector< std::tuple<double, double> > conductivity_boundaries_;
     //! Minimizer:
     //!  - Downhill simplex: Utils::Minimizers::Downhill_simplex
     typedef Utils::Minimizers::Downhill_simplex Algorithm;

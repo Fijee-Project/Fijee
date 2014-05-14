@@ -23,7 +23,7 @@ ifeq ($(DEBUG),yes)
 CXXFLAGS_MODE  = -g -DDEBUG
 CUDAFLAGS_MODE = 
 else
-CXXFLAGS_MODE  = -O3 #-DGPU
+CXXFLAGS_MODE  = -O3 -Wunused-local-typedefs #-DGPU
 CUDAFLAGS_MODE = -O3 -m64 -gencode arch=compute_20,code=sm_20 
 endif
 #

@@ -47,9 +47,10 @@ Solver::tCS_tDCS_local_conductivity::tCS_tDCS_local_conductivity():
 
   // 
   // Limites of conductivities
-  conductivity_boundaries_[OUTSIDE_SCALP]   = std::make_tuple(0.005, 1.);
-  conductivity_boundaries_[OUTSIDE_SKULL]   = std::make_tuple(4.33e-03, 6.86e-03);
-  conductivity_boundaries_[SPONGIOSA_SKULL] = std::make_tuple(5.66e-03, 23.2e-03);
+  conductivity_boundaries_.resize(3);
+  conductivity_boundaries_[0] = std::make_tuple(0.005, 1.);
+  conductivity_boundaries_[1] = std::make_tuple(4.33e-03, 6.86e-03);
+  conductivity_boundaries_[2] = std::make_tuple(5.66e-03, 23.2e-03);
   // 
   unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
   std::default_random_engine generator(seed);

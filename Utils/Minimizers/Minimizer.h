@@ -20,7 +20,6 @@
 //
 // UCSF
 //
-#include "Utils/enum.h"
 /*! \namespace Utils
  * 
  * Name space for our new package
@@ -54,7 +53,7 @@ namespace Utils
     public:
       virtual void initialization( Function,  
 				   const std::vector< Estimation_tuple >&,
-				   const std::map< Brain_segmentation, std::tuple<double, double> >& ) = 0;
+				   const std::vector< std::tuple<double, double> >& ) = 0;
       virtual void minimize() = 0;
     };
     /*! \class It_minimizer
@@ -66,7 +65,9 @@ namespace Utils
     {
     protected:
       //! Number of iteration
-      int interation_;
+      int iteration_;
+      //! Max number of iterations
+      int max_iterations_;
 
     public:
       /*!
@@ -74,7 +75,7 @@ namespace Utils
        *
        *  Constructor of the class Minimizer
        */
-      It_minimizer(){};
+    It_minimizer():iteration_(0), max_iterations_(200){};
       /*!
        *  \brief Destructeur
        *
@@ -87,14 +88,21 @@ namespace Utils
        *  Constructor is a copy constructor
        *
        */
-      It_minimizer( const It_minimizer& ){};
+    It_minimizer( const It_minimizer& that):
+      iteration_(that.iteration_), max_iterations_(that.max_iterations_){};
       /*!
        *  \brief Operator =
        *
        *  Operator = of the class It_minimizer_sphere
        *
        */
-      It_minimizer& operator = ( const It_minimizer& ){return *this;};
+      It_minimizer& operator = ( const It_minimizer& that )
+	{
+	  iteration_      = that.iteration_;
+	  max_iterations_ = that.max_iterations_;
+	  //
+	  return *this;
+	};
 
     public:
       /*!
@@ -104,7 +112,7 @@ namespace Utils
        */
       virtual void initialization( Function,  
 				   const std::vector< Estimation_tuple >&,
-				   const std::map< Brain_segmentation, std::tuple<double, double> >& ) = 0;
+				   const std::vector< std::tuple<double, double> >& ) = 0;
       /*!
        *  \brief minimize function
        *

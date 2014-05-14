@@ -42,9 +42,19 @@ namespace Utils
       //! Simplex vertices
       std::vector< Estimation_tuple > simplex_;
       //! Map of conductivity boundary values for each tissues
-      std::map< Brain_segmentation, std::tuple<double, double> > conductivity_boundaries_;
+      std::vector< std::tuple<double, double> > conductivity_boundaries_;
       //! Funtion to minimize
       Function function_;
+      //! Tolerance
+      double delta_;
+      //! TODO
+      double a_;
+      //! TODO
+      double b_;
+      //! TODO
+      double c_;
+      //! TODO
+      std::vector< int > asc_;
 
     public:
       /*!
@@ -88,13 +98,60 @@ namespace Utils
        */
       virtual void initialization( Function,  
 				   const std::vector< Estimation_tuple >&,
-				   const std::map< Brain_segmentation, std::tuple<double, double> >& );
+				   const std::vector< std::tuple<double, double> >& );
       /*!
        *  \brief minimize function
        *
        *  This method launch the minimization algorithm
        */
       virtual void minimize();
+
+    private:
+      /*!
+       *  \brief Order the simplex vertices
+       *
+       *  This method order the simplex vertices
+       */
+      void order_vertices();
+      /*!
+       *  \brief get facet centroid
+       *
+       *  This method 
+       */
+      const Eigen::Vector3d get_facet_centroid( const Eigen::Vector3d&, 
+						const Eigen::Vector3d&, 
+						const Eigen::Vector3d& ) const;
+      /*!
+       *  \brief Convergence criteria
+       *
+       *  This method 
+       */
+      bool is_converged();
+      /*!
+       *  \brief Contraction
+       *
+       *  This method TODO
+       */
+      void contraction();
+      /*!
+       *  \brief Transform
+       *
+       *  This method TODO
+       */
+      void transform(){};
+      /*!
+       *  \brief Reflection
+       *
+       *  This method TODO
+       */
+      Eigen::Vector3d reflection();
+      /*!
+       *  \brief Get middle
+       *
+       *  This method TODO
+       */
+      const Eigen::Vector3d get_middle( const Eigen::Vector3d&, 
+					const Eigen::Vector3d& ) const;
     };
     /*!
      *  \brief Dump values for Electrode
