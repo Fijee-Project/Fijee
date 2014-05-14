@@ -1,17 +1,6 @@
 #include <iostream>
 #include "tCS_tDCS_local_conductivity.h"
-inline double banana_helper(const double& x, const double& y) {
-	return (1 - x) * (1 - x) + 100 * (y - x * x) * (y - x * x);
-}
-double banana(Eigen::Vector3d& point) {
-	int x = point[0];
-	int y = point[1];
-	int z = point[2];
-	return banana_helper(x, y) + banana_helper(y, z);
-}
-
 typedef Solver::PDE_solver_parameters SDEsp;
-
 //
 //
 //

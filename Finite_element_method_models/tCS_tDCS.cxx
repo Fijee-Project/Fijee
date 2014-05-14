@@ -182,7 +182,7 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
   // tDCS electric current density field \vec{J}
   // 
   
-  if (false)
+  if (true)
     {
       //
       // Define variational forms

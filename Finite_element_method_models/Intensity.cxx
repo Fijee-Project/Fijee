@@ -220,9 +220,9 @@ Solver::Intensity::set_boundary_cells_( const std::map< std::size_t, std::list< 
 //
 double
 Solver::Intensity::get_electrical_potential() const
-{std::cout << "je passe get_electrical_potential" << std::endl;
+{
   if ( electrical_potential_list_.size() != 0 )
-    {std::cout << "je passe 1 get_electrical_potential" << std::endl;
+    {
       double cumul_potential = 0.;
       //
       for( auto potential : electrical_potential_list_ )

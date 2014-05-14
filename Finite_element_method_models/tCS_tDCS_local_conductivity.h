@@ -69,7 +69,7 @@ namespace Solver
   {
     typedef std::tuple< 
       double,          /* - 0 - estimation */
-      Eigen::Vector3d  /* - 1 - sigma (0) skin, (1) skull spongiosa, (2) skull compacta */
+      Eigen::Vector3d  /* - 1 - sigma (0) skin, (1) skull compacta, (2) skull spongiosa */
       > Estimation_tuple;
       
   private:
@@ -93,8 +93,8 @@ namespace Solver
     std::vector< Estimation_tuple > simplex_;
     //! vector of conductivity boundary values for each tissues
     //! - 0 - sigma skin
-    //! - 1 - sigma skull spongiosa
-    //! - 2 - sigma skull compacta
+    //! - 1 - sigma skull compacta
+    //! - 2 - sigma skull spongiosa
     std::vector< std::tuple<double, double> > conductivity_boundaries_;
     //! Minimizer:
     //!  - Downhill simplex: Utils::Minimizers::Downhill_simplex

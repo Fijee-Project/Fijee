@@ -37,7 +37,7 @@ namespace Utils
     typedef std::function< double( const Eigen::Vector3d& ) > Function;
     typedef std::tuple< 
       double,          /* - 0 - estimation */
-      Eigen::Vector3d /* - 1 - sigma (0) skin, (1) skull spongiosa, (2) skull compacta */
+      Eigen::Vector3d /* - 1 - sigma (0) skin, (1) skull compacta, (2) skull spongiosa */
       > Estimation_tuple;
     /*! \class Minimizer
      * \brief classe representing whatever

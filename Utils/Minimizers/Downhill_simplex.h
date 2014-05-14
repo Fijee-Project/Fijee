@@ -9,6 +9,7 @@
  */
 #include <iostream>
 #include <vector>
+#include <algorithm>    // std::sort
 //
 // UCSF
 //
@@ -47,14 +48,14 @@ namespace Utils
       Function function_;
       //! Tolerance
       double delta_;
-      //! TODO
-      double a_;
-      //! TODO
-      double b_;
-      //! TODO
-      double c_;
-      //! TODO
-      std::vector< int > asc_;
+      //! Reflection coefficient
+      double reflection_coeff_;
+      //! Expension coefficient
+      double expension_coeff_;
+      //! Contraction coefficient
+      double contraction_coeff_;
+      //! Dimension of the space: (N_ + 1) number of vertices in a simplex
+      double N_;
 
     public:
       /*!
@@ -118,9 +119,7 @@ namespace Utils
        *
        *  This method 
        */
-      const Eigen::Vector3d get_facet_centroid( const Eigen::Vector3d&, 
-						const Eigen::Vector3d&, 
-						const Eigen::Vector3d& ) const;
+      const Eigen::Vector3d get_facet_centroid() const;
       /*!
        *  \brief Convergence criteria
        *

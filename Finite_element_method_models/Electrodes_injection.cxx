@@ -313,10 +313,12 @@ Solver::Electrodes_injection::sum_of_squares()const
   Eigen::VectorXd U_phi;
   //  U_phi.resize(dim,1);
   U_phi = Eigen::VectorXd::Zero(dim,1);
-  // fill up the vector
+  // fill up the vector and avoid injection electrodes
   for ( auto measure : potential_measured_map_ )
     U_phi(information(measure.first).get_index_(), 0) 
-      = measure.second - information(measure.first).get_V_();
+      = ( information(measure.first).get_I_() == 0. ? 
+	  measure.second - information(measure.first).get_V_() : 
+	  0.);
 
   //
   // Create the noise matrix
