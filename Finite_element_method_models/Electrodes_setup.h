@@ -10,9 +10,11 @@
 // same resources than Dolfin
 //
 #include "Utils/pugi/pugixml.hpp"
+#include "Utils/XML_writer.h"
 //
 // UCSF project
 //
+#include "Utils/Fijee_environment.h"
 #include "Electrodes_injection.h"
 #include "Conductivity.h"
 #include "Intensity.h"
@@ -34,20 +36,29 @@ using namespace dolfin;
 namespace Solver
 {
   /*! \class Electrodes_setup
-   * \brief classe representing setup of electrodes
+   * \brief classe representing the set up of electrodes
    *
-   *  This class is an example of class I will have to use
+   *  This class holds the set of electrodes for each time's setp of the electrodes measure. Electrodes_setup is the interface between the electrodes and the Physical models. 
    */
-  class Electrodes_setup
+  class Electrodes_setup: public Utils::XML_writer
   {
   private:
     //! Electrodes list for current injected
-    std::shared_ptr< Solver::Electrodes_injection > current_injection_;
-    //! Electrodes list for potential applied
-    std::shared_ptr< Solver::Electrodes_injection > potential_injection_;
+    std::vector< std::shared_ptr< Solver::Electrodes_injection > > current_setup_;
+//    //! Electrodes list for current injected
+//    std::shared_ptr< Solver::Electrodes_injection > current_injection_;
+    //! number of samples
+    int number_samples_;
     //! number of electrodes
     int number_electrodes_;
 
+    // 
+    // Output file
+    //! XML output file: setup node
+    pugi::xml_node setup_node_;
+    //! XML output file: electrodes node
+    pugi::xml_node electrodes_node_;
+    
   public:
     /*!
      *  \brief Default Constructor
@@ -69,7 +80,7 @@ namespace Solver
      *  Constructor of the class Electrodes_setup
      *
      */
-    ~Electrodes_setup(){/*Do nothing*/};
+    virtual ~Electrodes_setup(){/*Do nothing*/};
     /*!
      *  \brief Operator =
      *
@@ -83,11 +94,33 @@ namespace Solver
      *  Operator [] the class Electrodes_setup
      *
      */
-    const Solver::Intensity& operator [] (const char * label )const{return get_current()->information(label);};
+    //    const Solver::Intensity& operator [] (const char * label )const{return get_current()->information(label);};
 
   public:
-    std::shared_ptr< Solver::Electrodes_injection > get_current() const { return current_injection_;};
-    std::shared_ptr< Solver::Electrodes_injection > get_potential() const { return potential_injection_;};
+    /*!
+     *  \brief Get number samples
+     *
+     *  This method return the number_samples_ member.
+     *
+     */
+    ucsf_get_macro( number_samples_, int );
+    /*!
+     *  \brief Get number electrodes
+     *
+     *  This method return the number_electrodes_ member.
+     *
+     */
+    ucsf_get_macro( number_electrodes_, int );
+    /*!
+     *  \brief Get the current set up
+     *
+     *  This method return the current set up in electrodes for the sampling Sample.
+     *
+     *  \param Sample: sample selected from the electrode measures
+     *
+     */
+    std::shared_ptr< Solver::Electrodes_injection > get_current(const int Sample ) const 
+      { return current_setup_[Sample];};
 
   public:
     /*!
@@ -97,6 +130,20 @@ namespace Solver
      *
      */
     bool inside( const Point& ) const;
+    /*!
+     *  \brief Add electrical potential
+     *
+     *   This method 
+     *
+     */
+    bool add_potential_value( const Point&, const double );
+    /*!
+     *  \brief Add electrical potential
+     *
+     *   This method 
+     *
+     */
+    bool add_potential_value( const std::string, const double );
     /*!
      *  \brief Inside probe
      *
@@ -111,6 +158,13 @@ namespace Solver
      *
      */
     void set_boundary_cells( const std::map< std::string, std::map< std::size_t, std::list< MeshEntity  >  >  > & );
+    /*!
+     *  \brief 
+     *
+     *  This method 
+     *
+     */
+    void record_potential( int, int );
  };
 }
 #endif

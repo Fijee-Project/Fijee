@@ -1,5 +1,5 @@
-#ifndef TCS_TDCS_H
-#define TCS_TDCS_H
+#ifndef TCS_TACS_H
+#define TCS_TACS_H
 #include <list>
 #include <memory>
 #include <string>
@@ -38,7 +38,7 @@ typedef std::vector<std::vector<std::pair<dolfin::la_index, dolfin::la_index> > 
 //
 //
 /*!
- * \file tCS_tDCS.h
+ * \file tCS_tACS.h
  * \brief brief describe 
  * \author Yann Cobigo
  * \version 0.1
@@ -51,12 +51,12 @@ typedef std::vector<std::vector<std::pair<dolfin::la_index, dolfin::la_index> > 
  */
 namespace Solver
 {
-  /*! \class tCS_tDCS
-   * \brief classe representing tDCS simulation.
+  /*! \class tCS_tACS
+   * \brief classe representing tACS simulation.
    *
-   *  This class representing the Physical model for the transcranial Direct Current Stimulation (tDCS) simulation.
+   *  This class representing the Physical model for the transcranial Alternating Current Stimulation (tACS) simulation.
    */
-  class tCS_tDCS : Physics
+  class tCS_tACS : Physics
   {
   private:
     //! Function space
@@ -82,34 +82,34 @@ namespace Solver
     /*!
      *  \brief Default Constructor
      *
-     *  Constructor of the class tCS_tDCS
+     *  Constructor of the class tCS_tACS
      *
      */
-    tCS_tDCS();
+    tCS_tACS();
     /*!
      *  \brief Copy Constructor
      *
      *  Constructor is a copy constructor
      *
      */
-    tCS_tDCS( const tCS_tDCS& ){};
+    tCS_tACS( const tCS_tACS& ){};
     /*!
      *  \brief Destructeur
      *
-     *  Destructor of the class tCS_tDCS
+     *  Destructor of the class tCS_tACS
      */
-    virtual ~tCS_tDCS(){/* Do nothing */};
+    virtual ~tCS_tACS(){/* Do nothing */};
     /*!
      *  \brief Operator =
      *
-     *  Operator = of the class tCS_tDCS
+     *  Operator = of the class tCS_tACS
      *
      */
-    tCS_tDCS& operator = ( const tCS_tDCS& ){return *this;};
+    tCS_tACS& operator = ( const tCS_tACS& ){return *this;};
     /*!
      *  \brief Operator ()
      *
-     *  Operator () of the class tCS_tDCS
+     *  Operator () of the class tCS_tACS
      *
      */
     virtual void operator ()();
@@ -119,11 +119,23 @@ namespace Solver
      *  \brief Get number of physical events
      *
      *  This method return the number of parallel process for the Physics solver. 
+     *  In the case of tACS the number of events is the number of sampling in the time series.
      *
      */
     virtual inline
-      int get_number_of_physical_events(){return 1;};
-   /*!
+      int get_number_of_physical_events(){return electrodes_->get_number_samples_();};
+    /*!
+     *  \brief Solution domain extraction
+     *
+     *  This method extract from the Function solution U the sub solution covering the sub-domains Sub_domains.
+     *  The result is a file with the name tACS_{Sub_domains}.vtu
+     *
+     *  \param U: Function solution of the Partial Differential Equation.
+     *  \param Sub_domains: array of sub-domain we want to extract from U.
+     *
+     */
+    void regulation_factor(const Function& , std::list<std::size_t>& );
+    /*!
      *  \brief Solution domain extraction
      *
      *  This method extract from the Function solution U the sub solution covering the sub-domains Sub_domains.
@@ -131,9 +143,12 @@ namespace Solver
      *
      *  \param U: Function solution of the Partial Differential Equation.
      *  \param Sub_domains: array of sub-domain we want to extract from U.
+     *  \param File: file .
      *
      */
-    void regulation_factor(const Function& , std::list<std::size_t>& );
+    void solution_domain_extraction( const dolfin::Function&, const std::list<std::size_t>&, 
+				     File* );
+
   };
 }
 #endif

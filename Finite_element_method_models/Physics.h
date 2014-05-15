@@ -8,8 +8,11 @@
 //
 // UCSF project
 //
+#include "Utils/Fijee_environment.h"
 #include "PDE_solver_parameters.h"
 #include "Conductivity.h"
+#include "Electrodes_setup.h"
+#include "Electrodes_surface.h"
 
 //using namespace dolfin;
 
@@ -37,6 +40,12 @@ namespace Solver
     std::shared_ptr< MeshFunction< std::size_t > > domains_;
     //! Anisotropic conductivity
     std::shared_ptr< Solver::Tensor_conductivity > sigma_;
+    //! Electrodes list
+    std::shared_ptr< Solver::Electrodes_setup > electrodes_;
+    //! Head model facets collection
+    std::shared_ptr< MeshValueCollection< std::size_t > > mesh_facets_collection_;
+    //! Boundarie conditions
+    std::shared_ptr< MeshFunction< std::size_t > > boundaries_;
 
 
   public:
@@ -77,10 +86,28 @@ namespace Solver
      *
      *  \param U: Function solution of the Partial Differential Equation.
      *  \param Sub_domains: array of sub-domain we want to extract from U.
+     *  \param name: file name.
      *
      */
-    void solution_domain_extraction( const dolfin::Function&, std::list<std::size_t>&, 
+    void solution_domain_extraction( const dolfin::Function&,  std::list<std::size_t>&, 
 				     const char* );
+
+  public:
+    /*!
+     *  \brief Operator ()
+     *
+     *  Operator () of the class Physics
+     *
+     */
+    virtual void operator ()() = 0;
+    /*!
+     *  \brief Get number of physical events
+     *
+     *  This method return the number of parallel process for the Physics solver. 
+     *
+     */
+    virtual inline
+      int get_number_of_physical_events() = 0;
    };
 };
 

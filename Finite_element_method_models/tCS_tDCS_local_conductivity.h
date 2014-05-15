@@ -1,5 +1,5 @@
-#ifndef TCS_TDCS_H
-#define TCS_TDCS_H
+#ifndef TCS_TDCS__LOCAL_CONDUCTIVITY_H
+#define TCS_TDCS__LOCAL_CONDUCTIVITY_H
 #include <list>
 #include <memory>
 #include <string>
@@ -7,6 +7,11 @@
 #include <stdexcept>      // std::logic_error
 #include <map>
 #include <thread>         // std::thread
+#include <random>
+//
+// Eigen
+//
+#include <Eigen/Dense>
 //
 // FEniCS
 //
@@ -22,6 +27,10 @@
 //
 // UCSF project
 //
+#include "Utils/Minimizers/Minimizer.h"
+#include "Utils/Minimizers/Downhill_simplex.h"
+#include "Utils/Minimizers/Iterative_minimizer.h"
+// 
 #include "Physics.h"
 #include "Conductivity.h"
 #include "Boundaries.h"
@@ -38,7 +47,7 @@ typedef std::vector<std::vector<std::pair<dolfin::la_index, dolfin::la_index> > 
 //
 //
 /*!
- * \file tCS_tDCS.h
+ * \file tCS_tDCS_local_conductivity.h
  * \brief brief describe 
  * \author Yann Cobigo
  * \version 0.1
@@ -51,13 +60,18 @@ typedef std::vector<std::vector<std::pair<dolfin::la_index, dolfin::la_index> > 
  */
 namespace Solver
 {
-  /*! \class tCS_tDCS
+  /*! \class tCS_tDCS_local_conductivity
    * \brief classe representing tDCS simulation.
    *
-   *  This class representing the Physical model for the transcranial Direct Current Stimulation (tDCS) simulation.
+   *  This class representing the Physical model for the estimation of skinn/skull conductivity tensors using the transcranial Direct Current Stimulation (tDCS) simulation.
    */
-  class tCS_tDCS : Physics
+  class tCS_tDCS_local_conductivity : Physics
   {
+    typedef std::tuple< 
+      double,          /* - 0 - estimation */
+      Eigen::Vector3d  /* - 1 - sigma (0) skin, (1) skull compacta, (2) skull spongiosa */
+      > Estimation_tuple;
+      
   private:
     //! Function space
     std::shared_ptr< tCS_model::FunctionSpace > V_;
@@ -72,8 +86,20 @@ namespace Solver
     // Time series potential field output file
     File *file_field_time_series_;
 
-    // std::map< std::size_t, std::size_t > map_index_cell_;
-
+    //
+    // Local conductivity estimation
+    // 
+    //! Simplex for downhill simplex estimation
+    std::vector< Estimation_tuple > simplex_;
+    //! vector of conductivity boundary values for each tissues
+    //! - 0 - sigma skin
+    //! - 1 - sigma skull compacta
+    //! - 2 - sigma skull spongiosa
+    std::vector< std::tuple<double, double> > conductivity_boundaries_;
+    //! Minimizer:
+    //!  - Downhill simplex: Utils::Minimizers::Downhill_simplex
+    typedef Utils::Minimizers::Downhill_simplex Algorithm;
+    std::shared_ptr< Utils::Minimizers::Iterative_minimizer< Algorithm >  > minimizer_algo_;
     
   private:
     std::mutex critical_zone_;
@@ -82,39 +108,47 @@ namespace Solver
     /*!
      *  \brief Default Constructor
      *
-     *  Constructor of the class tCS_tDCS
+     *  Constructor of the class tCS_tDCS_local_conductivity
      *
      */
-    tCS_tDCS();
+    tCS_tDCS_local_conductivity();
     /*!
      *  \brief Copy Constructor
      *
      *  Constructor is a copy constructor
      *
      */
-    tCS_tDCS( const tCS_tDCS& ){};
+    tCS_tDCS_local_conductivity( const tCS_tDCS_local_conductivity& ){};
     /*!
      *  \brief Destructeur
      *
-     *  Destructor of the class tCS_tDCS
+     *  Destructor of the class tCS_tDCS_local_conductivity
      */
-    virtual ~tCS_tDCS(){/* Do nothing */};
+    virtual ~tCS_tDCS_local_conductivity(){/* Do nothing */};
     /*!
      *  \brief Operator =
      *
-     *  Operator = of the class tCS_tDCS
+     *  Operator = of the class tCS_tDCS_local_conductivity
      *
      */
-    tCS_tDCS& operator = ( const tCS_tDCS& ){return *this;};
+    tCS_tDCS_local_conductivity& operator = ( const tCS_tDCS_local_conductivity& ){return *this;};
     /*!
      *  \brief Operator ()
      *
-     *  Operator () of the class tCS_tDCS
+     *  Operator () of the class tCS_tDCS_local_conductivity
      *
      */
     virtual void operator ()();
     
   public:
+    /*!
+     *  \brief Operator ()
+     *
+     *  Operator () of the class tCS_tDCS_local_conductivity
+     *
+     */
+    double solve( const Eigen::Vector3d& );
+    double operator ()( const Eigen::Vector3d& A);
     /*!
      *  \brief Get number of physical events
      *

@@ -38,10 +38,10 @@ DEss::print( std::ostream& Stream ) const
   Stream 
     // shape type
     << "type=\"SPEHERE\" "
-    // shape radius
-    << "radius=\"" << radius_ << "\" "
-    // shape surface
-    << "surface=\"" << contact_surface() << "\" ";
+    // shape radius; [mm] to [m]
+    << "radius=\"" << radius_ * 1.e-3 << "\" "
+    // shape surface; [mm] to [m]
+    << "surface=\"" << contact_surface() * 1.e-6 << "\" ";
 };
 //
 //
@@ -55,10 +55,10 @@ Domains::operator << ( std::ostream& stream,
   stream 
     // shape type
     << "type=\"SPEHERE\" "
-    // shape radius
-    << "radius=\"" << that.get_radius_() << "\" "
-    // shape surface
-    << "surface=\"" << that.contact_surface() << "\" ";
+    // shape radius; [mm] to [m]
+    << "radius=\"" << that.get_radius_() * 1.e-3 << "\" "
+    // shape surface; [mm] to [m]
+    << "surface=\"" << that.contact_surface() * 1.e-6 << "\" ";
   
   //
   //

@@ -18,9 +18,10 @@ SDEsp::PDE_solver_parameters()
   // Check on ENV variables
   Utils::Fijee_environment fijee;
   //
-  files_path_        = fijee.get_fem_path_();
-  files_path_output_ = fijee.get_fem_output_path_();
-  files_path_result_ = fijee.get_fem_result_path_();
+  files_path_         = fijee.get_fem_path_();
+  files_path_output_  = fijee.get_fem_output_path_();
+  files_path_result_  = fijee.get_fem_result_path_();
+  files_path_measure_ = fijee.get_fem_measure_path_();
 }
 //
 //
@@ -105,10 +106,11 @@ SDEsp::init()
   //
   maximum_iterations_ = 10000000;
   //
-//  relative_tolerance_ = 1.e-8 /*1.e-8*/;
+  //  relative_tolerance_ = 1.e-8 /*1.e-8*/;
 //  relative_tolerance_ = 7.e-4 /*tDCS_spheres*/;
 //  relative_tolerance_ = 1.e-8 /*tDCS_spheres*/;
-  relative_tolerance_ = 5.e-3 /*tDCS_head*/;
+//  relative_tolerance_ = 5.e-3 /*tDCS_head*/;
+  relative_tolerance_ = 1.e-5 /*tDCS_head*/;
 
   //
   // Dispatching information

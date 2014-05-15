@@ -40,7 +40,7 @@ Solver::Electrodes_surface::Electrodes_surface( std::shared_ptr< Solver::Electro
 	//
 	if( in_electrode )
 	  {
-	    // which cell belong the facet
+	    // which cell belongs the facet
 	    it_facet_cell_index = Map_Index_Cell.find( facet_index );
 	    if ( it_facet_cell_index ==  Map_Index_Cell.end() )
 	      {
@@ -91,7 +91,7 @@ Solver::Electrodes_surface::surface_vertices_per_electrodes( const std::size_t B
 	for( auto it_vertex = list_vertices_.begin() ; it_vertex != list_vertices_.end() ;
 	     it_vertex++ )
 	  if( std::get< /*vertex index*/ 4 >(*it_vertex) == -1 )
-	    if( std::get< /*position*/ 1 >(*it_vertex).distance( midpoint ) < 1.e-3 ) 
+	    if( std::get< /*position*/ 1 >(*it_vertex).distance( midpoint ) < 1.e-6 ) 
 	      {
 		map_boundary_cells[std::get< /*electrode label*/ 0 >(*it_vertex)]
 		  [std::get< /*cell index*/ 3 >(*it_vertex)].push_back(std::get< /*facet*/ 2 >(*it_vertex));
@@ -210,7 +210,7 @@ Solver::Electrodes_surface::inside(const Array<double>& x, bool on_boundary) con
     if( electrodes_->inside( vertex_point ) )
       for( auto it_vertex = list_vertices_.begin() ; it_vertex != list_vertices_.end() ;
 	   it_vertex++ )
-	if( std::get< /*position*/ 1 >(*it_vertex).distance( vertex_point ) < 1.e-3 ) 
+	if( std::get< /*position*/ 1 >(*it_vertex).distance( vertex_point ) <  1.e-6 ) 
 	  {
 	    // Satisfaction criteria fulfilled 
 	    std::get< /*criteria*/ 5 >(*it_vertex) = true;

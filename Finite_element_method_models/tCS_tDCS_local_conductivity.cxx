@@ -1,19 +1,16 @@
 #include <iostream>
-#include "tCS_tDCS.h"
-
+#include "tCS_tDCS_local_conductivity.h"
 typedef Solver::PDE_solver_parameters SDEsp;
-
 //
 //
 //
-Solver::tCS_tDCS::tCS_tDCS():
+Solver::tCS_tDCS_local_conductivity::tCS_tDCS_local_conductivity():
   Physics(), sample_(0)
 {
   //
   // Define the function space
   V_.reset( new tCS_model::FunctionSpace(mesh_) );
   V_field_.reset( new tCS_field_model::FunctionSpace(mesh_) );
-
 
   // 
   // Output files
@@ -23,23 +20,122 @@ Solver::tCS_tDCS::tCS_tDCS():
   // Head time series potential output file
   std::string file_head_potential_ts_name = (SDEsp::get_instance())->get_files_path_result_() + 
     std::string("tDCS_time_series.pvd");
-  file_potential_time_series_ = new File( file_head_potential_ts_name.c_str() );
+  file_potential_time_series_ = nullptr; // new File( file_head_potential_ts_name.c_str() );
   // 
   std::string file_brain_potential_ts_name = (SDEsp::get_instance())->get_files_path_result_() + 
     std::string("tDCS_brain_time_series.pvd");
-   file_brain_potential_time_series_ = nullptr; // new File( file_brain_potential_ts_name.c_str() );
+  file_brain_potential_time_series_ = nullptr; // new File( file_brain_potential_ts_name.c_str() );
   // 
   std::string file_filed_potential_ts_name = (SDEsp::get_instance())->get_files_path_result_() + 
     std::string("tDCS_field_time_series.pvd");
-   file_field_time_series_ = nullptr; // new File( file_filed_potential_ts_name.c_str() );
+  file_field_time_series_ = nullptr; // new File( file_filed_potential_ts_name.c_str() );
+
+  //
+  // Local conductivity estimation - initialization
+  // 
+
+  // 
+  // Limites of conductivities
+  conductivity_boundaries_.resize(3);
+  conductivity_boundaries_[0] = std::make_tuple(0.005, 1.);
+  conductivity_boundaries_[1] = std::make_tuple(4.33e-03, 6.86e-03);
+  conductivity_boundaries_[2] = std::make_tuple(5.66e-03, 23.2e-03);
+  // 
+  unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+  std::default_random_engine generator(seed);
+  std::uniform_real_distribution<double> uniform_dist_skin(0.005, 1.);
+  std::uniform_real_distribution<double> uniform_dist_skull_compacta(4.33e-03, 6.86e-03);
+  std::uniform_real_distribution<double> uniform_dist_skull_spongiosa(5.66e-03, 23.2e-03);
+   
+  // 
+  // 
+  simplex_.resize(4);
+  for ( int i = 0 ; i < 4 ; i++ )
+    {
+      Eigen::Vector3d sigma;
+      sigma << 
+	uniform_dist_skin(generator),
+	uniform_dist_skull_compacta(generator),
+	uniform_dist_skull_spongiosa(generator);
+      // 
+      simplex_[i] = std::make_tuple( 0.0, sigma);
+    }
+   
+  // 
+  // Read measured potential
+  std::cout << "Load electrical potential file" << std::endl;
+  //
+  std::string electrodes_xml = (SDEsp::get_instance())->get_files_path_measure_();
+  electrodes_xml += "eeg_readout.xml";
+  //
+  pugi::xml_document     xml_file;
+  pugi::xml_parse_result result = xml_file.load_file( electrodes_xml.c_str() );
+  //
+  switch( result.status )
+    {
+    case pugi::status_ok:
+      {
+	//
+	// Check that we have a FIJEE XML file
+	const pugi::xml_node fijee_node = xml_file.child("fijee");
+	if (!fijee_node)
+	  {
+	    std::cerr << "Read data from XML: Not a FIJEE XML file" << std::endl;
+	    exit(1);
+	  }
+
+	// 
+	// Get sampling
+	const pugi::xml_node setup_node = fijee_node.child("setup");
+	if (!setup_node)
+	  {
+	    std::cerr << "Read data from XML: no setup node" << std::endl;
+	    exit(1);
+	  }
+	// Get the number of samples
+	// loop over the samples
+	for ( auto sample : setup_node )
+	  {
+	    //
+	    // Get the number of electrodes
+	    int sample_number  = sample.attribute("index").as_int();
+
+	    //
+	    //
+	    for( auto electrode : sample )
+	      {
+		int index = electrode.attribute("index").as_uint();
+		// Label
+		std::string label = electrode.attribute("label").as_string(); 
+		// Intensity
+		double I = electrode.attribute("I").as_double(); /* Ampere */
+		// Potential
+		double V = electrode.attribute("V").as_double(); /* Volt */
+		//
+		electrodes_->get_current( sample_number )->add_measured_potential( label, V, I );
+	      }
+	  }
+
+	//
+	//
+	break;
+      };
+    default:
+      {
+	std::cerr << "Error reading XML file: " << result.description() << std::endl;
+	exit(1);
+      }
+    }
+  
+  // 
+  // Minimizer 
+  minimizer_algo_.reset( new Utils::Minimizers::Iterative_minimizer< Algorithm >());
 }
 //
 //
 //
 void 
-Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
-				  SLD_model::FunctionSpace& V,
-				  FacetFunction< size_t >& boundaries*/)
+Solver::tCS_tDCS_local_conductivity::operator ()( )
 {
 //  //
 //  // Mutex the electrodes vector poping process
@@ -64,19 +160,45 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
 //  //  // Define Dirichlet boundary conditions 
 //  //  DirichletBC boundary_conditions(*V, source, perifery);
 
+  // 
+  // Initialize the simplex
+  for( auto vertex = simplex_.begin() ; vertex != simplex_.end() ; vertex++ )
+    {
+      // 
+      // Estimate the the sum-of_squares
+      double tempo = solve( std::get<1>( *vertex ) );
+      std::cout << tempo << std::endl; 
+      std::get< 0 >(*vertex) = tempo;
+    }
 
-  //////////////////////////////////////////////////////
-  // Transcranial direct current stimulation equation //
-  //////////////////////////////////////////////////////
-      
+  
+  for( auto vertex : simplex_ )
+    std::cout << std::get<0>(vertex) << std::endl;
+
+  	  
+  // 
+  // Minimize when estimations are done for 4 vertices of the tetrahedron simplex
+  minimizer_algo_->initialization( std::bind( &tCS_tDCS_local_conductivity::solve, 
+					      this, 
+					      std::placeholders::_1 ), 
+				   simplex_, conductivity_boundaries_ );
+  minimizer_algo_->minimize();
+}
+double 
+Solver::tCS_tDCS_local_conductivity::operator ()( const Eigen::Vector3d& A){return solve(A);};
+//
+//
+//
+double
+Solver::tCS_tDCS_local_conductivity::solve( const Eigen::Vector3d& Vertex )
+{
+  // 
+  // Update the conductivity
+  sigma_->conductivity_update( domains_, Vertex );
 
   //
-  // tDCS electric potential u
+  // tDCS electrical potential u
   //
-
-  //  //
-  //  // PDE boundary conditions
-  //  DirichletBC bc(*V_, *(electrodes_->get_current(0)), *boundaries_, 101);
 
   //
   // Define variational forms
@@ -88,10 +210,10 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
   // Bilinear
   a.a_sigma  = *sigma_;
   // a.dx       = *domains_;
-  //  std::cout << electrodes_->get_current(0)->information("T7").get_I_() << std::endl;  
+  
   
   // Linear
-  L.I  = *(electrodes_->get_current( /*local_sample*/ 0));
+  L.I  = *(electrodes_->get_current(0));
   L.ds = *boundaries_;
 
   //
@@ -122,7 +244,7 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
   double Sum = 1.e+6;
   //
   //  while ( abs( u_bar - old_u_bar ) > 0.1 )
-  while ( fabs(Sum) > 1.e-6 )
+  while ( fabs(Sum) > 1.e-3 )
     {
       old_u_bar = u_bar;
       u_bar  = u.vector()->sum();
@@ -133,155 +255,38 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
       Sum = u.vector()->sum();
       std::cout << ++iteration << " ~ " << Sum  << std::endl;
     }
-  // 
-  std::cout << "int u dx = " << Sum << std::endl;
  
-  //
-  // Filter function over a subdomain
-  std::list<std::size_t> test_sub_domains{4,5};
-  solution_domain_extraction(u, test_sub_domains, "tDCS_potential");
-//  //
-//  // Filter function over a subdomain
-//  std::list<std::size_t> test_sub_domains{4,5};
-//  solution_domain_extraction(u, test_sub_domains, file_brain_potential_time_series_);
+  std::cout << "int u dx = " << Sum << std::endl;
 
+ 
   //
   // Mutex record potential at each electrods
   //
   try 
     {
-      // lock the dipole list
+      // lock the list
       std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
+      //
+      // Filter function over the electrodes
+      // solution_electrodes_extraction(u, electrodes_);
+      electrodes_->get_current(0)->punctual_potential_evaluation(u, mesh_);
+	  
       // 
-      // electrodes_->get_current(0)->punctual_potential_evaluation(u, mesh_);
-      electrodes_->get_current(0)->surface_potential_evaluation(u, mesh_);
-      electrodes_->record_potential( /*dipole idx*/ 0, 
-				     /*time   idx*/ 0);
+      // Estimate the the sum-of_squares
+      return electrodes_->get_current(0)->sum_of_squares(); 
+	  
     }
   catch (std::logic_error&) 
     {
       std::cerr << "[exception caught]\n" << std::endl;
     }
-
-
-  //
-  // Mutex in the critical zone
-  //
-  try
-    {
-      // lock the electrode list
-      std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
-      *file_potential_time_series_ << u;
-    }
-  catch (std::logic_error&)
-    {
-      std::cerr << "[exception caught]\n" << std::endl;
-    }
-
-  //
-  // tDCS electric current density field \vec{J}
-  // 
-  
-  if (true)
-    {
-      //
-      // Define variational forms
-      tCS_field_model::BilinearForm a_field(V_field_, V_field_);
-      tCS_field_model::LinearForm L_field(V_field_);
-      
-      //
-      // Anisotropy
-      // Bilinear
-      // a.dx       = *domains_;
-      
-      
-      // Linear
-      L_field.u       = u;
-      L_field.a_sigma = *sigma_;
-      //  L.ds = *boundaries_;
-      
-      //
-      // Compute solution
-      Function J(*V_field_);
-      LinearVariationalProblem problem_field(a_field, L_field, J/*, bc*/);
-      LinearVariationalSolver  solver_field(problem_field);
-      // krylov
-      solver_field.parameters["linear_solver"]  
-	= (SDEsp::get_instance())->get_linear_solver_();
-      solver_field.parameters("krylov_solver")["maximum_iterations"] 
-	= (SDEsp::get_instance())->get_maximum_iterations_();
-      solver_field.parameters("krylov_solver")["relative_tolerance"] 
-	= (SDEsp::get_instance())->get_relative_tolerance_();
-      solver_field.parameters["preconditioner"] 
-	= (SDEsp::get_instance())->get_preconditioner_();
-      //
-      solver_field.solve();
-      
-      // 
-      // Output
-      solution_domain_extraction(J, test_sub_domains, "tDCS_Current_density");
-      //
-      std::string field_name = (SDEsp::get_instance())->get_files_path_result_() + 
-	std::string("tDCS_field.pvd");
-      File field( field_name.c_str() );
-      //
-      field << J;
-    }
-
- 
- //
- // Validation process
- // !! WARNING !!
- // This process must be pluged only for spheres model
- if( false )
-   {
-     std::cout << "Validation processing" << std::endl;
-     //
-     // TODO CHANGE THE PROTOTYPE
-     std::cout << "je passe create T7" << std::endl;
-//     Solver::Spheres_electric_monopole mono_T7( (*electrodes_)["T7"].get_I_(),  
-//						(*electrodes_)["T7"].get_r0_projection_() );
-     Solver::Spheres_electric_monopole mono_T7( electrodes_->get_current(0)->information("T7").get_I_(),  
-						electrodes_->get_current(0)->information("T7").get_r0_projection_() );
-     //
-     std::cout << "je passe create T8" << std::endl;
-//     Solver::Spheres_electric_monopole mono_T8( (*electrodes_)["T8"].get_I_(),  
-//						(*electrodes_)["T8"].get_r0_projection_() );
-     Solver::Spheres_electric_monopole mono_T8( electrodes_->get_current(0)->information("T8").get_I_(),  
-						electrodes_->get_current(0)->information("T8").get_r0_projection_() );
-     //
-     //
-     Function 
-       Injection_T7(V_),
-       Injection_T8(V_);
-     //Function & Injection = Injection_T7;
-
-     //
-     std::cout << "je passe T7" << std::endl;
-     Injection_T7.interpolate( mono_T7 );
-     // std::thread T7(Injection_T7.interpolate, mono_T7);
-     std::cout << "je passe T8" << std::endl;
-     Injection_T8.interpolate( mono_T8 );
-     //
-     std::cout << "je passe T7+T8" << std::endl;
-     *(Injection_T7.vector()) += *(Injection_T8.vector());
-     std::cout << "je passe T7+T8 end" << std::endl;
-
-     //
-     // Produce outputs
-     std::string file_validation = (SDEsp::get_instance())->get_files_path_result_() + 
-       std::string("validation.pvd");
-     File validation( file_validation.c_str() );
-     //
-     validation << Injection_T7;
-     std::cout << "je passe" << std::endl;
-   }
-};
+}
 //
 //
 //
 void
-Solver::tCS_tDCS::regulation_factor(const Function& u, std::list<std::size_t>& Sub_domains)
+Solver::tCS_tDCS_local_conductivity::regulation_factor( const Function& u, 
+							std::list<std::size_t>& Sub_domains)
 {
   // 
   const std::size_t num_vertices = mesh_->num_vertices();

@@ -56,7 +56,7 @@
 // [sig_{nu}] = S/m
 //
 #define K_MAPPING 0.844 // 10^{9} S.s . m^{-3}
-#define D_EPS     0.124 // 10^{-9} m^{2} ; s^{-1}
+#define D_EPS     0.124 // 10^{-9} m^{2} . s^{-1}
 //
 // We give a comprehensive type name
 //
@@ -630,6 +630,9 @@ DHct::make_conductivity( const C3t3& Mesh )
 	  cell_pmap.subdomain_index( cit ) != OUTSIDE_SCALP       &&
 	  cell_pmap.subdomain_index( cit ) != OUTSIDE_SKULL       &&
 	  cell_pmap.subdomain_index( cit ) != CEREBROSPINAL_FLUID &&
+	  cell_pmap.subdomain_index( cit ) != AIR_IN_SKULL        &&
+	  cell_pmap.subdomain_index( cit ) != SPONGIOSA_SKULL     &&
+	  cell_pmap.subdomain_index( cit ) != EYE                 &&
 	  cell_pmap.subdomain_index( cit ) != ELECTRODE )
 	{
 	  //
@@ -727,18 +730,46 @@ DHct::make_conductivity( const C3t3& Mesh )
 	  Cell_conductivity 
 	    cell_parameters ( cell_id, cell_subdomain,
 			      cell_vertices[4](0),cell_vertices[4](1),cell_vertices[4](2),/* centroid */
-			      0.0132,/* l1 */
+			      0.00552,/* l1 */
 			      1., 0., 0., /* eigenvec V1 */
-			      0.0132,/* l2 */
+			      0.00552,/* l2 */
 			      0., 1., 0., /* eigenvec V2 */
-			      0.0132,/* l3 */
+			      0.00552,/* l3 */
 			      0., 0., 1., /* eigenvec V3 */
-			      0.0132, /*C00*/
+			      0.00552, /*C00*/
 			      0.00,   /*C01*/
 			      0.00,   /*C02*/
-			      0.0132, /*C11*/
+			      0.00552, /*C11*/
 			      0.00,   /*C12*/
-			      0.0132  /*C22*/ );
+			      0.00552  /*C22*/ );
+	  
+	  //
+	  // Add link to the list
+	  list_cell_conductivity_.push_back( std::move(cell_parameters) );
+	} // and of scalp and skull //
+
+      /////////////////////
+      // Skull spongiosa //
+      /////////////////////
+      else if ( cell_pmap.subdomain_index( cit ) == SPONGIOSA_SKULL )
+	{
+	  //
+	  //
+	  Cell_conductivity 
+	    cell_parameters ( cell_id, cell_subdomain,
+			      cell_vertices[4](0),cell_vertices[4](1),cell_vertices[4](2),/* centroid */
+			      0.01457,/* l1 */
+			      1., 0., 0., /* eigenvec V1 */
+			      0.01457,/* l2 */
+			      0., 1., 0., /* eigenvec V2 */
+			      0.01457,/* l3 */
+			      0., 0., 1., /* eigenvec V3 */
+			      0.01457, /*C00*/
+			      0.00,   /*C01*/
+			      0.00,   /*C02*/
+			      0.01457, /*C11*/
+			      0.00,   /*C12*/
+			      0.01457  /*C22*/ );
 	  
 	  //
 	  // Add link to the list
@@ -772,6 +803,64 @@ DHct::make_conductivity( const C3t3& Mesh )
 	  // Add link to the list
 	  list_cell_conductivity_.push_back( std::move(cell_parameters) );
 	} // and of scalp  
+
+      //////////////////////
+      // Air in the skull //
+      //////////////////////
+      else if ( cell_pmap.subdomain_index( cit ) == AIR_IN_SKULL )
+	{
+	  //
+	  //
+	  Cell_conductivity 
+	    cell_parameters ( cell_id, cell_subdomain,
+			      cell_vertices[4](0),cell_vertices[4](1),cell_vertices[4](2),/* centroid */
+			      2.5e-14, /* l1 */
+			      1., 0., 0., /* eigenvec V1 */
+			      2.5e-14, /* l2 */
+			      0., 1., 0., /* eigenvec V2 */
+			      2.5e-14, /* l3 */
+			      0., 0., 1., /* eigenvec V3 */
+			      2.5e-14,/*C00*/
+			      0.00,   /*C01*/
+			      0.00,   /*C02*/
+			      2.5e-14,/*C11*/
+			      0.00,   /*C12*/
+			      2.5e-14 /*C22*/ );
+	  
+	  //
+	  // Add link to the list
+	  list_cell_conductivity_.push_back( std::move(cell_parameters) );
+	} // Electrode
+
+      /////////
+      // EYE //
+      /////////
+      else if ( cell_pmap.subdomain_index( cit ) == EYE )
+	{
+	  //
+	  // http://onlinelibrary.wiley.com/doi/10.1002/cnm.2483/pdf
+	  // resistance 300 Ohm.cm -> 0.33 S/m -> 0.25 S/m
+	  // Wolter 1.5 S/m
+	  Cell_conductivity 
+	    cell_parameters ( cell_id, cell_subdomain,
+			      cell_vertices[4](0),cell_vertices[4](1),cell_vertices[4](2),/* centroid */
+			      0.25,/* l1 */
+			      1., 0., 0., /* eigenvec V1 */
+			      0.25,/* l2 */
+			      0., 1., 0., /* eigenvec V2 */
+			      0.25,/* l3 */
+			      0., 0., 1., /* eigenvec V3 */
+			      0.25,  /*C00*/
+			      0.00, /*C01*/
+			      0.00, /*C02*/
+			      0.25,  /*C11*/
+			      0.00, /*C12*/
+			      0.25   /*C22*/ );
+	  
+	  //
+	  // Add link to the list
+	  list_cell_conductivity_.push_back( std::move(cell_parameters) );
+	} // Electrode
 
       ///////////////
       // Electrode //

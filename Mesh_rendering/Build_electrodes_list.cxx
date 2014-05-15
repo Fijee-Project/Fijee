@@ -99,9 +99,11 @@ DBel::Build_electrodes_list()
 	    //
 	    phi += PI/2.;
 
-	    //
+	    // [mm] to [m]
 	    electrodes_.push_back( Domains::Electrode( index, label, 
-						       position_x, position_y, position_z,
+						       position_x, 
+						       position_y, 
+						       position_z,
 						       radius, phi, theta ) );
 	  }
 	//
@@ -298,21 +300,26 @@ DBel::Build_stream( std::ofstream& stream )
   //
   //
   stream << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-	 << "<fijee xmlns:fijee=\"http://www.fenicsproject.org\">\n";
+	 << "<fijee xmlns:fijee=\"https://github.com/Fijee-Project/Fijee\">\n";
   
   //
   //
-  stream << "  <electrodes size=\"" << electrodes_.size() << "\">\n";
+  stream << "  <setup size=\"1\">\n";
+
+  //
+  //
+  stream << "    <electrodes index=\"0\" time=\"0.001\" size=\"" << electrodes_.size() << "\">\n";
   
   //
   //
   int index = 0;
   for ( auto electrode : electrodes_ )
-    stream << "    <electrode index=\"" << index++ << "\" " << electrode << "/>\n";
+    stream << "      <electrode index=\"" << index++ << "\" " << electrode << "/>\n";
   
   //
   //
-  stream << "  </electrodes>\n" 
+  stream << "    </electrodes>\n" 
+	 << "  </setup>\n" 
 	 << "</fijee>\n"; 
 }
 //

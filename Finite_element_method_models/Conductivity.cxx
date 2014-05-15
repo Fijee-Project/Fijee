@@ -39,6 +39,7 @@ Solver::Tensor_conductivity::Tensor_conductivity( std::shared_ptr< const Mesh > 
 void 
 Solver::Tensor_conductivity::eval(Array<double>& values, const Array<double>& x, const ufc::cell& cell) const
 {
+  //
   //  const uint D = cell.topological_dimension;
   const uint cell_index = cell.index;
   // values should not be zero
@@ -57,6 +58,43 @@ Solver::Tensor_conductivity::eval(Array<double>& values, const Array<double>& x,
 //
 //
 //
+void 
+Solver::Tensor_conductivity::conductivity_update( const std::shared_ptr< MeshFunction<std::size_t> > Domains,
+						  const Eigen::Vector3d& Simplex )
+{
+  //
+  // 
+  for ( MeshEntityIterator cell( *(Domains->mesh()), Domains->dim() );
+	!cell.end(); ++cell )
+    {
+      //
+      // Swhitch on sub-domains
+      switch ( (*Domains)[*cell] )
+	{
+	case SPONGIOSA_SKULL:
+	  {
+	    //	    std::cout << "spongiosa: " << C00_[cell->index()] << std::endl;
+	    C00_[cell->index()] = C00_[cell->index()] = C00_[cell->index()] = Simplex(1);
+	    break;
+	  }
+	case OUTSIDE_SKULL/* compacta skull */:
+	  {
+	    // 	    std::cout << "compacta: " << C00_[cell->index()] << std::endl;
+	    C00_[cell->index()] = C00_[cell->index()] = C00_[cell->index()] = Simplex(2);
+	    break;
+	  }
+	case OUTSIDE_SCALP/* skin */:
+	  {
+	    // 	    std::cout << "skin: " << C00_[cell->index()] << std::endl;
+	    C00_[cell->index()] = C00_[cell->index()] = C00_[cell->index()] = Simplex(0);
+	    break;
+	  }
+	}
+    }
+}
+//
+//
+//
 /* Sigma_isotrope */
 //
 //
@@ -69,10 +107,6 @@ Solver::Sigma_isotrope::eval(Array<double>& values, const Array<double>& x) cons
   values[1] = 0.0;    values[4] = sigma_; values[7] = 0.0;
   values[2] = 0.0;    values[5] = 0.0;    values[8] = sigma_;
 }
-//
-//
-//
-/* Sigma_skull */
 //
 //
 //

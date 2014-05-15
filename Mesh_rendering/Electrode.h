@@ -1,5 +1,5 @@
-#ifndef ELECTRODE_H_
-#define ELECTRODE_H_
+#ifndef ELECTRODE_H
+#define ELECTRODE_H
 //http://franckh.developpez.com/tutoriels/outils/doxygen/
 /*!
  * \file Electrode.h

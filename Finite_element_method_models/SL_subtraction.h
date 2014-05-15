@@ -20,11 +20,9 @@
 // UCSF project
 //
 #include "Physics.h"
-#include "Source.h"
 #include "Boundaries.h"
-#include "Sub_domaines.h"
+#include "Source.h"
 #include "PDE_solver_parameters.h"
-//#include "Utils/Thread_dispatching.h"
 //
 //
 //
@@ -55,8 +53,6 @@ namespace Solver
     std::list< Solver::Phi > dipoles_list_;
     //! Function space
     std::shared_ptr< SLS_model::FunctionSpace > V_;
-    //! Boundarie conditions
-    std::shared_ptr<  FacetFunction< size_t > > boundaries_;
     
   private:
     std::mutex critical_zone_;
@@ -81,7 +77,7 @@ namespace Solver
      *
      *  Destructor of the class SL_subtraction
      */
-    ~SL_subtraction(){/* Do nothing */};
+    virtual ~SL_subtraction(){/* Do nothing */};
     /*!
      *  \brief Operator =
      *
@@ -95,13 +91,18 @@ namespace Solver
      *  Operator () of the class SL_subtraction
      *
      */
-    void operator () ();
+    virtual void operator () ();
     
   public:
     /*!
+     *  \brief Get number of physical events
+     *
+     *  This method return the number of parallel process for the Physics solver. 
+     *  In the case of source localization the number of events is the number of dipoles simulated.
+     *
      */
-    inline
-      int get_number_of_physical_event(){return number_dipoles_; };
+    virtual inline
+      int get_number_of_physical_events(){return number_dipoles_;};
 
 
   private:

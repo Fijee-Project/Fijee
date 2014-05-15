@@ -23,9 +23,9 @@ using namespace dolfin;
 namespace Solver
 {
   /*! \class Intensity
-   * \brief classe representing whatever
+   * \brief classe representing an electrode intensity
    *
-   *  This class is an example of class I will have to use
+   *  This class implements the geometrical caracteristics of an electrode: shape, size, ... Intensity also implements the current injection and the measured/simulated potential.
    */
   class Intensity// : public Expression
   {
@@ -39,8 +39,10 @@ namespace Solver
     int index_;
     //! Electrode position
     Point r0_values_;  
-    //! Electrode position projected on the boundary
+    //! Electrode position projected on the closest boundary vertex
     Point r0_projection_;  
+    //! Index of the electrode position projected vertex
+    std::size_t r0_projection_index_;
     //! Electrode direction vector
     Point e_values_;  
     //! Electrode intensity [I_] = A
@@ -66,6 +68,16 @@ namespace Solver
 
     mutable std::set<Point> points_Dirac_;
     mutable std::list<std::size_t> facet_reservoir_;
+
+    //
+    // Electrode electrical potential calculation
+    // 
+    //! Type of potential return true if the potential evaluation is punctual, false otherwise.
+    bool type_of_potential_;
+    //! Electrical potential list
+    std::list< double > electrical_potential_list_;
+    //! Electrical potential
+    double V_;
    
 
   public:
@@ -114,6 +126,16 @@ namespace Solver
     //
     int    get_index_()const{return index_;};
     double get_I_()const{return I_;};
+    double get_V_()const
+    {
+      if( type_of_potential_ ) return V_;
+      else return get_electrical_potential();
+    };
+    void   set_V_( double V )
+    {
+      type_of_potential_ = true; // Punctual potential
+      V_ = V;
+    };
     //
     Point  get_r0_values_()const{return r0_values_;};
     double get_X_()const{return r0_values_.x();};
@@ -121,6 +143,7 @@ namespace Solver
     double get_Z_()const{return r0_values_.z();};
     //
     Point  get_r0_projection_()const{return r0_projection_;};
+    std::size_t get_r0_projection_index_()const{return r0_projection_index_;};
     double get_projection_X_()const{return  r0_projection_.x();};
     double get_projection_Y_()const{return  r0_projection_.y();};
     double get_projection_Z_()const{return  r0_projection_.z();};
@@ -138,6 +161,9 @@ namespace Solver
     //
     double get_surface_()const{return surface_;};
     double get_radius_()const{return radius_;};
+    // 
+    void   clear_electrical_potential_list(){electrical_potential_list_.clear();};
+    double get_electrical_potential() const;
     
     //
     // Geometry propterties
@@ -155,6 +181,17 @@ namespace Solver
      *
      */
     double eval( const Point& , const ufc::cell& )const;
+    /*!
+     *  \brief Add potential
+     *
+     *  This method create the electrical potential mapping at the electrode contact surface.
+     *
+     */
+    double add_potential_value( const double U )
+    {
+      type_of_potential_ = false; // Surface potential
+      electrical_potential_list_.push_back( U );
+    };
   };
   /*!
    *  \brief Dump values for Intensity

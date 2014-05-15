@@ -6,8 +6,9 @@
 #include <algorithm>
 //#include <iterator>
 //
-// UCSF
+// UCSF project
 //
+#include "Utils/Fijee_environment.h"
 #include "Intensity.h"
 //
 //
@@ -28,14 +29,20 @@ using namespace dolfin;
 namespace Solver
 {
   /*! \class Electrodes_injection
-   * \brief classe representing whatever
+   * \brief classe representing a set of electrodes
    *
-   *  This class is an example of class I will have to use
+   *  This class implements a set of electrode. Typically, it is associated with a type of electroencephalogram.
    */
   class Electrodes_injection : public Expression
   {
     //! Electrodes list
-    std::map< std::string, Solver::Intensity > electrodes_map_;
+    std::map< /* label */ std::string, 
+      /* electrode caracteristics */ Solver::Intensity > electrodes_map_;
+    //! Electrodes list
+    std::map< /* label */ std::string, 
+      /* electrical potential */ double > potential_measured_map_;
+    //! Time injection/measure
+    double time_;
 
   public:
     /*!
@@ -45,6 +52,13 @@ namespace Solver
      *
      */
   Electrodes_injection();
+    /*!
+     *  \brief Default Constructor
+     *
+     *  Constructor of the class Electrodes_injection
+     *
+     */
+  Electrodes_injection(double);
     /*!
      *  \brief Copy Constructor
      *
@@ -69,6 +83,14 @@ namespace Solver
      */
     Electrodes_injection& operator =( const Electrodes_injection& );
 
+  public:
+    /*!
+     *  \brief value_dimension
+     *
+     *  This method return the dimension
+     *
+     */
+    std::map< std::string, Solver::Intensity > get_electrodes_map_()const{return electrodes_map_;};
 
   private:
     /*!
@@ -104,6 +126,15 @@ namespace Solver
 
   public:
     /*!
+     *  \brief Get the sampling time
+     *
+     *  This method return the time_ member.
+     *
+     */
+    ucsf_get_macro( time_, double );
+
+  public:
+    /*!
      *  \brief add_electrode
      *
      *  This method add a new electrode in the current injection system. 
@@ -113,6 +144,14 @@ namespace Solver
 			Point, Point,
 			double, double, double, double  );
     /*!
+     *  \brief add_measured_potential
+     *
+     *  This method add the measured potential at each electrode. 
+     *  This functionnality is used for the conductivity estimation.
+     *
+     */
+    void add_measured_potential( std::string, double, double  );
+    /*!
      *  \brief inside
      *
      *  This method check if a point is inside an electrode
@@ -120,7 +159,21 @@ namespace Solver
      */
     bool inside( const Point&  )const;
     /*!
-     *  \brief inside
+     *  \brief Add potential value
+     *
+     *  This method check if a point is inside an electrode and add the potential value to the electrode list of potential
+     *
+     */
+    bool add_potential_value( const Point&, const double );
+    /*!
+     *  \brief 
+     *
+     *  This method Add potential value
+     *
+     */
+    bool add_potential_value( const std::string, const double );
+    /*!
+     *  \brief Inside electrode probe
      *
      *  This method check if a point is inside an electrode
      *
@@ -133,10 +186,34 @@ namespace Solver
      *
      */
     void set_boundary_cells( const std::map< std::string, std::map< std::size_t, std::list< MeshEntity  >  >  >& );
-    /*!
-     *  \brief 
+     /*!
+     *  \brief Punctual potential evaluation
      *
-     *  This method record the cell index per probes.
+     *  This method 
+     *
+     *  \param U: function solution of the Partial Differential Equation.
+     *  \param Mesh: Tetrahedrization mesh
+     *
+     */
+    void punctual_potential_evaluation( const dolfin::Function&, 
+					const std::shared_ptr< const Mesh >  );
+     /*!
+     *  \brief Punctual potential evaluation
+     *
+     *  This method 
+     *
+     *  \param U: function solution of the Partial Differential Equation.
+     *  \param Mesh: Tetrahedrization mesh
+     *
+     */
+    void surface_potential_evaluation( const dolfin::Function&, 
+				       const std::shared_ptr< const Mesh >  );
+   /*!
+     *  \brief Information
+     *
+     *  This method retrieves infomation for a specific electrode.
+     *
+     *  \param label: labe of the specific electrode
      *
      */
     const Solver::Intensity& information( const std::string label ) const
@@ -148,8 +225,21 @@ namespace Solver
 	if( electrode !=  electrodes_map_.end() )
 	  return electrode->second;
 	else
-	  abort();
+	  {
+	    std::cerr << "Error: electrode " 
+		      << label 
+		      << " does not belong the ste of electrodes!" << std::endl;
+	    abort();
+	  }
       };
+      /*!
+     *  \brief Sum of squares
+     *
+     *  This method process the sum of squares formula between the measured potential and the simulated potential:
+     * S(\beta) = (U - \phi(\beta))^{T} \Sigma^{-1} (U - \phi(\beta))
+     *
+     */
+    double sum_of_squares() const;
   };
   /*!
    *  \brief Dump values for Electrodes_injection

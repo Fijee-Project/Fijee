@@ -3,6 +3,10 @@
 #include <dolfin.h>
 #include <vector>
 //
+// Eigen
+//
+#include <Eigen/Dense>
+//
 // UCSF
 //
 #include "PDE_solver_parameters.h"
@@ -46,6 +50,13 @@ namespace Solver
     MeshFunction<double> C12_;
     //! C22 conductivity tensor elements
     MeshFunction<double> C22_;
+
+    //! Skull spongiosa isotropic conductivity
+    double sigma_skull_spongiosa_;
+    //! Skull compacta isotropic conductivity
+    double sigma_skull_compacta_;
+    //! Skin isotropic conductivity
+    double sigma_skin_;
 
 
   public:
@@ -93,6 +104,16 @@ namespace Solver
       {
 	return 3;
       }
+
+  public:
+     /*!
+     *  \brief conductivity_update
+     *
+     *  This method update the conductivity in the skin/skull electrical conductivity estimation 
+     *
+     */
+    void conductivity_update( const std::shared_ptr< MeshFunction< std::size_t > >,
+			      const Eigen::Vector3d& );
   };
   
   /*! \class Sigma_isotrope

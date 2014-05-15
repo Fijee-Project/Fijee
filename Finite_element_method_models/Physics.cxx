@@ -9,7 +9,7 @@ Solver::Physics::Physics()
 {
   //
   // Load the mesh
-  std::cout << "Load the mesh" << std::endl;
+  std::cout << "Load mesh file" << std::endl;
   //
   std::string mesh_xml = (SDEsp::get_instance())->get_files_path_output_();
   mesh_xml += "mesh.xml";
@@ -18,10 +18,9 @@ Solver::Physics::Physics()
   //
   info( *mesh_ );
 
-
   //
   // Load Sub_domains
-  std::cout << "Load Sub_domains" << std::endl;
+  std::cout << "Load Sub_domains file" << std::endl;
   //
   std::string subdomains_xml = (SDEsp::get_instance())->get_files_path_output_();
   subdomains_xml += "mesh_subdomains.xml";
@@ -33,11 +32,91 @@ Solver::Physics::Physics()
   File domains_file( domains_file_name.c_str() );
   domains_file << *domains_;
 
-
   //
   // Load the conductivity. Anisotrope conductivity
-  std::cout << "Load the conductivity" << std::endl;
+  std::cout << "Load conductivity files" << std::endl;
   sigma_.reset( new Solver::Tensor_conductivity(mesh_) );
+
+  //
+  // Read the electrodes xml file
+  electrodes_.reset( new Electrodes_setup() );
+
+  //
+  // Boundary marking
+  //
+  
+  //
+  // Boundary conditions
+  std::cout << "Load boundaries" << std::endl;
+
+  //
+  // Load the facets collection
+  std::cout << "Load facets collection" << std::endl;
+  std::string facets_collection_xml = (SDEsp::get_instance())->get_files_path_output_();
+  facets_collection_xml += "mesh_facets_subdomains.xml";
+  //
+  mesh_facets_collection_.reset( new MeshValueCollection< std::size_t > (*mesh_, facets_collection_xml) );
+
+  //
+  // MeshDataCollection methode
+  // Recreate the connectivity
+  // Get mesh connectivity D --> d
+  const std::size_t d = mesh_facets_collection_->dim();
+  const std::size_t D = mesh_->topology().dim();
+  dolfin_assert(d == 2);
+  dolfin_assert(D == 3);
+
+  //
+  // Generate connectivity if it does not excist
+  mesh_->init(D, d);
+  const MeshConnectivity& connectivity = mesh_->topology()(D, d);
+  dolfin_assert(!connectivity.empty());
+  
+  //
+  // Map the facet index with cell index
+  std::map< std::size_t, std::size_t > map_index_cell;
+  typename std::map<std::pair<std::size_t, std::size_t>, std::size_t>::const_iterator it;
+  const std::map<std::pair<std::size_t, std::size_t>, std::size_t>& values
+    = mesh_facets_collection_->values();
+  // Iterate over all values
+  for ( it = values.begin() ; it != values.end() ; ++it )
+    {
+      // Get value collection entry data
+      const std::size_t cell_index = it->first.first;
+      const std::size_t local_entity = it->first.second;
+      const std::size_t value = it->second;
+
+      std::size_t entity_index = 0;
+      // Get global (local to to process) entity index
+      //      dolfin_assert(cell_index < mesh_->num_cells());
+      map_index_cell[connectivity(cell_index)[local_entity]] = cell_index;
+ 
+      // Set value for entity
+      //  dolfin_assert(entity_index < _size);
+    }
+
+  
+  //
+  // Define boundary condition
+  boundaries_.reset( new MeshFunction< std::size_t >(mesh_) );
+  *boundaries_ = *mesh_facets_collection_;
+  //
+  boundaries_->rename( mesh_facets_collection_->name(),
+		       mesh_facets_collection_->label() );
+  //
+  mesh_facets_collection_.reset();
+
+  //
+  // Boundary definition
+  Electrodes_surface electrodes_101( electrodes_, boundaries_, map_index_cell );
+  //
+  electrodes_101.mark( *boundaries_, 101 );
+  electrodes_101.surface_vertices_per_electrodes( 101 );
+  // write boundaries
+  std::string boundaries_file_name = (SDEsp::get_instance())->get_files_path_result_();
+  boundaries_file_name            += std::string("boundaries.pvd");
+  File boundaries_file( boundaries_file_name.c_str() );
+  boundaries_file << *boundaries_;
 }
 //
 //

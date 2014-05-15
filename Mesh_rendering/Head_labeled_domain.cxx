@@ -4,8 +4,9 @@
 //
 // UCSF
 //
-#include "Head_labeled_domain.h"
 #include "Utils/enum.h"
+#include "Head_labeled_domain.h"
+#include "CGAL_image_filtering.h"
 #include "Labeled_domain.h"
 #include "VTK_implicite_domain.h"
 #include "Access_parameters.h"
@@ -31,6 +32,7 @@ typedef CGAL::Point_with_normal_3<Kernel> Point_with_normal;
 typedef CGAL::Surface_mesh_default_triangulation_3 Triangle_surface;
 typedef Triangle_surface::Geom_traits GT;
 typedef CGAL::Mesh_3::Image_to_labeled_function_wrapper<CGAL::Image_3, Kernel > Image_wrapper;
+typedef Domains::CGAL_image_filtering<CGAL::Image_3, Kernel > Image_filter;
 //
 // We give a comprehensive type name
 //
@@ -232,6 +234,8 @@ Domains_Head_labeled::model_segmentation()
     outside_skull( (DAp::get_instance())->get_outer_skull_surface_() );
   Labeled_domain< VTK_implicite_domain, GT::Point_3, std::list< Point_vector > > 
     inside_skull( (DAp::get_instance())->get_inner_skull_surface_() );
+  Labeled_domain< VTK_implicite_domain, GT::Point_3, std::list< Point_vector > > 
+    inside_brain( (DAp::get_instance())->get_inner_brain_surface_() );
   //  
   //  outside_scalp( data_position_ );
   //  outside_skull( data_position_ );
@@ -239,9 +243,11 @@ Domains_Head_labeled::model_segmentation()
   std::thread outside_scalp_thread(std::ref(outside_scalp), data_position_);
   std::thread outside_skull_thread(std::ref(outside_skull), data_position_);
   std::thread inside_skull_thread (std::ref(inside_skull), data_position_);
+  std::thread inside_brain_thread (std::ref(inside_brain), data_position_);
   outside_scalp_thread.join();
   outside_skull_thread.join();
   inside_skull_thread.join();
+  inside_brain_thread.join();
 
   //
   // Cortical segmentation
@@ -292,19 +298,79 @@ Domains_Head_labeled::model_segmentation()
   Image_wrapper subcortical_brain ( aseg );
 
   //
+  // SPM volumes
+  //
+
+  // Skull
+  CGAL::Image_3 SPM_bones;
+//  SPM_bones.read( "/home/cobigo/Dropbox/Protocol-test-3/sc4T1-1.5.hdr" );
+  SPM_bones.read( (DAp::get_instance())->get_sc4T1_() );
+  Image_filter spm_bones( SPM_bones, data_position_ );
+  spm_bones.init( 5 /* % of outliers to remove */,
+		  85 /* % of the signal */);
+  //  spm_bones.holes_detection();
+  std::thread bones_thread( std::ref(spm_bones) );
+
+
+  // Skin
+  CGAL::Image_3 SPM_skin;
+//  SPM_skin.read( "/home/cobigo/Dropbox/Protocol-test-3/sc5T1-3.0.hdr" );
+  SPM_skin.read( (DAp::get_instance())->get_sc5T1_() );
+  Image_filter  spm_skin( SPM_skin, data_position_ );
+  spm_skin.init( 10 /* % of outliers to remove */,
+		 80 /* % of the signal */);
+
+  // Air
+  CGAL::Image_3 SPM_air;
+//  SPM_air.read( "/home/cobigo/Dropbox/Protocol-test-3/c6T1.hdr" );
+  SPM_air.read( (DAp::get_instance())->get_sc6T1_() );
+  //  Image_wrapper spm_air( SPM_air );
+  Image_filter  air( SPM_air, data_position_ );
+  air.init( 10 /* % of outliers to remove */,
+	    70 /* % of the signal */);
+
+  // CSF
+  CGAL::Image_3 SPM_csf;
+//  SPM_csf.read( "/home/cobigo/Dropbox/Protocol-test-3/sc3T1-2.0.hdr" );
+  SPM_csf.read( (DAp::get_instance())->get_sc3T1_() );
+  Image_filter spm_csf( SPM_csf, data_position_ );
+  spm_csf.init( 10 /* % of outliers to remove */,
+		70 /* % of the signal */);
+  spm_csf.eyes_detection();
+
+  //
+  // 
+  bones_thread.join();
+  
+
+  //
   // main loop building inrimage data
+  // 
+
 #ifdef DEBUG_UCSF
   timerLog->MarkEvent("building inrimage data");
 #endif
   Eigen::Matrix< float, 3, 1 > position;
   // speed-up
-  bool is_in_CSF = false;
+  bool is_in_Scalp = false;
+  bool is_in_Skull = false;
+  bool is_in_Bone  = false;
+  bool is_in_CSF   = false;
   //
   // create a data_label_tmp private in the different
   for ( int k = 0; k < 256; k++ )
     for ( int j = 0; j < 256; j++ )
       for ( int i = 0; i < 256; i++ )
 	{
+	  //
+	  // 
+	  is_in_Scalp = false;
+	  is_in_Skull = false;
+	  is_in_Bone  = false;
+	  is_in_CSF   = false;
+
+	  // 
+	  // 
  	  int idx = i + j*256 + k*256*256;
 	  //
 	  position <<
@@ -329,26 +395,78 @@ Domains_Head_labeled::model_segmentation()
 	    data_label_[ idx ] = ELECTRODE; 
 	  
 	  //
-	  // Brain segmentation
+	  // Head segmentation
 	  //
 	  
 	  //
-	  // Scalp and skull
-	  if( outside_scalp.inside_domain( cell_center ) ) 
-	    data_label_[ idx ] = OUTSIDE_SCALP; 
-	  //
-	  if( outside_skull.inside_domain( cell_center ) ) 
-	    data_label_[ idx ] = OUTSIDE_SKULL; 
-	  //
-	  if( inside_skull.inside_domain( cell_center ) ||
-	      subcortical_brain(cell_center_aseg) == CSF )
+	  // Scalp
+	  if( outside_scalp.inside_domain( cell_center ) )
 	    {
-	      data_label_[ idx ] = CEREBROSPINAL_FLUID; 
-	      is_in_CSF = true;
+	      data_label_[ idx ] = OUTSIDE_SCALP; 
+	      is_in_Scalp = true;
 	    }
-	  else
-	    is_in_CSF = false;
+	  //
+	  if (!is_in_Scalp && spm_skin.inside(cell_center_aseg) )
+	    {
+	      data_label_[ idx ] = OUTSIDE_SCALP;
+	      is_in_Scalp = true;
+	    }
+	  //
+	  if( outside_skull.inside_domain( cell_center ) )
+	    {
+	      is_in_Skull = true;
+	    }
 
+	  // 
+	  // Skull compacta and songiosa
+	  if ( is_in_Skull )
+	    {
+	      if( spm_bones.inside(cell_center_aseg) )
+		{
+		  data_label_[ idx ] = OUTSIDE_SKULL;
+		  is_in_Bone = true;
+		}
+	      else if( spm_bones.in_hole(cell_center_aseg) )
+		{
+		  data_label_[ idx ] = SPONGIOSA_SKULL; 
+		  is_in_Bone = true;
+		}
+	    }
+
+	  //
+	  // CSF
+	  if( is_in_Scalp )
+	    {
+	      if( (inside_brain.inside_domain(cell_center) && !is_in_Bone ) || 
+		  spm_csf.inside(cell_center_aseg) )
+		{
+		  data_label_[ idx ] = CEREBROSPINAL_FLUID; 
+		  is_in_CSF = true;
+		}
+	      else
+		is_in_CSF = false;
+	    }
+
+//AIR	  // 
+//AIR	  // Air
+//AIR	  if( is_in_Skull && !is_in_Bone  )
+//AIR	    if( air.inside(cell_center_aseg) )
+//AIR	      {
+//AIR		data_label_[ idx ] = AIR_IN_SKULL; 
+//AIR	      }
+
+	  //
+	  // Eyes
+	  if ( is_in_Scalp && !is_in_CSF  )
+	    if ( spm_csf.in_hole(cell_center_aseg) ) 
+	      {
+		data_label_[ idx ] = EYE;
+	      }
+
+	  //
+	  // Brain segmentation
+	  //
+	  
 	  if ( is_in_CSF ) 
 	    {
 	      //

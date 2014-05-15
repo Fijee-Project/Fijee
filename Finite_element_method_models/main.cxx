@@ -7,6 +7,8 @@
 #include "SL_subtraction.h"
 #include "SL_direct.h"
 #include "tCS_tDCS.h"
+#include "tCS_tACS.h"
+#include "tCS_tDCS_local_conductivity.h"
 #include "Model_solver.h"
 
 int main()
@@ -21,13 +23,15 @@ int main()
   //  - Source localization
   //    - Solver::SL_subtraction
   //    - Solver::SL_direct
-  //  - transcranial current stimulation
+  //  - Transcranial current stimulation
   //    - Solver::tCS_tDCS
   //    - Solver::tCS_tACS
+  //  - Local conductivity estimation
+  //    - Solver::tCS_tDCS_local_conductivity
   //
   // export OMP_NUM_THREADS=2
-  Solver::Model_solver< /* physical model */ Solver::SL_subtraction,
-			/*solver_parameters->get_number_of_threads_()*/ 1 >  model;
+  Solver::Model_solver< /* physical model */ Solver::tCS_tDCS_local_conductivity,
+			/*solver_parameters->get_number_of_threads_()*/ 2 >  model;
 
   //
   //

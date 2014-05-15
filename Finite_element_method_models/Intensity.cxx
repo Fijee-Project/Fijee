@@ -3,14 +3,15 @@
 //
 //
 Solver::Intensity::Intensity():
-  electric_variable_(""), index_( 0 ), I_( 0. ), surface_(0.), radius_(0.),
-  label_("no_name")
+  electric_variable_(""), index_( 0 ), I_( 0. ), V_( 0. ), surface_(0.), radius_(0.),
+  label_("no_name"), type_of_potential_(true)
 {
   //
   //
-  r0_values_     = Point();
-  r0_projection_ = Point();
-  e_values_      = Point();
+  r0_values_           = Point();
+  r0_projection_       = Point();
+  r0_projection_index_ = -1;
+  e_values_            = Point();
   //
   impedance_ = std::complex<double>(0.,0.);
 
@@ -21,14 +22,18 @@ Solver::Intensity::Intensity():
 //
 Solver::Intensity::Intensity(const Intensity& that): 
   electric_variable_(that.electric_variable_), index_(that.index_), 
-  I_(that.I_), label_(that.label_),
-  r0_values_(that.r0_values_), r0_projection_(that.r0_projection_), e_values_(that.e_values_),
-  impedance_(that.impedance_), surface_(that.surface_), radius_(that.radius_)
+  I_(that.I_),  V_(that.V_), label_(that.label_),
+  r0_values_(that.r0_values_), r0_projection_(that.r0_projection_), 
+  r0_projection_index_(that.r0_projection_index_), e_values_(that.e_values_),
+  impedance_(that.impedance_), surface_(that.surface_), radius_(that.radius_),
+  type_of_potential_(that.type_of_potential_)
 {
   not_yet_ = true;
   //
   boundary_cells_    = that.boundary_cells_;
   boundary_vertices_ = that.boundary_vertices_;
+  //
+  electrical_potential_list_ = that.electrical_potential_list_;
 }
 //
 //
@@ -38,10 +43,15 @@ Solver::Intensity::Intensity( std::string Electric_variable, int Index,
 			      Point X, Point V,double Re_z_l, double Im_z_l,
 			      double Surface, double Radius): 
   electric_variable_(Electric_variable), index_( Index ), label_( Label ), I_( Intensity ), 
-  r0_values_(X), e_values_(V), impedance_( (Re_z_l,Im_z_l) ), surface_(Surface), radius_(Radius) 
+  r0_values_(X), e_values_(V), impedance_( (Re_z_l,Im_z_l) ), surface_(Surface), radius_(Radius),
+  type_of_potential_(true)
 {
-  r0_projection_ = Point();
+  r0_projection_       = Point();
+  r0_projection_index_ = -1;
   not_yet_ = true;
+
+  // Electrical potential
+  V_ = 0.;
 }
 //
 //
@@ -56,10 +66,10 @@ Solver::Intensity::eval( const Point& x, const ufc::cell& cell) const
   if( I_ != 0 )
     {
       //
-      if ( r0_projection_.distance(x) < 1.e-3 )
+      if ( r0_projection_.distance(x) < 1.e-6 )
 	{
 	  std::cout << label_ << " position: " << x << std::endl;
-	  return I_ ;
+	  return I_ / surface_;
 	}
       else
 	return 0.;
@@ -74,7 +84,7 @@ Solver::Intensity::eval( const Point& x, const ufc::cell& cell) const
 //    {
 //      //
 //      auto boundary_cells_it = boundary_cells_.find( cell.index );
-//      // We check if the vertex belong to a cell which has, at least, one facet on boundary
+//      // We check if the vertex belongs to a cell which has, at least, one facet on boundary
 //      if ( boundary_cells_it != boundary_cells_.end() )
 //	{ 
 //	  // we check if the vertex belong to a boundary facet for the list
@@ -151,12 +161,14 @@ Solver::Intensity::operator =( const Intensity& that )
   electric_variable_ = that.electric_variable_;
   index_  = that.index_;
   I_      = that.I_;
+  V_      = that.V_;
   label_  = that.label_;
   //
   //
-  r0_values_     = that.get_r0_values_();
-  r0_projection_ = that.get_r0_projection_();
-  e_values_      = that.get_e_values_();
+  r0_values_           = that.get_r0_values_();
+  r0_projection_       = that.get_r0_projection_();
+  r0_projection_index_ = that.get_r0_projection_index_();
+  e_values_            = that.get_e_values_();
   //
   impedance_ = that.get_impedance_();
   //
@@ -166,7 +178,9 @@ Solver::Intensity::operator =( const Intensity& that )
   boundary_cells_    = that.boundary_cells_;
   boundary_vertices_ = that.boundary_vertices_;
   not_yet_ = that.not_yet_;
-
+  // 
+  electrical_potential_list_ = that.electrical_potential_list_;
+  type_of_potential_         = that.type_of_potential_;
   
   //
   //
@@ -191,12 +205,35 @@ Solver::Intensity::set_boundary_cells_( const std::map< std::size_t, std::list< 
 	  //
 	  //
 	  if( r0_values_.distance ( v->point() ) < r0_values_.distance ( r0_projection_ ) )
-	    r0_projection_ = v->point();
+	    {
+	      r0_projection_       = v->point();
+	      r0_projection_index_ = v->index();
+	    }
 
 	  //
 	  //
 	  boundary_vertices_.insert( v->index() );
 	}
+}
+//
+//
+//
+double
+Solver::Intensity::get_electrical_potential() const
+{
+  if ( electrical_potential_list_.size() != 0 )
+    {
+      double cumul_potential = 0.;
+      //
+      for( auto potential : electrical_potential_list_ )
+	cumul_potential += potential;
+      
+      //
+      // 
+      return cumul_potential / electrical_potential_list_.size();
+    }
+  else
+    return 0.0;
 }
 //
 //

@@ -33,6 +33,7 @@ DAp::Access_parameters():
   outer_skin_surface_  = skull_scalp_files_path + "_outer_skin_surface.stl";
   outer_skull_surface_ = skull_scalp_files_path + "_outer_skull_surface.stl";
   inner_skull_surface_ = skull_scalp_files_path + "_inner_skull_surface.stl";
+  inner_brain_surface_ = skull_scalp_files_path + "_brain_surface.stl";
 
   //
   // Cortical segmentation
@@ -45,6 +46,17 @@ DAp::Access_parameters():
   //
   // Subcortical segmenation
   aseg_hdr_ = files_path_ + "fem/input/mri/aseg.hdr";
+
+  // 
+  // SMP input
+  sc3T1_ = files_path_ + "fem/input/spm/sc3T1.hdr";
+  //
+  sc4T1_ = files_path_ + "fem/input/spm/sc4T1.hdr";
+  //
+  sc5T1_ = files_path_ + "fem/input/spm/sc5T1.hdr";
+  //
+  sc6T1_ = files_path_ + "fem/input/spm/sc6T1.hdr";
+
 
   //
   // NIFTI information on all segmentation file

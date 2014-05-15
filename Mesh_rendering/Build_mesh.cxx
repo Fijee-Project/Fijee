@@ -86,7 +86,9 @@ Domains_build_mesh::Tetrahedrization()
   //  Mesh_criteria criteria(facet_angle=30, facet_size=1.2, facet_distance=.8,
   //                         cell_radius_edge_ratio=2., cell_size=1.8);
   // Coarse in the midle fine on boundaries
-  Mesh_criteria criteria(facet_angle=25, facet_size=1., facet_distance=.5,
+//  Mesh_criteria criteria(facet_angle=25, facet_size=1., facet_distance=.5,
+//                         cell_radius_edge_ratio=2., cell_size=8.);
+  Mesh_criteria criteria(facet_angle=30, facet_size=1., facet_distance=.5,
                          cell_radius_edge_ratio=2., cell_size=8.);
   //  Mesh_criteria criteria(facet_angle=30, facet_size=2.5, facet_distance=1.5,
   //                         cell_radius_edge_ratio=2., cell_size=8.);
@@ -272,6 +274,8 @@ Domains_build_mesh::Output_FEniCS_xml()
 	(float)vit->point().z();
       //
       position = rotation * position + translation;
+      // [mm] to [m]
+      position *= 1.e-3;
       //      Point_3 p = vit->point();
       FEniCS_xml_file << "      <vertex index=\"" << inum++ << "\" x=\""
 		      << position(0,0) << "\" y=\""
