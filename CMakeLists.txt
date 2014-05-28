@@ -1,4 +1,9 @@
+### Barebones CMAKE script for fijee project
+
+
+
 project (FIJEE CXX) 
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 cmake_minimum_required(VERSION 2.6.0)
@@ -16,6 +21,7 @@ set(LIBRARY_SOVERSION "0")
 ##
 
 
+##This needs to be changed to use cmake scripts to determine correct flag
 set(FIJEE_CXX_FLAGS "-std=c++0x")
 list(APPEND CMAKE_CXX_FLAGS ${FIJEE_CXX_FLAGS})
 
@@ -30,7 +36,8 @@ set(CMAKE_MODULE_PATH
 #include(FijeeDefaults)
 set(LIBS)
 
-set(DOLFIN_DIR "/FIJEE-AUX/share/dolfin/cmake")
+set(DOLFIN_DIR "/FIJEE-AUX/share/dolfin/cmake") # Dolfin installs UseDolfin.cmake scripts, dummy findDolfin script in cmake/modules doesn't look here properly yet
+
 find_package(DOLFIN REQUIRED)
 if(DOLFIN_FOUND)
   include_directories(${DOLFIN_INCLUDE_DIRS})
@@ -67,6 +74,6 @@ endif()
 #import all the source folder
 add_subdirectory(Finite_element_method_models)
 add_subdirectory(Utils)
-#add_subdirectory(Mesh_rendering)
+#add_subdirectory(Mesh_rendering) # Mesh rendering not done yet
 
 

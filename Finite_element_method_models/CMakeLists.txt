@@ -16,6 +16,9 @@ foreach(_file ${UFL_SOURCES})
   list(APPEND UFL_HEADERS ${ufl_header})
 endforeach()
 add_custom_target(ufl_headers DEPENDS ${UFL_HEADERS})
+## Custom target does not yet create headers in a findable location, this needs to be fixed
+
+
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
   
