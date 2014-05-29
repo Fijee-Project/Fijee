@@ -1,5 +1,5 @@
-#ifndef FIJEE_ENVIRONMENT_H_
-#define FIJEE_ENVIRONMENT_H_
+#ifndef FIJEE_ENVIRONMENT_H
+#define FIJEE_ENVIRONMENT_H
 //http://franckh.developpez.com/tutoriels/outils/doxygen/
 /*!
  * \file Fijee_environment.h

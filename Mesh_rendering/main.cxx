@@ -23,7 +23,12 @@
 int 
 main()
 {
+  // 
+  // Time log
+  FIJEE_TIME_PROFILER("main");
+
   //
+  // TODO remove VTK traces
   // Time log
   vtkSmartPointer<vtkTimerLog> timerLog = 
     vtkSmartPointer<vtkTimerLog>::New();

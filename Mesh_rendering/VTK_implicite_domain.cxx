@@ -38,6 +38,10 @@ Domain::VTK_implicite_domain():
 Domain::VTK_implicite_domain( const char* Vtk_Mesh ):
   vtk_mesh_( Vtk_Mesh )
 {
+  // 
+  // Time log
+  FIJEE_TIME_PROFILER("VTK_implicite_domain constructor");
+
   //
   // create the stream for CGAL applications
   std::stringstream stream;
