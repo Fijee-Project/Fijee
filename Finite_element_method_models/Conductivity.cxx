@@ -100,19 +100,19 @@ Solver::Tensor_conductivity::conductivity_update( const std::shared_ptr< MeshFun
 	case SPONGIOSA_SKULL:
 	  {
 	    //	    std::cout << "spongiosa: " << C00_[cell->index()] << std::endl;
-	    C00_[cell->index()] = C00_[cell->index()] = C00_[cell->index()] = Simplex(1);
+	    C00_[cell->index()] = C11_[cell->index()] = C22_[cell->index()] = Simplex(1);
 	    break;
 	  }
 	case OUTSIDE_SKULL/* compacta skull */:
 	  {
 	    // 	    std::cout << "compacta: " << C00_[cell->index()] << std::endl;
-	    C00_[cell->index()] = C00_[cell->index()] = C00_[cell->index()] = Simplex(2);
+	    C00_[cell->index()] = C11_[cell->index()] = C22_[cell->index()] = Simplex(2);
 	    break;
 	  }
 	case OUTSIDE_SCALP/* skin */:
 	  {
 	    // 	    std::cout << "skin: " << C00_[cell->index()] << std::endl;
-	    C00_[cell->index()] = C00_[cell->index()] = C00_[cell->index()] = Simplex(0);
+	    C00_[cell->index()] = C11_[cell->index()] = C22_[cell->index()] = Simplex(0);
 	    break;
 	  }
 	}
