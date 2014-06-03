@@ -22,9 +22,8 @@ set(LIBRARY_SOVERSION "0")
 
 
 ##This needs to be changed to use cmake scripts to determine correct flag
-set(FIJEE_CXX_FLAGS "-std=c++0x")
-list(APPEND CMAKE_CXX_FLAGS ${FIJEE_CXX_FLAGS})
-
+add_definitions("-DHAS_MPI") #Needed for to link against FEniCS when it is compiled with openmpi
+add_definitions("-std=c++0x")
 
 
 #Tell cmake where to look for modules, modules are scripts that help us find required libraries
@@ -67,6 +66,13 @@ find_package(EIGEN 3.0 REQUIRED)
 if(EIGEN_FOUND)
   message(STATUS "eigen found @ ${EIGEN_DIR} ${EIGEN_INCLUDE_DIR}")
   include_directories(${EIGEN_INCLUDE_DIR})
+endif()
+
+
+find_package(MPI REQUIRED)
+if(MPI_FOUND)
+  message(STATUS "MPI found @ ${MPI_INCLUDE_PATH} : ")
+  include_directories(${MPI_INCLUDE_PATH})
 endif()
 ####
 

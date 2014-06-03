@@ -29,7 +29,7 @@ set(POISSON_SOURCES main.cxx  Conductivity.cxx Source.cxx Electrodes_injection.c
 
 add_executable(poisson ${POISSON_SOURCES})
 
-target_link_libraries(poisson ${LIBS} pugi dolfin)
+target_link_libraries(poisson ${LIBS} pugi dolfin boost_mpi mpi mpi_cxx)
 
 message(STATUS ${LIBS})
 
