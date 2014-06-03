@@ -72,6 +72,7 @@ export FIJEE += $(CURDIR)
 UTILS_DIR              = Utils
 MESH_RENDERING_DIR     = Mesh_rendering
 FEM_MODELS_DIR         = Finite_element_method_models
+INVERSE_PROBLEMS_DIR   = Inverse_problems
 EXEC = $(MESH_RENDERING)/build_inrimage  $(FEM_MODELS_DIR)/Poisson
 
 ###############
@@ -84,6 +85,7 @@ $(EXEC):
 	( cd $(UTILS_DIR)/Minimizers/ && $(MAKE) )
 	( cd $(FEM_MODELS_DIR) && $(MAKE) )
 	( cd $(MESH_RENDERING_DIR) && $(MAKE) )
+	( cd $(INVERSE_PROBLEMS_DIR) && $(MAKE) )
 	@echo""
 	@echo "export LD_LIBRARY_PATH=$(FIJEE)/$(UTILS_DIR)/pugi/:$(FIJEE)/$(UTILS_DIR)/Minimizers/:$(CUDA_LIB):$(VTK)/lib/vtk-5.10:$(CGAL)/lib:$(LD_LIBRARY_PATH)"
 	@echo""
@@ -98,6 +100,7 @@ clean:
 	( cd $(UTILS_DIR)/Minimizers/ && $(MAKE) $@ )
 	( cd $(FEM_MODELS_DIR) && $(MAKE) $@ )
 	( cd $(MESH_RENDERING_DIR) && $(MAKE) $@ )
+	( cd $(INVERSE_PROBLEMS_DIR) && $(MAKE) $@ )
 
 distclean: clean
 	find . -name *~      -exec rm {} \;
