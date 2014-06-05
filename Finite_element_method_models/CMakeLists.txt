@@ -8,7 +8,7 @@ set(UFL_HEADERS)
 foreach(_file ${UFL_SOURCES}) 
   string(REPLACE ".ufl" ".h" ufl_header ${_file})
   add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/${ufl_header}
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${ufl_header}
     COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR}
     COMMAND ffc ${UFL_FLAG}  ${CMAKE_CURRENT_SOURCE_DIR}/${_file} 
     COMMAND cd ${CMAKE_CURRENT_BINARY_DIR}
@@ -16,7 +16,6 @@ foreach(_file ${UFL_SOURCES})
   list(APPEND UFL_HEADERS ${ufl_header})
 endforeach()
 add_custom_target(ufl_headers DEPENDS ${UFL_HEADERS})
-## Custom target does not yet create headers in a findable location, this needs to be fixed
 
 
 
@@ -29,7 +28,7 @@ set(POISSON_SOURCES main.cxx  Conductivity.cxx Source.cxx Electrodes_injection.c
 
 add_executable(poisson ${POISSON_SOURCES})
 
-target_link_libraries(poisson ${LIBS} pugi dolfin boost_mpi mpi mpi_cxx)
+target_link_libraries(poisson ${LIBS})
 
 message(STATUS ${LIBS})
 

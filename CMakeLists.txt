@@ -22,12 +22,10 @@ set(LIBRARY_SOVERSION "0")
 
 
 ##This needs to be changed to use cmake scripts to determine correct flag
-add_definitions("-DHAS_MPI") #Needed for to link against FEniCS when it is compiled with openmpi
 add_definitions("-std=c++0x")
 
 
 #Tell cmake where to look for modules, modules are scripts that help us find required libraries
-
 set(CMAKE_MODULE_PATH 
   "${CMAKE_SOURCE_DIR}/cmake/modules;${CMAKE_MODULE_PATH}"
 )
@@ -35,12 +33,17 @@ set(CMAKE_MODULE_PATH
 #include(FijeeDefaults)
 set(LIBS)
 
-set(DOLFIN_DIR "/FIJEE-AUX/share/dolfin/cmake") # Dolfin installs UseDolfin.cmake scripts, dummy findDolfin script in cmake/modules doesn't look here properly yet
+#set(DOLFIN_DIR "/usr/share/dolfin/cmake") # Dolfin installs UseDolfin.cmake scripts, dummy findDolfin script in cmake/modules doesn't look here properly yet
 
-find_package(DOLFIN REQUIRED)
+find_package(DOLFIN REQUIRED CONFIG)
 if(DOLFIN_FOUND)
-  include_directories(${DOLFIN_INCLUDE_DIRS})
-  list (APPEND LIBS ${DOLFIN_LIBRARIES})
+  message("DOLFIN FOUND at ${DOLFIN_INCLUDE_DIRS} ${DOLFIN_3D_PARTY_LIBRARIES}")
+  include(${DOLFIN_USE_FILE})
+  list (APPEND LIBS ${DOLFIN_3RD_PARTY_LIBRARIES} ${DOLFIN_LIBRARIES})
+  message (${LIBS})
+#  add_definitions(${DOLFIN_CXX_DEFINITIONS})
+#  include_directories(${DOLFIN_INCLUDE_DIRS})
+#  list (APPEND LIBS ${DOLFIN_3D_PARTY_LIBRARIES})
 endif()
 
 
