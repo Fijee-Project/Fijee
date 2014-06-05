@@ -1,16 +1,13 @@
 Cmake build readme
 
-0. run `make models` to generate ufl headers 
 1. `mkdir build` (in source builds are not recomended) and cd into build
 2. cmake ../
-3. make pugi (for pugi utility)
-4. make poisson (to test poisson build)
+3. make 
 
 Mesh files and documentation are still TODO, this is the current state of the build system
 
 Libraries can either be specified with libname_DIR (so VTK_DIR or DOLFIN_DIR) when running cmake if they are in non-standard locations. - ex 'VTK_DIR=/path/to/vtk cmake../'
 
-Libraries installed from the fijee-dev ppa (ppa:akshmakov/fijee-dev-ppa) should be findable with no additional parameters.
+Libraries installed from the fijee-dev ppa (ppa:akshmakov/fijee-dev-ppa) should be findable with no additional parameters. 
 
 
-FIJEE DOES NOT BUILD AGAINST CURRENT VERSION OF DOLFIN IN FIJEE-DEV PPA, OPENCL VERSION OF DOLFIN COURTESY OF YANN COBIGO MUST BE USED (debian/ppa package for this is to do, install all necessary dolfin dependencies from PPA and build localy, specify location with DOLFIN_DIR)
