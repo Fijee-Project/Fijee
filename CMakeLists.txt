@@ -77,12 +77,25 @@ if(MPI_FOUND)
   message(STATUS "MPI found @ ${MPI_INCLUDE_PATH} : ")
   include_directories(${MPI_INCLUDE_PATH})
 endif()
+
+find_package(NIFTI REQUIRED)
+if(NIFTI_FOUND)
+  message(STATUS "FOUND NIFTI")
+  include_directories(${NIFTI_INCLUDE_DIR})
+endif()
+
+find_package(CGAL REQUIRED)
+if(CGAL_FOUND)
+  message(STATUS "CGAL FOUND ${CGAL_DIR}")
+  add_definitions( -DCGAL_EIGEN3_ENABLED)
+  include(${CGAL_USE_FILE})
+endif()
 ####
 
 
 #import all the source folder
 add_subdirectory(Finite_element_method_models)
 add_subdirectory(Utils)
-#add_subdirectory(Mesh_rendering) # Mesh rendering not done yet
+add_subdirectory(Mesh_rendering)
 
 
