@@ -1,0 +1,11 @@
+Cmake build readme
+
+1. `mkdir build` (in source builds are not recomended) and cd into build
+2. cmake ../
+3. make 
+
+Libraries can either be specified with libname_DIR (so VTK_DIR or DOLFIN_DIR) when running cmake if they are in non-standard locations. - ex 'VTK_DIR=/path/to/vtk cmake../'
+
+Libraries installed from the fijee-dev ppa (ppa:akshmakov/fijee-dev-ppa) should be findable with no additional parameters. 
+
+
