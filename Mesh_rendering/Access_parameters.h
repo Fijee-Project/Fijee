@@ -24,8 +24,8 @@
 //  The views and conclusions contained in the software and documentation are those   
 //  of the authors and should not be interpreted as representing official policies,    
 //  either expressed or implied, of the FreeBSD Project.  
-#ifndef ACCESS_PARAMETERS_H_
-#define ACCESS_PARAMETERS_H_
+#ifndef ACCESS_PARAMETERS_H
+#define ACCESS_PARAMETERS_H
 //http://franckh.developpez.com/tutoriels/outils/doxygen/
 /*!
  * \file Access_parameters.hh

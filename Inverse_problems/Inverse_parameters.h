@@ -24,8 +24,8 @@
 //  The views and conclusions contained in the software and documentation are those   
 //  of the authors and should not be interpreted as representing official policies,    
 //  either expressed or implied, of the FreeBSD Project.  
-#ifndef INVERSE_PARAMETERS_H_
-#define INVERSE_PARAMETERS_H_
+#ifndef INVERSE_PARAMETERS_H
+#define INVERSE_PARAMETERS_H
 //http://franckh.developpez.com/tutoriels/outils/doxygen/
 /*!
  * \file Inverse_parameters.hh
@@ -41,6 +41,7 @@
 // UCSF
 //
 #include "Utils/Fijee_environment.h"
+#include "Utils/Fijee_log_management.h"
 #include "Utils/enum.h"
 //
 //

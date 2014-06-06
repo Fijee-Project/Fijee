@@ -48,6 +48,15 @@ IIp::Inverse_parameters()
   files_path_output_  = fijee.get_fem_output_path_();
   files_path_result_  = fijee.get_fem_result_path_();
   files_path_measure_ = fijee.get_fem_measure_path_();
+
+  // 
+  // Time profiler lof file
+  // It the file existes: empty it.
+#ifdef TIME_PROFILER
+  std::ofstream ofs ( "fijee_time.log", std::ofstream::app );
+  if( ofs.good() ) ofs.clear();
+  ofs.close();
+#endif
 }
 //
 //

@@ -1,3 +1,4 @@
+CXXFLAGS += -Wall -DTRACE=0 -DTIME_PROFILER 
 #
 # Libraries and includes
 #
