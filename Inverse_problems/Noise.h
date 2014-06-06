@@ -24,47 +24,82 @@
 //  The views and conclusions contained in the software and documentation are those   
 //  of the authors and should not be interpreted as representing official policies,    
 //  either expressed or implied, of the FreeBSD Project.  
-#include <vector>
-#include <memory>
+#ifndef _NOISE_H
+#define _NOISE_H
+#include <fstream>  
+// 
+// Eigen
 //
-// UCSF
+#include <Eigen/Dense>
+typedef Eigen::Matrix< double, Eigen::Dynamic, Eigen::Dynamic > MatrixXd;
 //
-#include "PDE_solver_parameters.h"
-#include "SL_subtraction.h"
-#include "SL_direct.h"
-#include "tCS_tDCS.h"
-#include "tCS_tACS.h"
-#include "tCS_tDCS_local_conductivity.h"
-#include "Model_solver.h"
+// UCSF project
+//
+#include "Utils/Fijee_environment.h"
 
-int main()
+//using namespace dolfin;
+
+/*! \namespace Inverse
+ * 
+ * Name space for our new package
+ *
+ */
+//
+// 
+//
+namespace Inverse
 {
-  //
-  //
-  Solver::PDE_solver_parameters* solver_parameters = Solver::PDE_solver_parameters::get_instance();
-  solver_parameters->init();
-  
-  //
-  // Physical models:
-  //  - Source localization
-  //    - Solver::SL_subtraction
-  //    - Solver::SL_direct
-  //  - Transcranial current stimulation
-  //    - Solver::tCS_tDCS
-  //    - Solver::tCS_tACS
-  //  - Local conductivity estimation
-  //    - Solver::tCS_tDCS_local_conductivity
-  //
-  // export OMP_NUM_THREADS=2
-  Solver::Model_solver< /* physical model */ Solver::SL_subtraction,
-			/*solver_parameters->get_number_of_threads_()*/ 2 >  model;
+  /*! \class Physics
+   * \brief classe representing the mother class of all physical type of noises
+   *
+   *  This class representing the 
+   */
+  class Noise
+  {
+  public:
+//    /*!
+//     *  \brief Default Constructor
+//     *
+//     *  Constructor of the class Noise
+//     *
+//     */
+//    Noise(){};
+//    /*!
+//     *  \brief Copy Constructor
+//     *
+//     *  Constructor is a copy constructor
+//     *
+//     */
+//    Noise( const Noise& ){};
+    /*!
+     *  \brief Destructeur
+     *
+     *  Destructor of the class Noise
+     */
+    virtual ~Noise(){/* Do nothing */};
+//    /*!
+//     *  \brief Operator =
+//     *
+//     *  Operator = of the class Noise
+//     *
+//     */
+//    Noise& operator = ( const Noise& ){return *this;};
+//    /*!
+//     *  \brief Operator ()
+//     *
+//     *  Operator () of the class Noise
+//     *
+//     */
+//    virtual void operator ()() = 0;
+    /*!
+     *  \brief Get noise covariance matrix
+     *
+     *  This method return the covariance matrix for the noise model.
+     *
+     */
+    virtual inline
+     MatrixXd get_covariance() const = 0;
+   };
+};
 
-  //
-  //
-  std::cout << "Loop over solvers" << std::endl;
-  model.solver_loop();
-
-  //
-  //
-  return EXIT_SUCCESS;
-}
+#endif

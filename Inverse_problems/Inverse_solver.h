@@ -52,20 +52,20 @@ namespace Inverse
   class Inverse_solver
   {
   public:
-    /*!
-     *  \brief Default Constructor
-     *
-     *  Constructor of the class Inverse_solver
-     *
-     */
-    Inverse_solver();
-    /*!
-     *  \brief Copy Constructor
-     *
-     *  Constructor is a copy constructor
-     *
-     */
-    Inverse_solver( const Inverse_solver& ){};
+//    /*!
+//     *  \brief Default Constructor
+//     *
+//     *  Constructor of the class Inverse_solver
+//     *
+//     */
+//    Inverse_solver(){};
+//    /*!
+//     *  \brief Copy Constructor
+//     *
+//     *  Constructor is a copy constructor
+//     *
+//     */
+//    Inverse_solver( const Inverse_solver& ){};
     /*!
      *  \brief Destructeur
      *

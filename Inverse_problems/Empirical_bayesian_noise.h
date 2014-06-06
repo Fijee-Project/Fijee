@@ -24,17 +24,13 @@
 //  The views and conclusions contained in the software and documentation are those   
 //  of the authors and should not be interpreted as representing official policies,    
 //  either expressed or implied, of the FreeBSD Project.  
-#ifndef _MODEL_SOLVER_H
-#define _MODEL_SOLVER_H
-#include <list>
-#include <memory>
-#include <string>
+#ifndef _EMPIRICAL_BAYESIAN_NOISE_H
+#define _EMPIRICAL_BAYESIAN_NOISE_H
+// 
+// Eigen
 //
-// FEniCS
-//
-#include <dolfin.h>
-// Source localization subtraction model
-//#include "SLS_model.h"
+#include <Eigen/Dense>
+typedef Eigen::Matrix< double, Eigen::Dynamic, Eigen::Dynamic > MatrixXd;
 //
 // pugixml
 // same resources than Dolfin
@@ -43,19 +39,12 @@
 //
 // UCSF project
 //
-#include "PDE_solver_parameters.h"
-#include "Utils/Thread_dispatching.h"
+#include "Noise.h"
 //
 //
-//
-typedef Solver::PDE_solver_parameters SDEsp;
-//
-//
-//
-//using namespace dolfin;
 //
 /*!
- * \file Model_solver.h
+ * \file Empirical_bayesian_noise.h
  * \brief brief describe 
  * \author Yann Cobigo
  * \version 0.1
@@ -66,67 +55,57 @@ typedef Solver::PDE_solver_parameters SDEsp;
  * Name space for our new package
  *
  */
-namespace Solver
+namespace Inverse
 {
-  /*! \class Model_solver
-   * \brief classe representing the dipoles distribution
+  /*! \class Empirical_bayesian_noise
+   * \brief classe representing the source localisation with subtraction method.
    *
-   *  This class is an example of class I will have to use
+   *  This class representing the Physical noise for the source localisation using the subtraction method.
    */
-  template < typename Physical_model, int num_of_threads = 1 >
-  class Model_solver
+  class Empirical_bayesian_noise : Noise
   {
   private:
-    Physical_model model_;
+    //! Noise covariante matrix
+    MatrixXd noise_covariante_matrix_;
 
   public:
     /*!
      *  \brief Default Constructor
      *
-     *  Constructor of the class Model_solver
+     *  Constructor of the class Empirical_bayesian_noise
      *
      */
-  Model_solver(){};
+  Empirical_bayesian_noise():Noise(){};
     /*!
      *  \brief Copy Constructor
      *
      *  Constructor is a copy constructor
      *
      */
-    Model_solver( const Model_solver& ){};
+    Empirical_bayesian_noise( const Empirical_bayesian_noise& ){};
+    /*!
+     *  \brief Destructeur
+     *
+     *  Destructor of the class Empirical_bayesian_noise
+     */
+    virtual ~Empirical_bayesian_noise(){/* Do nothing */};
     /*!
      *  \brief Operator =
      *
-     *  Operator = of the class Model_solver
+     *  Operator = of the class Empirical_bayesian_noise
      *
      */
-  Model_solver& operator = ( const Model_solver& ){return *this;};
+    Empirical_bayesian_noise& operator = ( const Empirical_bayesian_noise& ){return *this;};
 
   public:
     /*!
+     *  \brief Get noise covariance matrix
+     *
+     *  This method return the covariance matrix for the noise model.
+     *
      */
-    void solver_loop()
-    {
-      
-      //
-      // Define the number of threads in the pool of threads
-      Utils::Thread_dispatching pool( num_of_threads );
-      
-      
-      //
-      //
-      int tempo = 0;
-      for( int physical_event = 0 ;
-	   physical_event != model_.get_number_of_physical_events() ; 
-	   physical_event++ )
-	if( tempo++ < 50 )
-	  {
-	    //
-	    // Enqueue tasks
-	    pool.enqueue( std::ref(model_) );
-	  }
-	else {break;}
-    };
+    virtual inline
+      MatrixXd get_covariance() const {return noise_covariante_matrix_;};
   };
 }
 #endif

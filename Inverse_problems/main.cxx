@@ -28,11 +28,15 @@
 //
 // UCSF
 //
+#include "Noise.h"
+#include "Empirical_bayesian_noise.h"
 #include "Inverse_parameters.h"
 #include "Inverse_model.h"
 #include "Inverse_solver.h"
 #include "Empirical_bayesian_model.h"
-
+//
+typedef Inverse::Empirical_bayesian_model< Inverse::Empirical_bayesian_noise > Inverser_algorithm;
+//
 int main()
 {
   //
@@ -46,8 +50,8 @@ int main()
   //    - Inverse::Empirical_bayesian_model
   //
   // export OMP_NUM_THREADS=2
-//  Inverse::Inverse_model< /* inverse model */ Inverse::Empirical_bayesian_model,
-//			/*inverse_parameters->get_number_of_threads_()*/ 2 >  model;
+  Inverse::Inverse_model< /* inverse model */ Inverser_algorithm,
+			  /*inverse_parameters->get_number_of_threads_()*/ 2 >  model;
 //
 //  //
 //  //
