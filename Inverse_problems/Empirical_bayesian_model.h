@@ -294,6 +294,10 @@ namespace Inverse
     Empirical_bayesian_model< Noise >::dipole_activity_estimation()
     {
       // 
+      // Time log
+      FIJEE_TIME_PROFILER("Empirical_bayesian_model::dipole_activity_estimation()");
+
+      // 
       // [Nj x Ne]
       Eigen::Matrix< 
 	double, 
