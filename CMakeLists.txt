@@ -22,7 +22,7 @@ set(LIBRARY_SOVERSION "0")
 
 
 ##This needs to be changed to use cmake scripts to determine correct flag
-add_definitions("-std=c++0x")
+add_definitions(-std=c++0x -Wno-deprecated)  #c standard and remove deprecation warnings (caused by vtk) that clutter compile output
 
 
 #Tell cmake where to look for modules, modules are scripts that help us find required libraries
@@ -87,7 +87,7 @@ endif()
 find_package(CGAL REQUIRED)
 if(CGAL_FOUND)
   message(STATUS "CGAL FOUND ${CGAL_DIR}")
-  add_definitions( -DCGAL_EIGEN3_ENABLED)
+  add_definitions( -DCGAL_EIGEN3_ENABLED) # this isn't set for some reason by the cmake configure, causes compilation errors
   include(${CGAL_USE_FILE})
 endif()
 ####

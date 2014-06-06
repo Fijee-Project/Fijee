@@ -4,8 +4,6 @@ Cmake build readme
 2. cmake ../
 3. make 
 
-Mesh files and documentation are still TODO, this is the current state of the build system
-
 Libraries can either be specified with libname_DIR (so VTK_DIR or DOLFIN_DIR) when running cmake if they are in non-standard locations. - ex 'VTK_DIR=/path/to/vtk cmake../'
 
 Libraries installed from the fijee-dev ppa (ppa:akshmakov/fijee-dev-ppa) should be findable with no additional parameters. 
