@@ -80,10 +80,16 @@ namespace Utils
       std::normal_distribution<double> distribution_;
       //! Excitatory inpulses already drawn from the neighbours
       std::vector<bool> drawn_; 
+      //! Duration of the simulation (ms)
+      double duration_;
+      //! Number of impulse per second (random noise)
+      double impulse_;
+
       // 
       // Parameter of the nonlinear sigmoid function, transforming the average membrane potential 
       // into an average density of action potential
       // 
+
       //! Determines the maximum firing rate of the neural population
       double e0_;
       //! Steepness of the sigmoidal transformation
@@ -103,9 +109,11 @@ namespace Utils
       double C3_;
       //! Average number of synaptic contacts in the inhibitory feedback loop
       double C4_;
+
       // 
       // Spontaneous activity in a single-column model
       // 
+
       //! Membrane average time constant and dendritic tree average time delays
       double a_;
       //! Average excitatory synaptic gain
@@ -116,12 +124,8 @@ namespace Utils
       double B_;
       //! White noise
       std::shared_ptr< double > p_;
-#ifdef TRACE
-#if TRACE == 100
       //! Analyse time v.s. potential
       std::list< std::tuple< double, double > > time_potential_;
-#endif
-#endif      
      
     public:
 	/*!

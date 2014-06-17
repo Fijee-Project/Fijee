@@ -90,15 +90,6 @@ namespace Utils
 	//    void operator () ();
 
       public:
-//	/*!
-//	 *  \brief initialization function
-//	 *
-//	 *  This method initialized the minimizer
-//	 */
-//	void initialization( )
-//	{
-//	  minimizer_.initialization( );
-//	};
 	/*!
 	 *  \brief minimize function
 	 *
