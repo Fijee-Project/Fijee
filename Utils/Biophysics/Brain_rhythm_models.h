@@ -24,18 +24,21 @@
 //  The views and conclusions contained in the software and documentation are those   
 //  of the authors and should not be interpreted as representing official policies,    
 //  either expressed or implied, of the FreeBSD Project.  
-#ifndef STATISTICAL_ANALYSIS_H
-#define STATISTICAL_ANALYSIS_H
-//http://franckh.developpez.com/tutoriels/outils/doxygen/
+#ifndef BRAIN_RHYTHM_MODELS_H
+#define BRAIN_RHYTHM_MODELS_H
+//
+// UCSF project
+//
+//#include "Utils/Thread_dispatching.h"
+//
+//
 /*!
- * \file Statistical_analysis.h
+ * \file Brain_rhythm_models.h
  * \brief brief describe 
  * \author Yann Cobigo
  * \version 0.1
  */
-#include <iostream>
-#include <fstream>      // std::ifstream, std::ofstream
-#include <sstream>
+
 /*! \namespace Utils
  * 
  * Name space for our new package
@@ -43,73 +46,69 @@
  */
 namespace Utils
 {
-  /*! \class Statistical_analysis
-   * \brief classe representing whatever
-   *
-   *  This class is an example of class I will have to use
-   */
-  class Statistical_analysis
+  namespace Biophysics
   {
-  private:
-    std::ofstream file_;
+   /*! \class Brain_rhythm_models
+     * \brief classe representing the dipoles distribution
+     *
+     *  This class is an example of class I will have to use
+     */
+    template < typename  Membrane_potential >
+      class Brain_rhythm_models
+      {
+      private:
+	Membrane_potential EEG_activity_;
 
+      public:
+	/*!
+	 *  \brief Default Constructor
+	 *
+	 *  Constructor of the class Brain_rhythm_models
+	 *
+	 */
+	Brain_rhythm_models(){};
+	/*!
+	 *  \brief Copy Constructor
+	 *
+	 *  Constructor is a copy constructor
+	 *
+	 */
+	Brain_rhythm_models( const Brain_rhythm_models& ){};
+	/*!
+	 *  \brief Operator =
+	 *
+	 *  Operator = of the class Brain_rhythm_models
+	 *
+	 */
+	Brain_rhythm_models& operator = ( const Brain_rhythm_models& ){};
+	//    /*!
+	//     *  \brief Operator ()
+	//     *
+	//     *  Operator () of the class Brain_rhythm_models
+	//     *
+	//     */
+	//    void operator () ();
 
-  protected:
-    //! Stream populating the output file.
-    std::stringstream output_stream_;
-
-    
-  public:
-    /*!
-     *  \brief Default Constructor
-     *
-     *  Constructor of the class Statistical_analysis
-     *
-     */
-    Statistical_analysis(){};
-    /*!
-     *  \brief Copy Constructor
-     *
-     *  Constructor is a copy constructor
-     *
-     */
-    Statistical_analysis( const Statistical_analysis& ){};
-    /*!
-     *  \brief Destructeur
-     *
-     *  Destructor of the class Statistical_analysis
-     */
-    virtual ~Statistical_analysis(){/* Do nothing */};
-    /*!
-     *  \brief Operator =
-     *
-     *  Operator = of the class Statistical_analysis
-     *
-     */
-    Statistical_analysis& operator = ( const Statistical_analysis& ){return *this;};
-    
-  public:
-    /*!
-     */
-    void Make_output_file( const char* file_name)
-    {
-      file_.open( file_name );
-      file_ << output_stream_.rdbuf();
-      file_.close();  
-    };
-
-  private:
-    /*!
-     */
-    virtual void Make_analysis() = 0;
- };
-  /*!
-   *  \brief Dump values for Statistical_analysis
-   *
-   *  This method overload "<<" operator for a customuzed output.
-   *
-   *  \param Point : new position to add in the list
-   */
-  std::ostream& operator << ( std::ostream&, const Statistical_analysis& );
+      public:
+//	/*!
+//	 *  \brief initialization function
+//	 *
+//	 *  This method initialized the minimizer
+//	 */
+//	void initialization( )
+//	{
+//	  minimizer_.initialization( );
+//	};
+	/*!
+	 *  \brief minimize function
+	 *
+	 *  This method launch the minimization algorithm
+	 */
+	void modelization()
+	{
+	  EEG_activity_.modelization();
+	};
+      };
+  }
 }
 #endif
