@@ -26,8 +26,9 @@
 //  either expressed or implied, of the FreeBSD Project.  
 #include "Jansen_Rit_1995.h"
 // 
+// WARNING
 // Untill gcc fix the bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55800
-// it should be a class member!!
+// Afterward, it should be a class member!!
 // 
 static thread_local int local_electrode_;
 // 
@@ -35,7 +36,6 @@ static thread_local int local_electrode_;
 // 
 extern "C" int ode_system(double t, const double y[], double dydt[], void *params)
 {
-  // 
   // 
   Utils::Biophysics::Jansen_Rit_1995 *alpha;
   alpha = static_cast< Utils::Biophysics::Jansen_Rit_1995 *>(params);
@@ -121,7 +121,6 @@ Utils::Biophysics::Jansen_Rit_1995::modelization()
 	  abort();
 	}
       // record statistics, after the transient state
-      //      time_potential_.push_back( std::make_tuple(ti - MAX_TRANSIENT * delta_t, y[0]) );
       electrode_rhythm_[local_electrode_].push_back(std::make_tuple(ti - MAX_TRANSIENT * delta_t,
 								    y[0], 0.));
     }
@@ -203,15 +202,11 @@ Utils::Biophysics::Jansen_Rit_1995::Make_analysis()
   // 
   while( it[0] !=  electrode_rhythm_[0].end())
     {
-      for (int electrode = 0 ; electrode < number_of_electrodes ; electrode++)
-	{
-	  // get the time
-	  if ( electrode == 0 )
-	    output_stream_ <<  std::get<0>( *(it[electrode]) ) << " ";
-	  // 
-	  
-	    output_stream_ <<  std::get<1>( *(it[electrode]++) ) << " ";
-	}
+      // get the time
+      output_stream_ <<  std::get<0>( *(it[0]) ) << " ";
+      // 
+     for (int electrode = 0 ; electrode < number_of_electrodes ; electrode++)
+       output_stream_ <<  std::get<1>( *(it[electrode]++) ) << " ";
       // 
       output_stream_ << std::endl;
     }
@@ -243,7 +238,6 @@ Utils::Biophysics::Jansen_Rit_1995::Make_analysis()
     N = 1024, /* N is a power of 2 */
     n = 0;
   // real and imaginary
-  double data[2*1024/*N*/];
   std::vector< double* > data_vector(number_of_electrodes);
   // 
   for ( int electrode = 0 ; electrode < number_of_electrodes ; electrode++ )
@@ -283,34 +277,6 @@ Utils::Biophysics::Jansen_Rit_1995::Make_analysis()
       // 
       output_stream_ << std::endl;
     }
-//  // 
-//  // 
-//  int 
-//    N = 1024, /* N is a power of 2 */
-//    n = 0;
-//  // real and imaginary
-//  double data[2*1024/*N*/];
-//  // 
-//  for( auto time_potential : time_potential_ )
-//    {
-//      if ( n < N )
-//	{
-//	  REAL(data,n)   = std::get<1>(time_potential);
-//	  IMAG(data,n++) = 0.0;
-//	}
-//    }
-//
-//  // 
-//  // Forwar FFT
-//  // A stride of 1 accesses the array without any additional spacing between elements. 
-//  gsl_fft_complex_radix2_forward (data, 1/*stride*/, 1024);
-//
-//  // 
-//  for ( int i = 0 ; i < N ; i++ )
-//    output_stream_ 
-//      << i << " " 
-//      << (REAL(data,i)*REAL(data,i) + IMAG(data,i)*IMAG(data,i)) / N
-//      << std::endl;
 
   //
   //
@@ -369,6 +335,47 @@ void
 Utils::Biophysics::Jansen_Rit_1995::output_XML()
 {
   // 
-  // Statistic analysise
+  // Build XML output 
+  // 
+  
+  // Size of the time series
+  setup_node_.append_attribute("size") = static_cast<int>( electrode_rhythm_[0].size() );
+  // 
+  int number_of_electrodes = electrode_rhythm_.size();
+
+  // 
+  // loop over the time series
+  std::vector< std::list< std::tuple< double, double, double > >::const_iterator > 
+    it(number_of_electrodes);
+  // inializes all the lists
+  for( int electrode = 0 ; electrode < number_of_electrodes ; electrode++ )
+    it[electrode] = electrode_rhythm_[electrode].begin();
+  // 
+  int index = 0;
+  while( it[0] !=  electrode_rhythm_[0].end())
+    {
+      auto electrodes_node = setup_node_.append_child("electrodes");
+      // 
+      electrodes_node.append_attribute("index")  = index++;
+      electrodes_node.append_attribute("dipole") = 0;
+      electrodes_node.append_attribute("time")   = std::get<0>( *(it[0]) );
+      electrodes_node.append_attribute("size")   = number_of_electrodes;
+
+      //
+      // loop over electrodes  
+      for ( int electrode = 0 ; electrode < number_of_electrodes ; electrode++ )
+	{
+	  auto electrode_node = electrodes_node.append_child("electrode");
+	  // 
+	  electrode_node.append_attribute("index") = electrode;
+	  electrode_node.append_attribute("label") = electrode_mapping_[electrode].c_str();
+	  electrode_node.append_attribute("V")     = std::get<1>( *(it[electrode]++) );
+	  electrode_node.append_attribute("I")     = 0.0;
+	}
+    }
+  
+
+  // 
+  // Statistical analysise
   Make_analysis();
 }

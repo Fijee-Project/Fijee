@@ -103,5 +103,4 @@ Utils::Biophysics::Brain_rhythm::load_electrode_file( std::string In_electrode_f
   // Output XML file initialization
   // 
   setup_node_ = fijee_.append_child("setup");
-  setup_node_.append_attribute("size") = static_cast<int>(electrode_mapping_.size());
 }

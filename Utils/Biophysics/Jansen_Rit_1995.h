@@ -130,8 +130,6 @@ namespace Utils
       double B_;
       //! White noise
       std::vector< double > p_;
-      //! Analyse time v.s. potential
-      std::list< std::tuple< double, double > > time_potential_;
      
       // 
       // Multi-threading
@@ -166,7 +164,7 @@ namespace Utils
 	 *  Operator = of the class Jansen_Rit_1995
 	 *
 	 */
-	Jansen_Rit_1995& operator = ( Jansen_Rit_1995& ){return *this;};
+	Jansen_Rit_1995& operator = ( const Jansen_Rit_1995& ){return *this;};
 	/*!
 	 *  \brief Destructor
 	 *
@@ -212,14 +210,14 @@ namespace Utils
        *  This member function transforms the average membrane potential into an average density of action potential.
        *
        */
-      inline double sigmoid( double V ){return (2 * e0_) / ( 1 + exp( r_*(v0_ - V) ) ); }
+      inline double sigmoid( const double V ){return (2 * e0_) / ( 1 + exp( r_*(v0_ - V) ) ); }
       /*!
        *  \brief  dS/dy
        *
        *  This member function is the first derivative of the sigmoid.
        *
        */
-      inline double dSdy( double V ){return (2 * e0_ * r_ * exp(r_*(v0_ - V)))/(  exp(r_*v0_) + exp(r_*V) )/( exp(r_*v0_) + exp(r_*V) ); }
+      inline double dSdy( const double V ){return (2 * e0_ * r_ * exp(r_*(v0_ - V)))/(  exp(r_*v0_) + exp(r_*V) )/( exp(r_*v0_) + exp(r_*V) ); }
       /*!
        */
       virtual void Make_analysis();

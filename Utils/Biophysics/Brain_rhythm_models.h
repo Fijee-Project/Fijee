@@ -110,17 +110,11 @@ namespace Utils
 	  
 	  //
 	  //
-	  int tempo = 0;
 	  for( int physical_event = 0 ;
 	       physical_event != EEG_activity_.get_number_of_physical_events() ; 
 	       physical_event++ )
-	    if( tempo++ < 10 )
-	      {
-		//
-		// Enqueue tasks
-		pool.enqueue( std::ref(EEG_activity_) );
-	      }
-	    else {break;}
+	    // Enqueue tasks
+	    pool.enqueue( std::ref(EEG_activity_) );
 	};
 	/*!
 	 *  \brief minimize function
