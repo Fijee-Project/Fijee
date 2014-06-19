@@ -34,10 +34,16 @@
  * \version 0.1
  */
 #include <iostream>
+#include <string>
+#include <list>
+#include <vector>
+#include <tuple>
 //
 // UCSF
 //
+#include "Utils/pugi/pugixml.hpp"
 #include "Utils/Statistical_analysis.h"
+#include "Utils/XML_writer.h"
 // 
 // 
 // 
@@ -61,15 +67,85 @@ namespace Utils
      *  This class is an example of class 
      * 
      */
-    class Brain_rhythm: public Utils::Statistical_analysis
-
+    class Brain_rhythm: public Utils::Statistical_analysis, public Utils::XML_writer
     {
+    protected:
+      //! Vector of analyse time v.s. potential
+      std::vector< std::list< std::tuple< double/*time*/, double/*V*/, double/*I*/ > > >
+	electrode_rhythm_;
+      //! Mapping of the electrode setting
+      std::vector< std::string /*label*/> electrode_mapping_;
+
+      // 
+      // Output file
+      // 
+
+      //! XML output file: setup node
+      pugi::xml_node setup_node_;
+      //! XML output file: electrodes node
+      pugi::xml_node electrodes_node_;
+
+
     public:
+      /*!
+       *  \brief Default Constructor
+       *
+       *  Constructor of the class Brain_rhythm
+       *
+       */
+      Brain_rhythm();
+      /*!
+       *  \brief Copy Constructor
+       *
+       *  Constructor of the class Brain_rhythm
+       *
+       */
+      Brain_rhythm(const Brain_rhythm& ){};
+      /*!
+       *  \brief Destructor
+       *
+       *  Constructor of the class Brain_rhythm
+       *
+       */
       virtual ~Brain_rhythm(){/* Do nothing */};  
+      /*!
+       *  \brief Operator =
+       *
+       *  Operator = of the class Brain_rhythm
+       *
+       */
+      Brain_rhythm& operator = (const Brain_rhythm& ){return *this;};
       
     public:
-      //      virtual void initialization() = 0;
-      virtual void modelization() = 0;
+      /*!
+       *  \brief Load electrode file
+       *
+       *  This method load the input XML file of electrode setting.
+       *
+       * \param In_electrode_file_XML: input electrode file in XML format.
+       */
+      void load_electrode_file( std::string In_electrode_file_XML );
+      /*!
+       *  \brief Get the number of electrodes
+       *
+       *  This method return the number of electrodes. This methode is needed for the multi-threading dispatching.
+       *
+       */
+      inline int get_number_of_physical_events(){return electrode_mapping_.size();};
+
+    public:
+      /*!
+       */
+      virtual void modelization()  = 0;
+      /*!
+       */
+      virtual void Make_analysis() = 0;
+      /*!
+       */
+      virtual void output_XML()    = 0;
+      /*!
+       */
+      virtual void operator () ()  = 0;
     };
   }
 }

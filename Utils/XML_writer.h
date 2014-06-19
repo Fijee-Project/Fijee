@@ -105,5 +105,5 @@ namespace Utils
      */
     XML_writer& operator = ( const XML_writer& ){return *this;};
   };
-};
+}
 #endif

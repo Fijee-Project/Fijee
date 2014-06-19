@@ -26,6 +26,11 @@
 //  either expressed or implied, of the FreeBSD Project.  
 #include "Jansen_Rit_1995.h"
 // 
+// Untill gcc fix the bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55800
+// it should be a class member!!
+// 
+static thread_local int local_electrode_;
+// 
 // 
 // 
 extern "C" int ode_system(double t, const double y[], double dydt[], void *params)
@@ -33,7 +38,7 @@ extern "C" int ode_system(double t, const double y[], double dydt[], void *param
   // 
   // 
   Utils::Biophysics::Jansen_Rit_1995 *alpha;
-  alpha = reinterpret_cast< Utils::Biophysics::Jansen_Rit_1995 *>(params);
+  alpha = static_cast< Utils::Biophysics::Jansen_Rit_1995 *>(params);
 
   // 
   // 
@@ -43,26 +48,21 @@ extern "C" int ode_system(double t, const double y[], double dydt[], void *param
 // 
 // 
 Utils::Biophysics::Jansen_Rit_1995::Jansen_Rit_1995():
-  duration_(20000.), impulse_(320.),
+  duration_(20000.), impulse_(120.),
   e0_( 2.5 /*s^{-1}*/), r_( 0.56 /*(mV)^{-1}*/), v0_( 6. /*(mV)*/),
   C_( 135. ),
-  a_( 100. /*s^{-1}*/), A_( 3.25 /*(mV)*/), b_( 50. /*s^{-1}*/), B_( 22. /*(mV)*/)
+  a_( 100. /*s^{-1}*/), A_( 3.25 /*(mV)*/), b_( 50. /*s^{-1}*/), B_( 22. /*(mV)*/),
+  electrode_(0)
 {
   // 
   //  Normal distribution: mu = 2.4 mV and sigma = 2.0 mV
   distribution_ = std::normal_distribution<double>(2.4, 2.0);
-  // 
-  drawn_ = std::vector<bool>(1000000,false);
   
   // 
   // 
   C1_ = C_;
   C2_ = 0.8 * C_;
   C3_ = C4_ = 0.25 * C_;
-
-  // 
-  // 
-  p_.reset( new double (distribution_(generator_)) );
 }
 // 
 // 
@@ -92,10 +92,26 @@ Utils::Biophysics::Jansen_Rit_1995::modelization()
   double y[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
   // 
-  // 
-  for ( int i = 1 ; i < duration_ + 500; i++ )
+  // Reach oscillation rhythm
+  int transient_stage = 0;
+  int MAX_TRANSIENT   = 5000000;
+  while ( transient_stage++ < MAX_TRANSIENT )
     {
-      double ti = i * delta_t;
+      double ti = transient_stage * delta_t;
+      // solve
+      int status = gsl_odeiv2_driver_apply (driver, &t, ti, y);
+      // 
+      if (status != GSL_SUCCESS)
+	{
+	  printf ("error, return value=%d\n", status);
+	  abort();
+	}
+    }
+  // 
+  std::cout << "electrode: " << local_electrode_ << std::endl;
+  for ( int i = 1 ; i < duration_ ; i++ )
+    {
+      double ti = i * delta_t + MAX_TRANSIENT * delta_t;
       // solve
       int status = gsl_odeiv2_driver_apply (driver, &t, ti, y);
       // 
@@ -105,13 +121,10 @@ Utils::Biophysics::Jansen_Rit_1995::modelization()
 	  abort();
 	}
       // record statistics, after the transient state
-      if( i > 500 )
-	time_potential_.push_back( std::make_tuple(t, y[0]) );
+      //      time_potential_.push_back( std::make_tuple(ti - MAX_TRANSIENT * delta_t, y[0]) );
+      electrode_rhythm_[local_electrode_].push_back(std::make_tuple(ti - MAX_TRANSIENT * delta_t,
+								    y[0], 0.));
     }
-
-  // 
-  // Statistic analysise
-  Make_analysis();
 
   // 
   // 
@@ -133,22 +146,23 @@ Utils::Biophysics::Jansen_Rit_1995::ordinary_differential_equations( double T, c
   // 
   // 
   if( rest == 0. )
-    if ( !drawn_[(int)pulse] )
+    if ( !drawn_[local_electrode_][(int)pulse] )
       {
-	*p_ = distribution_(generator_);
-	drawn_[(int)pulse] = true;
+	p_[local_electrode_] = distribution_(generator_);
+	drawn_[local_electrode_][(int)pulse] = true;
       }
 
   // 
   // System of ODE
-  DyDt[0] = Y[3];
-  DyDt[3] = A_ * a_ * this->sigmoid(Y[1] - Y[2]) - 2*a_*Y[3] - a_*a_*Y[0];
+  DyDt[0]  = Y[3];
+  DyDt[3]  = A_ * a_ * sigmoid(Y[1] - Y[2]) - 2*a_*Y[3] - a_*a_*Y[0];
   // 
-  DyDt[1] = Y[4];
-  DyDt[4] = A_ * a_ * ( *p_ + C2_*sigmoid(C1_ * Y[0]) ) - 2*a_*Y[4] - a_*a_*Y[1];
+  DyDt[1]  = Y[4];
+  DyDt[4]  = A_ * a_ * ( p_[local_electrode_] + C2_*sigmoid(C1_ * Y[0]) );
+  DyDt[4] += - 2*a_*Y[4] - a_*a_*Y[1];
   // 
-  DyDt[2] = Y[5];
-  DyDt[5] = B_ * b_ * C4_*sigmoid(C3_ * Y[0]) - 2*b_*Y[5] - b_*b_*Y[2];
+  DyDt[2]  = Y[5];
+  DyDt[5]  = B_ * b_ * C4_*sigmoid(C3_ * Y[0]) - 2*b_*Y[5] - b_*b_*Y[2];
 
   // 
   // 
@@ -162,22 +176,199 @@ Utils::Biophysics::Jansen_Rit_1995::Make_analysis()
 {
 #ifdef TRACE
 #if TRACE == 100
+  // 
+  // 
+  // 
+  int number_of_electrodes = electrode_mapping_.size();
+
   //
-  //
+  // R header: alpha rhythm
+  // 
   output_stream_
-    << "time potential "
-    << std::endl;
+    << "time ";
+  // 
+  for (int electrode = 0 ; electrode < number_of_electrodes ; electrode++)
+    output_stream_ <<  electrode_mapping_[electrode] << " ";
+  // 
+  output_stream_ << std::endl;
 
   // 
-  for( auto time_potential : time_potential_ )
-    output_stream_
-      << std::get<0>(time_potential) << " " 
-      << std::get<1>(time_potential) 
-      << std::endl;
+  // R values: alpha rhythm
+  // 
+  std::vector< std::list< std::tuple< double, double, double > >::const_iterator > 
+    it(number_of_electrodes);
+  // 
+  for( int electrode = 0 ; electrode < number_of_electrodes ; electrode++ )
+    it[electrode] = electrode_rhythm_[electrode].begin();
+  // 
+  while( it[0] !=  electrode_rhythm_[0].end())
+    {
+      for (int electrode = 0 ; electrode < number_of_electrodes ; electrode++)
+	{
+	  // get the time
+	  if ( electrode == 0 )
+	    output_stream_ <<  std::get<0>( *(it[electrode]) ) << " ";
+	  // 
+	  
+	    output_stream_ <<  std::get<1>( *(it[electrode]++) ) << " ";
+	}
+      // 
+      output_stream_ << std::endl;
+    }
 
   //
   //
   Make_output_file("alpha_rhythm.frame");
+
+
+  // 
+  // FFT
+  // 
+
+  //
+  // R header: Power spectral density
+  // 
+  output_stream_
+    << "Hz ";
+  // 
+  for (int electrode = 0 ; electrode < number_of_electrodes ; electrode++)
+    output_stream_ <<  electrode_mapping_[electrode] << " ";
+  // 
+  output_stream_ << std::endl;
+
+  // 
+  // R values: Power spectral density
+  // 
+  int 
+    N = 1024, /* N is a power of 2 */
+    n = 0;
+  // real and imaginary
+  double data[2*1024/*N*/];
+  std::vector< double* > data_vector(number_of_electrodes);
+  // 
+  for ( int electrode = 0 ; electrode < number_of_electrodes ; electrode++ )
+    {
+      n = 0;
+      data_vector[electrode] = new double[2*1024/*N*/];
+      for( auto time_potential : electrode_rhythm_[electrode] )
+	{
+	  if ( n < N )
+	    {
+	      REAL(data_vector[electrode],n)   = std::get<1>(time_potential);
+	      IMAG(data_vector[electrode],n++) = 0.0;
+	    }
+	  else
+	    break;
+	}
+    }
+
+  // 
+  // Forward FFT
+  // A stride of 1 accesses the array without any additional spacing between elements. 
+  for ( auto electrode : data_vector )
+    gsl_fft_complex_radix2_forward (electrode, 1/*stride*/, 1024);
+
+  //
+  // 
+  for ( int i = 0 ; i < N ; i++ )
+    {
+      output_stream_ 
+	<< i << " ";
+      // 
+      for ( auto electrode : data_vector )
+	output_stream_ 
+	  << (REAL(electrode,i)*REAL(electrode,i) + IMAG(electrode,i)*IMAG(electrode,i)) / N
+	  << " ";
+	  
+      // 
+      output_stream_ << std::endl;
+    }
+//  // 
+//  // 
+//  int 
+//    N = 1024, /* N is a power of 2 */
+//    n = 0;
+//  // real and imaginary
+//  double data[2*1024/*N*/];
+//  // 
+//  for( auto time_potential : time_potential_ )
+//    {
+//      if ( n < N )
+//	{
+//	  REAL(data,n)   = std::get<1>(time_potential);
+//	  IMAG(data,n++) = 0.0;
+//	}
+//    }
+//
+//  // 
+//  // Forwar FFT
+//  // A stride of 1 accesses the array without any additional spacing between elements. 
+//  gsl_fft_complex_radix2_forward (data, 1/*stride*/, 1024);
+//
+//  // 
+//  for ( int i = 0 ; i < N ; i++ )
+//    output_stream_ 
+//      << i << " " 
+//      << (REAL(data,i)*REAL(data,i) + IMAG(data,i)*IMAG(data,i)) / N
+//      << std::endl;
+
+  //
+  //
+  Make_output_file("PSD.frame");
 #endif
 #endif      
+}
+//
+//
+//
+void 
+Utils::Biophysics::Jansen_Rit_1995::init()
+{
+  // 
+  // Initializations
+  drawn_.resize( get_number_of_physical_events() );
+  //
+  for ( int i = 0 ; i < get_number_of_physical_events() ; i++ )
+    drawn_[i] = std::vector<bool>(1000000,false);
+
+  //
+  p_.resize( get_number_of_physical_events() );
+  // 
+  for( int i = 0 ; i < get_number_of_physical_events() ; i++ )
+    p_[i] = distribution_(generator_);
+}
+//
+//
+//
+void 
+Utils::Biophysics::Jansen_Rit_1995::operator () ()
+{
+  //
+  // Mutex the electrode poping process
+  //
+  try 
+    {
+      // lock the electrode
+      std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
+      // 
+      local_electrode_ = electrode_++;
+    }
+  catch (std::logic_error&) 
+    {
+      std::cerr << "[exception caught]\n" << std::endl;
+    }
+
+  // 
+  // Generate alpha rhythm for electrode local_electrode_
+  modelization();
+}
+// 
+// 
+// 
+void 
+Utils::Biophysics::Jansen_Rit_1995::output_XML()
+{
+  // 
+  // Statistic analysise
+  Make_analysis();
 }

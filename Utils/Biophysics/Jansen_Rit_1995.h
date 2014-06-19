@@ -40,10 +40,16 @@
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_odeiv2.h>
+#include <gsl/gsl_fft_complex.h>
 #include <random>
 #include <vector>
 #include <list>
 #include <memory>
+#include <mutex>
+#include <stdexcept>      // std::logic_error
+// GSL macros
+#define REAL(z,i) ((z)[2*(i)])
+#define IMAG(z,i) ((z)[2*(i)+1])
 //
 // UCSF
 //
@@ -79,7 +85,7 @@ namespace Utils
       //! Normal distribution
       std::normal_distribution<double> distribution_;
       //! Excitatory inpulses already drawn from the neighbours
-      std::vector<bool> drawn_; 
+      std::vector< std::vector<bool> > drawn_; 
       //! Duration of the simulation (ms)
       double duration_;
       //! Number of impulse per second (random noise)
@@ -123,10 +129,22 @@ namespace Utils
       //! Average inhibitory synaptic gain
       double B_;
       //! White noise
-      std::shared_ptr< double > p_;
+      std::vector< double > p_;
       //! Analyse time v.s. potential
       std::list< std::tuple< double, double > > time_potential_;
      
+      // 
+      // Multi-threading
+      // 
+      //! Critical zone
+      std::mutex critical_zone_;
+      //! Electrode treated
+      int electrode_;
+      // #! Electrode treated localy in the thread
+      // Untill gcc fix the bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55800
+      // static thread_local int local_electrode_;
+
+
     public:
 	/*!
 	 *  \brief Default Constructor
@@ -156,8 +174,22 @@ namespace Utils
 	 *
 	 */
 	virtual ~Jansen_Rit_1995(){/* Do nothing */};  
-      
+	/*!
+	 *  \brief Operator ()
+	 *
+	 *  Operator () of the class SL_subtraction
+	 *
+	 */
+	virtual void operator () ();
+     
     public:
+	/*!
+	 *  \brief Initialization
+	 *
+	 *  This member function initializes the containers.
+ 	 *
+	 */
+	void init();
 	/*!
 	 *  \brief  Brain rhythm modelization
 	 *
@@ -165,6 +197,13 @@ namespace Utils
  	 *
 	 */
       virtual void modelization();
+	/*!
+	 *  \brief Output XML
+	 *
+	 *  This member function create the XML output
+ 	 *
+	 */
+      virtual void output_XML();
 
     private:
       /*!

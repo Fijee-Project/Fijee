@@ -29,7 +29,7 @@
 //
 // UCSF project
 //
-//#include "Utils/Thread_dispatching.h"
+#include "Utils/Thread_dispatching.h"
 //
 //
 /*!
@@ -53,7 +53,7 @@ namespace Utils
      *
      *  This class is an example of class I will have to use
      */
-    template < typename  Membrane_potential >
+    template < typename  Membrane_potential, int num_of_threads = 1 >
       class Brain_rhythm_models
       {
       private:
@@ -97,7 +97,41 @@ namespace Utils
 	 */
 	void modelization()
 	{
-	  EEG_activity_.modelization();
+	  //
+	  // load electrodes file
+	  EEG_activity_.load_electrode_file("/home/cobigo/subjects/GazzDCS0004mgh_GPU4/fem/output/electrodes.xml");
+	  // Init containers
+	  EEG_activity_.init();
+
+      
+	  //
+	  // Define the number of threads in the pool of threads
+	  Utils::Thread_dispatching pool( num_of_threads );
+	  
+	  //
+	  //
+	  int tempo = 0;
+	  for( int physical_event = 0 ;
+	       physical_event != EEG_activity_.get_number_of_physical_events() ; 
+	       physical_event++ )
+	    if( tempo++ < 10 )
+	      {
+		//
+		// Enqueue tasks
+		pool.enqueue( std::ref(EEG_activity_) );
+	      }
+	    else {break;}
+	};
+	/*!
+	 *  \brief minimize function
+	 *
+	 *  This method launch the minimization algorithm
+	 */
+	void output()
+	{
+	  // 
+	  // Generation of output
+	  EEG_activity_.output_XML();
 	};
       };
   }

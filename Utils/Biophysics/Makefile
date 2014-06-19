@@ -5,11 +5,11 @@ LDFLAGS   =  -shared
 #
 INC     = -I$(FIJEE)/ 
 LIB_DIR = 
-LIBS    = -lgsl
+LIBS    = -lgsl #-pthread 
 #
 # Sources
 #
-SRC        = Jansen_Rit_1995.cxx
+SRC        = Brain_rhythm.cxx Jansen_Rit_1995.cxx 
 OBJ        = $(SRC:.cxx=.o)
 #
 #
@@ -21,7 +21,7 @@ EXEC = libfijee_biophysics.so
 all: $(EXEC) 
 
 $(EXEC): $(OBJ)
-	$(CXX) $(LDFLAGS) $(INC) -o $@  $<
+	$(CXX) $(LDFLAGS) $(INC) -o $@  $?
 
 
 %.o: %.cxx

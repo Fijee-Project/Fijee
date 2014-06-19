@@ -36,33 +36,47 @@
 #include "tCS_tACS.h"
 #include "tCS_tDCS_local_conductivity.h"
 #include "Model_solver.h"
+#include "Utils/Biophysics/Brain_rhythm_models.h"
+#include "Utils/Biophysics/Brain_rhythm.h"
+#include "Utils/Biophysics/Jansen_Rit_1995.h"
 
 int main()
 {
   //
   //
   Solver::PDE_solver_parameters* solver_parameters = Solver::PDE_solver_parameters::get_instance();
+  // 
   solver_parameters->init();
   
+  // 
+  // Modelisation of alpha rhythm
+  //  - Utils::Biophysics::Jansen_Rit_1995
+  // 
+  // 
+  Utils::Biophysics::Brain_rhythm_models< Utils::Biophysics::Jansen_Rit_1995, 
+					  /*solver_parameters->get_number_of_threads_()*/ 4 > alpha;
   //
-  // Physical models:
-  //  - Source localization
-  //    - Solver::SL_subtraction
-  //    - Solver::SL_direct
-  //  - Transcranial current stimulation
-  //    - Solver::tCS_tDCS
-  //    - Solver::tCS_tACS
-  //  - Local conductivity estimation
-  //    - Solver::tCS_tDCS_local_conductivity
-  //
-  // export OMP_NUM_THREADS=2
-  Solver::Model_solver< /* physical model */ Solver::tCS_tDCS,
-			/*solver_parameters->get_number_of_threads_()*/ 2 >  model;
+  alpha.modelization();
+  alpha.output();
 
-  //
-  //
-  std::cout << "Loop over solvers" << std::endl;
-  model.solver_loop();
+
+//  //
+//  // Physical models:
+//  //  - Source localization
+//  //    - Solver::SL_subtraction
+//  //    - Solver::SL_direct
+//  //  - Transcranial current stimulation
+//  //    - Solver::tCS_tDCS
+//  //    - Solver::tCS_tACS
+//  //  - Local conductivity estimation
+//  //    - Solver::tCS_tDCS_local_conductivity
+//  //
+//  // export OMP_NUM_THREADS=2
+//  Solver::Model_solver< /* physical model */ Solver::tCS_tDCS,
+//			/*solver_parameters->get_number_of_threads_()*/ 2 >  model;
+//  //
+//  std::cout << "Loop over solvers" << std::endl;
+//  model.solver_loop();
 
   //
   //
