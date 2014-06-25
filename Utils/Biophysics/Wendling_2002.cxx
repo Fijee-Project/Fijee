@@ -52,19 +52,24 @@ Utils::Biophysics::Wendling_2002::Wendling_2002():
   e0_( 2.5 /*s^{-1}*/), r_( 0.56 /*(mV)^{-1}*/), v0_( 6. /*(mV)*/),
   C_( 135. ),
   a_( 100. /*s^{-1}*/), A_( 3.25 /*(mV)*/), b_( 50. /*s^{-1}*/), B_( 22. /*(mV)*/),
+  g_(500. /*s^{-1}*/), G_( 10. /*(mV)*/),
   electrode_(0)
 {
   // 
   //  Normal distribution: mu = 2.4 mV and sigma = 2.0 mV
-  distribution_ = std::normal_distribution<double>(2.4, 2.0);
+  distribution_ = std::normal_distribution<double>(1., 5.0);
   // Frequency of pulse changing per second
-  uniform_distribution_ = std::uniform_int_distribution<int>(120, 320);
+  gaussian_distribution_ = std::normal_distribution<double>(90., 30.);
   // 
   // 
   C1_ = C_;
   C2_ = 0.8 * C_;
   C3_ = C4_ = 0.25 * C_;
+  C5_ = 0.3 * C_;
+  C6_ = 0.1 * C_;
+  C7_ = 0.8 * C_;
 }
+
 // 
 // 
 //
@@ -75,7 +80,7 @@ Utils::Biophysics::Wendling_2002::modelization()
   // Runge-Kutta
   // 
   // Create the system of ode
-  gsl_odeiv2_system sys = {ode_system_W02, NULL /*jacobian*/, 6, this};
+  gsl_odeiv2_system sys = {ode_system_W02, NULL /*jacobian*/, 10, this};
   // Step types
   // Step Type: gsl_odeiv2_step_rk2   - Explicit embedded Runge-Kutta (2, 3) method. 
   // Step Type: gsl_odeiv2_step_rk4   - Explicit 4th order Runge-Kutta. 
@@ -90,7 +95,7 @@ Utils::Biophysics::Wendling_2002::modelization()
     t = 0.0,
     delta_t = 1. / 1000.; /* EEG trigges every 1ms */
   // we have 6 unknowns
-  double y[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+  double y[10] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
   // 
   // Reach oscillation rhythm
@@ -158,15 +163,21 @@ Utils::Biophysics::Wendling_2002::ordinary_differential_equations( double T, con
 
   // 
   // System of ODE
-  DyDt[0]  = Y[3];
-  DyDt[3]  = A_*a_*sigmoid(Y[1] - Y[2]) - 2*a_*Y[3] - a_*a_*Y[0];
+  DyDt[0]  = Y[5];
+  DyDt[5]  = A_*a_*sigmoid(Y[1] - Y[2] - Y[3]) - 2*a_*Y[5] - a_*a_*Y[0];
   // 
-  DyDt[1]  = Y[4];
-  DyDt[4]  = A_*a_*( p_[local_electrode_] + C2_*sigmoid(C1_ * Y[0]) );
-  DyDt[4] += - 2*a_*Y[4] - a_*a_*Y[1];
+  DyDt[1]  = Y[6];
+  DyDt[6]  = A_*a_*( p_[local_electrode_] + C2_*sigmoid(C1_*Y[0]) );
+  DyDt[6] += - 2*a_*Y[6] - a_*a_*Y[1];
   // 
-  DyDt[2]  = Y[5];
-  DyDt[5]  = B_*b_*C4_*sigmoid(C3_ * Y[0]) - 2*b_*Y[5] - b_*b_*Y[2];
+  DyDt[2]  = Y[7];
+  DyDt[7]  = B_*b_*C4_*sigmoid(C3_*Y[0]) - 2*b_*Y[7] - b_*b_*Y[2];
+  // 
+  DyDt[3]  = Y[8];
+  DyDt[8]  = G_*g_*C7_*sigmoid(C5_*Y[0] - C6_*Y[4]) - 2*g_*Y[8] - g_*g_*Y[3];
+  // 
+  DyDt[4]  = Y[9];
+  DyDt[9]  = B_*b_*sigmoid(C3_*Y[0]) - 2*b_*Y[9] - b_*b_*Y[4];
 
   // 
   // 
@@ -201,7 +212,7 @@ Utils::Biophysics::Wendling_2002::init()
   impulse_.resize( get_number_of_physical_events() );
   // 
   for( int i = 0 ; i < get_number_of_physical_events() ; i++ )
-    impulse_[i] = uniform_distribution_(generator_);
+    impulse_[i] = gaussian_distribution_(generator_);
 }
 //
 //

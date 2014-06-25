@@ -76,9 +76,9 @@ namespace Utils
       //! Random engine generator
       std::default_random_engine generator_;
       //! Normal distribution
-      std::normal_distribution<double> distribution_;
+      std::normal_distribution< double > distribution_;
       //! Uniform distribution
-      std::uniform_int_distribution<int> uniform_distribution_;
+      std::normal_distribution< double > gaussian_distribution_;
 
       //! Excitatory inpulses already drawn from the neighbours
       std::vector< std::vector<bool> > drawn_; 
@@ -111,19 +111,29 @@ namespace Utils
       double C3_;
       //! Average number of synaptic contacts in the inhibitory feedback loop
       double C4_;
+      //! Average number of synaptic contacts in the inhibitory feedback loop
+      double C5_;
+      //! Average number of synaptic contacts in the inhibitory feedback loop
+      double C6_;
+      //! Average number of synaptic contacts in the inhibitory feedback loop
+      double C7_;
 
       // 
       // Spontaneous activity in a single-column model
       // 
 
-      //! Membrane average time constant and dendritic tree average time delays
+      //! Membrane average time constant and dendritic tree average time delays (AMPA)
       double a_;
-      //! Average excitatory synaptic gain
+      //! Average excitatory synaptic gain (AMPA)
       double A_;
-      //! Membrane average time constant and dendritic tree average time delays
+      //! Membrane average time constant and dendritic tree average time delays (GABA_{A,slow})
       double b_;
-      //! Average inhibitory synaptic gain
+      //! Average inhibitory synaptic gain (GABA_{A,slow})
       double B_;
+      //! Membrane average time constant and dendritic tree average time delays (GABA_{A,fast})
+      double g_;
+      //! Average inhibitory synaptic gain (GABA_{A,fast})
+      double G_;
       //! White noise
       std::vector< double > p_;
      
