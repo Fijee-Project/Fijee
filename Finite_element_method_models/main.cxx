@@ -39,6 +39,8 @@
 #include "Utils/Biophysics/Brain_rhythm_models.h"
 #include "Utils/Biophysics/Brain_rhythm.h"
 #include "Utils/Biophysics/Jansen_Rit_1995.h"
+#include "Utils/Biophysics/Wendling_2002.h"
+#include "Utils/Biophysics/Molaee_Ardekani_Wendling_2009.h"
 
 int main()
 {
@@ -51,9 +53,10 @@ int main()
   // 
   // Modelisation of alpha rhythm
   //  - Utils::Biophysics::Jansen_Rit_1995
+  //  - Utils::Biophysics::Wendling_2002
+  //  - Utils::Biophysics::Molaee_Ardekani_Wendling_2009
   // 
-  // 
-  Utils::Biophysics::Brain_rhythm_models< Utils::Biophysics::Jansen_Rit_1995, 
+  Utils::Biophysics::Brain_rhythm_models< Utils::Biophysics::Wendling_2002, 
 					  /*solver_parameters->get_number_of_threads_()*/ 4 > alpha;
   //
   alpha.modelization();
@@ -73,7 +76,7 @@ int main()
 //  //
 //  // export OMP_NUM_THREADS=2
 //  Solver::Model_solver< /* physical model */ Solver::tCS_tDCS,
-//			/*solver_parameters->get_number_of_threads_()*/ 2 >  model;
+//			/*solver_parameters->get_number_of_threads_()*/ 1 >  model;
 //  //
 //  std::cout << "Loop over solvers" << std::endl;
 //  model.solver_loop();

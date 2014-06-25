@@ -75,6 +75,9 @@ namespace Solver
    */
   class SL_subtraction : Physics
   {
+  private:
+    //! Number of dipoles
+    int number_dipoles_;
     //! Dipoles list
     std::list< Solver::Phi > dipoles_list_;
     //! Function space
@@ -129,12 +132,6 @@ namespace Solver
      */
     virtual inline
       int get_number_of_physical_events(){return number_dipoles_;};
-
-
-  private:
-    /// Number of dipoles
-    int number_dipoles_;
-
   };
 }
 #endif

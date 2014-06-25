@@ -24,11 +24,11 @@
 //  The views and conclusions contained in the software and documentation are those   
 //  of the authors and should not be interpreted as representing official policies,    
 //  either expressed or implied, of the FreeBSD Project.  
-#ifndef JANSEN_RIT_1995_H
-#define JANSEN_RIT_1995_H
+#ifndef MOLAEE_ARDEKANI_WENDLING_2009_H
+#define MOLAEE_ARDEKANI_WENDLING_2009_H
 //http://franckh.developpez.com/tutoriels/outils/doxygen/
 /*!
- * \file Jansen_Rit_1995.h
+ * \file Molaee_Ardekani_Wendling_2009.h
  * \brief brief describe 
  * \author Yann Cobigo
  * \version 0.1
@@ -64,28 +64,26 @@ namespace Utils
    */
   namespace Biophysics
   {
-    /*! \class Jansen_Rit_1995
-     * \brief classe representing the first cortical activity model
+    /*! \class Molaee_Ardekani_Wendling_2009
+     * 
+     * \brief classe representing a cortical activity model
      *
-     *  This class implement the Jansen and Rit model. It is the first mathematical cortical activity model, representing alpha waves. 
+     *  This class implement the Molaee-Ardekani, Benquet, Bartolomei, Wendling model. It is a mathematical cortical activity model, representing alpha waves. 
      * 
      */
-    class Jansen_Rit_1995 : public Brain_rhythm
+    class Molaee_Ardekani_Wendling_2009 : public Brain_rhythm
     {
     private:
       //! Random engine generator
       std::default_random_engine generator_;
       //! Normal distribution
       std::normal_distribution<double> distribution_;
-      //! Uniform distribution
-      std::uniform_int_distribution<int> uniform_distribution_;
-
       //! Excitatory inpulses already drawn from the neighbours
       std::vector< std::vector<bool> > drawn_; 
       //! Duration of the simulation (ms)
       double duration_;
       //! Number of impulse per second (random noise)
-      std::vector< double > impulse_;
+      double impulse_;
 
       // 
       // Parameter of the nonlinear sigmoid function, transforming the average membrane potential 
@@ -93,37 +91,47 @@ namespace Utils
       // 
 
       //! Determines the maximum firing rate of the neural population
-      double e0_;
+      double e0P_, e0I1_, e0I2_;
       //! Steepness of the sigmoidal transformation
-      double r_;
+      double rP_, rI1_, rI2_;
       //! Postsynaptic potential for which a 50 % firing rate is achieved
-      double v0_;
+      double v0P_, v0I1_, v0I2_;
       // 
       // Synaptic contacts
       // 
-      //! Average number of synaptic contacts
-      double C_;
-      //! Average number of synaptic contacts in the excitatory feedback loop
-      double C1_;
-      //! Average number of synaptic contacts in the excitatory feedback loop
-      double C2_;
-      //! Average number of synaptic contacts in the inhibitory feedback loop
-      double C3_;
-      //! Average number of synaptic contacts in the inhibitory feedback loop
-      double C4_;
+      //! Average number of synaptic contacts: type P  \rightarrow type P
+      double CPP_;
+      //! Average number of synaptic contacts: type P  \rightarrow type I
+      double CPI1_;
+      //! Average number of synaptic contacts: type P  \rightarrow type I'
+      double CPI2_;
+      //! Average number of synaptic contacts: type I  \rightarrow type P
+      double CI1P_;
+      //! Average number of synaptic contacts: type I  \rightarrow type I
+      double CI1I1_;
+      //! Average number of synaptic contacts: type I' \rightarrow type P
+      double CI2P_;
+      //! Average number of synaptic contacts: type I' \rightarrow type I
+      double CI2I1_;
+      //! Average number of synaptic contacts: type I' \rightarrow type I'
+      double CI2I2_;
 
       // 
       // Spontaneous activity in a single-column model
       // 
 
-      //! Membrane average time constant and dendritic tree average time delays
+      //! Membrane average time constant and dendritic tree average time delays (AMPA)
       double a_;
-      //! Average excitatory synaptic gain
+      //! Average excitatory synaptic gain (AMPA)
       double A_;
-      //! Membrane average time constant and dendritic tree average time delays
+      //! Membrane average time constant and dendritic tree average time delays (GABA_{a,slow})
       double b_;
-      //! Average inhibitory synaptic gain
+      //! Average inhibitory synaptic gain (GABA_{a,slow})
       double B_;
+      //! Membrane average time constant and dendritic tree average time delays (GABA_{a,fast})
+      double g_;
+      //! Average inhibitory synaptic gain (GABA_{a,fast})
+      double G_;
       //! White noise
       std::vector< double > p_;
      
@@ -143,31 +151,32 @@ namespace Utils
 	/*!
 	 *  \brief Default Constructor
 	 *
-	 *  Constructor of the class Jansen_Rit_1995
+	 *  Constructor of the class Molaee_Ardekani_Wendling_2009
 	 *
 	 */
-	Jansen_Rit_1995();
+	Molaee_Ardekani_Wendling_2009();
 	/*!
 	 *  \brief Copy Constructor
 	 *
 	 *  Constructor is a copy constructor
 	 *
 	 */
-	Jansen_Rit_1995( const Jansen_Rit_1995& ){};
+	Molaee_Ardekani_Wendling_2009( const Molaee_Ardekani_Wendling_2009& ){};
 	/*!
 	 *  \brief Operator =
 	 *
-	 *  Operator = of the class Jansen_Rit_1995
+	 *  Operator = of the class Molaee_Ardekani_Wendling_2009
 	 *
 	 */
-	Jansen_Rit_1995& operator = ( const Jansen_Rit_1995& ){return *this;};
+	Molaee_Ardekani_Wendling_2009& operator = ( const Molaee_Ardekani_Wendling_2009& )
+	  {return *this;};
 	/*!
 	 *  \brief Destructor
 	 *
-	 *  Operator destructor of the class Jansen_Rit_1995
+	 *  Operator destructor of the class Molaee_Ardekani_Wendling_2009
 	 *
 	 */
-	virtual ~Jansen_Rit_1995(){/* Do nothing */};  
+	virtual ~Molaee_Ardekani_Wendling_2009(){/* Do nothing */};  
 	/*!
 	 *  \brief Operator ()
 	 *
@@ -194,12 +203,26 @@ namespace Utils
 
     private:
       /*!
-       *  \brief  Sigmoid
+       *  \brief  Sigmoid P
        *
-       *  This member function transforms the average membrane potential into an average density of action potential.
+       *  This member function transforms the average membrane potential into an average density of action potential. This wave-to-pulse transforms the pyramidal (type P) average mambrane potential.
        *
        */
-      inline double sigmoid( const double V ){return (2 * e0_) / ( 1 + exp( r_*(v0_ - V) ) ); }
+      inline double sigmoid_P( const double V ){return (2 * e0P_) / ( 1 + exp( rP_*(v0P_ - V) ) ); }
+      /*!
+       *  \brief  Sigmoid I
+       *
+       *  This member function transforms the average membrane potential into an average density of action potential. This wave-to-pulse transforms the inter-neurons mediated by GABA_{a,fast} (type I) average mambrane potential.
+       *
+       */
+      inline double sigmoid_I1( const double V ){return (2 * e0I1_) / ( 1 + exp( rI1_*(v0I1_ - V) ) ); }
+      /*!
+       *  \brief  Sigmoid I,
+       *
+       *  This member function transforms the average membrane potential into an average density of action potential. This wave-to-pulse transforms the inter-neurons mediated by GABA_{a,slow} (type I') average mambrane potential.
+       *
+       */
+      inline double sigmoid_I2( const double V ){return (2 * e0I2_) / ( 1 + exp( rI2_*(v0I2_ - V) ) ); }
 
 
     public:

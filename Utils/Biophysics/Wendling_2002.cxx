@@ -24,7 +24,7 @@
 //  The views and conclusions contained in the software and documentation are those   
 //  of the authors and should not be interpreted as representing official policies,    
 //  either expressed or implied, of the FreeBSD Project.  
-#include "Jansen_Rit_1995.h"
+#include "Wendling_2002.h"
 // 
 // WARNING
 // Untill gcc fix the bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55800
@@ -34,11 +34,11 @@ static thread_local int local_electrode_;
 // 
 // 
 // 
-extern "C" int ode_system_JR(double t, const double y[], double dydt[], void *params)
+extern "C" int ode_system_W02(double t, const double y[], double dydt[], void *params)
 {
   // 
-  Utils::Biophysics::Jansen_Rit_1995 *alpha;
-  alpha = static_cast< Utils::Biophysics::Jansen_Rit_1995 *>(params);
+  Utils::Biophysics::Wendling_2002 *alpha;
+  alpha = static_cast< Utils::Biophysics::Wendling_2002 *>(params);
 
   // 
   // 
@@ -47,7 +47,7 @@ extern "C" int ode_system_JR(double t, const double y[], double dydt[], void *pa
 // 
 // 
 // 
-Utils::Biophysics::Jansen_Rit_1995::Jansen_Rit_1995():
+Utils::Biophysics::Wendling_2002::Wendling_2002():
   duration_(20000.),
   e0_( 2.5 /*s^{-1}*/), r_( 0.56 /*(mV)^{-1}*/), v0_( 6. /*(mV)*/),
   C_( 135. ),
@@ -69,13 +69,13 @@ Utils::Biophysics::Jansen_Rit_1995::Jansen_Rit_1995():
 // 
 //
 void
-Utils::Biophysics::Jansen_Rit_1995::modelization()
+Utils::Biophysics::Wendling_2002::modelization()
 {
   // 
   // Runge-Kutta
   // 
   // Create the system of ode
-  gsl_odeiv2_system sys = {ode_system_JR, NULL /*jacobian*/, 6, this};
+  gsl_odeiv2_system sys = {ode_system_W02, NULL /*jacobian*/, 6, this};
   // Step types
   // Step Type: gsl_odeiv2_step_rk2   - Explicit embedded Runge-Kutta (2, 3) method. 
   // Step Type: gsl_odeiv2_step_rk4   - Explicit 4th order Runge-Kutta. 
@@ -134,7 +134,7 @@ Utils::Biophysics::Jansen_Rit_1995::modelization()
 // 
 //
 int
-Utils::Biophysics::Jansen_Rit_1995::ordinary_differential_equations( double T, const double Y[], double DyDt[] )
+Utils::Biophysics::Wendling_2002::ordinary_differential_equations( double T, const double Y[], double DyDt[] )
 {
   // 
   // When puse is a multiple of impulse_ we change the amplitude
@@ -176,7 +176,7 @@ Utils::Biophysics::Jansen_Rit_1995::ordinary_differential_equations( double T, c
 //
 //
 void 
-Utils::Biophysics::Jansen_Rit_1995::init()
+Utils::Biophysics::Wendling_2002::init()
 {
   // 
   // Initializations
@@ -207,7 +207,7 @@ Utils::Biophysics::Jansen_Rit_1995::init()
 //
 //
 void 
-Utils::Biophysics::Jansen_Rit_1995::operator () ()
+Utils::Biophysics::Wendling_2002::operator () ()
 {
   //
   // Mutex the electrode poping process

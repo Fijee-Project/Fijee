@@ -1,7 +1,7 @@
 ## transcranial current stimulation (tCS)
 ## tDCS
 ## tACS
-## Current density field
+## Electrical field
 
 cell          = tetrahedron
 scalarElement = FiniteElement("Lagrange", cell, 1)
@@ -11,11 +11,10 @@ tensorElement = TensorElement("Lagrange", cell, 1)
 #
 # Function definition
 #
-J = TrialFunction(vectorElement)
+E = TrialFunction(vectorElement)
 w = TestFunction(vectorElement)
 
-a_sigma = Coefficient(tensorElement)
-u       = Coefficient(scalarElement) 
+u   = Coefficient(scalarElement) 
 
 
 #
@@ -23,8 +22,8 @@ u       = Coefficient(scalarElement)
 #
 
 # Bilinear form
-a = inner(J, w) * dx
+a = inner(E, w) * dx
 
 # Linear form
-L = -inner(  a_sigma * grad(u), w ) * dx
+L = - inner( grad(u), w ) * dx
 

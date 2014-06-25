@@ -24,7 +24,7 @@
 //  The views and conclusions contained in the software and documentation are those   
 //  of the authors and should not be interpreted as representing official policies,    
 //  either expressed or implied, of the FreeBSD Project.  
-#include "Jansen_Rit_1995.h"
+#include "Molaee_Ardekani_Wendling_2009.h"
 // 
 // WARNING
 // Untill gcc fix the bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55800
@@ -34,11 +34,11 @@ static thread_local int local_electrode_;
 // 
 // 
 // 
-extern "C" int ode_system_JR(double t, const double y[], double dydt[], void *params)
+extern "C" int ode_system_MAW(double t, const double y[], double dydt[], void *params)
 {
   // 
-  Utils::Biophysics::Jansen_Rit_1995 *alpha;
-  alpha = static_cast< Utils::Biophysics::Jansen_Rit_1995 *>(params);
+  Utils::Biophysics::Molaee_Ardekani_Wendling_2009 *alpha;
+  alpha = static_cast< Utils::Biophysics::Molaee_Ardekani_Wendling_2009 *>(params);
 
   // 
   // 
@@ -47,35 +47,36 @@ extern "C" int ode_system_JR(double t, const double y[], double dydt[], void *pa
 // 
 // 
 // 
-Utils::Biophysics::Jansen_Rit_1995::Jansen_Rit_1995():
-  duration_(20000.),
-  e0_( 2.5 /*s^{-1}*/), r_( 0.56 /*(mV)^{-1}*/), v0_( 6. /*(mV)*/),
-  C_( 135. ),
-  a_( 100. /*s^{-1}*/), A_( 3.25 /*(mV)*/), b_( 50. /*s^{-1}*/), B_( 22. /*(mV)*/),
+Utils::Biophysics::Molaee_Ardekani_Wendling_2009::Molaee_Ardekani_Wendling_2009():
+  duration_(20000.), impulse_(90.),
+  e0P_( 10. /*s^{-1}*/), e0I1_( 10. /*s^{-1}*/), e0I2_( 10. /*s^{-1}*/), 
+  rP_( 0.7 /*(mV)^{-1}*/), rI1_( 0.7 /*(mV)^{-1}*/), rI2_( 0.7 /*(mV)^{-1}*/), 
+  v0P_( 1. /*(mV)*/), v0I1_( 4. /*(mV)*/), v0I2_( 4. /*(mV)*/),
+  CPP_ ( 55. ),   CI1P_( 20. ),   CI2P_( 25. ),  /* Number of synaptic connections */
+  CPI1_( 80. ),  CI1I1_( 15. ),  CI2I1_( 20. ),  /* Number of synaptic connections */
+  CPI2_( 90. ),                  CI2I2_( 40. ),  /* Number of synaptic connections */  
+  a_(  40. /*s^{-1}*/), A_( 5.5 /*(mV)*/), 
+  b_(  20. /*s^{-1}*/), B_( 8.  /*(mV)*/),
+  g_( 150. /*s^{-1}*/), G_( 10.  /*(mV)*/),
   electrode_(0)
 {
   // 
-  //  Normal distribution: mu = 2.4 mV and sigma = 2.0 mV
-  distribution_ = std::normal_distribution<double>(2.4, 2.0);
-  // Frequency of pulse changing per second
-  uniform_distribution_ = std::uniform_int_distribution<int>(120, 320);
-  // 
-  // 
-  C1_ = C_;
-  C2_ = 0.8 * C_;
-  C3_ = C4_ = 0.25 * C_;
+  //  Noise - frequency of amplitude changing: 90
+  //  Normal distribution: mu = 0 mV and sigma = 30.0 mV
+  //  distribution_ = std::normal_distribution<double>(0., 30.0);
+  distribution_ = std::normal_distribution<double>(2., 2.4);
 }
 // 
 // 
 //
 void
-Utils::Biophysics::Jansen_Rit_1995::modelization()
+Utils::Biophysics::Molaee_Ardekani_Wendling_2009::modelization()
 {
   // 
   // Runge-Kutta
   // 
   // Create the system of ode
-  gsl_odeiv2_system sys = {ode_system_JR, NULL /*jacobian*/, 6, this};
+  gsl_odeiv2_system sys = {ode_system_MAW, NULL /*jacobian*/, 8, this};
   // Step types
   // Step Type: gsl_odeiv2_step_rk2   - Explicit embedded Runge-Kutta (2, 3) method. 
   // Step Type: gsl_odeiv2_step_rk4   - Explicit 4th order Runge-Kutta. 
@@ -90,12 +91,12 @@ Utils::Biophysics::Jansen_Rit_1995::modelization()
     t = 0.0,
     delta_t = 1. / 1000.; /* EEG trigges every 1ms */
   // we have 6 unknowns
-  double y[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+  double y[8] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  };
 
   // 
   // Reach oscillation rhythm
   int transient_stage = 0;
-  int MAX_TRANSIENT   = 1000000;
+  int MAX_TRANSIENT   = 5000000;
   while ( transient_stage++ < MAX_TRANSIENT )
     {
       double ti = transient_stage * delta_t;
@@ -128,45 +129,48 @@ Utils::Biophysics::Jansen_Rit_1995::modelization()
 
   // 
   // 
-  gsl_odeiv2_driver_free (driver);
+  //  gsl_odeiv2_driver_free (driver);
 }
 // 
 // 
 //
 int
-Utils::Biophysics::Jansen_Rit_1995::ordinary_differential_equations( double T, const double Y[], double DyDt[] )
+Utils::Biophysics::Molaee_Ardekani_Wendling_2009::ordinary_differential_equations( double T, const double Y[], double DyDt[] )
 {
   // 
   // When puse is a multiple of impulse_ we change the amplitude
-  double pulse = 1. / (double)impulse_[local_electrode_];
-
-  int pulse_int = int(pulse*1000.);
-  double n = T * 1000/ (double) pulse_int;
-  double n_int;
-  double rest = std::modf(n, &n_int);
+  double pulse = T * impulse_;
+  double pulse_int;
+  //
+  double rest = std::modf(pulse, &pulse_int);
 
   // 
   // 
-  if( rest == 0 /*|| (1 - rest) < 5.e-2*/)
-    if ( !drawn_[local_electrode_][(int)n_int] )
-      {//std::cout << "t: " << T << " " << impulse_[local_electrode_] << std::endl;
-	// Amplitude of the input signal
+  if( rest == 0. )
+    if ( !drawn_[local_electrode_][(int)pulse] )
+      {
 	p_[local_electrode_] = distribution_(generator_);
-	// 
-	drawn_[local_electrode_][(int)n_int] = true;
+	drawn_[local_electrode_][(int)pulse] = true;
       }
 
   // 
   // System of ODE
-  DyDt[0]  = Y[3];
-  DyDt[3]  = A_*a_*sigmoid(Y[1] - Y[2]) - 2*a_*Y[3] - a_*a_*Y[0];
-  // 
-  DyDt[1]  = Y[4];
-  DyDt[4]  = A_*a_*( p_[local_electrode_] + C2_*sigmoid(C1_ * Y[0]) );
-  DyDt[4] += - 2*a_*Y[4] - a_*a_*Y[1];
-  // 
-  DyDt[2]  = Y[5];
-  DyDt[5]  = B_*b_*C4_*sigmoid(C3_ * Y[0]) - 2*b_*Y[5] - b_*b_*Y[2];
+  // AMPA
+  DyDt[0]  = Y[4];
+  DyDt[4]  = A_*a_*sigmoid_P(CPP_*Y[0] - CI1P_*Y[1] - CI2P_*Y[3] + p_[local_electrode_] ) - 2*a_*Y[4] - a_*a_*Y[0];
+  // GABA_{A,fast}
+  DyDt[1]  = Y[5];
+  DyDt[5]  = G_*g_*sigmoid_I1(CPI1_*Y[0] - CI1I1_*Y[1] - CI2I1_*Y[2]) - 2*g_*Y[5] - g_*g_*Y[1];
+  // GABA_{A,fast}
+  DyDt[2]  = Y[6];
+  DyDt[6]  = G_*g_*sigmoid_I2(CPI2_*Y[0]               - CI2I2_*Y[3]) - 2*g_*Y[6] - g_*g_*Y[2];
+  // GABA_{A,slow}
+  DyDt[3]  = Y[7];
+  DyDt[7]  = B_*b_*sigmoid_I2(CPI2_*Y[0]               - CI2I2_*Y[3]) - 2*b_*Y[7] - b_*b_*Y[3];
+
+//  // P
+//  DyDt[8]  = Y[9];
+//  DyDt[9]  = A_*a_*p_[local_electrode_] - 2*a_*Y[9] - a_*a_*Y[8];
 
   // 
   // 
@@ -176,38 +180,26 @@ Utils::Biophysics::Jansen_Rit_1995::ordinary_differential_equations( double T, c
 //
 //
 void 
-Utils::Biophysics::Jansen_Rit_1995::init()
+Utils::Biophysics::Molaee_Ardekani_Wendling_2009::init()
 {
   // 
   // Initializations
-  // 
-
-  // 
-  // 
   drawn_.resize( get_number_of_physical_events() );
   //
   for ( int i = 0 ; i < get_number_of_physical_events() ; i++ )
     drawn_[i] = std::vector<bool>(1000000,false);
 
-  // 
   //
   p_.resize( get_number_of_physical_events() );
   // 
   for( int i = 0 ; i < get_number_of_physical_events() ; i++ )
     p_[i] = distribution_(generator_);
-  
-  // 
-  // 
-  impulse_.resize( get_number_of_physical_events() );
-  // 
-  for( int i = 0 ; i < get_number_of_physical_events() ; i++ )
-    impulse_[i] = uniform_distribution_(generator_);
 }
 //
 //
 //
 void 
-Utils::Biophysics::Jansen_Rit_1995::operator () ()
+Utils::Biophysics::Molaee_Ardekani_Wendling_2009::operator () ()
 {
   //
   // Mutex the electrode poping process

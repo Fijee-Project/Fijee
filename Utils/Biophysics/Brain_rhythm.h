@@ -38,6 +38,16 @@
 #include <list>
 #include <vector>
 #include <tuple>
+// 
+// GSL
+// 
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_odeiv2.h>
+#include <gsl/gsl_fft_complex.h>
+// GSL macros
+#define REAL(z,i) ((z)[2*(i)])
+#define IMAG(z,i) ((z)[2*(i)+1])
 //
 // UCSF
 //
@@ -139,13 +149,17 @@ namespace Utils
       virtual void modelization()  = 0;
       /*!
        */
-      virtual void Make_analysis() = 0;
-      /*!
-       */
-      virtual void output_XML()    = 0;
-      /*!
-       */
       virtual void operator () ()  = 0;
+      /*!
+       *  \brief Output XML
+       *
+       *  This member function create the XML output
+       *
+       */
+      virtual void output_XML();
+      /*!
+       */
+      virtual void Make_analysis();
     };
   }
 }

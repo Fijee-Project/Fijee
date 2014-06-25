@@ -39,7 +39,7 @@
 #include <dolfin.h>
 // transcranial current stimulation
 #include "tCS_model.h"
-#include "tCS_field_model.h"
+#include "tCS_current_density_model.h"
 //
 // pugixml
 // same resources than Dolfin
@@ -88,15 +88,15 @@ namespace Solver
     //! Function space
     std::shared_ptr< tCS_model::FunctionSpace > V_;
     //! Function space
-    std::shared_ptr< tCS_field_model::FunctionSpace > V_field_;
+    std::shared_ptr< tCS_current_density_model::FunctionSpace > V_field_;
     //! Sample studied
     int sample_;
     // Head time series potential output file
-    File *file_potential_time_series_;
+    std::shared_ptr< File > file_potential_time_series_;
     // Brain time series potential output file
-    File *file_brain_potential_time_series_;
+    std::shared_ptr< File > file_brain_potential_time_series_;
     // Time series potential field output file
-    File *file_field_time_series_;
+    std::shared_ptr< File > file_current_density_time_series_;
 
     // std::map< std::size_t, std::size_t > map_index_cell_;
 
@@ -173,8 +173,7 @@ namespace Solver
      *
      */
     void solution_domain_extraction( const dolfin::Function&, const std::list<std::size_t>&, 
-				     File* );
-
+				     std::shared_ptr<File> );
   };
 }
 #endif

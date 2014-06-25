@@ -36,7 +36,7 @@ Solver::tCS_tDCS_local_conductivity::tCS_tDCS_local_conductivity():
   //
   // Define the function space
   V_.reset( new tCS_model::FunctionSpace(mesh_) );
-  V_field_.reset( new tCS_field_model::FunctionSpace(mesh_) );
+  V_field_.reset( new tCS_current_density_model::FunctionSpace(mesh_) );
 
   // 
   // Output files
@@ -46,15 +46,15 @@ Solver::tCS_tDCS_local_conductivity::tCS_tDCS_local_conductivity():
   // Head time series potential output file
   std::string file_head_potential_ts_name = (SDEsp::get_instance())->get_files_path_result_() + 
     std::string("tDCS_time_series.pvd");
-  file_potential_time_series_ = nullptr; // new File( file_head_potential_ts_name.c_str() );
+//  file_potential_time_series_.reset(new File( file_head_potential_ts_name.c_str() ));
   // 
   std::string file_brain_potential_ts_name = (SDEsp::get_instance())->get_files_path_result_() + 
     std::string("tDCS_brain_time_series.pvd");
-  file_brain_potential_time_series_ = nullptr; // new File( file_brain_potential_ts_name.c_str() );
+//  file_brain_potential_time_series_.reset(new File( file_brain_potential_ts_name.c_str() ));
   // 
   std::string file_filed_potential_ts_name = (SDEsp::get_instance())->get_files_path_result_() + 
     std::string("tDCS_field_time_series.pvd");
-  file_field_time_series_ = nullptr; // new File( file_filed_potential_ts_name.c_str() );
+//  file_current_density_time_series_.reset(new File( file_filed_potential_ts_name.c_str() ));
 
   //
   // Local conductivity estimation - initialization

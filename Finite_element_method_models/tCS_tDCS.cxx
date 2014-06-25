@@ -38,7 +38,8 @@ Solver::tCS_tDCS::tCS_tDCS():
   //
   // Define the function space
   V_.reset( new tCS_model::FunctionSpace(mesh_) );
-  V_field_.reset( new tCS_field_model::FunctionSpace(mesh_) );
+  V_current_density_.reset( new tCS_current_density_model::FunctionSpace(mesh_) );
+  V_E_.reset( new tCS_electrical_field_model::FunctionSpace(mesh_) );
 
 
   // 
@@ -49,15 +50,19 @@ Solver::tCS_tDCS::tCS_tDCS():
   // Head time series potential output file
   std::string file_head_potential_ts_name = (SDEsp::get_instance())->get_files_path_result_() + 
     std::string("tDCS_time_series.pvd");
-  file_potential_time_series_ = new File( file_head_potential_ts_name.c_str() );
+  file_potential_time_series_.reset( new File( file_head_potential_ts_name.c_str() ) );
   // 
   std::string file_brain_potential_ts_name = (SDEsp::get_instance())->get_files_path_result_() + 
     std::string("tDCS_brain_time_series.pvd");
-   file_brain_potential_time_series_ = nullptr; // new File( file_brain_potential_ts_name.c_str() );
+  file_brain_potential_time_series_.reset(new File(file_brain_potential_ts_name.c_str()));
   // 
-  std::string file_filed_potential_ts_name = (SDEsp::get_instance())->get_files_path_result_() + 
-    std::string("tDCS_field_time_series.pvd");
-   file_field_time_series_ = nullptr; // new File( file_filed_potential_ts_name.c_str() );
+  std::string file_current_density_ts_name = (SDEsp::get_instance())->get_files_path_result_() + 
+    std::string("tDCS_current_density_time_series.pvd");
+  file_current_density_time_series_.reset(new File(file_current_density_ts_name.c_str()));
+  // 
+  std::string file_E_ts_name = (SDEsp::get_instance())->get_files_path_result_() + 
+    std::string("tDCS_E_time_series.pvd");
+  file_E_time_series_.reset(new File(file_E_ts_name.c_str()));
 }
 //
 //
@@ -166,10 +171,6 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
   // Filter function over a subdomain
   std::list<std::size_t> test_sub_domains{4,5};
   solution_domain_extraction(u, test_sub_domains, "tDCS_potential");
-//  //
-//  // Filter function over a subdomain
-//  std::list<std::size_t> test_sub_domains{4,5};
-//  solution_domain_extraction(u, test_sub_domains, file_brain_potential_time_series_);
 
   //
   // Mutex record potential at each electrods
@@ -212,8 +213,8 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
     {
       //
       // Define variational forms
-      tCS_field_model::BilinearForm a_field(V_field_, V_field_);
-      tCS_field_model::LinearForm L_field(V_field_);
+      tCS_current_density_model::BilinearForm a_field(V_current_density_, V_current_density_);
+      tCS_current_density_model::LinearForm L_field(V_current_density_);
       
       //
       // Anisotropy
@@ -228,7 +229,7 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
       
       //
       // Compute solution
-      Function J(*V_field_);
+      Function J(*V_current_density_);
       LinearVariationalProblem problem_field(a_field, L_field, J/*, bc*/);
       LinearVariationalSolver  solver_field(problem_field);
       // krylov
@@ -247,61 +248,111 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
       // Output
       solution_domain_extraction(J, test_sub_domains, "tDCS_Current_density");
       //
-      std::string field_name = (SDEsp::get_instance())->get_files_path_result_() + 
-	std::string("tDCS_field.pvd");
-      File field( field_name.c_str() );
+//      std::string field_name = (SDEsp::get_instance())->get_files_path_result_() + 
+//	std::string("tDCS_field.pvd");
+//      File field( field_name.c_str() );
       //
-      field << J;
+      *file_current_density_time_series_ << J;
     }
 
  
- //
- // Validation process
- // !! WARNING !!
- // This process must be pluged only for spheres model
- if( false )
-   {
-     std::cout << "Validation processing" << std::endl;
-     //
-     // TODO CHANGE THE PROTOTYPE
-     std::cout << "je passe create T7" << std::endl;
-//     Solver::Spheres_electric_monopole mono_T7( (*electrodes_)["T7"].get_I_(),  
-//						(*electrodes_)["T7"].get_r0_projection_() );
-     Solver::Spheres_electric_monopole mono_T7( electrodes_->get_current(0)->information("T7").get_I_(),  
-						electrodes_->get_current(0)->information("T7").get_r0_projection_() );
-     //
-     std::cout << "je passe create T8" << std::endl;
-//     Solver::Spheres_electric_monopole mono_T8( (*electrodes_)["T8"].get_I_(),  
+  //
+  // tDCS electrical field \vec{E}
+  // 
+  
+  if (true)
+    {
+      //
+      // Define variational forms
+      tCS_electrical_field_model::BilinearForm a_E(V_E_, V_E_);
+      tCS_electrical_field_model::LinearForm L_E(V_E_);
+      
+      //
+      // Anisotropy
+      // Bilinear
+      // a.dx       = *domains_;
+      // a.ds = *boundaries_;
+      
+      
+      // Linear
+      L_E.u  = u;
+      //      L_Er.a_sigma = *sigma_;
+      //       L.ds = *boundaries_;
+      
+      //
+      // Compute solution
+      Function E(*V_E_);
+      LinearVariationalProblem problem_E(a_E, L_E, E/*, bc*/);
+      LinearVariationalSolver  solver_E(problem_E);
+      // krylov
+      solver_E.parameters["linear_solver"]  
+	= (SDEsp::get_instance())->get_linear_solver_();
+      solver_E.parameters("krylov_solver")["maximum_iterations"] 
+	= (SDEsp::get_instance())->get_maximum_iterations_();
+      solver_E.parameters("krylov_solver")["relative_tolerance"] 
+	= (SDEsp::get_instance())->get_relative_tolerance_();
+      solver_E.parameters["preconditioner"] 
+	= (SDEsp::get_instance())->get_preconditioner_();
+      //
+      solver_E.solve();
+      
+      // 
+      // Output
+//      solution_domain_extraction(J, test_sub_domains, "tDCS_Current_density");
+      //
+      *file_E_time_series_ << E;
+    }
+
+ 
+  ////////////////////////
+  // Validation process //
+  //   !! WARNING !!    //
+  ////////////////////////
+  
+  // This process must be pluged only for spheres model
+  if( false )
+    {
+      std::cout << "Validation processing" << std::endl;
+      //
+      // TODO CHANGE THE PROTOTYPE
+      std::cout << "je passe create T7" << std::endl;
+      //     Solver::Spheres_electric_monopole mono_T7( (*electrodes_)["T7"].get_I_(),  
+      //						(*electrodes_)["T7"].get_r0_projection_() );
+      Solver::Spheres_electric_monopole mono_T7( electrodes_->get_current(0)->information("T7").get_I_(),  
+						 electrodes_->get_current(0)->information("T7").get_r0_projection_() );
+      //
+      std::cout << "je passe create T8" << std::endl;
+      //     Solver::Spheres_electric_monopole mono_T8( (*electrodes_)["T8"].get_I_(),  
 //						(*electrodes_)["T8"].get_r0_projection_() );
-     Solver::Spheres_electric_monopole mono_T8( electrodes_->get_current(0)->information("T8").get_I_(),  
-						electrodes_->get_current(0)->information("T8").get_r0_projection_() );
-     //
-     //
-     Function 
-       Injection_T7(V_),
-       Injection_T8(V_);
-     //Function & Injection = Injection_T7;
-
-     //
-     std::cout << "je passe T7" << std::endl;
-     Injection_T7.interpolate( mono_T7 );
-     // std::thread T7(Injection_T7.interpolate, mono_T7);
-     std::cout << "je passe T8" << std::endl;
-     Injection_T8.interpolate( mono_T8 );
-     //
-     std::cout << "je passe T7+T8" << std::endl;
-     *(Injection_T7.vector()) += *(Injection_T8.vector());
-     std::cout << "je passe T7+T8 end" << std::endl;
-
-     //
-     // Produce outputs
-     std::string file_validation = (SDEsp::get_instance())->get_files_path_result_() + 
-       std::string("validation.pvd");
-     File validation( file_validation.c_str() );
-     //
-     validation << Injection_T7;
-     std::cout << "je passe" << std::endl;
-   }
+      Solver::Spheres_electric_monopole mono_T8( electrodes_->get_current(0)->information("T8").get_I_(),  
+						 electrodes_->get_current(0)->information("T8").get_r0_projection_() );
+      //
+      //
+      Function 
+	Injection_T7(V_),
+	Injection_T8(V_);
+      //Function & Injection = Injection_T7;
+      
+      //
+      std::cout << "je passe T7" << std::endl;
+      Injection_T7.interpolate( mono_T7 );
+      // std::thread T7(Injection_T7.interpolate, mono_T7);
+      std::cout << "je passe T8" << std::endl;
+      Injection_T8.interpolate( mono_T8 );
+      //
+      std::cout << "je passe T7+T8" << std::endl;
+      *(Injection_T7.vector()) += *(Injection_T8.vector());
+      std::cout << "je passe T7+T8 end" << std::endl;
+      
+      //
+      // Produce outputs
+      std::string file_validation = (SDEsp::get_instance())->get_files_path_result_() + 
+	std::string("validation.pvd");
+      File validation( file_validation.c_str() );
+      //
+      validation << Injection_T7;
+      std::cout << "je passe" << std::endl;
+    }
 };
 //
 //

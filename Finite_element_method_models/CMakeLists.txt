@@ -1,4 +1,4 @@
-set(UFL_SOURCES SLS_model.ufl SLD_model.ufl tCS_model.ufl tCS_field_model.ufl)
+set(UFL_SOURCES SLS_model.ufl SLD_model.ufl tCS_model.ufl tCS_current_density_model.ufl tCS_electrical_field_model.ufl)
 set(UFL_FLAG -l dolfin)
 set(UFL_COMPILER ffc)
 

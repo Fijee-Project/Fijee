@@ -38,7 +38,7 @@ Solver::tCS_tACS::tCS_tACS():
   //
   // Define the function space
   V_.reset( new tCS_model::FunctionSpace(mesh_) );
-  V_field_.reset( new tCS_field_model::FunctionSpace(mesh_) );
+  V_field_.reset( new tCS_current_density_model::FunctionSpace(mesh_) );
 
 
   // 
@@ -49,15 +49,15 @@ Solver::tCS_tACS::tCS_tACS():
   // Head time series potential output file
   std::string file_head_potential_ts_name = (SDEsp::get_instance())->get_files_path_result_() + 
     std::string("tACS_time_series.pvd");
-   file_potential_time_series_ = new File( file_head_potential_ts_name.c_str() );
+  file_potential_time_series_.reset( new File( file_head_potential_ts_name.c_str() ) );
   // 
   std::string file_brain_potential_ts_name = (SDEsp::get_instance())->get_files_path_result_() + 
     std::string("tACS_brain_time_series.pvd");
-   file_brain_potential_time_series_ = new File( file_brain_potential_ts_name.c_str() );
+  file_brain_potential_time_series_.reset( new File( file_brain_potential_ts_name.c_str() ) );
   // 
   std::string file_filed_potential_ts_name = (SDEsp::get_instance())->get_files_path_result_() + 
-    std::string("tACS_field_time_series.pvd");
-   file_field_time_series_ = new File( file_filed_potential_ts_name.c_str() );
+    std::string("tACS_current_density_time_series.pvd");
+  file_current_density_time_series_.reset( new File( file_filed_potential_ts_name.c_str() ) );
 }
 //
 //
@@ -185,15 +185,15 @@ Solver::tCS_tACS::operator () ( /*Solver::Phi& source,
 
  
   // 
-  // tDCS electric current density field \vec{J}
+  // tACS electric current density field \vec{J}
   // 
 
   if (true)
     {
       //
       // Define variational forms
-      tCS_field_model::BilinearForm a_field(V_field_, V_field_);
-      tCS_field_model::LinearForm L_field(V_field_);
+      tCS_current_density_model::BilinearForm a_field(V_field_, V_field_);
+      tCS_current_density_model::LinearForm   L_field(V_field_);
  
       //
       // Anisotropy
@@ -233,7 +233,7 @@ Solver::tCS_tACS::operator () ( /*Solver::Phi& source,
 	{
 	  // lock the electrode list
 	  std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
-	  *file_field_time_series_ 
+	  *file_current_density_time_series_ 
 	    << std::make_pair<const Function*, double>(&J, 
 						       electrodes_
 						       ->get_current(local_sample)
@@ -405,7 +405,7 @@ Solver::tCS_tACS::regulation_factor(const Function& u, std::list<std::size_t>& S
 void 
 Solver::tCS_tACS::solution_domain_extraction( const dolfin::Function& U, 
 					      const std::list<std::size_t>& Sub_domains,
-					      File* File )
+					      std::shared_ptr<File> File )
 {
   // TODO Build a new time series to extract domains
   // Don't forget to call the mutex while writting the output file.

@@ -24,11 +24,11 @@
 //  The views and conclusions contained in the software and documentation are those   
 //  of the authors and should not be interpreted as representing official policies,    
 //  either expressed or implied, of the FreeBSD Project.  
-#ifndef JANSEN_RIT_1995_H
-#define JANSEN_RIT_1995_H
+#ifndef WENDLING_2002_H
+#define WENDLING_2002_H
 //http://franckh.developpez.com/tutoriels/outils/doxygen/
 /*!
- * \file Jansen_Rit_1995.h
+ * \file Wendling_2002.h
  * \brief brief describe 
  * \author Yann Cobigo
  * \version 0.1
@@ -64,13 +64,13 @@ namespace Utils
    */
   namespace Biophysics
   {
-    /*! \class Jansen_Rit_1995
-     * \brief classe representing the first cortical activity model
+    /*! \class Wendling_2002
+     * \brief classe representing a cortical activity model
      *
-     *  This class implement the Jansen and Rit model. It is the first mathematical cortical activity model, representing alpha waves. 
+     *  This class implement the Wending Bartolomei Bellanger and Chauvel model (2002). It is a mathematical cortical activity model, representing alpha waves. 
      * 
      */
-    class Jansen_Rit_1995 : public Brain_rhythm
+    class Wendling_2002 : public Brain_rhythm
     {
     private:
       //! Random engine generator
@@ -143,31 +143,31 @@ namespace Utils
 	/*!
 	 *  \brief Default Constructor
 	 *
-	 *  Constructor of the class Jansen_Rit_1995
+	 *  Constructor of the class Wendling_2002
 	 *
 	 */
-	Jansen_Rit_1995();
+	Wendling_2002();
 	/*!
 	 *  \brief Copy Constructor
 	 *
 	 *  Constructor is a copy constructor
 	 *
 	 */
-	Jansen_Rit_1995( const Jansen_Rit_1995& ){};
+	Wendling_2002( const Wendling_2002& ){};
 	/*!
 	 *  \brief Operator =
 	 *
-	 *  Operator = of the class Jansen_Rit_1995
+	 *  Operator = of the class Wendling_2002
 	 *
 	 */
-	Jansen_Rit_1995& operator = ( const Jansen_Rit_1995& ){return *this;};
+	Wendling_2002& operator = ( const Wendling_2002& ){return *this;};
 	/*!
 	 *  \brief Destructor
 	 *
-	 *  Operator destructor of the class Jansen_Rit_1995
+	 *  Operator destructor of the class Wendling_2002
 	 *
 	 */
-	virtual ~Jansen_Rit_1995(){/* Do nothing */};  
+	virtual ~Wendling_2002(){/* Do nothing */};  
 	/*!
 	 *  \brief Operator ()
 	 *

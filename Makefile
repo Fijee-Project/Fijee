@@ -106,8 +106,8 @@ distclean: clean
 	find . -name SLS_model.h -exec rm {} \;
 	find . -name SLD_model.h -exec rm {} \;
 	find . -name tCS_model.h -exec rm {} \;
-	find . -name tCS_field_model.h -exec rm {} \;
-#	find . -name *.xml   -exec rm {} \;
+	find . -name tCS_current_density_model.h -exec rm {} \;
+	find . -name tCS_electrical_field_model.h -exec rm {} \;
 	find . -name *.mesh  -exec rm {} \;
 	find . -name *.inr   -exec rm {} \;
 	find . -name *.frame -exec rm {} \;

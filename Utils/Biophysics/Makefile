@@ -9,7 +9,7 @@ LIBS    = -lgsl #-pthread
 #
 # Sources
 #
-SRC        = Brain_rhythm.cxx Jansen_Rit_1995.cxx 
+SRC        = Brain_rhythm.cxx Jansen_Rit_1995.cxx Molaee_Ardekani_Wendling_2009.cxx Wendling_2002.cxx
 OBJ        = $(SRC:.cxx=.o)
 #
 #
