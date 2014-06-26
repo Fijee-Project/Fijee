@@ -48,7 +48,7 @@ extern "C" int ode_system_W02(double t, const double y[], double dydt[], void *p
 // 
 // 
 Utils::Biophysics::Wendling_2002::Wendling_2002():
-  duration_(20000.),
+  duration_(20000. /*ms*/), pulse_(90./*pulses per second*/),
   e0_( 2.5 /*s^{-1}*/), r_( 0.56 /*(mV)^{-1}*/), v0_( 6. /*(mV)*/),
   C_( 135. ),
   a_( 100. /*s^{-1}*/), A_( 3.25 /*(mV)*/), b_( 50. /*s^{-1}*/), B_( 22. /*(mV)*/),
@@ -56,11 +56,9 @@ Utils::Biophysics::Wendling_2002::Wendling_2002():
   electrode_(0)
 {
   // 
-  //  Normal distribution: mu = 2.4 mV and sigma = 2.0 mV
-  distribution_ = std::normal_distribution<double>(1., 5.0);
-  // Frequency of pulse changing per second
-  gaussian_distribution_ = std::normal_distribution<double>(90., 30.);
-  // 
+  // p(t) = <p> + \varepsilon; 
+  // <p> = pulse_ and \varepsilon \sim \mathcal{N}(0., 30.)
+  distribution_ = std::normal_distribution<double>(0., 30.);
   // 
   C1_ = C_;
   C2_ = 0.8 * C_;
@@ -69,7 +67,6 @@ Utils::Biophysics::Wendling_2002::Wendling_2002():
   C6_ = 0.1 * C_;
   C7_ = 0.8 * C_;
 }
-
 // 
 // 
 //
@@ -100,13 +97,17 @@ Utils::Biophysics::Wendling_2002::modelization()
   // 
   // Reach oscillation rhythm
   int transient_stage = 0;
-  int MAX_TRANSIENT   = 1000000;
+  int MAX_TRANSIENT   = 500000;
   while ( transient_stage++ < MAX_TRANSIENT )
     {
+      // every second change the noise influence
+      if ( transient_stage % 1000 )
+	p_[local_electrode_] = pulse_ + distribution_(generator_);
+      //
       double ti = transient_stage * delta_t;
       // solve
       int status = gsl_odeiv2_driver_apply (driver, &t, ti, y);
-      // 
+     // 
       if (status != GSL_SUCCESS)
 	{
 	  printf ("error, return value=%d\n", status);
@@ -117,6 +118,10 @@ Utils::Biophysics::Wendling_2002::modelization()
   std::cout << "electrode: " << local_electrode_ << std::endl;
   for ( int i = 1 ; i < duration_ ; i++ )
     {
+      // every second change the noise influence
+      if ( i % 1000 )
+	p_[local_electrode_] = pulse_ + distribution_(generator_);
+      // 
       double ti = i * delta_t + MAX_TRANSIENT * delta_t;
       // solve
       int status = gsl_odeiv2_driver_apply (driver, &t, ti, y);
@@ -128,7 +133,7 @@ Utils::Biophysics::Wendling_2002::modelization()
 	}
       // record statistics, after the transient state
       electrode_rhythm_[local_electrode_].push_back(std::make_tuple(ti - MAX_TRANSIENT * delta_t,
-								    y[0], 0.));
+								    /* V = */ y[1] - y[2], 0.));
     }
 
   // 
@@ -141,26 +146,6 @@ Utils::Biophysics::Wendling_2002::modelization()
 int
 Utils::Biophysics::Wendling_2002::ordinary_differential_equations( double T, const double Y[], double DyDt[] )
 {
-  // 
-  // When puse is a multiple of impulse_ we change the amplitude
-  double pulse = 1. / (double)impulse_[local_electrode_];
-
-  int pulse_int = int(pulse*1000.);
-  double n = T * 1000/ (double) pulse_int;
-  double n_int;
-  double rest = std::modf(n, &n_int);
-
-  // 
-  // 
-  if( rest == 0 /*|| (1 - rest) < 5.e-2*/)
-    if ( !drawn_[local_electrode_][(int)n_int] )
-      {//std::cout << "t: " << T << " " << impulse_[local_electrode_] << std::endl;
-	// Amplitude of the input signal
-	p_[local_electrode_] = distribution_(generator_);
-	// 
-	drawn_[local_electrode_][(int)n_int] = true;
-      }
-
   // 
   // System of ODE
   DyDt[0]  = Y[5];
@@ -194,25 +179,11 @@ Utils::Biophysics::Wendling_2002::init()
   // 
 
   // 
-  // 
-  drawn_.resize( get_number_of_physical_events() );
-  //
-  for ( int i = 0 ; i < get_number_of_physical_events() ; i++ )
-    drawn_[i] = std::vector<bool>(1000000,false);
-
-  // 
   //
   p_.resize( get_number_of_physical_events() );
   // 
   for( int i = 0 ; i < get_number_of_physical_events() ; i++ )
-    p_[i] = distribution_(generator_);
-  
-  // 
-  // 
-  impulse_.resize( get_number_of_physical_events() );
-  // 
-  for( int i = 0 ; i < get_number_of_physical_events() ; i++ )
-    impulse_[i] = gaussian_distribution_(generator_);
+    p_[i] = pulse_ + distribution_(generator_);
 }
 //
 //

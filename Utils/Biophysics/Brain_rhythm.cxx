@@ -166,13 +166,14 @@ Utils::Biophysics::Brain_rhythm::Make_analysis()
   for (int electrode = 0 ; electrode < number_of_electrodes ; electrode++)
     output_stream_ <<  electrode_mapping_[electrode] << " ";
   // 
-  output_stream_ << std::endl;
+  output_stream_ << "power" << std::endl;
+
 
   // 
   // R values: Power spectral density
   // 
   int 
-    N = 1024, /* N is a power of 2 */
+    N = 2048, /* N is a power of 2 */
     n = 0;
   // real and imaginary
   std::vector< double* > data_vector(number_of_electrodes);
@@ -180,7 +181,7 @@ Utils::Biophysics::Brain_rhythm::Make_analysis()
   for ( int electrode = 0 ; electrode < number_of_electrodes ; electrode++ )
     {
       n = 0;
-      data_vector[electrode] = new double[2*1024/*N*/];
+      data_vector[electrode] = new double[2*2048/*N*/];
       for( auto time_potential : electrode_rhythm_[electrode] )
 	{
 	  if ( n < N )
@@ -197,7 +198,26 @@ Utils::Biophysics::Brain_rhythm::Make_analysis()
   // Forward FFT
   // A stride of 1 accesses the array without any additional spacing between elements. 
   for ( auto electrode : data_vector )
-    gsl_fft_complex_radix2_forward (electrode, 1/*stride*/, 1024);
+    gsl_fft_complex_radix2_forward (electrode, 1/*stride*/, 2048);
+
+  // 
+  // Average the power signal
+  std::vector< double > average_power(N);
+ 
+  // 
+  for ( int i = 0 ; i < N ; i++ )
+    {
+      // 
+      for ( auto electrode : data_vector )
+	{
+	  average_power[i]  = REAL(electrode,i)*REAL(electrode,i);
+	  average_power[i] += IMAG(electrode,i)*IMAG(electrode,i);
+	  average_power[i] /= N;
+	}
+      // 
+      average_power[i] /= number_of_electrodes;
+    }
+ 
 
   //
   // 
@@ -212,7 +232,7 @@ Utils::Biophysics::Brain_rhythm::Make_analysis()
 	  << " ";
 	  
       // 
-      output_stream_ << std::endl;
+      output_stream_ << average_power[i] << std::endl;
     }
 
   //

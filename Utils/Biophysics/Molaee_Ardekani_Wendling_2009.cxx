@@ -48,7 +48,7 @@ extern "C" int ode_system_MAW(double t, const double y[], double dydt[], void *p
 // 
 // 
 Utils::Biophysics::Molaee_Ardekani_Wendling_2009::Molaee_Ardekani_Wendling_2009():
-  duration_(20000.), impulse_(90.),
+  duration_(20000. /*ms*/), pulse_(90./*pulses per second*/),
   e0P_( 10. /*s^{-1}*/), e0I1_( 10. /*s^{-1}*/), e0I2_( 10. /*s^{-1}*/), 
   rP_( 0.7 /*(mV)^{-1}*/), rI1_( 0.7 /*(mV)^{-1}*/), rI2_( 0.7 /*(mV)^{-1}*/), 
   v0P_( 1. /*(mV)*/), v0I1_( 4. /*(mV)*/), v0I2_( 4. /*(mV)*/),
@@ -61,10 +61,9 @@ Utils::Biophysics::Molaee_Ardekani_Wendling_2009::Molaee_Ardekani_Wendling_2009(
   electrode_(0)
 {
   // 
-  //  Noise - frequency of amplitude changing: 90
-  //  Normal distribution: mu = 0 mV and sigma = 30.0 mV
-  //  distribution_ = std::normal_distribution<double>(0., 30.0);
-  distribution_ = std::normal_distribution<double>(2., 2.4);
+  // p(t) = <p> + \varepsilon; 
+  // <p> = pulse_ and \varepsilon \sim \mathcal{N}(0., 30.)
+  distribution_ = std::normal_distribution<double>(0., 30.);
 }
 // 
 // 
@@ -76,7 +75,7 @@ Utils::Biophysics::Molaee_Ardekani_Wendling_2009::modelization()
   // Runge-Kutta
   // 
   // Create the system of ode
-  gsl_odeiv2_system sys = {ode_system_MAW, NULL /*jacobian*/, 8, this};
+  gsl_odeiv2_system sys = {ode_system_MAW, NULL /*jacobian*/, 10, this};
   // Step types
   // Step Type: gsl_odeiv2_step_rk2   - Explicit embedded Runge-Kutta (2, 3) method. 
   // Step Type: gsl_odeiv2_step_rk4   - Explicit 4th order Runge-Kutta. 
@@ -91,14 +90,18 @@ Utils::Biophysics::Molaee_Ardekani_Wendling_2009::modelization()
     t = 0.0,
     delta_t = 1. / 1000.; /* EEG trigges every 1ms */
   // we have 6 unknowns
-  double y[8] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  };
+  double y[10] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
   // 
   // Reach oscillation rhythm
   int transient_stage = 0;
-  int MAX_TRANSIENT   = 5000000;
+  int MAX_TRANSIENT   = 500000;//1000000;
   while ( transient_stage++ < MAX_TRANSIENT )
     {
+      // every second change the noise influence
+      if ( transient_stage % 1000 )
+	p_[local_electrode_] = pulse_ + distribution_(generator_);
+      // 
       double ti = transient_stage * delta_t;
       // solve
       int status = gsl_odeiv2_driver_apply (driver, &t, ti, y);
@@ -113,7 +116,11 @@ Utils::Biophysics::Molaee_Ardekani_Wendling_2009::modelization()
   std::cout << "electrode: " << local_electrode_ << std::endl;
   for ( int i = 1 ; i < duration_ ; i++ )
     {
-      double ti = i * delta_t + MAX_TRANSIENT * delta_t;
+      // every second change the noise influence
+      if ( i % 1000 )
+	p_[local_electrode_] = pulse_ + distribution_(generator_);
+      // start after the transient state
+     double ti = i * delta_t + MAX_TRANSIENT * delta_t;
       // solve
       int status = gsl_odeiv2_driver_apply (driver, &t, ti, y);
       // 
@@ -124,12 +131,13 @@ Utils::Biophysics::Molaee_Ardekani_Wendling_2009::modelization()
 	}
       // record statistics, after the transient state
       electrode_rhythm_[local_electrode_].push_back(std::make_tuple(ti - MAX_TRANSIENT * delta_t,
-								    y[0], 0.));
+								    /*V = */y[0] + y[4] - y[1] - y[2],
+								    0.));
     }
 
   // 
   // 
-  //  gsl_odeiv2_driver_free (driver);
+  gsl_odeiv2_driver_free (driver);
 }
 // 
 // 
@@ -138,39 +146,22 @@ int
 Utils::Biophysics::Molaee_Ardekani_Wendling_2009::ordinary_differential_equations( double T, const double Y[], double DyDt[] )
 {
   // 
-  // When puse is a multiple of impulse_ we change the amplitude
-  double pulse = T * impulse_;
-  double pulse_int;
-  //
-  double rest = std::modf(pulse, &pulse_int);
-
-  // 
-  // 
-  if( rest == 0. )
-    if ( !drawn_[local_electrode_][(int)pulse] )
-      {
-	p_[local_electrode_] = distribution_(generator_);
-	drawn_[local_electrode_][(int)pulse] = true;
-      }
-
-  // 
   // System of ODE
-  // AMPA
-  DyDt[0]  = Y[4];
-  DyDt[4]  = A_*a_*sigmoid_P(CPP_*Y[0] - CI1P_*Y[1] - CI2P_*Y[3] + p_[local_electrode_] ) - 2*a_*Y[4] - a_*a_*Y[0];
-  // GABA_{A,fast}
-  DyDt[1]  = Y[5];
-  DyDt[5]  = G_*g_*sigmoid_I1(CPI1_*Y[0] - CI1I1_*Y[1] - CI2I1_*Y[2]) - 2*g_*Y[5] - g_*g_*Y[1];
-  // GABA_{A,fast}
-  DyDt[2]  = Y[6];
-  DyDt[6]  = G_*g_*sigmoid_I2(CPI2_*Y[0]               - CI2I2_*Y[3]) - 2*g_*Y[6] - g_*g_*Y[2];
-  // GABA_{A,slow}
-  DyDt[3]  = Y[7];
-  DyDt[7]  = B_*b_*sigmoid_I2(CPI2_*Y[0]               - CI2I2_*Y[3]) - 2*b_*Y[7] - b_*b_*Y[3];
-
-//  // P
-//  DyDt[8]  = Y[9];
-//  DyDt[9]  = A_*a_*p_[local_electrode_] - 2*a_*Y[9] - a_*a_*Y[8];
+  // \Phi_{p} -- AMPA
+  DyDt[0]  = Y[5];
+  DyDt[5]  = A_*a_*sigmoid_P(CPP_*Y[0] - CI1P_*Y[1] - CI2P_*Y[3] + Y[4]) - 2*a_*Y[5] - a_*a_*Y[0];
+  //  \Phi_{I} -- GABA_{A,fast}
+  DyDt[1]  = Y[6];
+  DyDt[6]  = G_*g_*sigmoid_I1(CPI1_*Y[0] - CI1I1_*Y[1] - CI2I1_*Y[2]) - 2*g_*Y[6] - g_*g_*Y[1];
+  //  \Phi_{I''} -- GABA_{A,fast}
+  DyDt[2]  = Y[7];
+  DyDt[7]  = G_*g_*sigmoid_I2(CPI2_*Y[0]               - CI2I2_*Y[3]) - 2*g_*Y[7] - g_*g_*Y[2];
+  //  \Phi_{I'} -- GABA_{A,slow}
+  DyDt[3]  = Y[8];
+  DyDt[8]  = B_*b_*sigmoid_I2(CPI2_*Y[0]               - CI2I2_*Y[3]) - 2*b_*Y[8] - b_*b_*Y[3];
+  // P -- AMPA
+  DyDt[4]  = Y[9];
+  DyDt[9]  = A_*a_*p_[local_electrode_] - 2*a_*Y[9] - a_*a_*Y[4];
 
   // 
   // 
@@ -184,16 +175,14 @@ Utils::Biophysics::Molaee_Ardekani_Wendling_2009::init()
 {
   // 
   // Initializations
-  drawn_.resize( get_number_of_physical_events() );
   //
-  for ( int i = 0 ; i < get_number_of_physical_events() ; i++ )
-    drawn_[i] = std::vector<bool>(1000000,false);
-
+  
+  // 
   //
   p_.resize( get_number_of_physical_events() );
   // 
   for( int i = 0 ; i < get_number_of_physical_events() ; i++ )
-    p_[i] = distribution_(generator_);
+    p_[i] = pulse_ + distribution_(generator_);
 }
 //
 //

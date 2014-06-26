@@ -77,15 +77,14 @@ namespace Utils
       std::default_random_engine generator_;
       //! Normal distribution
       std::normal_distribution< double > distribution_;
-      //! Uniform distribution
+      //! Normal distribution
       std::normal_distribution< double > gaussian_distribution_;
-
       //! Excitatory inpulses already drawn from the neighbours
       std::vector< std::vector<bool> > drawn_; 
       //! Duration of the simulation (ms)
       double duration_;
       //! Number of impulse per second (random noise)
-      std::vector< double > impulse_;
+      double pulse_;
 
       // 
       // Parameter of the nonlinear sigmoid function, transforming the average membrane potential 
