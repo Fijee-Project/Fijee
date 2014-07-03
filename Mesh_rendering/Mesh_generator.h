@@ -41,13 +41,10 @@
 #include "Access_parameters.h"
 #include "Utils/enum.h"
 #include "Cell_conductivity.h"
-#include "Build_dipoles_list.h"
-#include "Build_dipoles_list_knn.h"
-#include "Build_dipoles_list_high_density.h"
 //
 //
 //
-//////typedef Solver::PDE_solver_parameters SDEsp;
+// typedef Solver::PDE_solver_parameters SDEsp;
 //
 //
 //
@@ -72,7 +69,11 @@ namespace Domains
    *
    *  This class is an example of class I will have to use
    */
-  template < typename Labeled_domain, typename Conductivity, typename Mesher >
+  template < 
+    typename Labeled_domain, 
+    typename Conductivity, 
+    typename Mesher, 
+    typename Dipole_distribution >
   class Mesh_generator
   {
   private:
@@ -149,8 +150,7 @@ namespace Domains
     {
       //
       // Algorithm building the dipoles list;
-      //      Build_dipoles_list_knn dipoles_;
-      Build_dipoles_list_high_density dipoles_;
+      Dipole_distribution dipoles_;
       dipoles_.Make_list( tensors_.get_list_cell_conductivity_() );
 
 #ifdef DEBUG

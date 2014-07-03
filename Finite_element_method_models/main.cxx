@@ -50,36 +50,36 @@ int main()
   // 
   solver_parameters->init();
   
-  // 
-  // Modelisation of alpha rhythm
-  //  - Utils::Biophysics::Jansen_Rit_1995
-  //  - Utils::Biophysics::Wendling_2002
-  //  - Utils::Biophysics::Molaee_Ardekani_Wendling_2009
-  // 
-  Utils::Biophysics::Brain_rhythm_models< Utils::Biophysics::Molaee_Ardekani_Wendling_2009, 
-					  /*solver_parameters->get_number_of_threads_()*/ 4 > alpha;
+//  // 
+//  // Modelisation of alpha rhythm
+//  //  - Utils::Biophysics::Jansen_Rit_1995
+//  //  - Utils::Biophysics::Wendling_2002
+//  //  - Utils::Biophysics::Molaee_Ardekani_Wendling_2009
+//  // 
+//  Utils::Biophysics::Brain_rhythm_models< Utils::Biophysics::Molaee_Ardekani_Wendling_2009, 
+//					  /*solver_parameters->get_number_of_threads_()*/ 4 > alpha;
+//  //
+//  alpha.modelization();
+//  alpha.output();
+
+
   //
-  alpha.modelization();
-  alpha.output();
-
-
-//  //
-//  // Physical models:
-//  //  - Source localization
-//  //    - Solver::SL_subtraction
-//  //    - Solver::SL_direct
-//  //  - Transcranial current stimulation
-//  //    - Solver::tCS_tDCS
-//  //    - Solver::tCS_tACS
-//  //  - Local conductivity estimation
-//  //    - Solver::tCS_tDCS_local_conductivity
-//  //
-//  // export OMP_NUM_THREADS=2
-//  Solver::Model_solver< /* physical model */ Solver::tCS_tDCS,
-//			/*solver_parameters->get_number_of_threads_()*/ 1 >  model;
-//  //
-//  std::cout << "Loop over solvers" << std::endl;
-//  model.solver_loop();
+  // Physical models:
+  //  - Source localization
+  //    - Solver::SL_subtraction
+  //    - Solver::SL_direct
+  //  - Transcranial current stimulation
+  //    - Solver::tCS_tDCS
+  //    - Solver::tCS_tACS
+  //  - Local conductivity estimation
+  //    - Solver::tCS_tDCS_local_conductivity
+  //
+  // export OMP_NUM_THREADS=2
+  Solver::Model_solver< /* physical model */ Solver::SL_subtraction,
+			/*solver_parameters->get_number_of_threads_()*/ 2 >  model;
+  //
+  std::cout << "Loop over solvers" << std::endl;
+  model.solver_loop();
 
   //
   //
