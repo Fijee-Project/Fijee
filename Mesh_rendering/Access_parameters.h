@@ -24,8 +24,8 @@
 //  The views and conclusions contained in the software and documentation are those   
 //  of the authors and should not be interpreted as representing official policies,    
 //  either expressed or implied, of the FreeBSD Project.  
-#ifndef ACCESS_PARAMETERS_H_
-#define ACCESS_PARAMETERS_H_
+#ifndef ACCESS_PARAMETERS_H
+#define ACCESS_PARAMETERS_H
 //http://franckh.developpez.com/tutoriels/outils/doxygen/
 /*!
  * \file Access_parameters.hh
@@ -615,6 +615,14 @@ namespace Domains
      */
     void set_lh_gray_matter_surface_point_normal_(std::list<Point_vector>&&  Lh_gray_matter_surface_point_normal );
     /*!
+     *  \brief Get lh_gray_matter_surface_point_normal_
+     *
+     *  This method copy the left hemisphere gray matter surface point normal vector.
+     *
+     *  \param Lh_gray_matter_surface_point_normal: gray matter surface point normal vector of the gray matter surface mesh.
+     */
+    void get_lh_gray_matter_surface_point_normal_(std::list<Point_vector>&  Lh_gray_matter_surface_point_normal )const;
+    /*!
      *  \brief Set rh_gray_matter_surface_point_normal_
      *
      *  This method move the right hemisphere gray matter surface point normal vector inside the parameters object.
@@ -622,6 +630,14 @@ namespace Domains
      *  \param Rh_gray_matter_surface_point_normal: gray matter surface point normal vector of the gray matter surface mesh.
      */
     void set_rh_gray_matter_surface_point_normal_(std::list<Point_vector>&&  Rh_gray_matter_surface_point_normal );
+    /*!
+     *  \brief Get rh_gray_matter_surface_point_normal_
+     *
+     *  This method copy the right hemisphere gray matter surface point normal vector.
+     *
+     *  \param Rh_gray_matter_surface_point_normal: gray matter surface point normal vector of the gray matter surface mesh.
+     */
+    void get_rh_gray_matter_surface_point_normal_(std::list<Point_vector>&  Rh_gray_matter_surface_point_normal )const;
     /*!
      *  \brief Set lh_white_matter_surface_point_normal_
      *
@@ -631,6 +647,14 @@ namespace Domains
      */
     void set_lh_white_matter_surface_point_normal_(std::list<Point_vector>&&  Lh_white_matter_surface_point_normal );
     /*!
+     *  \brief Get lh_white_matter_surface_point_normal_
+     *
+     *  This method copy the left hemisphere white matter surface point normal vector.
+     *
+     *  \param White_matter_surface_point_normal: white matter surface point normal vector of the white matter surface mesh.
+     */
+    void get_lh_white_matter_surface_point_normal_(std::list<Point_vector>&  Lh_white_matter_surface_point_normal )const;
+    /*!
      *  \brief Set rh_white_matter_surface_point_normal_
      *
      *  This method move the right hemisphere white matter surface point normal vector inside the parameters object.
@@ -638,6 +662,14 @@ namespace Domains
      *  \param White_matter_surface_point_normal: white matter surface point normal vector of the white matter surface mesh.
      */
     void set_rh_white_matter_surface_point_normal_(std::list<Point_vector>&&  Rh_white_matter_surface_point_normal );
+    /*!
+     *  \brief Get rh_white_matter_surface_point_normal_
+     *
+     *  This method copy the right hemisphere white matter surface point normal vector.
+     *
+     *  \param White_matter_surface_point_normal: white matter surface point normal vector of the white matter surface mesh.
+     */
+    void get_rh_white_matter_surface_point_normal_(std::list<Point_vector>&  Rh_white_matter_surface_point_normal )const;
     /*!
      *  \brief Kill the singleton instance
      *

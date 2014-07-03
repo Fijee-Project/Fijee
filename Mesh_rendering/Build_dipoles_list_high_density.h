@@ -24,11 +24,10 @@
 //  The views and conclusions contained in the software and documentation are those   
 //  of the authors and should not be interpreted as representing official policies,    
 //  either expressed or implied, of the FreeBSD Project.  
-#ifndef BUILD_DIPOLES_LIST_KNN_H
-#define BUILD_DIPOLES_LIST_KNN_H
-//http://franckh.developpez.com/tutoriels/outils/doxygen/
+#ifndef BUILD_DIPOLES_LIST_HIGH_DENSITY_H
+#define BUILD_DIPOLES_LIST_HIGH_DENSITY_H
 /*!
- * \file Build_dipoles_list_knn.h
+ * \file Build_dipoles_list_high_density.h
  * \brief brief describe 
  * \author Yann Cobigo
  * \version 0.1
@@ -48,15 +47,21 @@
 //
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/basic.h>
+// dD Spatial Searching
 #include <CGAL/Search_traits_3.h>
 #include <CGAL/Search_traits_adapter.h>
 #include <CGAL/Orthogonal_k_neighbor_search.h>
-#include <CGAL/Orthogonal_incremental_neighbor_search.h>
-//
+// Point Set Processing
+#include <CGAL/compute_average_spacing.h>
+#include <CGAL/grid_simplify_point_set.h>
+// Point Set Processing
 typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
+typedef Kernel::FT FT;
 typedef Kernel::Point_3 Dipole_position;
+typedef boost::tuple<int, Dipole_position, Domains::Point_vector> IndexedPointVector;
+// dD Spatial Searching
 typedef CGAL::Search_traits_3< Kernel >Traits_base;
-typedef std::tuple< Dipole_position, std::tuple<Domains::Point_vector, Domains::Point_vector> > Key_type;
+typedef std::tuple< Dipole_position , Domains::Cell_conductivity > High_density_key_type;
 //
 //
 //
@@ -70,48 +75,46 @@ namespace Domains
   // -----------------------------------
   // K-nearest neighbor algorithm (CGAL)
   // -----------------------------------
-  struct Point_vector_property_map
+  struct Point_vector_high_density_map
   {
     typedef Dipole_position value_type;
     typedef const value_type& reference;
-    typedef const Key_type& key_type;
+    typedef const High_density_key_type& key_type;
     typedef boost::readable_property_map_tag category;
   };
   // get function for the property map
-  Point_vector_property_map::reference 
-    get( Point_vector_property_map, Point_vector_property_map::key_type p);
+  Point_vector_high_density_map::reference 
+    get( Point_vector_high_density_map, Point_vector_high_density_map::key_type p);
   //
-  typedef CGAL::Search_traits_adapter< Key_type, Point_vector_property_map, Traits_base > Dipoles_traits;
-  typedef CGAL::Orthogonal_k_neighbor_search< Dipoles_traits > Dipoles_neighbor_search;
-  typedef Dipoles_neighbor_search::Tree Dipoles_tree;
-  typedef Dipoles_neighbor_search::Distance Dipole_distance;
-  //
-  // Check the distance between two dipoles
-  //
-  typedef CGAL::Orthogonal_incremental_neighbor_search< Traits_base > incremental_search;
-  typedef incremental_search::iterator knn_iterator;
-  typedef incremental_search::Tree Distance_tree;
+  typedef CGAL::Search_traits_adapter< High_density_key_type, Point_vector_high_density_map, Traits_base > High_density_traits;
+  typedef CGAL::Orthogonal_k_neighbor_search< High_density_traits > High_density_neighbor_search;
+  typedef High_density_neighbor_search::Tree High_density_tree;
+  typedef High_density_neighbor_search::Distance High_density_distance;
 
   // -----------------------------------
 
-  /*! \class Build_dipoles_list_knn
+  /*! \class Build_dipoles_list_high_density
    * \brief classe representing whatever
    *
    *  This class is an example of class I will have to use
    */
-  class Build_dipoles_list_knn : public Build_dipoles_list
+  class Build_dipoles_list_high_density : public Build_dipoles_list
   {
   private:
-    //! Couple of the closest white and gray matter vertices in the left hemisphere 
-    std::list< std::tuple< Domains::Point_vector, Domains::Point_vector > > lh_match_wm_gm_;
-    //! Couple of the closest white and gray matter vertices in the right hemisphere 
-    std::list< std::tuple< Domains::Point_vector, Domains::Point_vector > > rh_match_wm_gm_;
+    //! Left hemisphere white matter point-vectors
+    std::list< Point_vector > lh_wm_;
+    //! Right hemisphere white matter point-vectors
+    std::list< Point_vector > rh_wm_;
     //! Dipoles list
     std::list< Domains::Dipole > dipoles_list_;
+    //! Cell size controlling the inter dipoles distance. This variable allow to control the density of the dipole distribution
+    double cell_size_;
+    //! Gray matter layer populated by the dipole distribution. If layer_ = 1, only the first layer of gray matter centroids will be populated. This variable allow to control the density of the dipole distribution
+    int layer_;
 #ifdef TRACE
 #if TRACE == 100
-    //! 
-    std::list< std::tuple< Domains::Point_vector, std::tuple< Domains::Point_vector, Domains::Point_vector > > > match_centroid_wm_gm_;
+    //! Mesh centroid and white matter point-vector tuples list
+    std::list< std::tuple< Point_vector, Point_vector > > centroid_vertex_;
 #endif
 #endif      
 
@@ -119,34 +122,34 @@ namespace Domains
     /*!
      *  \brief Default Constructor
      *
-     *  Constructor of the class Build_dipoles_list_knn
+     *  Constructor of the class Build_dipoles_list_high_density
      *
      */
-    Build_dipoles_list_knn();
+    Build_dipoles_list_high_density();
     /*!
      *  \brief Copy Constructor
      *
      *  Constructor is a copy constructor
      *
      */
-    Build_dipoles_list_knn( const Build_dipoles_list_knn& );
+    Build_dipoles_list_high_density( const Build_dipoles_list_high_density& );
     /*!
      *  \brief Destructeur
      *
-     *  Destructor of the class Build_dipoles_list_knn
+     *  Destructor of the class Build_dipoles_list_high_density
      */
-    virtual ~Build_dipoles_list_knn();
+    virtual ~Build_dipoles_list_high_density();
     /*!
      *  \brief Operator =
      *
-     *  Operator = of the class Build_dipoles_list_knn
+     *  Operator = of the class Build_dipoles_list_high_density
      *
      */
-    Build_dipoles_list_knn& operator = ( const Build_dipoles_list_knn& );
+    Build_dipoles_list_high_density& operator = ( const Build_dipoles_list_high_density& );
     /*!
      *  \brief Operator ()
      *
-     *  Operator () of the class Build_dipoles_list_knn
+     *  Operator () of the class Build_dipoles_list_high_density
      *
      */
     virtual void operator ()()
@@ -175,15 +178,17 @@ namespace Domains
     virtual void Make_analysis();
     /*!
      */
-    bool Select_dipole( Dipoles_tree&, Domains::Point_vector& );
+    void Select_dipole( const High_density_tree&, 
+			const std::vector< IndexedPointVector >&, 
+			std::vector< bool >&  );
   };
   /*!
-   *  \brief Dump values for Build_dipoles_list_knn
+   *  \brief Dump values for Build_dipoles_list_high_density
    *
    *  This method overload "<<" operator for a customuzed output.
    *
-   *  \param Build_dipoles_list_knn: this object
+   *  \param Build_dipoles_list_high_density: this object
    */
-  std::ostream& operator << ( std::ostream&, const Build_dipoles_list_knn& );
+  std::ostream& operator << ( std::ostream&, const Build_dipoles_list_high_density& );
 };
 #endif

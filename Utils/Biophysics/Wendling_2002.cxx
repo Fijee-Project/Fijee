@@ -162,7 +162,7 @@ Utils::Biophysics::Wendling_2002::ordinary_differential_equations( double T, con
   DyDt[8]  = G_*g_*C7_*sigmoid(C5_*Y[0] - C6_*Y[4]) - 2*g_*Y[8] - g_*g_*Y[3];
   // 
   DyDt[4]  = Y[9];
-  DyDt[9]  = B_*b_*sigmoid(C3_*Y[0]) - 2*b_*Y[9] - b_*b_*Y[4];
+  DyDt[9]  = B_*b_*C6_*sigmoid(C3_*Y[0]) - 2*b_*Y[9] - b_*b_*Y[4];
 
   // 
   // 

@@ -4,7 +4,7 @@
 # 100 R statistical software studies
 # 200 VTK visualization
 #
-CXXFLAGS += -Wall -DTIME_PROFILER #-DTRACE=100 
+CXXFLAGS += -Wall -DTIME_PROFILER -DTRACE=100 
 INC       = -I$(FIJEE)/ -I$(NIFTI)/include/nifti -I$(VTK)/include/vtk-5.10/ -I/$(CGAL)/include/ -I$(EIGEN3)/include/eigen3/ #-I/usr/include/taucs/ #
 LIBS      = -L$(FIJEE)/Utils/pugi/ -lpugixml -L/$(CGAL)/lib/ -lCGAL -lCGAL_ImageIO -lgmp -lmpfr -lboost_thread #-lgsl -lgslcblas -lm 
 # Taucs
@@ -21,7 +21,7 @@ INC_CUDA = #-I$(NIFTI)/include/nifti/
 
 ######
 ######
-SRC = main.cxx VTK_implicite_domain.cxx  Spheres_implicite_domain.cxx  Head_labeled_domain.cxx Spheres_labeled_domain.cxx Build_mesh.cxx Access_parameters.cxx Spheres_conductivity_tensor.cxx Head_conductivity_tensor.cxx Point_vector.cxx Dipole.cxx Electrode.cxx Electrode_shape_sphere.cxx Electrode_shape_cylinder.cxx Cell_conductivity.cxx Point.cxx Distance.cxx Build_dipoles_list.cxx Build_electrodes_list.cxx Build_dipoles_list_knn.cxx ##CUDA_Conductivity_matching.cxx
+SRC = main.cxx VTK_implicite_domain.cxx  Spheres_implicite_domain.cxx  Head_labeled_domain.cxx Spheres_labeled_domain.cxx Build_mesh.cxx Access_parameters.cxx Spheres_conductivity_tensor.cxx Head_conductivity_tensor.cxx Point_vector.cxx Dipole.cxx Electrode.cxx Electrode_shape_sphere.cxx Electrode_shape_cylinder.cxx Cell_conductivity.cxx Point.cxx Distance.cxx Build_dipoles_list.cxx Build_electrodes_list.cxx Build_dipoles_list_knn.cxx Build_dipoles_list_high_density.cxx  ##CUDA_Conductivity_matching.cxx
 OBJ = $(SRC:.cxx=.o)
 #
 SRC_CUDA = CUDA_Conductivity_matching.cu

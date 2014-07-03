@@ -43,6 +43,7 @@
 #include "Cell_conductivity.h"
 #include "Build_dipoles_list.h"
 #include "Build_dipoles_list_knn.h"
+#include "Build_dipoles_list_high_density.h"
 //
 //
 //
@@ -148,7 +149,8 @@ namespace Domains
     {
       //
       // Algorithm building the dipoles list;
-      Build_dipoles_list_knn dipoles_;
+      //      Build_dipoles_list_knn dipoles_;
+      Build_dipoles_list_high_density dipoles_;
       dipoles_.Make_list( tensors_.get_list_cell_conductivity_() );
 
 #ifdef DEBUG

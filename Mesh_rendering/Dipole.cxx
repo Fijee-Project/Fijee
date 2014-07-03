@@ -80,6 +80,28 @@ DD::Dipole( const Domains::Cell_conductivity& that ):
 //
 //
 //
+DD::Dipole( const Point_vector& that_point, const Domains::Cell_conductivity& that ):
+  Domains::Point_vector( that_point ),
+  cell_id_( that.get_cell_id_() ), cell_subdomain_(that.get_cell_subdomain_())
+{
+  //
+  // set the dipole intensity
+  set_weight_( 0.000000001 );
+  
+  //
+  //
+  for( int i = 0 ; i < 6 ; i++)
+    conductivity_coefficients_[i] = that.get_conductivity_coefficients_()[i];
+
+  //
+  //
+  for( int i = 0 ; i < 3 ; i++)
+    conductivity_eigenvalues_[i] = that.get_centroid_lambda_()[i].weight();
+  
+}
+//
+//
+//
 DD::~Dipole(){ /* Do nothing */}
 //
 //

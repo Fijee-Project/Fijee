@@ -67,6 +67,10 @@ DBdlknn::~Build_dipoles_list_knn()
 void 
 DBdlknn::Make_list( const std::list< Cell_conductivity >& List_cell_conductivity )
 {
+  // 
+  // Time log
+  FIJEE_TIME_PROFILER("Domain::Build_dipoles_list_knn::Make_list");
+
   //
   // We create the knn trees for the right and left hemispheres
   Dipoles_tree 

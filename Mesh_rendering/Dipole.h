@@ -95,6 +95,13 @@ namespace Domains
      */
     Dipole( const Cell_conductivity& );
     /*!
+     *  \brief Copy Constructor
+     *
+     *  Constructor is a copy constructor from Cell_conductivity object and a position
+     *
+     */
+    Dipole( const Point_vector& , const Cell_conductivity& );
+    /*!
      *  \brief Destructeur
      *
      *  Destructor of the class Dipole

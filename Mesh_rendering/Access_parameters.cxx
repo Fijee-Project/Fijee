@@ -559,9 +559,33 @@ DAp::set_lh_gray_matter_surface_point_normal_(std::list<Point_vector>&&  Lh_gray
 //
 //
 void
-DAp::set_rh_gray_matter_surface_point_normal_(std::list<Point_vector>&&  rh_Gray_matter_surface_point_normal )
+DAp::get_lh_gray_matter_surface_point_normal_(std::list<Point_vector>&  Lh_gray_matter_surface_point_normal )const
 {
-  rh_gray_matter_surface_point_normal_ = rh_Gray_matter_surface_point_normal;
+  Lh_gray_matter_surface_point_normal.resize(lh_gray_matter_surface_point_normal_.size());
+  // 
+  std::copy( lh_gray_matter_surface_point_normal_.begin(),
+	     lh_gray_matter_surface_point_normal_.end(),
+	     Lh_gray_matter_surface_point_normal.begin() );
+}
+//
+//
+//
+void
+DAp::set_rh_gray_matter_surface_point_normal_(std::list<Point_vector>&&  Rh_gray_matter_surface_point_normal )
+{
+  rh_gray_matter_surface_point_normal_ = Rh_gray_matter_surface_point_normal;
+}
+//
+//
+//
+void
+DAp::get_rh_gray_matter_surface_point_normal_(std::list<Point_vector>&  Rh_gray_matter_surface_point_normal ) const
+{
+  Rh_gray_matter_surface_point_normal.resize(rh_gray_matter_surface_point_normal_.size());
+  // 
+  std::copy( rh_gray_matter_surface_point_normal_.begin(),
+	     rh_gray_matter_surface_point_normal_.end(),
+	     Rh_gray_matter_surface_point_normal.begin() );
 }
 //
 //
@@ -575,9 +599,33 @@ DAp::set_lh_white_matter_surface_point_normal_(std::list<Point_vector>&&  Lh_whi
 //
 //
 void
+DAp::get_lh_white_matter_surface_point_normal_(std::list<Point_vector>&  Lh_white_matter_surface_point_normal )const
+{
+  Lh_white_matter_surface_point_normal.resize( lh_white_matter_surface_point_normal_.size() );
+  // 
+  std::copy( lh_white_matter_surface_point_normal_.begin(),
+	     lh_white_matter_surface_point_normal_.end(),
+	     Lh_white_matter_surface_point_normal.begin() );
+}
+//
+//
+//
+void
 DAp::set_rh_white_matter_surface_point_normal_(std::list<Point_vector>&&  Rh_white_matter_surface_point_normal )
 {
   rh_white_matter_surface_point_normal_ = Rh_white_matter_surface_point_normal;
+}
+//
+//
+//
+void
+DAp::get_rh_white_matter_surface_point_normal_(std::list<Point_vector>&  Rh_white_matter_surface_point_normal )const
+{
+  Rh_white_matter_surface_point_normal.resize(rh_white_matter_surface_point_normal_.size());
+  //
+  std::copy( rh_white_matter_surface_point_normal_.begin(),
+	     rh_white_matter_surface_point_normal_.end(),
+	     Rh_white_matter_surface_point_normal.begin() );
 }
 //
 //
