@@ -101,10 +101,16 @@ namespace Domains
   class Build_dipoles_list_high_density : public Build_dipoles_list
   {
   private:
+    //! Enhance statistics by adding 2D gray matter mesh
+    bool add_gray_matter_;
     //! Left hemisphere white matter point-vectors
     std::list< Point_vector > lh_wm_;
     //! Right hemisphere white matter point-vectors
     std::list< Point_vector > rh_wm_;
+    //! Left hemisphere gray matter point-vectors
+    std::list< Point_vector > lh_gm_;
+    //! Right hemisphere gray matter point-vectors
+    std::list< Point_vector > rh_gm_;
     //! Dipoles list
     std::list< Domains::Dipole > dipoles_list_;
     //! Cell size controlling the inter dipoles distance. This variable allow to control the density of the dipole distribution

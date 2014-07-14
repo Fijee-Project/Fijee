@@ -42,18 +42,19 @@ Domains::get( Domains::Point_vector_high_density_map, Domains::Point_vector_high
 //
 //
 DBdlhd::Build_dipoles_list_high_density():
-  cell_size_(2. /*mm*/), layer_(1)
+  cell_size_(1. /*mm*/), layer_(2), add_gray_matter_(false)
 {
   //
-  // Get the white and gray matter vertices matching tuples.
-//  (DAp::get_instance())->get_lh_match_wm_gm_( lh_match_wm_gm_ );
-//  (DAp::get_instance())->get_rh_match_wm_gm_( rh_match_wm_gm_ );
-
+  // Get the white and gray matter point_vectors
+  // 
   (DAp::get_instance())->get_lh_white_matter_surface_point_normal_( lh_wm_ );
   (DAp::get_instance())->get_rh_white_matter_surface_point_normal_( rh_wm_ );
-
-  std::cout << "Size left  H: " << lh_wm_.size()  << std::endl;
-  std::cout << "Size right H: " << rh_wm_.size()  << std::endl;
+  // 
+  if( add_gray_matter_ )
+    {
+      (DAp::get_instance())->get_lh_gray_matter_surface_point_normal_( lh_gm_ );
+      (DAp::get_instance())->get_rh_gray_matter_surface_point_normal_( rh_gm_ );
+    }
 }
 //
 //
@@ -80,8 +81,14 @@ DBdlhd::Make_list( const std::list< Cell_conductivity >& List_cell_conductivity 
 
   // 
   // Initialize index and Point vector tuple.
-  std::vector< IndexedPointVector > lh_wm_points( lh_wm_.size() );
-  std::vector< IndexedPointVector > rh_wm_points( rh_wm_.size() );
+  // white matter
+  std::vector< IndexedPointVector > lh_wm_points( lh_wm_.size() + lh_gm_.size() );
+  std::vector< IndexedPointVector > rh_wm_points( rh_wm_.size() + rh_gm_.size());
+  // Concat {white,gray} matters
+  lh_wm_.insert( lh_wm_.end(), lh_gm_.begin(), lh_gm_.end() );
+  rh_wm_.insert( rh_wm_.end(), rh_gm_.begin(), rh_gm_.end() );
+
+  // 
   // Left hemisphere
   int l = 0;
   // 
@@ -104,8 +111,8 @@ DBdlhd::Make_list( const std::list< Cell_conductivity >& List_cell_conductivity 
       r++;
     }
   // 
-  std::cout << "Density of the white matter 2D mesh: " 
-	    << lh_wm_.size() + rh_wm_.size() 
+  std::cout << "Density of the gray matter 2D mesh: " 
+	    << lh_wm_.size() + rh_wm_.size() + lh_gm_.size() + rh_gm_.size() 
 	    << std::endl;
 
   // 
@@ -143,7 +150,7 @@ DBdlhd::Make_list( const std::list< Cell_conductivity >& List_cell_conductivity 
 						    cell_size_),
 		      rh_wm_points.end() );
   // 
-  std::cout << "Down sizing the dipole distribution d(d1,d2) > 1mm: " 
+  std::cout << "Down sizing the dipole distribution d(d1,d2) > " << cell_size_ << " mm: " 
 	    << lh_wm_points.size() + rh_wm_points.size() << " dipoles in the 2D mesh" 
 	    << std::endl;
 
