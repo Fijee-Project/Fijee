@@ -291,7 +291,7 @@ DSct::make_conductivity( const C3t3& Mesh )
 	  //
 	  //
 	  Cell_conductivity 
-	    cell_parameters ( cell_id, cell_subdomain,
+	    cell_parameters ( cell_id, cell_subdomain, 0,
 			      cell_vertices[4](0),cell_vertices[4](1),cell_vertices[4](2),/* centroid */
 			      0.33,/* l1 */
 			      1., 0., 0., /* eigenvec V1 */
@@ -320,7 +320,7 @@ DSct::make_conductivity( const C3t3& Mesh )
 	  //
 	  //
 	  Cell_conductivity 
-	    cell_parameters ( cell_id, cell_subdomain,
+	    cell_parameters ( cell_id, cell_subdomain, 0,
 			      cell_vertices[4](0),cell_vertices[4](1),cell_vertices[4](2),/* centroid */
 			      1.79,/* l1 */
 			      1., 0., 0., /* eigenvec V1 */
@@ -348,7 +348,7 @@ DSct::make_conductivity( const C3t3& Mesh )
 	  //
 	  //
 	  Cell_conductivity 
-	    cell_parameters ( cell_id, cell_subdomain,
+	    cell_parameters ( cell_id, cell_subdomain, 0,
 			      cell_vertices[4](0),cell_vertices[4](1),cell_vertices[4](2),/* centroid */
 			      0.0132,/* l1 */
 			      1., 0., 0., /* eigenvec V1 */
@@ -376,7 +376,7 @@ DSct::make_conductivity( const C3t3& Mesh )
 	  //
 	  //
 	  Cell_conductivity 
-	    cell_parameters ( cell_id, cell_subdomain,
+	    cell_parameters ( cell_id, cell_subdomain, 0,
 			      cell_vertices[4](0),cell_vertices[4](1),cell_vertices[4](2),/* centroid */
 			      0.33,/* l1 */
 			      1., 0., 0., /* eigenvec V1 */
@@ -404,7 +404,7 @@ DSct::make_conductivity( const C3t3& Mesh )
 	  //
 	  //
 	  Cell_conductivity 
-	    cell_parameters ( cell_id, cell_subdomain,
+	    cell_parameters ( cell_id, cell_subdomain, 0,
 			      cell_vertices[4](0),cell_vertices[4](1),cell_vertices[4](2),/* centroid */
 			      0.33,/* l1 */
 			      1., 0., 0., /* eigenvec V1 */
@@ -429,7 +429,7 @@ DSct::make_conductivity( const C3t3& Mesh )
 	  //
 	  //
 //	  Cell_conductivity 
-//	    cell_parameters ( cell_id, cell_subdomain,
+//	    cell_parameters ( cell_id, cell_subdomain, 0,
 //			      cell_vertices[4](0),cell_vertices[4](1),cell_vertices[4](2),/* centroid */
 //			      0.,/* l1 */
 //			      0., 0., 0., /* eigenvec V1 */
@@ -466,7 +466,7 @@ DSct::Make_analysis()
   //
   //
   output_stream_
-    << "Cell_sub_domain "
+    << "Cell_sub_domain Cell_parcel "
     << "X_cent Y_cent Z_cent  "
     << "l1  l2  l3 l_long l_tang l_mean "
     << "v11 v12 v13 "
@@ -480,6 +480,7 @@ DSct::Make_analysis()
     {
       output_stream_
 	<< cell_it.get_cell_subdomain_() << " "
+	<< cell_it.get_cell_parcel_() << " "
 	<< (cell_it.get_centroid_lambda_()[0]).x() << " " 
 	<< (cell_it.get_centroid_lambda_()[0]).y() << " " 
 	<< (cell_it.get_centroid_lambda_()[0]).z() << " ";

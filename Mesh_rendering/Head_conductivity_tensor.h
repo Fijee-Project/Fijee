@@ -24,8 +24,8 @@
 //  The views and conclusions contained in the software and documentation are those   
 //  of the authors and should not be interpreted as representing official policies,    
 //  either expressed or implied, of the FreeBSD Project.  
-#ifndef HEAD_CONDUCTIVITY_TENSOR_H_
-#define HEAD_CONDUCTIVITY_TENSOR_H_
+#ifndef HEAD_CONDUCTIVITY_TENSOR_H
+#define HEAD_CONDUCTIVITY_TENSOR_H
 /*!
  * \file Head_conductivity_tensor.h
  * \brief brief describe 
@@ -42,6 +42,8 @@
 #include "Conductivity_tensor.h"
 #include "CGAL_tools.h"
 #include "Cell_conductivity.h"
+
+#include <metis.h>
 //
 // Eigen
 //
@@ -192,12 +194,26 @@ namespace Domains
 
   public:
     /*!
-     *  \brief Move_conductivity_array_to_parameters
+     *  \brief Make conductivity
      *
-     *  This method moves members array to Access_Parameters's object.
+     *  This method compute the conductivity at mesh centroids.
      *
      */
     virtual void make_conductivity( const C3t3& );
+    /*!
+     *  \brief Make parcellation
+     *
+     *  This method create a mesh partitioning.
+     *
+     */
+    void make_parcellation( const C3t3& );
+    /*!
+     *  \brief Make parcellation
+     *
+     *  This method create a mesh partitioning.
+     *
+     */
+    void make_parcellation1( const C3t3& );
     /*!
      *  \brief Output the XML match between mesh and conductivity
      *

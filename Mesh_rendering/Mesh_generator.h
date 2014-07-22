@@ -137,6 +137,10 @@ namespace Domains
       mesher_.Tetrahedrization();
 
       //
+      // Create brain parcellation
+      tensors_.make_parcellation( mesher_.get_mesh_() );
+
+      //
       // Diffusion tensor
       tensors_.make_conductivity( mesher_.get_mesh_() );
     }

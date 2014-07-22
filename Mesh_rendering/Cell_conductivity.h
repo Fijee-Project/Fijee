@@ -60,6 +60,8 @@ namespace Domains
     int cell_id_;
     //! Cell domain 
     int cell_subdomain_;
+    //! Cell parcel 
+    int cell_parcel_;
     //! Conductivity coefficients
     //! 0 -> C00
     //! 1 -> C01
@@ -85,7 +87,7 @@ namespace Domains
      *  Constructor of the class Cell_conductivity
      *
      */
-    Cell_conductivity( int, int, 
+    Cell_conductivity( int, int, int,
 		       float, float, float,
 		       float, float, float, float, 
 		       float, float, float, float, 
@@ -115,6 +117,7 @@ namespace Domains
   public:
     int get_cell_id_() const {return cell_id_;};
     int get_cell_subdomain_() const {return cell_subdomain_;};
+    int get_cell_parcel_() const {return cell_parcel_;};
 
     const float* get_conductivity_coefficients_() const {return conductivity_coefficients_; }
 

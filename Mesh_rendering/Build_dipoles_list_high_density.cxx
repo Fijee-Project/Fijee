@@ -42,7 +42,7 @@ Domains::get( Domains::Point_vector_high_density_map, Domains::Point_vector_high
 //
 //
 DBdlhd::Build_dipoles_list_high_density():
-  cell_size_(1. /*mm*/), layer_(2), add_gray_matter_(false)
+  cell_size_(2. /*mm*/), layer_(1), add_gray_matter_(true)
 {
   //
   // Get the white and gray matter point_vectors
@@ -168,7 +168,9 @@ DBdlhd::Make_list( const std::list< Cell_conductivity >& List_cell_conductivity 
   std::vector< bool > cell_conductivity_assignment(List_cell_conductivity.size(), false);
   // 
   for ( auto cell_conductivity : List_cell_conductivity )
-    if ( cell_conductivity.get_cell_subdomain_() == GRAY_MATTER )
+    if ( cell_conductivity.get_cell_subdomain_() == LEFT_GRAY_MATTER  ||
+	 cell_conductivity.get_cell_subdomain_() == RIGHT_GRAY_MATTER ||
+	 cell_conductivity.get_cell_subdomain_() == GRAY_MATTER )
       {
 	// 
 	//

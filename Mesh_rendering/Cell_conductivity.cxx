@@ -33,7 +33,7 @@ typedef Domains::Cell_conductivity DCc;
 //
 //
 DCc::Cell_conductivity():
-  cell_id_(0), cell_subdomain_(0)
+  cell_id_(0), cell_subdomain_(0), cell_parcel_(0)
 {    
   for( int i = 0 ; i < 6 ; i++)
     conductivity_coefficients_[i] = 0.;
@@ -44,13 +44,13 @@ DCc::Cell_conductivity():
 //
 //
 //
-DCc::Cell_conductivity( int Cell_id, int Cell_subdomain, 
+DCc::Cell_conductivity( int Cell_id, int Cell_subdomain, int Cell_parcel,
 			float Centroid_x, float Centroid_y, float Centroid_z, 
 			float L1, float V1_x, float V1_y, float V1_z, 
 			float L2, float V2_x, float V2_y, float V2_z,
 			float L3, float V3_x, float V3_y, float V3_z,
 			float C00, float C01, float C02, float C11, float C12, float C22 ):
-  cell_id_(Cell_id), cell_subdomain_(Cell_subdomain)
+  cell_id_(Cell_id), cell_subdomain_(Cell_subdomain), cell_parcel_(Cell_parcel)
 {    
     conductivity_coefficients_[0] = C00;
     conductivity_coefficients_[1] = C01;
@@ -67,7 +67,7 @@ DCc::Cell_conductivity( int Cell_id, int Cell_subdomain,
 //
 //
 DCc::Cell_conductivity( const DCc& that ):
-  cell_id_(that.cell_id_), cell_subdomain_(that.cell_subdomain_)
+  cell_id_(that.cell_id_), cell_subdomain_(that.cell_subdomain_), cell_parcel_(that.cell_parcel_)
 {
   for( int i = 0 ; i < 6 ; i++)
     conductivity_coefficients_[i] = that.conductivity_coefficients_[i];
@@ -89,6 +89,7 @@ DCc::operator = ( const DCc& that )
 {
   cell_id_        = that.cell_id_;
   cell_subdomain_ = that.cell_subdomain_;
+  cell_parcel_    = that.cell_parcel_;
   //
   for( int i = 0 ; i < 6 ; i++)
     conductivity_coefficients_[i] = that.conductivity_coefficients_[i];

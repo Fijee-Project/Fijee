@@ -100,7 +100,9 @@ DBdlknn::Make_list( const std::list< Cell_conductivity >& List_cell_conductivity
     {
       //
       // 
-      if ( cell_conductivity.get_cell_subdomain_() == GRAY_MATTER )
+      if ( cell_conductivity.get_cell_subdomain_() == LEFT_GRAY_MATTER  ||
+	   cell_conductivity.get_cell_subdomain_() == RIGHT_GRAY_MATTER ||
+	   cell_conductivity.get_cell_subdomain_() == GRAY_MATTER )
 	{
 	  //
 	  //

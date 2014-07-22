@@ -329,7 +329,6 @@ Domains_Head_labeled::model_segmentation()
 
   // Skull
   CGAL::Image_3 SPM_bones;
-//  SPM_bones.read( "/home/cobigo/Dropbox/Protocol-test-3/sc4T1-1.5.hdr" );
   SPM_bones.read( (DAp::get_instance())->get_sc4T1_() );
   Image_filter spm_bones( SPM_bones, data_position_ );
   spm_bones.init( 5 /* % of outliers to remove */,
@@ -340,7 +339,6 @@ Domains_Head_labeled::model_segmentation()
 
   // Skin
   CGAL::Image_3 SPM_skin;
-//  SPM_skin.read( "/home/cobigo/Dropbox/Protocol-test-3/sc5T1-3.0.hdr" );
   SPM_skin.read( (DAp::get_instance())->get_sc5T1_() );
   Image_filter  spm_skin( SPM_skin, data_position_ );
   spm_skin.init( 10 /* % of outliers to remove */,
@@ -348,7 +346,6 @@ Domains_Head_labeled::model_segmentation()
 
   // Air
   CGAL::Image_3 SPM_air;
-//  SPM_air.read( "/home/cobigo/Dropbox/Protocol-test-3/c6T1.hdr" );
   SPM_air.read( (DAp::get_instance())->get_sc6T1_() );
   //  Image_wrapper spm_air( SPM_air );
   Image_filter  air( SPM_air, data_position_ );
@@ -357,7 +354,6 @@ Domains_Head_labeled::model_segmentation()
 
   // CSF
   CGAL::Image_3 SPM_csf;
-//  SPM_csf.read( "/home/cobigo/Dropbox/Protocol-test-3/sc3T1-2.0.hdr" );
   SPM_csf.read( (DAp::get_instance())->get_sc3T1_() );
   Image_filter spm_csf( SPM_csf, data_position_ );
   spm_csf.init( 10 /* % of outliers to remove */,
@@ -497,9 +493,11 @@ Domains_Head_labeled::model_segmentation()
 	    {
 	      //
 	      // Gray-matter
-	      if( right_gray_matter.inside_domain( cell_center ) || 
-		  left_gray_matter.inside_domain( cell_center ) )
-		data_label_[ idx ] = GRAY_MATTER;
+	      if( left_gray_matter.inside_domain( cell_center ) )
+		data_label_[ idx ] = LEFT_GRAY_MATTER;
+	      //
+	      if( right_gray_matter.inside_domain( cell_center ) )
+		data_label_[ idx ] = RIGHT_GRAY_MATTER;
 	      
 	      //
 	      //	  if( subcortical_brain(cell_center_aseg) == RIGHT_CEREBRAL_CORTEX || 

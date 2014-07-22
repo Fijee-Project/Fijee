@@ -4,9 +4,9 @@
 # 100 R statistical software studies
 # 200 VTK visualization
 #
-CXXFLAGS += -Wall -DTIME_PROFILER -DTRACE=100 
-INC       = -I$(FIJEE)/ -I$(NIFTI)/include/nifti -I$(VTK)/include/vtk-5.10/ -I/$(CGAL)/include/ -I$(EIGEN3)/include/eigen3/ #-I/usr/include/taucs/ #
-LIBS      = -L$(FIJEE)/Utils/pugi/ -lpugixml -L/$(CGAL)/lib/ -lCGAL -lCGAL_ImageIO -lgmp -lmpfr -lboost_thread #-lgsl -lgslcblas -lm 
+CXXFLAGS += -Wall -DTIME_PROFILER -DTRACE=100 -DIDXTYPEWIDTH=64 -DINTSIZE64
+INC       = -I$(FIJEE)/ -I$(NIFTI)/include/nifti -I$(VTK)/include/vtk-5.10/ -I/$(CGAL)/include/ -I$(EIGEN3)/include/eigen3/  #-I/usr/include/scotch-x86_64/ #-I/usr/include/taucs/ #
+LIBS      = -L$(FIJEE)/Utils/pugi/ -lpugixml -L/$(CGAL)/lib/ -lCGAL -lCGAL_ImageIO -lgmp -lmpfr -lboost_thread -lmetis #-lscotch -lscotcherr -lscotcherrexit #-lscotchmetis -lgsl -lgslcblas -lm 
 # Taucs
 #LIBS += -L/usr/lib64/taucs/ -ltaucs -lblas -llapack -lmetis
 #########

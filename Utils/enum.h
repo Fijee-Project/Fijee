@@ -259,47 +259,48 @@ enum Brain_segmentation
     WHITE_MATTER              = 4,  //  77 WM_HYPOINTENSITIES 
                                     //  41 RIGHT_CEREBRAL_WHITE_MATTER 
                                     //   2  LEFT_CEREBRAL_WHITE_MATTER
-    GRAY_MATTER               = 5,  //  42 RIGHT_CEREBRAL_CORTEX 
-                                    //   3  LEFT_CEREBRAL_CORTEX 
-    BRAIN_STEM_SUBCORTICAL    = 6,  //  16  BRAIN_STEM
-    HIPPOCAMPUS               = 7,  //  53 RIGHT_HIPPOCAMPUS 
+    LEFT_GRAY_MATTER          = 5,  //   3  LEFT_CEREBRAL_CORTEX 
+    RIGHT_GRAY_MATTER         = 6,  //  42 RIGHT_CEREBRAL_CORTEX 
+    GRAY_MATTER               = 7,                          //  
+    BRAIN_STEM_SUBCORTICAL    = 8,  //  16  BRAIN_STEM
+    HIPPOCAMPUS               = 9,  //  53 RIGHT_HIPPOCAMPUS 
                                     //  17  LEFT_HIPPOCAMPUS
-    AMYGDALA_SUBCORTICAL      = 8,  //  5  RIGHT_AMYGDALA 
+    AMYGDALA_SUBCORTICAL      = 10, //  5  RIGHT_AMYGDALA 
                                     //  18  LEFT_AMYGDALA
-    CAUDATE                   = 9,  //  50 RIGHT_CAUDATE 
+    CAUDATE                   = 11, //  50 RIGHT_CAUDATE 
                                     //  11  LEFT_CAUDATE 
-    PUTAMEN                   = 10, //  12  LEFT_PUTAMEN 
+    PUTAMEN                   = 12, //  12  LEFT_PUTAMEN 
                                     //  51 RIGHT_PUTAMEN
-    THALAMUS                  = 11, //  10  LEFT_THALAMUS_PROPER  
+    THALAMUS                  = 13, //  10  LEFT_THALAMUS_PROPER  
                                     //  49 RIGHT_THALAMUS_PROPER 
-    ACCUMBENS                 = 12, //  26  LEFT_ACCUMBENS_AREA 
+    ACCUMBENS                 = 14, //  26  LEFT_ACCUMBENS_AREA 
                                     //  58 RIGHT_ACCUMBENS_AREA 
-    PALLIDUM                  = 13, //  13  LEFT_PALLIDUM 
+    PALLIDUM                  = 15, //  13  LEFT_PALLIDUM 
                                     //  52 RIGHT_PALLIDUM
-    VENTRICLE                 = 14, //   4  LEFT_LATERAL_VENTRICLE 
+    VENTRICLE                 = 16, //   4  LEFT_LATERAL_VENTRICLE 
                                     //  43 RIGHT_LATERAL_VENTRICLE 
                                     //   5  LEFT_INF_LAT_VENT 
                                     //  44 RIGHT_INF_LAT_VENT
                                     //  15  FOURTH_VENTRICLE 
                                     //  14  THIRD_VENTRICLE 
                                     //  72  FIFTH_VENTRICLE 
-    PLEXUS                    = 15, //  63 RIGHT_CHOROID_PLEXUS 
+    PLEXUS                    = 17, //  63 RIGHT_CHOROID_PLEXUS 
                                     //  31  LEFT_CHOROID_PLEXUS
-    FORNIX_SUBCORTICAL        = 16, // 250 FORNIX
-    CORPUS_COLLOSUM           = 17, // 251 CC_POSTERIOR 
+    FORNIX_SUBCORTICAL        = 18, // 250 FORNIX
+    CORPUS_COLLOSUM           = 19, // 251 CC_POSTERIOR 
                                     // 252 CC_MID_POSTERIOR 
                                     // 253 CC_CENTRAL 
                                     // 254 CC_MID_ANTERIOR 
                                     // 255 CC_ANTERIOR 
-    VESSEL                    = 18, //  30  LEFT_VESSEL 
+    VESSEL                    = 20, //  30  LEFT_VESSEL 
                                     //  62 RIGHT_VESSEL 
-    CEREBELLUM_GRAY_MATTER    = 19, //   8  LEFT_CEREBELLUM_CORTEX 
+    CEREBELLUM_GRAY_MATTER    = 21, //   8  LEFT_CEREBELLUM_CORTEX 
                                     //  47 RIGHT_CEREBELLUM_CORTEX
-    CEREBELLUM_WHITE_MATTER   = 20, //   7  LEFT_CEREBELLUM_WHITE_MATTER 
+    CEREBELLUM_WHITE_MATTER   = 22, //   7  LEFT_CEREBELLUM_WHITE_MATTER 
                                     //  46 RIGHT_CEREBELLUM_WHITE_MATTER
-    VENTRAL_DIENCEPHALON      = 21, //  28  LEFT_VENTRALDC 
+    VENTRAL_DIENCEPHALON      = 23, //  28  LEFT_VENTRALDC 
                                     //  60 RIGHT_VENTRALDC
-    OPTIC_CHIASM_SUBCORTICAL  = 22, //  85 OPTIC_CHIASM
+    OPTIC_CHIASM_SUBCORTICAL  = 24, //  85 OPTIC_CHIASM
     //
     //
     ELECTRODE                 = 100,

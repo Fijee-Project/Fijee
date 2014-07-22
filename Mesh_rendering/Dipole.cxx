@@ -34,7 +34,7 @@ typedef Domains::Dipole DD;
 //
 DD::Dipole():
   Domains::Point_vector(),
-  cell_id_(0), cell_subdomain_(0)
+  cell_id_(0), cell_subdomain_(0), cell_parcel_(0)
 {
   for( int i = 0 ; i < 6 ; i++)
     conductivity_coefficients_[i] = 0.;
@@ -47,7 +47,7 @@ DD::Dipole():
 //
 DD::Dipole( const DD& that ):
   Domains::Point_vector(that),
-  cell_id_(that.cell_id_), cell_subdomain_(that.cell_subdomain_)
+  cell_id_(that.cell_id_), cell_subdomain_(that.cell_subdomain_), cell_parcel_(that.cell_parcel_)
 {
   for( int i = 0 ; i < 6 ; i++)
     conductivity_coefficients_[i] = that.conductivity_coefficients_[i];
@@ -60,7 +60,8 @@ DD::Dipole( const DD& that ):
 //
 DD::Dipole( const Domains::Cell_conductivity& that ):
   Domains::Point_vector( that.get_centroid_lambda_()[0] ),
-  cell_id_( that.get_cell_id_() ), cell_subdomain_(that.get_cell_subdomain_())
+  cell_id_( that.get_cell_id_() ), cell_subdomain_(that.get_cell_subdomain_()), 
+  cell_parcel_(that.get_cell_parcel_())
 {
   //
   // set the dipole intensity
@@ -82,7 +83,8 @@ DD::Dipole( const Domains::Cell_conductivity& that ):
 //
 DD::Dipole( const Point_vector& that_point, const Domains::Cell_conductivity& that ):
   Domains::Point_vector( that_point ),
-  cell_id_( that.get_cell_id_() ), cell_subdomain_(that.get_cell_subdomain_())
+  cell_id_( that.get_cell_id_() ), cell_subdomain_(that.get_cell_subdomain_()),
+  cell_parcel_(that.get_cell_parcel_())
 {
   //
   // set the dipole intensity
@@ -113,6 +115,7 @@ DD::operator = ( const DD& that )
   //
   cell_id_        = that.cell_id_;
   cell_subdomain_ = that.cell_subdomain_;
+  cell_parcel_    = that.cell_parcel_;
   //
   for( int i = 0 ; i < 6 ; i++)
     conductivity_coefficients_[i] = that.conductivity_coefficients_[i];
