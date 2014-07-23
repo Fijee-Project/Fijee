@@ -33,6 +33,9 @@
 //
 #include "Head_conductivity_tensor.h"
 #include "Access_parameters.h"
+#include "Parcellation.h"
+#include "Parcellation_METIS.h"
+#include "Parcellation_Scotch.h"
 // 
 // Scotch
 // 
@@ -587,6 +590,25 @@ DHct::make_conductivity( const C3t3& Mesh )
   // Tetrahedra mapping
   Cell_pmap cell_pmap( Mesh );
 
+  // 
+  // Mesh parcellation
+  int 
+    lh_region = 0,
+    rh_region = 0,
+    region_numbers = 16;
+  Parcellation_METIS parcellation_lh( Mesh, cell_pmap, LEFT_GRAY_MATTER,  region_numbers );
+  Parcellation_METIS parcellation_rh( Mesh, cell_pmap, RIGHT_GRAY_MATTER, region_numbers );
+  // 
+  std::thread left_gray_matter_thread (std::ref(parcellation_lh));
+  std::thread right_gray_matter_thread(std::ref(parcellation_rh));
+  // 
+//  parcellation_lh.Mesh_partitioning();
+//  parcellation_rh.Mesh_partitioning();
+  // 
+  left_gray_matter_thread.join();
+  right_gray_matter_thread.join();
+
+
   //
   // Retrieve the transformation matrix and vector from aseg
   Eigen::Matrix< float, 3, 3 > rotation    = (DAp::get_instance())->get_rotation_();
@@ -716,9 +738,31 @@ DHct::make_conductivity( const C3t3& Mesh )
 	      Eigen::Vector3f eigen_vector_tmp = rotation * eigen_vector[i];
 	      eigen_vector[i] = eigen_vector_tmp;
 	    }
-	  //
+	  // Parcellation region
+	  int region = 0;
+	  switch( cell_pmap.subdomain_index( cit ) )
+	    {
+	    case LEFT_GRAY_MATTER:
+	      {
+		// avoid region = 0
+		region = parcellation_lh.get_region( lh_region++ ) + 1;
+		break;
+	      }
+	    case RIGHT_GRAY_MATTER:
+	      {
+		// avoid region = 0 and left hemsphere overlap
+		region = parcellation_rh.get_region( rh_region++ ) + region_numbers + 1;
+		break;
+	      }
+	    default:
+	      {
+		region = 0;
+		break;
+	      }
+	    }
+	  // 
 	  Cell_conductivity 
-	    cell_parameters ( cell_id, cell_subdomain, 0,
+	    cell_parameters ( cell_id, cell_subdomain, region,
 			      cell_vertices[4](0),cell_vertices[4](1),cell_vertices[4](2),/* centroid */
 			      eigen_values_matrices_array_[std::get<1>( conductivity_centroids->first )](0,0),/* l1 */
 			      eigen_vector[0](0), eigen_vector[0](1), eigen_vector[0](2), /* eigenvec V1 */
@@ -966,582 +1010,6 @@ DHct::make_conductivity( const C3t3& Mesh )
   //
   // Output for R analysis
   Make_analysis();
-}
-//
-//
-//
-void 
-DHct::make_parcellation( const C3t3& Mesh )
-{
-  // 
-  // Time log
-  FIJEE_TIME_PROFILER("Domain::Head_conductivity_tensor::make_parcellation");
-
-  printf(" size of idx_t: %zubits, real_t: %zubits, idx_t *: %zubits\n", 
-	 8*sizeof(idx_t), 8*sizeof(real_t), 8*sizeof(idx_t *));
-
-  //
-  // Tetrahedra mapping
-  Cell_pmap cell_pmap( Mesh );
-  // 
-  int inum = 0; 
-  int vertex_new_id = 0; 
-  // list of elements (cells - tetrahedrons) and their nodes (tetrahedron's vertices)
-  // just store addresses
-  std::vector< Cell_iterator > elements_nodes;
-  // 
-  // 
-  std::map< Tr::Vertex_handle, 
-	    std::tuple<int/*vertex new id*/, std::list<int/*cell id*/> > > edge_vertex_to_element;
-  // 
-  int cell_id = 0;
-  for( Cell_iterator cit = Mesh.cells_in_complex_begin() ;
-       cit != Mesh.cells_in_complex_end() ; cit++ )
-    {
-      //
-      if( cell_pmap.subdomain_index( cit ) == LEFT_GRAY_MATTER )
-	{
-	  elements_nodes.push_back( cit );
-	  int mesh_cell = cell_id++;
-	
-	  // 
-	  // 
-	  for( int i = 0 ; i < 4 ; i++ )
-	    {
-	      // 
-	      // 
-	      std::map< Tr::Vertex_handle, std::tuple<int, std::list<int> > >::iterator it_v_handler;
-	      // 
-	      it_v_handler = edge_vertex_to_element.find(cit->vertex(i));
-	      // The vertex is not in the edge_vertex_to_element map
-	      if ( it_v_handler == edge_vertex_to_element.end() )
-		{
-		  edge_vertex_to_element.insert( std::pair<Tr::Vertex_handle,
-						 std::tuple<int, std::list<int> > >
-						 (cit->vertex(i),
-						  std::make_tuple (vertex_new_id++,
-								   std::list<int>(1, mesh_cell))) );
-		}
-	      // The vertex is in the edge_vertex_to_element map
-	      else
-		{
-		  (std::get<1/*list of cell id*/>(it_v_handler->second)).push_back(mesh_cell);
-		}
-	    }
-	}
-    }
-	
-
-  // 
-  // Metis data structure
-  // 
-  
-  // 
-  // 
-  idx_t options[METIS_NOPTIONS];
-  // 
-  //  Options --------------------------------------------------------
-  // ptype=kway, objtype=cut, ctype=shem, rtype=greedy, iptype=metisrb
-  // dbglvl=0, ufactor=1.030, minconn=NO, contig=NO, nooutput=NO
-  // seed=-1, niter=10, ncuts=1
-  // gtype=dual, ncommon=1, niter=10, ncuts=1
-
-  // 
-  METIS_SetDefaultOptions(options);
-  // METIS_PTYPE_RB || METIS_PTYPE_KWAY
-  options[METIS_OPTION_PTYPE] = METIS_PTYPE_KWAY;
-  // Specifies the type of objective. Possible values are:
-  // - METIS_OBJTYPE_CUT Edge-cut minimization.
-  // - METIS_OBJTYPE_VOL Total communication volume minimization.
-  options[METIS_OPTION_OBJTYPE] = METIS_OBJTYPE_CUT;
-  // Specifies the matching scheme to be used during coarsening. Possible values are:
-  // - METIS_CTYPE_RM Random matching.
-  // - METIS_CTYPE_SHEM Sorted heavy-edge matching.
-  options[METIS_OPTION_CTYPE] = METIS_CTYPE_SHEM;
-//  // Determines the algorithm used during initial partitioning. Possible values are:
-//  // - METIS_IPTYPE_GROW Grows a bisection using a greedy strategy.
-//  // - METIS_IPTYPE_RANDOM Computes a bisection at random followed by a refinement.
-//  // - METIS_IPTYPE_EDGE Derives a separator from an edge cut.
-//  // - METIS_IPTYPE_NODE Grow a bisection using a greedy node-based strategy.
-//  options[METIS_OPTION_IPTYPE]  = METIS_IPTYPE_GROW;
-  // Determines the algorithm used for refinement. Possible values are:
-  // - METIS_RTYPE_FM FM-based cut refinement.
-  // - METIS_RTYPE_GREEDY Greedy-based cut and volume refinement.
-  // - METIS_RTYPE_SEP2SIDED Two-sided node FM refinement.
-  // - METIS_RTYPE_SEP1SIDED One-sided node FM refinement.
-  options[METIS_OPTION_RTYPE] = METIS_RTYPE_GREEDY;
-  // Debug
-  options[METIS_OPTION_DBGLVL] = 0;
-  //
-  //  options[METIS_OPTION_UFACTOR] = params->ufactor;
-  // 0 || 1
-  options[METIS_OPTION_MINCONN] = 0;
-  // 0 || 1
-  options[METIS_OPTION_CONTIG] = 0;
-  // Specifies the seed for the random number generator.
-  options[METIS_OPTION_SEED] = -1;
-  // Specifies the number of iterations for the refinement algorithms at each stage of the uncoarsening process. Default is 10.
-  options[METIS_OPTION_NITER] = 10;
-  // Specifies the number of different partitionings that it will compute. The final partitioning 
-  // is the one that achieves the best edgecut or communication volume. Default is 1.
-  options[METIS_OPTION_NCUTS] = 1;
-  //
-  //  options[METIS_OPTION_NUMBERING] = 0;
-
-
-  // 
-  // number of elements and vertices
-  idx_t 
-    elem_nbr     = static_cast<idx_t>(elements_nodes.size()),
-    vertices_nbr = static_cast<idx_t>(edge_vertex_to_element.size());
-  // The size of the eptr array is n + 1, where n is the number of elements in the mesh. 
-  // The size of the eind array is of size equal to the sum of the number of nodes in all 
-  // the elements of the mesh. The list of nodes belonging to the ith element of the mesh 
-  // are stored in consecutive locations of eind starting at position eptr[i] up to 
-  // (but not including) position eptr[i+1].
-  idx_t *eptr, *epart, *eind, *npart;
-  //
-  eptr  = (idx_t*)calloc(sizeof(idx_t), elem_nbr+1);
-  eind  = (idx_t*)calloc(sizeof(idx_t), 4 * elem_nbr);
-  //partition vector for the elements of the mesh
-  epart = (idx_t*)calloc(sizeof(idx_t), elem_nbr);
-  // partition vector for the nodes of the mesh
-  npart = (idx_t*)calloc(sizeof(idx_t), vertices_nbr);
-
-  // 
-  // Build Metis mesh data structure
-  // 
-  std::cout << "Build Metis mesh data structure" << std::endl;
-     
-  // 
-  // Load elements in eptr (element ptr) and eind (element index) arrays
-  for ( int elem = 0 ; elem < elem_nbr ; elem++ )
-    {
-      eptr[elem] = 4*elem;
-      // 
-      for ( int num = 0 ; num < 4 ; num++ )
-	{
-	  auto vertex = edge_vertex_to_element.find(elements_nodes[elem]->vertex(num));
-	  if( vertex != edge_vertex_to_element.end() )
-	    eind[4*elem+num] = std::get<0>(vertex->second);
-	  else
-	    {
-	      std::cerr << "Parcelletion: all vertices must be found:" << std::endl;
-	      std::cerr << vertex->first->point() << std::endl;
-	      abort();
-	    }
-	}
-    }
-  // last element
-  eptr[ elem_nbr ] = 4*elem_nbr;
-
-  std::cout << "Check: eptr" << std::endl;
-  for (int elem = 0 ; elem < elem_nbr + 1 ; elem++)
-    std::cout << "eptr[" << elem << "] = " << eptr[elem] << std::endl;
-
-  std::cout << "Check: cell - vertex, size: " << elements_nodes.size() << std::endl;
-  int id = 0;
-  for (auto elem : elements_nodes )
-    {
-      for ( int i = 0 ; i < 4 ; i++ )
-	{
-	  auto vertex = edge_vertex_to_element.find(elem->vertex(i));
-	  std::cout << "cell id: " << id << " - vertex(" << i << "): " << std::get<0>(vertex->second) 
-		    << " : " << vertex->first->point()
-		    << std::endl;
-	}
-      // 
-      id++;
-    }
-
-  std::cout << "Check: vertex - cell, size: " << edge_vertex_to_element.size() << std::endl;
-  for (auto vertex : edge_vertex_to_element )
-    {
-      std::cout << "vertex id: " << std::get<0>(vertex.second) << " list size: " << std::get<1>(vertex.second).size() << std::endl;
-      for ( auto cell : std::get<1>(vertex.second) )
-	std::cout << cell << " ";
-      std::cout << std::endl;
-    }
-
-
-   std::cout << "Check - eind: cell - vertex" << std::endl;
-   std::cout << elem_nbr << std::endl;
-   for (int elem = 0 ; elem < elem_nbr ; elem++ )
-     {
-       for ( int num = 0 ; num < 4 ; num++ )
-	 std::cout << eind[4*elem+num]+1 << " ";
-       std::cout << std::endl;
-     }
-
-   
-
-
-  // 
-  // Metis partitioning
-  // 
-  int status  = 0;
-  idx_t 
-    // 1 - 2 elem share at least 1 vertex; 
-    // 2 - 2 elem share at least 1 edge; 
-    // 3 - 2 elem share at least 1 facet (triangl); ... 
-    ncommon = 1,  /* Higher it is faster it is */
-    nparts  = 16; /*number of part*/
-  idx_t objval;
-
-  std::cout << "Metis partitioning" << std::endl;
-  // 
-  switch (METIS_GTYPE_DUAL/*params->gtype*/) 
-    {
-      //
-    case METIS_GTYPE_DUAL:
-      {
-	status = METIS_PartMeshDual( &elem_nbr, &vertices_nbr, eptr, eind, NULL, NULL, 
-				     &ncommon, &nparts, NULL, options, &objval, epart, npart );
-	break;
-      }
-      // 
-    case METIS_GTYPE_NODAL:
-      {
-	status = METIS_PartMeshNodal( &elem_nbr, &vertices_nbr, eptr, eind, NULL, NULL, 
-				     &nparts, NULL, options, &objval, epart, npart );
-	break;
-      }
-      // 
-    default:
-      {
-	abort();
-      }
-    }
-  // 
-  switch ( status ) 
-    {
-    case METIS_ERROR_INPUT://Indicates an input error
-      {
-	std::cerr << "input error" << std::endl;
-	abort();
-      }
-    case METIS_ERROR_MEMORY://Indicates that it could not allocate the required memory.
-      {
-	std::cerr << "could not allocate the required memory" << std::endl;
-	abort();
-      }
-    case METIS_ERROR://Indicates some other type of error
-      {
-	std::cerr << "ERROR" << std::endl;
-	abort();
-      }
-    }
-  
-  std::cout << "X Y Z PAR" << std::endl;
-  for( int cell = 0 ; cell < elem_nbr ; cell++ )
-    {
-      auto centroid = elements_nodes[cell];
-      Point_3 
-	CGAL_cell_vertices[4],
-	CGAL_cell_centroid;
-      // 
-      for (int i = 0 ; i < 4 ; i++)
-	  CGAL_cell_vertices[i] = centroid->vertex( i )->point();
-      // 
-      CGAL_cell_centroid = CGAL::centroid(CGAL_cell_vertices, CGAL_cell_vertices + 4);
-      // 
-      std::cout << CGAL_cell_centroid.point() << " " << epart[cell] << std::endl;
-    }
-
-}
-//
-//
-//
-void 
-DHct::make_parcellation1( const C3t3& Mesh )
-{
-//  // 
-//  // Time log
-//  FIJEE_TIME_PROFILER("Domain::Head_conductivity_tensor::make_parcellation");
-//
-//  //
-//  // Tetrahedra mapping
-//  Cell_pmap cell_pmap( Mesh );
-//  // 
-//  int inum = 0; 
-//  int vertex_new_id = 0; 
-//  // list of elements (cells - tetrahedrons) and their nodes (tetrahedron's vertices)
-//  // just store addresses
-//  std::vector< Cell_iterator > elements_nodes;
-//  // 
-//  std::map< Tr::Vertex_handle, 
-//	    std::tuple<int/*vertex new id*/, std::list<int/*cell id*/> > > edge_vertex_to_element;
-//  // 
-//  for( Cell_iterator cit = Mesh.cells_in_complex_begin() ;
-//       cit != Mesh.cells_in_complex_end() ; cit++ )
-//    if( cell_pmap.subdomain_index( cit ) == LEFT_GRAY_MATTER )
-//      {
-//	// 
-//	// cell and index
-//	int cell_id = inum++;
-//	// increment the vector of elements_nodes corresponding to cell_id
-//	elements_nodes.push_back( cit );
-//	
-//	// 
-//	// 
-//	for( int i = 0 ; i < 4 ; i++ )
-//	  {
-//	    // 
-//	    // 
-//	    std::map< Tr::Vertex_handle, std::tuple<int, std::list<int> > >::iterator it_v_handler;
-//	    // 
-//	    it_v_handler = edge_vertex_to_element.find(cit->vertex(i));
-//	    // The vertex is not in the edge_vertex_to_element map
-//	    if ( it_v_handler == edge_vertex_to_element.end() )
-//	      {
-//		edge_vertex_to_element.insert( std::pair<Tr::Vertex_handle,
-//					       std::tuple<int, std::list<int> > >
-//					       (cit->vertex(i),
-//						std::make_tuple (vertex_new_id++,
-//								 std::list<int>(1, cell_id))) );
-//	      }
-//	    // The vertex is in the edge_vertex_to_element map
-//	    else
-//	      {
-//		(std::get<1/*list of cell id*/>(it_v_handler->second)).push_back(cell_id);
-//	      }
-//	  }
-//      }
-//     std::cout << "everything is good" << std::endl;
-//  // 
-//  // Build Scotch graph (Scotch and libScotch 6.0 User's Guide)
-//  //
-//
-//  // Initialization
-//  // Base value for element indexings.
-//  SCOTCH_Num velmbas = 0;
-//  // Base value for node indexings. 
-//  // The base value of the underlying graph, baseval, is set as min(velmbas, vnodbas).
-//  SCOTCH_Num vnodbas = static_cast< SCOTCH_Num >( elements_nodes.size() );
-//  // Number of element vertices in mesh.
-//  SCOTCH_Num velmnbr = vnodbas; //static_cast< SCOTCH_Num >( elements_nodes.size() );
-//  // Number of node vertices in mesh. 
-//  // The overall number of vertices in the underlying graph, vertnbr, is set as velmnbr + vnodnbr.
-//  SCOTCH_Num vnodnbr = static_cast< SCOTCH_Num >( edge_vertex_to_element.size() );
-//  // Number of arcs in mesh. 
-//  // Since edges are represented by both of their ends, the number of edge data in the mesh is 
-//  // twice the number of edges.
-//  SCOTCH_Num edgenbr = 2 * 4 /*vertices in cell*/ * velmnbr;
-//  // Array of start indices in edgetab of vertex (that is, both elements and nodes) 
-//  // adjacency sub-arrays.
-//  // verttab[baseval /*0*/+ vertnbr] = (baseval + edgenbr) = edgenbr
-//  SCOTCH_Num* verttab;
-//  verttab = (SCOTCH_Num*)calloc(sizeof(SCOTCH_Num), velmnbr + vnodnbr);
-//  // Array of after-last indices in edgetab of vertex adjacency sub-arrays. 
-//  // For any element or node vertex i, with baseval i < (baseval + vertnbr), 
-//  // vendtab[i] − verttab[i] is the degree of vertex i, and the indices of the neighbors of i 
-//  // are stored in edgetab from edgetab[verttab[i]] to edgetab [vendtab[i]−1], inclusive.
-//  SCOTCH_Num* vendtab;
-//  vendtab = (SCOTCH_Num*)calloc(sizeof(SCOTCH_Num), velmnbr + vnodnbr);
-//  // SCOTCH_Num* vendtab = NULL;
-//  //  SCOTCH_Num vendtab[velmnbr + vnodnbr];
-//  //  vendtab = (verttab + 1);
-//
-//  // 
-//  // Bipartite element-node graph construction
-//  // 
-//
-//
-//  std::cout << "0 step: inum = " << inum << "then become 0" << std::endl;
-//  std::cout << "vnodbas = " << vnodbas <<std::endl;
-//  std::cout << "velmnbr = " << velmnbr <<std::endl;
-//  std::cout << "vnodnbr = " << vnodnbr <<std::endl;
-//  std::cout << "edgenbr = " << edgenbr <<std::endl;
-//  
-//  // 
-//  // 
-//  std::list< SCOTCH_Num > edgetab_list;
-//  
-//  // 
-//  // First, we fill the elements
-//  inum = 0; 
-//  //
-//  for ( Cell_iterator cit : elements_nodes )
-//    {
-//      // 
-//      // 
-//      int cell_id = inum++;
-//      // Each element (cell) has 4 vertices
-//      verttab[ cell_id ] = 4 * cell_id;
-//      vendtab[ cell_id ] = 4 * cell_id + 4;
-//      std::cout << "verttab[" <<  cell_id << " ] = " << verttab[ cell_id ] << std::endl;
-//      std::cout << "vendtab[" <<  cell_id << " ] = " << vendtab[ cell_id ] << std::endl;
-//      // 
-//      // 
-//      for ( int i = 0 ; i < 4 ; i++ )
-//	{
-//	  // 
-//	  auto it_vertex = edge_vertex_to_element.find( cit->vertex(i) );
-//	  // 
-//	  if( it_vertex != edge_vertex_to_element.end() )
-//	    {
-//	      // 
-//	      // we shift the vertex id after the element number (velmnbr)
-//	      // edgetab[4*cell_id+i]=velmnbr+static_cast<SCOTCH_Num>(std::get<0>(it_vertex->second));
-//	      edgetab_list.push_back(velmnbr+static_cast<SCOTCH_Num>(std::get<0>(it_vertex->second)));
-//	    }
-//	  else
-//	    {
-//	      std::cerr << "Parcelletion: all vertices must be found:" << std::endl;
-//	      std::cerr << it_vertex->first->point() << std::endl;
-//	      abort();
-//	    }
-//	}
-//    }
-//
-//      std::cout << "First step: inum = " << inum <<std::endl;
-//      std::cout << "vnodbas = " << vnodbas <<std::endl;
-//      std::cout << "velmnbr = " << velmnbr <<std::endl;
-//      std::cout << "vnodnbr = " << vnodnbr <<std::endl;
-//      std::cout << "edgenbr = " << edgenbr <<std::endl;
-//      std::cout << "edgenbr_list = 4*velmnbr = " << edgetab_list.size() <<std::endl;
-//
-//  
-//  // 
-//  // Second, we fill the nodes
-//  int edgetab_vertex_pos = 4*inum;
-//  std::cout << "vertex start pos = " <<  edgetab_vertex_pos<<std::endl;
-//  for ( auto it_vertex : edge_vertex_to_element )
-//    {
-//      // 
-//      // 
-//      verttab[ inum ]     = edgetab_vertex_pos;
-//      std::cout << "verttab[" <<  inum  << " ] = " << verttab[ inum ] << std::endl;
-//      edgetab_vertex_pos += static_cast<SCOTCH_Num>( std::get<1>(it_vertex.second).size() );
-//      vendtab[ inum++ ]   = edgetab_vertex_pos;
-//      std::cout << "vendtab[" <<  inum - 1 << " ] = " << vendtab[ inum - 1 ] 
-//		<< std::endl;
-//      //
-//      for ( auto cell_id : std::get<1>(it_vertex.second) )
-//	{
-//	  // edgetab_vertex_pos += element_connected++; 
-//	  // edgetab[edgetab_vertex_pos] = static_cast<SCOTCH_Num>(cell_id);
-//	  edgetab_list.push_back(static_cast<SCOTCH_Num>(cell_id));
-//	}
-//    }
-//  // last element
-//  //  verttab[ inum ] = edgetab_vertex_pos;
-//
-//      std::cout << "Second step: inum = " << inum <<std::endl;
-//      std::cout << "vnodbas = " << vnodbas <<std::endl;
-//      std::cout << "velmnbr = " << velmnbr <<std::endl;
-//      std::cout << "vnodnbr = " << vnodnbr <<std::endl;
-//      std::cout << "edgenbr = " << edgenbr <<std::endl;
-//      std::cout << "edgenbr_list = " << edgetab_list.size() <<std::endl;
-//
-//      std::cout << "copy edgetab_list in edgetab" <<std::endl;
-//  
-//  // 
-//  // edgetab is the adjacency array, of size at least edgenbr 
-//  // (it can be more if the edge array is not compact).
-//  SCOTCH_Num* edgetab;
-//  edgetab = (SCOTCH_Num*)calloc(sizeof(SCOTCH_Num), edgetab_list.size());
-//  std::copy(edgetab_list.begin(), edgetab_list.end(), edgetab);
-//
-//  // 
-//  if( vendtab[ --inum ] != edgenbr )
-//    {
-//      std::cerr << "vnodbas = " << vnodbas <<std::endl;
-//      std::cerr << "velmnbr = " << velmnbr <<std::endl;
-//      std::cerr << "vnodnbr = " << vnodnbr <<std::endl;
-//      std::cerr << "edgenbr = " << edgenbr <<std::endl;
-//      std::cerr << "verttab[vertnbr] = " << verttab[velmnbr+vnodnbr] <<std::endl;
-//      std::cerr << "Parcelletion: we should have: verttab[vertnbr] = edgenbr" << std::endl;
-//      abort();
-//    }
-//
-//  // 
-//  // Scotch Mesh handling
-//  SCOTCH_Num* velotab = NULL;
-//  SCOTCH_Num* vlbltab = NULL;
-//  SCOTCH_Num* vnlotab = NULL;
-//  // Graph construction
-//  SCOTCH_Mesh* meshptr;
-//  meshptr = SCOTCH_meshAlloc();
-//  //  meshptr = ((SCOTCH_Mesh *) memAlloc (sizeof (SCOTCH_Mesh)));
-//  std::cout << "Init the Scotch mesh" <<std::endl;
-//  if ( SCOTCH_meshInit( meshptr ) != 0 )
-//    {
-//      std::cerr << "Parcelletion: SCOTCH_meshInit abort" << std::endl;
-//      abort();
-//    }
-//  //
-//  std::cout << "Build the Scotch mesh" <<std::endl;
-//  if ( SCOTCH_meshBuild( meshptr, velmbas, vnodbas, velmnbr, vnodnbr,
-//			 verttab, vendtab, velotab, vnlotab, vlbltab, 
-//			 edgenbr, edgetab) != 0 )
-//    {
-//      std::cerr << "Parcelletion: SCOTCH_meshBuild abort" << std::endl;
-//      abort();
-//    }
-//
-//
-//#ifdef TRACE
-//  // 
-//  // At least in the development phase, it is recommended to check the Scotch mesh
-//  // SCOTCH_meshCheck
-//  std::cout << "Check the Scotch mesh" <<std::endl;
-////  if ( SCOTCH_meshCheck( meshptr ) != 0 )
-////    {
-////      std::cerr << "Parcelletion: SCOTCH_meshCheck abort" << std::endl;
-////      abort();
-////    }
-//#endif      
-//  
-//  // 
-//  // Graph construction
-//  SCOTCH_Graph* grafptr;
-//  grafptr = SCOTCH_graphAlloc();
-//  SCOTCH_graphInit( grafptr );
-//  // 
-//  std::cout << "Build graph from the Scotch mesh" <<std::endl;
-//  if ( SCOTCH_meshGraph( meshptr, grafptr ) != 0 )
-//    {
-//      std::cerr << "Parcelletion: SCOTCH_meshGraph abort" << std::endl;
-//      abort();
-//    }
-//
-//  //
-//  // Partitioning strategy
-//  SCOTCH_Strat* strat;
-//  strat = SCOTCH_stratAlloc();
-//  SCOTCH_stratInit(strat);
-//  //
-//  SCOTCH_Num* vertices_partition;
-//  vertices_partition = (SCOTCH_Num*)calloc(sizeof(SCOTCH_Num), vnodnbr);
-// 
-//  // Partition graph
-//  std::cout << "Graph partitioning" <<std::endl;
-//  if (SCOTCH_graphPart(grafptr, 16, strat, vertices_partition))
-//  {
-//    std::cerr << "Parcelletion: SCOTCH_graphPart abort" << std::endl;
-//    abort();
-//  }
-//  std::cout << "VERTEX LIST" <<std::endl;
-//  std::cout << "X Y Z PAR" <<std::endl;
-//  for ( auto vertex : edge_vertex_to_element )
-//    std::cout << (vertex.first)->point() << " " 
-//	      << vertices_partition[std::get<0>(vertex.second)]
-//	      << std::endl;
-//
-//
-//  std::cout << "Free Scotch objects" <<std::endl;
-//  // 
-//  // Free the structures
-//  // Array and SCOTCH_meshExit
-//  SCOTCH_meshExit(meshptr);
-//  //
-//  SCOTCH_graphExit(grafptr);
-//  // 
-//  SCOTCH_stratExit(strat);
-//  //
-//  free(verttab);
-//  free(edgetab);
 }
 //
 //

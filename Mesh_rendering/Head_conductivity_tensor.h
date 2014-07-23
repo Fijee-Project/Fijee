@@ -35,6 +35,7 @@
 #include <iostream>
 #include <string>
 #include <memory>
+#include <thread>
 //
 // UCSF
 //
@@ -200,20 +201,6 @@ namespace Domains
      *
      */
     virtual void make_conductivity( const C3t3& );
-    /*!
-     *  \brief Make parcellation
-     *
-     *  This method create a mesh partitioning.
-     *
-     */
-    void make_parcellation( const C3t3& );
-    /*!
-     *  \brief Make parcellation
-     *
-     *  This method create a mesh partitioning.
-     *
-     */
-    void make_parcellation1( const C3t3& );
     /*!
      *  \brief Output the XML match between mesh and conductivity
      *
