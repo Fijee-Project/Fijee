@@ -34,11 +34,13 @@
  * \version 0.1
  */
 #include <iostream>
+#include <list>
 //
 // UCSF
 //
 #include "Utils/enum.h"
 #include "Point_vector.h"
+#include "Dipole.h"
 #include "Cell_conductivity.h"
 #include "Utils/Statistical_analysis.h"
 /*! \namespace Domains
@@ -99,24 +101,34 @@ namespace Domains
      */
     virtual void Make_list( const std::list< Cell_conductivity >& List_cell_conductivity ) = 0;
     /*!
-     *  \brief Build stream
-     *
-     *  This method create the output stream.
-     *
-     */
-    virtual void Build_stream(std::ofstream&) = 0;
-    /*!
      *  \brief Output the XML of the dipoles' list
      *
      *  This method create the list of dipoles.
      *
      */
     virtual void Output_dipoles_list_xml() = 0;
+    /*!
+     *  \brief Output the XML of the parcellation' list
+     *
+     *  This method create the list of parcellation dipoles.
+     *
+     */
+    virtual void Output_parcellation_list_xml() = 0;
 
   private:
     /*!
      */
     virtual void Make_analysis() = 0;
+    /*!
+     *  \brief Build stream
+     *
+     *  This method create the output stream.
+     *
+     */
+    virtual void Build_stream(const std::list< Domains::Dipole >&, std::ofstream&) = 0;
+    /*!
+     */
+    virtual void Parcellation_list() = 0;
 };
   /*!
    *  \brief Dump values for Build_dipoles_list

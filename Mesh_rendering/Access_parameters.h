@@ -212,6 +212,11 @@ namespace Domains
     //! Electrodes Standard 10/20 Cap81
     std::string electrodes_10_20_;
 
+    // 
+    // Graph parcellation
+    //! Number of parcels per gray matter hemisphere
+    int number_of_parcels_;
+
 
   protected:
     /*!
@@ -498,6 +503,13 @@ namespace Domains
      *
      */
     ucsf_get_string_macro(electrodes_10_20_);
+    /*!
+     *  \brief Get number_of_parcels_
+     *
+     *  This method return the number of parcels requiered for the graph parcellation.
+     *
+     */
+    ucsf_get_macro(number_of_parcels_, int);
 
 
   public:

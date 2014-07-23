@@ -34,7 +34,6 @@
  * \version 0.1
  */
 #include <iostream>
-#include <list>
 #include <tuple>
 //
 // UCSF
@@ -42,7 +41,6 @@
 #include "Build_dipoles_list.h"
 #include "Access_parameters.h"
 #include "Point_vector.h"
-#include "Dipole.h"
 //
 // CGAL
 //
@@ -108,6 +106,8 @@ namespace Domains
     std::list< std::tuple< Domains::Point_vector, Domains::Point_vector > > rh_match_wm_gm_;
     //! Dipoles list
     std::list< Domains::Dipole > dipoles_list_;
+    //! Parcellation list
+    std::list< Domains::Dipole > parcellation_list_;
 #ifdef TRACE
 #if TRACE == 100
     //! 
@@ -159,15 +159,19 @@ namespace Domains
      */
     virtual void Make_list( const std::list< Cell_conductivity >& List_cell_conductivity );
     /*!
-     */
-    virtual void Build_stream(std::ofstream& );
-    /*!
      *  \brief Output the XML of the dipoles' list
      *
      *  This method create the list of dipoles.
      *
      */
     virtual void Output_dipoles_list_xml();
+    /*!
+     *  \brief Output the XML of the parcellation' list
+     *
+     *  This method create the list of parcellation dipoles.
+     *
+     */
+    virtual void Output_parcellation_list_xml(){};
 
   private:
     /*!
@@ -176,6 +180,12 @@ namespace Domains
     /*!
      */
     bool Select_dipole( Dipoles_tree&, Domains::Point_vector& );
+    /*!
+     */
+    virtual void Build_stream(const std::list< Domains::Dipole >&, std::ofstream& );
+    /*!
+     */
+    virtual void Parcellation_list(){};
   };
   /*!
    *  \brief Dump values for Build_dipoles_list_knn

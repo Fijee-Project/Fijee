@@ -33,7 +33,6 @@
  * \version 0.1
  */
 #include <iostream>
-#include <list>
 #include <tuple>
 //
 // UCSF
@@ -41,12 +40,12 @@
 #include "Build_dipoles_list.h"
 #include "Access_parameters.h"
 #include "Point_vector.h"
-#include "Dipole.h"
 //
 // CGAL
 //
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/basic.h>
+#include <CGAL/centroid.h>
 // dD Spatial Searching
 #include <CGAL/Search_traits_3.h>
 #include <CGAL/Search_traits_adapter.h>
@@ -62,6 +61,7 @@ typedef boost::tuple<int, Dipole_position, Domains::Point_vector> IndexedPointVe
 // dD Spatial Searching
 typedef CGAL::Search_traits_3< Kernel >Traits_base;
 typedef std::tuple< Dipole_position , Domains::Cell_conductivity > High_density_key_type;
+typedef std::tuple< Dipole_position , Domains::Dipole > Parcellation_key_type;
 //
 //
 //
@@ -88,8 +88,27 @@ namespace Domains
   //
   typedef CGAL::Search_traits_adapter< High_density_key_type, Point_vector_high_density_map, Traits_base > High_density_traits;
   typedef CGAL::Orthogonal_k_neighbor_search< High_density_traits > High_density_neighbor_search;
-  typedef High_density_neighbor_search::Tree High_density_tree;
+  typedef High_density_neighbor_search::Tree     High_density_tree;
   typedef High_density_neighbor_search::Distance High_density_distance;
+
+  // -----------------------------------
+  // K-nearest neighbor algorithm (CGAL)
+  // -----------------------------------
+  struct Point_vector_parcellation_map
+  {
+    typedef Dipole_position value_type;
+    typedef const value_type& reference;
+    typedef const Parcellation_key_type& key_type;
+    typedef boost::readable_property_map_tag category;
+  };
+  // get function for the property map
+  Point_vector_parcellation_map::reference 
+    get( Point_vector_parcellation_map, Point_vector_parcellation_map::key_type p);
+  //
+  typedef CGAL::Search_traits_adapter< Parcellation_key_type, Point_vector_parcellation_map, Traits_base > Parcellation_traits;
+  typedef CGAL::Orthogonal_k_neighbor_search< Parcellation_traits > Parcellation_neighbor_search;
+  typedef Parcellation_neighbor_search::Tree     Parcellation_tree;
+  typedef Parcellation_neighbor_search::Distance Parcellation_distance;
 
   // -----------------------------------
 
@@ -113,6 +132,8 @@ namespace Domains
     std::list< Point_vector > rh_gm_;
     //! Dipoles list
     std::list< Domains::Dipole > dipoles_list_;
+    //! Parcellation list
+    std::list< Domains::Dipole > parcellation_list_;
     //! Cell size controlling the inter dipoles distance. This variable allow to control the density of the dipole distribution
     double cell_size_;
     //! Gray matter layer populated by the dipole distribution. If layer_ = 1, only the first layer of gray matter centroids will be populated. This variable allow to control the density of the dipole distribution
@@ -120,7 +141,7 @@ namespace Domains
 #ifdef TRACE
 #if TRACE == 100
     //! Mesh centroid and white matter point-vector tuples list
-    std::list< std::tuple< Point_vector, Point_vector > > centroid_vertex_;
+    std::list< std::tuple< Point_vector, Point_vector, Cell_conductivity > > centroid_vertex_;
 #endif
 #endif      
 
@@ -161,6 +182,7 @@ namespace Domains
     virtual void operator ()()
     {
       Output_dipoles_list_xml();
+      Output_parcellation_list_xml();
     };
 
   public:
@@ -168,15 +190,19 @@ namespace Domains
      */
     virtual void Make_list( const std::list< Cell_conductivity >& List_cell_conductivity );
     /*!
-     */
-    virtual void Build_stream(std::ofstream& );
-    /*!
      *  \brief Output the XML of the dipoles' list
      *
      *  This method create the list of dipoles.
      *
      */
     virtual void Output_dipoles_list_xml();
+    /*!
+     *  \brief Output the XML of the parcellation' list
+     *
+     *  This method create the list of parcellation dipoles.
+     *
+     */
+    virtual void Output_parcellation_list_xml();
 
   private:
     /*!
@@ -187,6 +213,12 @@ namespace Domains
     void Select_dipole( const High_density_tree&, 
 			const std::vector< IndexedPointVector >&, 
 			std::vector< bool >&  );
+    /*!
+     */
+    virtual void Build_stream( const std::list< Domains::Dipole >&, std::ofstream& );
+    /*!
+     */
+    virtual void Parcellation_list();
   };
   /*!
    *  \brief Dump values for Build_dipoles_list_high_density

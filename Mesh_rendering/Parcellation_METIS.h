@@ -137,6 +137,15 @@ namespace Domains
     */
     virtual long int get_region( int Elem_number )
     {return elements_partitioning_[Elem_number];};
+    /*!
+     *  \brief Check partitioning
+     *
+     *  This method true if the number of centroids matching its region is not equal to the number of elements in the sub mesh. 
+     *
+     *  \param Cells_in_region: number of centroids in the sub mesh.
+    */
+    virtual bool check_partitioning( int Cells_in_region )
+    {return ( Cells_in_region != static_cast<int>(elements_partitioning_.size()) );};
 
   private:
     /*!

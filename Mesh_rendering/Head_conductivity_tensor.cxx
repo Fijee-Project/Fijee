@@ -595,7 +595,7 @@ DHct::make_conductivity( const C3t3& Mesh )
   int 
     lh_region = 0,
     rh_region = 0,
-    region_numbers = 16;
+    region_numbers = (Domains::Access_parameters::get_instance())->get_number_of_parcels_();
   Parcellation_METIS parcellation_lh( Mesh, cell_pmap, LEFT_GRAY_MATTER,  region_numbers );
   Parcellation_METIS parcellation_rh( Mesh, cell_pmap, RIGHT_GRAY_MATTER, region_numbers );
   // 
@@ -1006,6 +1006,14 @@ DHct::make_conductivity( const C3t3& Mesh )
 	}
     }// end of for( Cell_iterator cit = mesh_...
 
+  // 
+  // Check on mesh partitioning
+  if( parcellation_lh.check_partitioning( lh_region ) ||  
+      parcellation_rh.check_partitioning( rh_region ) )
+    {
+      std::cerr << "Number of partitions allocated to centroids missmatch" << std::endl;
+      abort();
+    }
 
   //
   // Output for R analysis

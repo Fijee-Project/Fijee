@@ -96,6 +96,9 @@ namespace Domains
     /*!
      */
     virtual long int get_region( int ) = 0;
+    /*!
+    */
+    virtual bool check_partitioning( int  ) = 0;
 
   private:
     /*!

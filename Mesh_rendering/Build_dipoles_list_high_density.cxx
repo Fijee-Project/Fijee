@@ -38,6 +38,11 @@ Domains::get( Domains::Point_vector_high_density_map, Domains::Point_vector_high
 {
   return std::get<0>(p);
 };
+Domains::Point_vector_parcellation_map::reference 
+Domains::get( Domains::Point_vector_parcellation_map, Domains::Point_vector_parcellation_map::key_type p)
+{
+  return std::get<0>(p);
+};
 //
 //
 //
@@ -168,26 +173,52 @@ DBdlhd::Make_list( const std::list< Cell_conductivity >& List_cell_conductivity 
   std::vector< bool > cell_conductivity_assignment(List_cell_conductivity.size(), false);
   // 
   for ( auto cell_conductivity : List_cell_conductivity )
-    if ( cell_conductivity.get_cell_subdomain_() == LEFT_GRAY_MATTER  ||
-	 cell_conductivity.get_cell_subdomain_() == RIGHT_GRAY_MATTER ||
-	 cell_conductivity.get_cell_subdomain_() == GRAY_MATTER )
-      {
-	// 
-	//
-	Point_vector cell_centroid = ( cell_conductivity.get_centroid_lambda_() )[0];
-	// 
-	// left hemisphere
-	if( cell_centroid.x() < 0 )
-	  lh_tree.insert(std::make_tuple(Dipole_position( cell_centroid.x(),
-							  cell_centroid.y(),
-							  cell_centroid.z() ),
-					 cell_conductivity));
-	else // right hemisphere
-	  rh_tree.insert(std::make_tuple(Dipole_position( cell_centroid.x(),
-							  cell_centroid.y(),
-							  cell_centroid.z() ),
-					 cell_conductivity));
-      }
+    {
+      // 
+      // Centroid
+      Point_vector cell_centroid = ( cell_conductivity.get_centroid_lambda_() )[0];
+      // 
+      switch(cell_conductivity.get_cell_subdomain_())
+	{
+	case GRAY_MATTER: // 4-spheres case
+	  {
+	    if( cell_centroid.x() < 0 )
+	      lh_tree.insert(std::make_tuple(Dipole_position( cell_centroid.x(),
+							      cell_centroid.y(),
+							      cell_centroid.z() ),
+					     cell_conductivity));
+	    else // right hemisphere
+	      rh_tree.insert(std::make_tuple(Dipole_position( cell_centroid.x(),
+							      cell_centroid.y(),
+							      cell_centroid.z() ),
+					     cell_conductivity));
+	    break;
+	  }
+	case LEFT_GRAY_MATTER:  // head left gray matter hemisphere
+	  {
+	    lh_tree.insert(std::make_tuple(Dipole_position( cell_centroid.x(),
+							    cell_centroid.y(),
+							    cell_centroid.z() ),
+					   cell_conductivity));
+	    break;
+	  }
+	case RIGHT_GRAY_MATTER: // head right gray matter hemisphere
+	  {
+	    rh_tree.insert(std::make_tuple(Dipole_position( cell_centroid.x(),
+							    cell_centroid.y(),
+							    cell_centroid.z() ),
+					   cell_conductivity));
+	    break;
+	  }
+//	default:
+//	  {
+//	    std::cerr << "All gray matter centroid must be associated to a subdomain: " 
+//		      << "Subdomain is: " << cell_conductivity.get_cell_subdomain_()
+//		      << std::endl;
+//	    abort();
+//	  }
+	}
+    }
 
   // 
   // Dipole list creation
@@ -201,6 +232,12 @@ DBdlhd::Make_list( const std::list< Cell_conductivity >& List_cell_conductivity 
 	    << dipoles_list_.size() 
 	    << " dipoles"
 	    << std::endl;
+
+  // 
+  // Parcellation list creation
+  // 
+  Parcellation_list();
+
   //
   //
   Make_analysis();
@@ -223,7 +260,7 @@ DBdlhd::Select_dipole( const High_density_tree& Tree,
 	dipoles_neighbor( Tree, vertex.get<1>(), layer_ );
 
       // 
-      // Position of the dipole on the nearest mesh cell centroid
+      // Position of the dipole in the nearest mesh cell centroid
       auto dipole_position = dipoles_neighbor.begin();
       // If the conductivity centroid is not yet assigned; otherwise we skip it
       for (int layer = 0 ; layer < layer_ ; layer++ )
@@ -245,7 +282,8 @@ DBdlhd::Select_dipole( const High_density_tree& Tree,
 #ifdef TRACE
 #if TRACE == 100
 	      centroid_vertex_.push_back(std::make_tuple(((std::get<1>(dipole_position->first)).get_centroid_lambda_())[0],
-							 vertex.get<2>()));
+							 vertex.get<2>(), 
+							 std::get<1>(dipole_position->first)));
 #endif
 #endif
 	      break;
@@ -261,6 +299,59 @@ DBdlhd::Select_dipole( const High_density_tree& Tree,
 //
 //
 void 
+DBdlhd::Parcellation_list()
+{
+  // 
+  // Region vector 
+  // (2*number_of_parcels + 1) because regions start at 1
+  // region 0 won't be used.
+  std::vector< std::list< Domains::Dipole > > 
+    Regions( 2 * (DAp::get_instance())->get_number_of_parcels_() + 1 );
+
+  // 
+  // Sort the dipoles in function of the region they belong too.
+  for ( auto dipole : dipoles_list_ )
+    Regions[ dipole.get_cell_parcel_() ].push_back(dipole);
+
+  // 
+  // Region centroid -> dipole centroid
+  // 
+  for ( auto dipoles : Regions )
+    if ( dipoles.size() != 0 ) // We get rid of Region 0
+      {
+	// 
+	// In a region
+	// 
+	std::list< Dipole_position > positions_list;
+	Parcellation_tree tree;
+
+	// 
+	// 
+	for ( auto dipole : dipoles )
+	  {
+	    // 
+	    // Create the position list and the neirest neighbor tree of all dipole
+	    Dipole_position position(dipole.x(), dipole.y(), dipole.z());
+	    // 
+	    positions_list.push_back(position);
+	    tree.insert(std::make_tuple(position,dipole));
+	  }
+
+	// 
+	// Build the search tree
+	Parcellation_neighbor_search
+	  dipoles_neighbor( tree, 
+			    CGAL::centroid(positions_list.begin(), 
+					   positions_list.end()), 
+			    1 );
+	// Save the dipole the closest from the centroid
+	parcellation_list_.push_back( std::get<1>((dipoles_neighbor.begin())->first) );
+      }
+}
+//
+//
+//
+void 
 DBdlhd::Make_analysis()
 {
 #ifdef TRACE
@@ -268,6 +359,8 @@ DBdlhd::Make_analysis()
   //
   //
   output_stream_
+    // Dipole Region
+    << "Region " 
     // Dipole point-vector
     << "Dipole_X Dipole_Y Dipole_Z Dipole_vX Dipole_vY Dipole_vZ " 
     // Mesh centroide point-vector
@@ -283,6 +376,8 @@ DBdlhd::Make_analysis()
       //
       // 
       output_stream_
+	// "Region "
+	<< ((std::get<2>(centroid_vertex))).get_cell_parcel_() << " "
 	// "Dipole_X Dipole_Y Dipole_Z Dipole_vX Dipole_vY Dipole_vZ "
 	<< ((std::get<0>(centroid_vertex))).x() << " "
 	<< ((std::get<0>(centroid_vertex))).y() << " "
@@ -310,6 +405,35 @@ DBdlhd::Make_analysis()
   //
   //
   Make_output_file("Dipole_high_density.distribution.frame");
+
+  // 
+  // 
+    output_stream_
+    // Dipole Region
+    << "Region " 
+    // Dipole point-vector
+    << "Dipole_X Dipole_Y Dipole_Z Dipole_vX Dipole_vY Dipole_vZ " 
+    << std::endl;
+    
+  //
+  //
+  for( auto dipole  : parcellation_list_ )
+    output_stream_
+      // Dipole Region
+      << dipole.get_cell_parcel_() << " "
+      // Dipole point-vector
+      << dipole.x() << " "
+      << dipole.y() << " "
+      << dipole.z() << " "
+      << dipole.vx() << " "
+      << dipole.vy() << " "
+      << dipole.vz() << " "
+      << std::endl;
+
+  //
+  //
+  Make_output_file("Parcellation.frame");
+
 #endif
 #endif      
 }
@@ -329,7 +453,29 @@ DBdlhd::Output_dipoles_list_xml()
   
   //
   //
-  Build_stream(dipoles_file);
+  Build_stream(dipoles_list_, dipoles_file);
+
+  //
+  //
+  dipoles_file.close();
+}
+//
+//
+//
+void
+DBdlhd::Output_parcellation_list_xml()
+{
+  //
+  // Output xml files. 
+  std::string dipoles_XML = 
+    (Domains::Access_parameters::get_instance())->get_files_path_output_();
+  dipoles_XML += std::string("parcellation.xml");
+  //
+  std::ofstream dipoles_file( dipoles_XML.c_str() );
+  
+  //
+  //
+  Build_stream(parcellation_list_, dipoles_file);
 
   //
   //
@@ -350,7 +496,7 @@ DBdlhd::operator = ( const DBdlhd& that )
 //
 //
 void
-DBdlhd::Build_stream( std::ofstream& stream )
+DBdlhd::Build_stream( const std::list< Domains::Dipole >& List, std::ofstream& stream )
 {
   //
   //
@@ -359,12 +505,12 @@ DBdlhd::Build_stream( std::ofstream& stream )
   
   //
   //
-  stream << "  <dipoles size=\"" << dipoles_list_.size() << "\">\n";
+  stream << "  <dipoles size=\"" << List.size() << "\">\n";
   
   //
   //
   int index = 0;
-  for ( auto dipole : dipoles_list_ )
+  for ( auto dipole : List )
     stream << "    <dipole index=\"" << index++ << "\" " << dipole << "/>\n";
   
   //

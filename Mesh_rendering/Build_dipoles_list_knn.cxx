@@ -347,7 +347,7 @@ DBdlknn::Output_dipoles_list_xml()
   
   //
   //
-  Build_stream(dipoles_file);
+  Build_stream(dipoles_list_, dipoles_file);
 
   //
   //
@@ -368,7 +368,7 @@ DBdlknn::operator = ( const DBdlknn& that )
 //
 //
 void
-DBdlknn::Build_stream( std::ofstream& stream )
+DBdlknn::Build_stream( const std::list< Domains::Dipole >& List, std::ofstream& stream )
 {
   //
   //
@@ -377,12 +377,12 @@ DBdlknn::Build_stream( std::ofstream& stream )
   
   //
   //
-  stream << "  <dipoles size=\"" << dipoles_list_.size() << "\">\n";
+  stream << "  <dipoles size=\"" << List.size() << "\">\n";
   
   //
   //
   int index = 0;
-  for ( auto dipole : dipoles_list_ )
+  for ( auto dipole : List )
     stream << "    <dipole index=\"" << index++ << "\" " << dipole << "/>\n";
   
   //

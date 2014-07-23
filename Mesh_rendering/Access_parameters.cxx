@@ -405,6 +405,10 @@ DAp::Access_parameters():
     exit(1);
   }  
 
+  // 
+  // Graph parcellation: number of parcels
+  number_of_parcels_ = 1024;
+
   //
   // Clean up
   fclose(aseg_file_nifti);
