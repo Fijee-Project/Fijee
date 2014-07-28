@@ -71,6 +71,22 @@ namespace Utils
    */
   namespace Biophysics
   {
+    /*! \class Population
+     * \brief classe representing a neural population
+     *
+     *  This class stores dipoles attributes.
+     * 
+     */
+    typedef struct Dipole
+    {
+      double position_[3];
+      double direction_[3];
+      double I_;
+      double V_;
+      int    index_cell_;
+      int    parcel_;
+      double lambda_[3];
+    } Population;
     /*! \class Brain_rhythm
      * \brief classe representing whatever
      *
@@ -81,19 +97,25 @@ namespace Utils
     {
     protected:
       //! Vector of analyse time v.s. potential
-      std::vector< std::list< std::tuple< double/*time*/, double/*V*/, double/*I*/ > > >
-	electrode_rhythm_;
-      //! Mapping of the electrode setting
-      std::vector< std::string /*label*/> electrode_mapping_;
+      std::vector< std::list< std::tuple< double/*time*/, double/*V*/ > > >
+	population_rhythm_;
+      //! Vector neural population
+      std::vector< Population > populations_;
+      //! Mapping of the population setting
+      //      std::vector< std::string /*label*/> population_mapping_;
+      //! Number of neural populations
+      int number_samples_;
 
       // 
       // Output file
       // 
 
-      //! XML output file: setup node
-      pugi::xml_node setup_node_;
-      //! XML output file: electrodes node
-      pugi::xml_node electrodes_node_;
+      //! XML output file: dipoles node
+      pugi::xml_node dipoles_node_;
+      //! XML output file: populations node
+      pugi::xml_node dipole_node_;
+      //! XML output file: populations node
+      pugi::xml_node time_series_node_;
 
 
     public:
@@ -128,22 +150,29 @@ namespace Utils
       
     public:
       /*!
-       *  \brief Load electrode file
+       *  \brief Load population file
        *
-       *  This method load the input XML file of electrode setting.
+       *  This method load the input XML file of population setting.
        *
-       * \param In_electrode_file_XML: input electrode file in XML format.
+       * \param In_population_file_XML: input population file in XML format.
        */
-      void load_electrode_file( std::string In_electrode_file_XML );
+      void load_population_file( std::string );
       /*!
-       *  \brief Get the number of electrodes
+       *  \brief Get the number of populations
        *
-       *  This method return the number of electrodes. This methode is needed for the multi-threading dispatching.
+       *  This method return the number of populations. This methode is needed for the multi-threading dispatching.
        *
        */
-      inline int get_number_of_physical_events(){return electrode_mapping_.size();};
+      inline int get_number_of_physical_events(){return number_samples_;};
 
     public:
+      /*!
+       *  \brief Initialization
+       *
+       *  This member function initializes the containers.
+       *
+       */
+      virtual void init() = 0;
       /*!
        */
       virtual void modelization()  = 0;

@@ -26,6 +26,7 @@
 //  either expressed or implied, of the FreeBSD Project.  
 #ifndef BRAIN_RHYTHM_MODELS_H
 #define BRAIN_RHYTHM_MODELS_H
+#include <string>
 //
 // UCSF project
 //
@@ -95,11 +96,11 @@ namespace Utils
 	 *
 	 *  This method launch the minimization algorithm
 	 */
-	void modelization()
+      void modelization( std::string Output_File )
 	{
 	  //
-	  // load electrodes file
-	  EEG_activity_.load_electrode_file("/home/cobigo/subjects/GazzDCS0004mgh_GPU4/fem/output/electrodes.xml");
+	  // load populations file
+	  EEG_activity_.load_population_file( Output_File );
 	  // Init containers
 	  EEG_activity_.init();
 

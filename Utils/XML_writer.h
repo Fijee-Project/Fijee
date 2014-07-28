@@ -104,6 +104,14 @@ namespace Utils
      *
      */
     XML_writer& operator = ( const XML_writer& ){return *this;};
+
+  public:
+    /*!
+     *
+     *
+     *
+     */
+    void set_file_name_( std::string File_Name ){file_name_ = File_Name;};
   };
 }
 #endif

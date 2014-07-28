@@ -142,11 +142,11 @@ namespace Utils
       // 
       //! Critical zone
       std::mutex critical_zone_;
-      //! Electrode treated
-      int electrode_;
-      // #! Electrode treated localy in the thread
+      //! Population treated
+      int population_;
+      // #! Population treated localy in the thread
       // Untill gcc fix the bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55800
-      // static thread_local int local_electrode_;
+      // static thread_local int local_population_;
 
 
     public:
@@ -194,7 +194,7 @@ namespace Utils
 	 *  This member function initializes the containers.
  	 *
 	 */
-	void init();
+	virtual void init();
 	/*!
 	 *  \brief  Brain rhythm modelization
 	 *

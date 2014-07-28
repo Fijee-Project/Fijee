@@ -30,7 +30,7 @@
 // Untill gcc fix the bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55800
 // Afterward, it should be a class member!!
 // 
-static thread_local int local_electrode_;
+static thread_local int local_population_;
 // 
 // 
 // 
@@ -53,7 +53,7 @@ Utils::Biophysics::Wendling_2002::Wendling_2002():
   C_( 135. ),
   a_( 100. /*s^{-1}*/), A_( 3.25 /*(mV)*/), b_( 50. /*s^{-1}*/), B_( 22. /*(mV)*/),
   g_(500. /*s^{-1}*/), G_( 10. /*(mV)*/),
-  electrode_(0)
+  population_(0)
 {
   // 
   // p(t) = <p> + \varepsilon; 
@@ -102,7 +102,7 @@ Utils::Biophysics::Wendling_2002::modelization()
     {
       // every second change the noise influence
       if ( transient_stage % 1000 )
-	p_[local_electrode_] = pulse_ + distribution_(generator_);
+	p_[local_population_] = pulse_ + distribution_(generator_);
       //
       double ti = transient_stage * delta_t;
       // solve
@@ -115,12 +115,12 @@ Utils::Biophysics::Wendling_2002::modelization()
 	}
     }
   // 
-  std::cout << "electrode: " << local_electrode_ << std::endl;
+  std::cout << "population: " << local_population_ << std::endl;
   for ( int i = 1 ; i < duration_ ; i++ )
     {
       // every second change the noise influence
       if ( i % 1000 )
-	p_[local_electrode_] = pulse_ + distribution_(generator_);
+	p_[local_population_] = pulse_ + distribution_(generator_);
       // 
       double ti = i * delta_t + MAX_TRANSIENT * delta_t;
       // solve
@@ -132,8 +132,8 @@ Utils::Biophysics::Wendling_2002::modelization()
 	  abort();
 	}
       // record statistics, after the transient state
-      electrode_rhythm_[local_electrode_].push_back(std::make_tuple(ti - MAX_TRANSIENT * delta_t,
-								    /* V = */ y[1] - y[2], 0.));
+      population_rhythm_[local_population_].push_back(std::make_tuple(ti - MAX_TRANSIENT * delta_t,
+								    /* V = */ y[1] - y[2]));
     }
 
   // 
@@ -152,7 +152,7 @@ Utils::Biophysics::Wendling_2002::ordinary_differential_equations( double T, con
   DyDt[5]  = A_*a_*sigmoid(Y[1] - Y[2] - Y[3]) - 2*a_*Y[5] - a_*a_*Y[0];
   // 
   DyDt[1]  = Y[6];
-  DyDt[6]  = A_*a_*( p_[local_electrode_] + C2_*sigmoid(C1_*Y[0]) );
+  DyDt[6]  = A_*a_*( p_[local_population_] + C2_*sigmoid(C1_*Y[0]) );
   DyDt[6] += - 2*a_*Y[6] - a_*a_*Y[1];
   // 
   DyDt[2]  = Y[7];
@@ -192,14 +192,14 @@ void
 Utils::Biophysics::Wendling_2002::operator () ()
 {
   //
-  // Mutex the electrode poping process
+  // Mutex the population poping process
   //
   try 
     {
-      // lock the electrode
+      // lock the population
       std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
       // 
-      local_electrode_ = electrode_++;
+      local_population_ = population_++;
     }
   catch (std::logic_error&) 
     {
@@ -207,6 +207,6 @@ Utils::Biophysics::Wendling_2002::operator () ()
     }
 
   // 
-  // Generate alpha rhythm for electrode local_electrode_
+  // Generate alpha rhythm for population local_population_
   modelization();
 }

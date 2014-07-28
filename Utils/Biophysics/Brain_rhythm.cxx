@@ -35,14 +35,21 @@ Utils::Biophysics::Brain_rhythm::Brain_rhythm():
 // 
 // 
 void
-Utils::Biophysics::Brain_rhythm::load_electrode_file( std::string In_electrode_file_XML )
+Utils::Biophysics::Brain_rhythm::load_population_file( std::string Output_path )
 {
   //
-  // Read the electrodes xml file
-  std::cout << "Load electrodes file for alpha generation" << std::endl;
+  // Read the populations xml file
+  std::cout << "Load populations file for alpha generation" << std::endl;
+
+  // 
+  // Load file
+  std::string In_population_file_XML = Output_path + "parcellation.xml";
+  // XML output
+  set_file_name_( Output_path + "alpha_rhythm.xml" );
+
   //
   pugi::xml_document     xml_file;
-  pugi::xml_parse_result result = xml_file.load_file( In_electrode_file_XML.c_str() );
+  pugi::xml_parse_result result = xml_file.load_file( In_population_file_XML.c_str() );
   //
   switch( result.status )
     {
@@ -59,35 +66,46 @@ Utils::Biophysics::Brain_rhythm::load_electrode_file( std::string In_electrode_f
 
 	// 
 	// Get sampling
-	const pugi::xml_node setup_node = fijee_node.child("setup");
-	if (!setup_node)
+	const pugi::xml_node dipoles_node = fijee_node.child("dipoles");
+	if (!dipoles_node)
 	  {
-	    std::cerr << "Read data from XML: no setup node" << std::endl;
+	    std::cerr << "Read data from XML: no dipoles node" << std::endl;
 	    exit(1);
 	  }
 	// Get the number of samples
-	//	number_samples_ = setup_node.attribute("size").as_int();
+	number_samples_ = dipoles_node.attribute("size").as_int();
+	populations_.resize(number_samples_);
 	// loop over the samples
-	for ( auto sample : setup_node )
+	for ( auto dipole : dipoles_node )
 	  {
 	    //
-	    // Get the number of electrodes
-	    // int sample_number = sample.attribute("index").as_int();
-	    int number_electrodes = sample.attribute("size").as_int();
+	    // Get the number of populations
+	    int dipole_number = dipole.attribute("index").as_int();
+
+	    // 
+	    // load dipole information
+	    // Position
+	    populations_[dipole_number].position_[0] = dipole.attribute("x").as_double();
+	    populations_[dipole_number].position_[1] = dipole.attribute("y").as_double();
+	    populations_[dipole_number].position_[2] = dipole.attribute("z").as_double();
+	    // Direction
+	    populations_[dipole_number].direction_[0] = dipole.attribute("vx").as_double();
+	    populations_[dipole_number].direction_[1] = dipole.attribute("vy").as_double();
+	    populations_[dipole_number].direction_[2] = dipole.attribute("vz").as_double();
+	    // Current and potential
+	    populations_[dipole_number].I_ = dipole.attribute("I").as_double();
+	    // cell index and parcel
+	    populations_[dipole_number].index_cell_ = dipole.attribute("index_cell").as_int();
+	    populations_[dipole_number].parcel_     = 0;//dipole.attribute("").as_int();
+	    // Lambda
+	    populations_[dipole_number].lambda_[0] = dipole.attribute("lambda1").as_double();
+	    populations_[dipole_number].lambda_[1] = dipole.attribute("lambda2").as_double();
+	    populations_[dipole_number].lambda_[2] = dipole.attribute("lambda3").as_double();
+	    
 
 	    //
 	    //
-	    electrode_rhythm_.resize(number_electrodes);
-	    electrode_mapping_.resize(number_electrodes);
-	    // 
-	    for( auto electrode : sample )
-	      {
-		int index = electrode.attribute("index").as_uint();
-		// Label
-		std::string label = electrode.attribute("label").as_string(); 
-		// 
-		electrode_mapping_[index] = label;
-	      }
+	    population_rhythm_.resize(number_samples_);
 	  }
 	//
 	break;
@@ -98,11 +116,6 @@ Utils::Biophysics::Brain_rhythm::load_electrode_file( std::string In_electrode_f
 	exit(1);
       }
     }
-
-  // 
-  // Output XML file initialization
-  // 
-  setup_node_ = fijee_.append_child("setup");
 }
 // 
 // 
@@ -114,8 +127,6 @@ Utils::Biophysics::Brain_rhythm::Make_analysis()
 #if TRACE == 100
   // 
   // 
-  // 
-  int number_of_electrodes = electrode_mapping_.size();
 
   //
   // R header: alpha rhythm
@@ -123,27 +134,27 @@ Utils::Biophysics::Brain_rhythm::Make_analysis()
   output_stream_
     << "time ";
   // 
-  for (int electrode = 0 ; electrode < number_of_electrodes ; electrode++)
-    output_stream_ <<  electrode_mapping_[electrode] << " ";
+  for (int population = 0 ; population < number_samples_ ; population++)
+    output_stream_ <<  population << " ";
   // 
   output_stream_ << std::endl;
 
   // 
   // R values: alpha rhythm
   // 
-  std::vector< std::list< std::tuple< double, double, double > >::const_iterator > 
-    it(number_of_electrodes);
+  std::vector< std::list< std::tuple< double, double > >::const_iterator > 
+    it(number_samples_);
   // 
-  for( int electrode = 0 ; electrode < number_of_electrodes ; electrode++ )
-    it[electrode] = electrode_rhythm_[electrode].begin();
+  for( int population = 0 ; population < number_samples_ ; population++ )
+    it[population] = population_rhythm_[population].begin();
   // 
-  while( it[0] !=  electrode_rhythm_[0].end())
+  while( it[0] !=  population_rhythm_[0].end())
     {
       // get the time
       output_stream_ <<  std::get<0>( *(it[0]) ) << " ";
       // 
-     for (int electrode = 0 ; electrode < number_of_electrodes ; electrode++)
-       output_stream_ <<  std::get<1>( *(it[electrode]++) ) << " ";
+     for (int population = 0 ; population < number_samples_ ; population++)
+       output_stream_ <<  std::get<1>( *(it[population]++) ) << " ";
       // 
       output_stream_ << std::endl;
     }
@@ -163,8 +174,8 @@ Utils::Biophysics::Brain_rhythm::Make_analysis()
   output_stream_
     << "Hz ";
   // 
-  for (int electrode = 0 ; electrode < number_of_electrodes ; electrode++)
-    output_stream_ <<  electrode_mapping_[electrode] << " ";
+  for (int population = 0 ; population < number_samples_ ; population++)
+    output_stream_ <<  population << " ";
   // 
   output_stream_ << "power" << std::endl;
 
@@ -176,18 +187,18 @@ Utils::Biophysics::Brain_rhythm::Make_analysis()
     N = 2048, /* N is a power of 2 */
     n = 0;
   // real and imaginary
-  std::vector< double* > data_vector(number_of_electrodes);
+  std::vector< double* > data_vector(number_samples_);
   // 
-  for ( int electrode = 0 ; electrode < number_of_electrodes ; electrode++ )
+  for ( int population = 0 ; population < number_samples_ ; population++ )
     {
       n = 0;
-      data_vector[electrode] = new double[2*2048/*N*/];
-      for( auto time_potential : electrode_rhythm_[electrode] )
+      data_vector[population] = new double[2*2048/*N*/];
+      for( auto time_potential : population_rhythm_[population] )
 	{
 	  if ( n < N )
 	    {
-	      REAL(data_vector[electrode],n)   = std::get<1>(time_potential);
-	      IMAG(data_vector[electrode],n++) = 0.0;
+	      REAL(data_vector[population],n)   = std::get<1>(time_potential);
+	      IMAG(data_vector[population],n++) = 0.0;
 	    }
 	  else
 	    break;
@@ -197,8 +208,8 @@ Utils::Biophysics::Brain_rhythm::Make_analysis()
   // 
   // Forward FFT
   // A stride of 1 accesses the array without any additional spacing between elements. 
-  for ( auto electrode : data_vector )
-    gsl_fft_complex_radix2_forward (electrode, 1/*stride*/, 2048);
+  for ( auto population : data_vector )
+    gsl_fft_complex_radix2_forward (population, 1/*stride*/, 2048);
 
   // 
   // Average the power signal
@@ -208,14 +219,14 @@ Utils::Biophysics::Brain_rhythm::Make_analysis()
   for ( int i = 0 ; i < N ; i++ )
     {
       // 
-      for ( auto electrode : data_vector )
+      for ( auto population : data_vector )
 	{
-	  average_power[i]  = REAL(electrode,i)*REAL(electrode,i);
-	  average_power[i] += IMAG(electrode,i)*IMAG(electrode,i);
+	  average_power[i]  = REAL(population,i)*REAL(population,i);
+	  average_power[i] += IMAG(population,i)*IMAG(population,i);
 	  average_power[i] /= N;
 	}
       // 
-      average_power[i] /= number_of_electrodes;
+      average_power[i] /= number_samples_;
     }
  
 
@@ -226,9 +237,9 @@ Utils::Biophysics::Brain_rhythm::Make_analysis()
       output_stream_ 
 	<< i << " ";
       // 
-      for ( auto electrode : data_vector )
+      for ( auto population : data_vector )
 	output_stream_ 
-	  << (REAL(electrode,i)*REAL(electrode,i) + IMAG(electrode,i)*IMAG(electrode,i)) / N
+	  << (REAL(population,i)*REAL(population,i) + IMAG(population,i)*IMAG(population,i)) / N
 	  << " ";
 	  
       // 
@@ -251,43 +262,64 @@ Utils::Biophysics::Brain_rhythm::output_XML()
   // Build XML output 
   // 
   
-  // Size of the time series
-  setup_node_.append_attribute("size") = static_cast<int>( electrode_rhythm_[0].size() );
   // 
-  int number_of_electrodes = electrode_rhythm_.size();
-
+  // Output XML file initialization
+  dipoles_node_ = fijee_.append_child("dipoles");
+  dipoles_node_.append_attribute("size") = static_cast<int>( populations_.size() );
+  
+  // 
+  std::vector< std::list< std::tuple< double, double > >::const_iterator > 
+    it(number_samples_);
+  
   // 
   // loop over the time series
-  std::vector< std::list< std::tuple< double, double, double > >::const_iterator > 
-    it(number_of_electrodes);
-  // inializes all the lists
-  for( int electrode = 0 ; electrode < number_of_electrodes ; electrode++ )
-    it[electrode] = electrode_rhythm_[electrode].begin();
-  // 
   int index = 0;
-  while( it[0] !=  electrode_rhythm_[0].end())
+  // 
+  for( int population = 0 ; population < number_samples_ ; population++ )
     {
-      auto electrodes_node = setup_node_.append_child("electrodes");
       // 
-      electrodes_node.append_attribute("index")  = index++;
-      electrodes_node.append_attribute("dipole") = 0;
-      electrodes_node.append_attribute("time")   = std::get<0>( *(it[0]) );
-      electrodes_node.append_attribute("size")   = number_of_electrodes;
-
+      // 
+      dipole_node_ = dipoles_node_.append_child("dipole");
+      // 
+      dipole_node_.append_attribute("index")  = index++;
+      // 
+      dipole_node_.append_attribute("x") = populations_[population].position_[0];
+      dipole_node_.append_attribute("y") = populations_[population].position_[1];
+      dipole_node_.append_attribute("z") = populations_[population].position_[2];
+      // 
+      dipole_node_.append_attribute("vx") = populations_[population].direction_[0];
+      dipole_node_.append_attribute("vy") = populations_[population].direction_[1];
+      dipole_node_.append_attribute("vz") = populations_[population].direction_[2];
+      // 
+      dipole_node_.append_attribute("I") = populations_[population].I_;
+      // 
+      dipole_node_.append_attribute("index_cell") = populations_[population].index_cell_;
+      dipole_node_.append_attribute("parcel") = populations_[population].parcel_;
+      // 
+      dipole_node_.append_attribute("lambda1") = populations_[population].lambda_[0];
+      dipole_node_.append_attribute("lambda2") = populations_[population].lambda_[1];
+      dipole_node_.append_attribute("lambda3") = populations_[population].lambda_[2];
       //
-      // loop over electrodes  
-      for ( int electrode = 0 ; electrode < number_of_electrodes ; electrode++ )
+      dipole_node_.append_attribute("size") = static_cast<int>( population_rhythm_[0].size() );
+
+      // 
+      // Time series
+      it[population] = population_rhythm_[population].begin();
+      // 
+      int index_time_step = 0;
+      while( it[population] !=  population_rhythm_[population].end() )
 	{
-	  auto electrode_node = electrodes_node.append_child("electrode");
+	  //       
+	  time_series_node_ = dipole_node_.append_child("time_step");
 	  // 
-	  electrode_node.append_attribute("index") = electrode;
-	  electrode_node.append_attribute("label") = electrode_mapping_[electrode].c_str();
-	  electrode_node.append_attribute("V")     = std::get<1>( *(it[electrode]++) );
-	  electrode_node.append_attribute("I")     = 0.0;
+	  time_series_node_.append_attribute("index") = index_time_step++;
+	  time_series_node_.append_attribute("time")  = std::get<0>( *(it[population]) );
+	  // conversion mV -> V
+	  time_series_node_.append_attribute("V")     = std::get<1>( *(it[population]++) ) * 1.e-03;
 	}
     }
-  
 
+  
   // 
   // Statistical analysise
   Make_analysis();

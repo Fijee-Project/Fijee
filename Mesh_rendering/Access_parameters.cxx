@@ -407,7 +407,7 @@ DAp::Access_parameters():
 
   // 
   // Graph parcellation: number of parcels
-  number_of_parcels_ = 1024;
+  number_of_parcels_ = 32;
 
   //
   // Clean up

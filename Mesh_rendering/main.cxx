@@ -39,6 +39,13 @@
 #include "Build_dipoles_list.h"
 #include "Build_dipoles_list_knn.h"
 #include "Build_dipoles_list_high_density.h"
+// Alpha rhythm
+#include "Utils/Biophysics/Brain_rhythm_models.h"
+#include "Utils/Biophysics/Brain_rhythm.h"
+#include "Utils/Biophysics/Jansen_Rit_1995.h"
+#include "Utils/Biophysics/Wendling_2002.h"
+#include "Utils/Biophysics/Molaee_Ardekani_Wendling_2009.h"
+
 //
 // VTK
 //
@@ -95,6 +102,19 @@ main()
   generator.make_conductivity();
   // 
   generator.make_output();
+
+  // 
+  // Modelisation of alpha rhythm
+  //  - Utils::Biophysics::Jansen_Rit_1995
+  //  - Utils::Biophysics::Wendling_2002
+  //  - Utils::Biophysics::Molaee_Ardekani_Wendling_2009
+  // 
+  Utils::Biophysics::Brain_rhythm_models< Utils::Biophysics::Jansen_Rit_1995, 
+					  /*solver_parameters->get_number_of_threads_()*/ 4 > alpha;
+  //
+  alpha.modelization( parameters->get_files_path_output_() );
+  alpha.output();
+
 
   //
   // Time log 
