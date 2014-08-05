@@ -40,7 +40,7 @@ Solver::Physics::Physics()
   std::string mesh_xml = (SDEsp::get_instance())->get_files_path_output_();
   mesh_xml += "mesh.xml";
   //
-  mesh_.reset( new dolfin::Mesh(mesh_xml.c_str()) );
+  mesh_.reset( new dolfin::Mesh(mesh_xml) );
   //
   info( *mesh_ );
 
@@ -51,7 +51,7 @@ Solver::Physics::Physics()
   std::string subdomains_xml = (SDEsp::get_instance())->get_files_path_output_();
   subdomains_xml += "mesh_subdomains.xml";
   //
-  domains_.reset( new MeshFunction< long unsigned int >(mesh_, subdomains_xml.c_str()) );
+  domains_.reset( new MeshFunction< long unsigned int >(mesh_, subdomains_xml) );
   // write domains
   std::string domains_file_name = (SDEsp::get_instance())->get_files_path_result_();
   domains_file_name            += std::string("domains.pvd");

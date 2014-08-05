@@ -106,6 +106,7 @@ Utils::Biophysics::Brain_rhythm::load_population_file( std::string Output_path )
 	    //
 	    //
 	    population_rhythm_.resize(number_samples_);
+	    population_V_shift_.resize(number_samples_);
 	  }
 	//
 	break;
@@ -154,7 +155,7 @@ Utils::Biophysics::Brain_rhythm::Make_analysis()
       output_stream_ <<  std::get<0>( *(it[0]) ) << " ";
       // 
      for (int population = 0 ; population < number_samples_ ; population++)
-       output_stream_ <<  std::get<1>( *(it[population]++) ) << " ";
+       output_stream_ <<  std::get<1>( *(it[population]++) ) - population_V_shift_[population] << " ";
       // 
       output_stream_ << std::endl;
     }
@@ -315,7 +316,8 @@ Utils::Biophysics::Brain_rhythm::output_XML()
 	  time_series_node_.append_attribute("index") = index_time_step++;
 	  time_series_node_.append_attribute("time")  = std::get<0>( *(it[population]) );
 	  // conversion mV -> V
-	  time_series_node_.append_attribute("V")     = std::get<1>( *(it[population]++) ) * 1.e-03;
+	  double V = std::get<1>( *(it[population]++) ) - population_V_shift_[population];
+	  time_series_node_.append_attribute("V")     = V * 1.e-03;
 	}
     }
 

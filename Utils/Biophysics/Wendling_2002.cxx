@@ -119,8 +119,8 @@ Utils::Biophysics::Wendling_2002::modelization()
   for ( int i = 1 ; i < duration_ ; i++ )
     {
       // every second change the noise influence
-      if ( i % 1000 )
-	p_[local_population_] = pulse_ + distribution_(generator_);
+      //      if ( i % 1000 )
+      p_[local_population_] = pulse_ + distribution_(generator_);
       // 
       double ti = i * delta_t + MAX_TRANSIENT * delta_t;
       // solve
@@ -128,13 +128,17 @@ Utils::Biophysics::Wendling_2002::modelization()
       // 
       if (status != GSL_SUCCESS)
 	{
-	  printf ("error, return value=%d\n", status);
+	  std::cerr << "error, return value = " << status << std::endl;
 	  abort();
 	}
       // record statistics, after the transient state
       population_rhythm_[local_population_].push_back(std::make_tuple(ti - MAX_TRANSIENT * delta_t,
-								    /* V = */ y[1] - y[2]));
+								      /*V=*/ y[1] - y[2] - y[3]));
+      // shift
+      population_V_shift_[local_population_] += y[1] - y[2] - y[3];
     }
+  // average the shift
+  population_V_shift_[local_population_] /= duration_;
 
   // 
   // 

@@ -108,7 +108,7 @@ namespace Utils
 	    exit(1);
 	  }
 	//
-	fem_path_ = std::string( subjects_dir_.c_str() ) + "/" + std::string( subject_.c_str() ) + "/";
+	fem_path_ = std::string( subjects_dir_.c_str() ) + std::string("/") + std::string( subject_.c_str() ) + std::string("/");
 
 	//
 	// Create output path
@@ -116,7 +116,7 @@ namespace Utils
 	int       status = 0;
 	mode_t    mode   = 0750;
 	//
-	fem_output_path_ = fem_path_ + "/fem/output/";
+	fem_output_path_ = fem_path_ + std::string("/fem/output/");
 	//
 	if ( stat( fem_output_path_.c_str(), &st ) != 0 )
 	  {
@@ -147,7 +147,7 @@ namespace Utils
 	// Create result path
 	status = 0;
 	//
-	fem_result_path_ = fem_path_ + "/fem/result/";
+	fem_result_path_ = fem_path_ + std::string("/fem/result/");
 	//
 	if ( stat( fem_result_path_.c_str(), &st ) != 0 )
 	  {
@@ -176,13 +176,13 @@ namespace Utils
 
 	//
 	// append the path line
-	fem_path_ += "/";
+	fem_path_ += std::string("/");
 
 	//
 	// Create measure path
 	status = 0;
 	//
-	fem_measure_path_ = fem_path_ + "/fem/measure/";
+	fem_measure_path_ = fem_path_ + std::string("/fem/measure/");
 	//
 	if ( stat( fem_measure_path_.c_str(), &st ) != 0 )
 	  {
@@ -211,7 +211,7 @@ namespace Utils
 
 	//
 	// append the path line
-	fem_path_ += "/";
+	fem_path_ += std::string("/");
       };
     /*!
      *  \brief Copy Constructor

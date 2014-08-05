@@ -82,6 +82,12 @@ namespace Solver
     std::list< Solver::Phi > dipoles_list_;
     //! Function space
     std::shared_ptr< SLS_model::FunctionSpace > V_;
+    //! Bilinear form
+    std::shared_ptr< SLS_model::BilinearForm > a_;
+    //! Assembling matrix of the Bilinear form
+    std::unique_ptr< Matrix > A_;
+    //! Initializing variable check: we want A_ to be built one time
+    bool initialized_;
     
   private:
     std::mutex critical_zone_;

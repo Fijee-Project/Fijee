@@ -29,6 +29,8 @@
 #include <list>
 #include <memory>
 #include <string>
+#include <thread>         // std::this_thread::sleep_for
+#include <chrono>         // std::chrono::seconds
 //
 // FEniCS
 //
@@ -37,7 +39,7 @@
 //#include "SLS_model.h"
 //
 // pugixml
-// same resources than Dolfin
+// same resources as Dolfin
 //
 #include "Utils/pugi/pugixml.hpp"
 //
@@ -119,13 +121,16 @@ namespace Solver
       for( int physical_event = 0 ;
 	   physical_event != model_.get_number_of_physical_events() ; 
 	   physical_event++ )
-	if( tempo++ < 10 )
+//	if( tempo++ < 10 )
 	  {
 	    //
 	    // Enqueue tasks
 	    pool.enqueue( std::ref(model_) );
+	    // 
+	    // pospone the next launch 0.5 second
+	    std::this_thread::sleep_for( std::chrono::microseconds(5000) );
 	  }
-	else {break;}
+//	else {break;}
     };
   };
 }

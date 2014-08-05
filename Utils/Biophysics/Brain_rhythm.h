@@ -99,6 +99,8 @@ namespace Utils
       //! Vector of analyse time v.s. potential
       std::vector< std::list< std::tuple< double/*time*/, double/*V*/ > > >
 	population_rhythm_;
+      //! Vector of analyse time v.s. potential
+      std::vector< double > population_V_shift_;
       //! Vector neural population
       std::vector< Population > populations_;
       //! Mapping of the population setting
@@ -164,6 +166,7 @@ namespace Utils
        *
        */
       inline int get_number_of_physical_events(){return number_samples_;};
+
 
     public:
       /*!

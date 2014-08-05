@@ -20,7 +20,7 @@ export CUDA = nvcc
 #  -gencode arch=compute_35,code=sm_35 
 #
 ifeq ($(DEBUG),yes)
-CXXFLAGS_MODE  = -g -DDEBUG
+CXXFLAGS_MODE  = -g -O0 -DDEBUG
 CUDAFLAGS_MODE = 
 else
 CXXFLAGS_MODE  = -O3 -Wunused-local-typedefs #-DGPU

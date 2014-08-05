@@ -37,6 +37,10 @@ Solver::SL_subtraction::SL_subtraction():Physics()
   //
   // Define the function space
   V_.reset( new SLS_model::FunctionSpace(mesh_) );
+  // 
+  a_.reset( new SLS_model::BilinearForm(V_, V_) );
+  // 
+  initialized_ = false;
   
   //
   // Define boundary condition
@@ -52,7 +56,8 @@ Solver::SL_subtraction::SL_subtraction():Physics()
   std::cout << "Load dipoles file" << std::endl;
   //
   std::string dipoles_xml = (SDEsp::get_instance())->get_files_path_output_();
-  dipoles_xml += "dipoles.xml";
+  //  dipoles_xml += "dipoles.xml";
+  dipoles_xml += "parcellation.xml";
   //
   pugi::xml_document     xml_file;
   pugi::xml_parse_result result = xml_file.load_file( dipoles_xml.c_str() );
@@ -126,6 +131,13 @@ Solver::SL_subtraction::SL_subtraction():Physics()
 		<< std::endl;
       exit(1);
     }
+  
+  // 
+  // Reset outputfile
+  std::string leadfield_matrix_xml = (SDEsp::get_instance())->get_files_path_result_();
+  leadfield_matrix_xml += "leadfield_matrix.xml";
+
+  electrodes_->set_file_name_(leadfield_matrix_xml);
 }
 //
 //
@@ -145,6 +157,22 @@ Solver::SL_subtraction::operator () ( /*Solver::Phi& source,
 	std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
 	source = dipoles_list_.front();
 	dipoles_list_.pop_front();
+	// 
+	if( !initialized_ )
+	  {
+	    //
+	    // Anisotropy conductivity
+	    // Bilinear form
+	    a_->a_sigma = *sigma_;
+	    //  a.dx      = *domains_;
+	    //
+	    A_.reset( new Matrix() );
+	    assemble(*A_, *a_);
+
+	    // 
+	    // 
+	    initialized_ = true;
+	  }
       }
     catch (std::logic_error&) 
       {
@@ -169,14 +197,10 @@ Solver::SL_subtraction::operator () ( /*Solver::Phi& source,
       
   //
   // Define variational forms
-  SLS_model::BilinearForm a(V_, V_);
+  //  SLS_model::BilinearForm a(V_, V_);
   SLS_model::LinearForm L(V_);
+  Vector L_;
 
-  //
-  // Anisotropy
-  // Bilinear
-  a.a_sigma = *sigma_;
-  //  a.dx      = *domains_;
   // Linear
   L.a_inf   =  a_inf;
   L.a_sigma = *sigma_;
@@ -184,24 +208,40 @@ Solver::SL_subtraction::operator () ( /*Solver::Phi& source,
   //
   //  L.dx    = *domains_;
   //  L.ds    = *boundaries_;
+  // Assembling the linear form in a vector
+  assemble(L_, L);
 
   //
   // Compute solution
   Function u(V_);
   //
-  LinearVariationalProblem problem(a, L, u);
-  LinearVariationalSolver  solver(problem);
-  // krylov
-  solver.parameters["linear_solver"]  
-    = (SDEsp::get_instance())->get_linear_solver_();
-  solver.parameters("krylov_solver")["maximum_iterations"] 
-    = (SDEsp::get_instance())->get_maximum_iterations_();
-  solver.parameters("krylov_solver")["relative_tolerance"] 
-    = (SDEsp::get_instance())->get_relative_tolerance_();
-  solver.parameters["preconditioner"] 
-    = (SDEsp::get_instance())->get_preconditioner_();
+// ORIG  LinearVariationalProblem problem(*a_, L, u);
+// ORIG  LinearVariationalSolver  solver(problem);
+// ORIG  // krylov
+// ORIG  solver.parameters["linear_solver"]  
+// ORIG    = (SDEsp::get_instance())->get_linear_solver_();
+// ORIG  solver.parameters("krylov_solver")["maximum_iterations"] 
+// ORIG    = (SDEsp::get_instance())->get_maximum_iterations_();
+// ORIG  solver.parameters("krylov_solver")["relative_tolerance"] 
+// ORIG    = (SDEsp::get_instance())->get_relative_tolerance_();
+// ORIG  solver.parameters["preconditioner"] 
+// ORIG    = (SDEsp::get_instance())->get_preconditioner_();
+// ORIG  //
+// ORIG  solver.solve();
+
+  
+  // 
   //
-  solver.solve();
+  KrylovSolver solver( (SDEsp::get_instance())->get_linear_solver_(),
+		       (SDEsp::get_instance())->get_preconditioner_() );
+  // Set parameters of the Krylov solver
+  solver.parameters["maximum_iterations"] 
+    = (SDEsp::get_instance())->get_maximum_iterations_();
+  solver.parameters["relative_tolerance"] 
+    = (SDEsp::get_instance())->get_relative_tolerance_();
+  // 
+  solver.solve( *A_, *u.vector(), L_ );
+
 
   //
   // Regulation terme:  \int u dx = 0
@@ -236,19 +276,22 @@ Solver::SL_subtraction::operator () ( /*Solver::Phi& source,
 
   //
   // Filter function over a subdomain
-  std::list<std::size_t> test_sub_domains{4,5};
-  solution_domain_extraction(Phi_tot, test_sub_domains, source.get_name_().c_str());
-  
+  if ( false )
+    {
+      std::list<std::size_t> test_sub_domains{4,5};
+      solution_domain_extraction(Phi_tot, test_sub_domains, source.get_name_().c_str());
+      
+    }
+
   //
   // Mutex record potential at each electrods
-  //
   try 
     {
       // lock the dipole list
       std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
       // 
-      //      electrodes_->get_current(0)->punctual_potential_evaluation(u, mesh_);
-      electrodes_->get_current(0)->surface_potential_evaluation(u, mesh_);
+      //      electrodes_->get_current(0)->punctual_potential_evaluation(Phi_tot/*u*/, mesh_);
+      electrodes_->get_current(0)->surface_potential_evaluation(Phi_tot/*u*/, mesh_);
       electrodes_->record_potential( /*dipole idx*/ source.get_index_(), 
 				     /*time   idx*/ 0);
     }
@@ -257,26 +300,28 @@ Solver::SL_subtraction::operator () ( /*Solver::Phi& source,
       std::cerr << "[exception caught]\n" << std::endl;
     }
 
-
-  //
-  // Save solution in VTK format
-  //  * Binary (.bin)
-  //  * RAW    (.raw)
-  //  * SVG    (.svg)
-  //  * XD3    (.xd3)
-  //  * XDMF   (.xdmf)
-  //  * XML    (.xml)
-  //  * XYZ    (.xyz)
-  //  * VTK    (.pvd)
-  std::string file_name = (SDEsp::get_instance())->get_files_path_result_() 
-  + source.get_name_() + std::string(".pvd");
-  File file( file_name.c_str() );
-//  std::string file_th_name = source.get_name_() + std::string("_Phi_th.pvd");
-//  File file_th(file_th_name.c_str());
-//  std::string file_tot_name = source.get_name_() + std::string("_Phi_tot.pvd");
-//  File file_tot(file_tot_name.c_str());
-  //
-//  file << u;
-//  file_th << Phi_th;
-  file << Phi_tot;
+  if( false )
+    {
+      //
+      // Save solution in VTK format
+      //  * Binary (.bin)
+      //  * RAW    (.raw)
+      //  * SVG    (.svg)
+      //  * XD3    (.xd3)
+      //  * XDMF   (.xdmf)
+      //  * XML    (.xml)
+      //  * XYZ    (.xyz)
+      //  * VTK    (.pvd)
+      std::string file_name = (SDEsp::get_instance())->get_files_path_result_() 
+	+ source.get_name_() + std::string(".pvd");
+      File file( file_name.c_str() );
+      //  std::string file_th_name = source.get_name_() + std::string("_Phi_th.pvd");
+      //  File file_th(file_th_name.c_str());
+      //  std::string file_tot_name = source.get_name_() + std::string("_Phi_tot.pvd");
+      //  File file_tot(file_tot_name.c_str());
+      //
+      //  file << u;
+      //  file_th << Phi_th;
+      file << Phi_tot;
+    }
 };

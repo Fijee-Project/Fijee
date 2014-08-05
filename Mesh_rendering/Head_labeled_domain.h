@@ -135,15 +135,6 @@ namespace Domains
      */
     void operator ()();
 
-  public:
-    /*!
-     *  \brief Set pos_x_ value
-     *
-     *  This method set the x coordinate pos_x_.
-     *
-     *  \param Pos_X : The new position X.
-     */
-    //    inline void set_pos_x( int Pos_X ){pos_x_ = Pos_X;};
 
   public:
     /*!
@@ -164,14 +155,6 @@ namespace Domains
     {
       file_inrimage_->write( data_label_, 256*256*256 );
     };
-    /*!
-     *  \brief 
-     *
-     *  This method 
-     *
-     */
-    void Head_mesh();
-
   };
   /*!
    *  \brief Dump values for Head_labeled_domain

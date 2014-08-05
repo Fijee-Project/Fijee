@@ -76,32 +76,32 @@ main()
   Domains::Access_parameters* parameters = Domains::Access_parameters::get_instance();
   parameters->init();
   
-  // 
-  // Head simulation:    
-  //   - Domains::Head_labeled_domain 
-  //   - Domains::Head_conductivity_tensor
-  //   - Domains::Build_mesh
-  //   - Dipole generation
-  //     - Domains::Build_dipoles_list_high_density
-  //     - Build_dipoles_list_knn
-  //
-  // Spheres simulation: 
-  //   - Domains::Spheres_labeled_domain 
-  //   - Domains::Spheres_conductivity_tensor
-  //   - Domains::Build_mesh
-  //   - Dipole generation
-  //     - Domains::Build_dipoles_list_high_density
-  //     - Build_dipoles_list_knn
-  // 
-  Domains::Mesh_generator< Domains::Head_labeled_domain, 
-			   Domains::Head_conductivity_tensor,
-			   Domains::Build_mesh,
-			   Domains::Build_dipoles_list_high_density > generator;
-  //
-  generator.make_inrimage();
-  generator.make_conductivity();
-  // 
-  generator.make_output();
+//  // 
+//  // Head simulation:    
+//  //   - Domains::Head_labeled_domain 
+//  //   - Domains::Head_conductivity_tensor
+//  //   - Domains::Build_mesh
+//  //   - Dipole generation
+//  //     - Domains::Build_dipoles_list_high_density
+//  //     - Build_dipoles_list_knn
+//  //
+//  // Spheres simulation: 
+//  //   - Domains::Spheres_labeled_domain 
+//  //   - Domains::Spheres_conductivity_tensor
+//  //   - Domains::Build_mesh
+//  //   - Dipole generation
+//  //     - Domains::Build_dipoles_list_high_density
+//  //     - Build_dipoles_list_knn
+//  // 
+//  Domains::Mesh_generator< Domains::Head_labeled_domain, 
+//			   Domains::Head_conductivity_tensor,
+//			   Domains::Build_mesh,
+//			   Domains::Build_dipoles_list_high_density > generator;
+//  //
+//  generator.make_inrimage();
+//  generator.make_conductivity();
+//  // 
+//  generator.make_output();
 
   // 
   // Modelisation of alpha rhythm
@@ -110,7 +110,8 @@ main()
   //  - Utils::Biophysics::Molaee_Ardekani_Wendling_2009
   // 
   Utils::Biophysics::Brain_rhythm_models< Utils::Biophysics::Jansen_Rit_1995, 
-					  /*solver_parameters->get_number_of_threads_()*/ 4 > alpha;
+					  /*solver_parameters->get_number_of_threads_()*/ 4 > 
+    alpha;
   //
   alpha.modelization( parameters->get_files_path_output_() );
   alpha.output();

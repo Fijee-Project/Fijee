@@ -58,12 +58,10 @@ int main()
   //
   // export OMP_NUM_THREADS=2
   Solver::Model_solver< /* physical model */ Solver::SL_subtraction,
-					     /*solver_parameters->get_number_of_threads_()*/ 2 >  model;
+		        /*solver_parameters->get_number_of_threads_()*/ 4 >  model;
   //
   std::cout << "Loop over solvers" << std::endl;
   model.solver_loop();
-
-
 
   //
   //

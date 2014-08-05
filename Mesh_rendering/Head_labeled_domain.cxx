@@ -616,13 +616,6 @@ Domains_Head_labeled::model_segmentation()
 //
 //
 //
-void
-Domains_Head_labeled::Head_mesh()
-{
-}
-//
-//
-//
 std::ostream& 
 Domains::operator << ( std::ostream& stream, 
 		       const Domains_Head_labeled& that)

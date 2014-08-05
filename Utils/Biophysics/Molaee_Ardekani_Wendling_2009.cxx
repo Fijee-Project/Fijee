@@ -48,7 +48,7 @@ extern "C" int ode_system_MAW(double t, const double y[], double dydt[], void *p
 // 
 // 
 Utils::Biophysics::Molaee_Ardekani_Wendling_2009::Molaee_Ardekani_Wendling_2009():
-  duration_(20000. /*ms*/), pulse_(500./*pulses per second*/),
+  duration_(20000. /*ms*/), pulse_(90./*pulses per second*/),
   e0P_( 10. /*s^{-1}*/), e0I1_( 10. /*s^{-1}*/), e0I2_( 10. /*s^{-1}*/), 
   rP_( 0.7 /*(mV)^{-1}*/), rI1_( 0.7 /*(mV)^{-1}*/), rI2_( 0.7 /*(mV)^{-1}*/), 
   v0P_( 1. /*(mV)*/), v0I1_( 4. /*(mV)*/), v0I2_( 4. /*(mV)*/),
@@ -99,8 +99,8 @@ Utils::Biophysics::Molaee_Ardekani_Wendling_2009::modelization()
   while ( transient_stage++ < MAX_TRANSIENT )
     {
       // every second change the noise influence
-      if ( transient_stage % 1000 )
-	p_[local_population_] = pulse_ + distribution_(generator_);
+      //      if ( transient_stage % 1000 )
+      p_[local_population_] = pulse_ + distribution_(generator_);
       // 
       double ti = transient_stage * delta_t;
       // solve
@@ -132,7 +132,11 @@ Utils::Biophysics::Molaee_Ardekani_Wendling_2009::modelization()
       // record statistics, after the transient state
       population_rhythm_[local_population_].push_back(std::make_tuple(ti - MAX_TRANSIENT * delta_t,
 								    /*V = */y[0] + y[4] - y[1] - y[2] ));
+      // shift
+      population_V_shift_[local_population_] += y[0] + y[4] - y[1] - y[2];
     }
+  // average the shift
+  population_V_shift_[local_population_] /= duration_;
 
   // 
   // 

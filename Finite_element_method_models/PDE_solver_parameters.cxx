@@ -126,9 +126,9 @@ SDEsp::init()
   //    use_petsc_cusp_hack      |    bool  false  {true, false}       0       0
   //
   // cg - bicgstab - gmres
-  linear_solver_ = "cg";
+  linear_solver_ = std::string("cg");
   // ilut - ilu0 - block_ilu{t,0} - jacobi - row_scaling
-  preconditioner_ = "row_scaling";
+  preconditioner_ = std::string("row_scaling");
   //
   maximum_iterations_ = 10000000;
   //

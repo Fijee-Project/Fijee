@@ -97,8 +97,8 @@ Utils::Biophysics::Jansen_Rit_1995::modelization()
   while ( transient_stage++ < MAX_TRANSIENT )
     {
       // every second change the noise influence
-      if ( transient_stage % 1000 )
-	p_[local_population_] = pulse_ + distribution_(generator_);
+      //      if ( transient_stage % 1000 )
+      p_[local_population_] = pulse_ + distribution_(generator_);
       // 
       double ti = transient_stage * delta_t;
       // solve
@@ -130,7 +130,11 @@ Utils::Biophysics::Jansen_Rit_1995::modelization()
       // record statistics, after the transient state
       population_rhythm_[local_population_].push_back(std::make_tuple(ti - MAX_TRANSIENT * delta_t,
 								    /* V= */ y[1] - y[2]));
+      // shift
+      population_V_shift_[local_population_] += y[1] - y[2];
     }
+  // average the shift
+  population_V_shift_[local_population_] /= duration_;
 
   // 
   // 
