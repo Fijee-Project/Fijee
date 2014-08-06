@@ -152,6 +152,8 @@ Domains::operator << ( std::ostream& stream,
     << "I=\"" << that.weight() << "\" "
     // Cell id
     << "index_cell=\"" << that.get_cell_id_() << "\" "
+    // Parcel id
+    << "index_parcel=\"" << that.get_cell_parcel_() << "\" "
     // Conductivity eigenvalues
     << "lambda1=\"" << that.lambda1() 
     << "\" lambda2=\"" << that.lambda2() 

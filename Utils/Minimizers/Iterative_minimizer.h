@@ -46,7 +46,7 @@
  * \version 0.1
  */
 
-/*! \namespace Solver
+/*! \namespace Utils
  * 
  * Name space for our new package
  *

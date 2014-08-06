@@ -157,15 +157,4 @@ namespace CGAL {
     };
   };
 }
-////
-////
-////
-//struct Construct_coord_iterator {
-//  typedef  const float* result_type;
-//  const float* operator()(const Domains::Point& p) const
-//  { return static_cast<const float*>( p.get_position_() ); }
-//
-//  const float* operator()(const Domains::Point& p, int)  const
-//  { return static_cast<const float*>( p.get_position_() + 3 ); }
-//};
 #endif

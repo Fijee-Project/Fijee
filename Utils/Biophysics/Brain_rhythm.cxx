@@ -83,25 +83,22 @@ Utils::Biophysics::Brain_rhythm::load_population_file( std::string Output_path )
 	    int dipole_number = dipole.attribute("index").as_int();
 
 	    // 
-	    // load dipole information
-	    // Position
-	    populations_[dipole_number].position_[0] = dipole.attribute("x").as_double();
-	    populations_[dipole_number].position_[1] = dipole.attribute("y").as_double();
-	    populations_[dipole_number].position_[2] = dipole.attribute("z").as_double();
-	    // Direction
-	    populations_[dipole_number].direction_[0] = dipole.attribute("vx").as_double();
-	    populations_[dipole_number].direction_[1] = dipole.attribute("vy").as_double();
-	    populations_[dipole_number].direction_[2] = dipole.attribute("vz").as_double();
-	    // Current and potential
-	    populations_[dipole_number].I_ = dipole.attribute("I").as_double();
-	    // cell index and parcel
-	    populations_[dipole_number].index_cell_ = dipole.attribute("index_cell").as_int();
-	    populations_[dipole_number].parcel_     = 0;//dipole.attribute("").as_int();
-	    // Lambda
-	    populations_[dipole_number].lambda_[0] = dipole.attribute("lambda1").as_double();
-	    populations_[dipole_number].lambda_[1] = dipole.attribute("lambda2").as_double();
-	    populations_[dipole_number].lambda_[2] = dipole.attribute("lambda3").as_double();
-	    
+	    // load dipole information in populations vector
+	    Population neurons( dipole_number,
+				dipole.attribute("x").as_double(),
+				dipole.attribute("y").as_double(),
+				dipole.attribute("z").as_double(),
+				dipole.attribute("vx").as_double(),
+				dipole.attribute("vy").as_double(),
+				dipole.attribute("vz").as_double(),
+				dipole.attribute("I").as_double(),
+				dipole.attribute("index_cell").as_int(),
+				dipole.attribute("index_parcel").as_int(),
+				dipole.attribute("lambda1").as_double(),
+				dipole.attribute("lambda2").as_double(),
+				dipole.attribute("lambda3").as_double() );
+	    // 
+	    populations_[dipole_number] = std::move( neurons );
 
 	    //
 	    //
@@ -274,32 +271,30 @@ Utils::Biophysics::Brain_rhythm::output_XML()
   
   // 
   // loop over the time series
-  int index = 0;
-  // 
   for( int population = 0 ; population < number_samples_ ; population++ )
     {
       // 
       // 
       dipole_node_ = dipoles_node_.append_child("dipole");
       // 
-      dipole_node_.append_attribute("index")  = index++;
+      dipole_node_.append_attribute("index")  = populations_[population].get_index_();
       // 
-      dipole_node_.append_attribute("x") = populations_[population].position_[0];
-      dipole_node_.append_attribute("y") = populations_[population].position_[1];
-      dipole_node_.append_attribute("z") = populations_[population].position_[2];
+      dipole_node_.append_attribute("x") = (populations_[population].get_position_())[0];
+      dipole_node_.append_attribute("y") = (populations_[population].get_position_())[1];
+      dipole_node_.append_attribute("z") = (populations_[population].get_position_())[2];
       // 
-      dipole_node_.append_attribute("vx") = populations_[population].direction_[0];
-      dipole_node_.append_attribute("vy") = populations_[population].direction_[1];
-      dipole_node_.append_attribute("vz") = populations_[population].direction_[2];
+      dipole_node_.append_attribute("vx") = (populations_[population].get_direction_())[0];
+      dipole_node_.append_attribute("vy") = (populations_[population].get_direction_())[1];
+      dipole_node_.append_attribute("vz") = (populations_[population].get_direction_())[2];
       // 
-      dipole_node_.append_attribute("I") = populations_[population].I_;
+      dipole_node_.append_attribute("I") = populations_[population].get_I_();
       // 
-      dipole_node_.append_attribute("index_cell") = populations_[population].index_cell_;
-      dipole_node_.append_attribute("parcel") = populations_[population].parcel_;
+      dipole_node_.append_attribute("index_cell") = populations_[population].get_index_cell_();
+      dipole_node_.append_attribute("index_parcel") = populations_[population].get_index_parcel_();
       // 
-      dipole_node_.append_attribute("lambda1") = populations_[population].lambda_[0];
-      dipole_node_.append_attribute("lambda2") = populations_[population].lambda_[1];
-      dipole_node_.append_attribute("lambda3") = populations_[population].lambda_[2];
+      dipole_node_.append_attribute("lambda1") = (populations_[population].get_lambda_())[0];
+      dipole_node_.append_attribute("lambda2") = (populations_[population].get_lambda_())[1];
+      dipole_node_.append_attribute("lambda3") = (populations_[population].get_lambda_())[2];
       //
       dipole_node_.append_attribute("size") = static_cast<int>( population_rhythm_[0].size() );
 

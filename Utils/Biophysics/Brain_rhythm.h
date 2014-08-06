@@ -54,6 +54,7 @@
 #include "Utils/pugi/pugixml.hpp"
 #include "Utils/Statistical_analysis.h"
 #include "Utils/XML_writer.h"
+#include "Utils/Biophysics/Population.h"
 // 
 // 
 // 
@@ -64,29 +65,13 @@
  */
 namespace Utils
 {
-  /*! \namespace Minimizers
+  /*! \namespace Biophysics
    * 
    * Name space for our new package
    *
    */
   namespace Biophysics
   {
-    /*! \class Population
-     * \brief classe representing a neural population
-     *
-     *  This class stores dipoles attributes.
-     * 
-     */
-    typedef struct Dipole
-    {
-      double position_[3];
-      double direction_[3];
-      double I_;
-      double V_;
-      int    index_cell_;
-      int    parcel_;
-      double lambda_[3];
-    } Population;
     /*! \class Brain_rhythm
      * \brief classe representing whatever
      *
@@ -103,8 +88,6 @@ namespace Utils
       std::vector< double > population_V_shift_;
       //! Vector neural population
       std::vector< Population > populations_;
-      //! Mapping of the population setting
-      //      std::vector< std::string /*label*/> population_mapping_;
       //! Number of neural populations
       int number_samples_;
 
@@ -178,10 +161,10 @@ namespace Utils
       virtual void init() = 0;
       /*!
        */
-      virtual void modelization()  = 0;
+      virtual void modelization() = 0;
       /*!
        */
-      virtual void operator () ()  = 0;
+      virtual void operator ()() = 0;
       /*!
        *  \brief Output XML
        *

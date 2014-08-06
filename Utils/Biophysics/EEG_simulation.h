@@ -24,28 +24,39 @@
 //  The views and conclusions contained in the software and documentation are those   
 //  of the authors and should not be interpreted as representing official policies,    
 //  either expressed or implied, of the FreeBSD Project.  
-#ifndef MINIMIZER_H
-#define MINIMIZER_H
+#ifndef EEG_SIMULATION_H
+#define EEG_SIMULATION_H
 //http://franckh.developpez.com/tutoriels/outils/doxygen/
 /*!
- * \file Minimization.h
+ * \file EEG_simulation.h
  * \brief brief describe 
  * \author Yann Cobigo
  * \version 0.1
  */
 #include <iostream>
-#include <memory>
+#include <string>
 #include <vector>
-#include <map>
-#include <tuple>
-#include <functional>
-//
-// Eigen
-//
-#include <Eigen/Dense>
+#include <list>
+//// 
+//// GSL
+//// 
+//#include <gsl/gsl_errno.h>
+//#include <gsl/gsl_matrix.h>
+//#include <gsl/gsl_odeiv2.h>
+//#include <gsl/gsl_fft_complex.h>
+//// GSL macros
+//#define REAL(z,i) ((z)[2*(i)])
+//#define IMAG(z,i) ((z)[2*(i)+1])
 //
 // UCSF
 //
+#include "Utils/pugi/pugixml.hpp"
+#include "Utils/Biophysics/Population.h"
+#include "Utils/Statistical_analysis.h"
+#include "Utils/XML_writer.h"
+// 
+// 
+// 
 /*! \namespace Utils
  * 
  * Name space for our new package
@@ -53,98 +64,104 @@
  */
 namespace Utils
 {
-  /*! \namespace Minimizers
+  /*! \namespace Biophysics
    * 
    * Name space for our new package
    *
    */
-  namespace Minimizers
+  namespace Biophysics
   {
-    typedef std::function< double( const Eigen::Vector3d& ) > Function;
-    typedef std::tuple< 
-      double,         /* - 0 - estimation */
-      Eigen::Vector3d /* - 1 - sigma (0) skin, (1) skull compacta, (2) skull spongiosa */
-      > Estimation_tuple;
-    /*! \class Minimizer
+    /*! \class EEG_simulation
      * \brief classe representing whatever
      *
      *  This class is an example of class 
      * 
      */
-    class Minimizer
+    class EEG_simulation: public Utils::Statistical_analysis, public Utils::XML_writer
     {
-    public:
-      virtual ~Minimizer(){/* Do nothing */};  
-      
-    public:
-      virtual void initialization( Function,  
-				   const std::vector< Estimation_tuple >&,
-				   const std::vector< std::tuple<double, double> >& ) = 0;
-      virtual void minimize() = 0;
-    };
-    /*! \class It_minimizer
-     * \brief classe representing the 
-     *
-     *  This class is an example of class I will have to use
-     */
-    class It_minimizer : public Minimizer
-    {
-    protected:
-      //! Number of iteration
-      int iteration_;
-      //! Max number of iterations
-      int max_iterations_;
+    private:
+      //! Vector of populations
+      std::vector< Utils::Biophysics::Population > populations_;
+      //! Number 
+      int number_samples_;
+
+      // 
+      // Output file
+      // 
+
+      //! XML output file: dipoles node
+      pugi::xml_node dipoles_node_;
+
 
     public:
       /*!
-       *  \brief Constructor
+       *  \brief Default Constructor
        *
-       *  Constructor of the class Minimizer
+       *  Constructor of the class EEG_simulation
+       *
        */
-    It_minimizer():iteration_(0), max_iterations_(200){};
+      EEG_simulation();
       /*!
-       *  \brief Destructeur
+       *  \brief Default Constructor
        *
-       *  Destructor of the class Minimizer
+       *  Constructor of the class EEG_simulation
+       *
        */
-      virtual ~It_minimizer(){/* Do nothing */};
-            /*!
+      EEG_simulation( std::string );
+      /*!
        *  \brief Copy Constructor
        *
-       *  Constructor is a copy constructor
+       *  Constructor of the class EEG_simulation
        *
        */
-    It_minimizer( const It_minimizer& that):
-      iteration_(that.iteration_), max_iterations_(that.max_iterations_){};
+      EEG_simulation(const EEG_simulation& ){};
+      /*!
+       *  \brief Destructor
+       *
+       *  Constructor of the class EEG_simulation
+       *
+       */
+      virtual ~EEG_simulation(){/* Do nothing */};  
       /*!
        *  \brief Operator =
        *
-       *  Operator = of the class It_minimizer_sphere
+       *  Operator = of the class EEG_simulation
        *
        */
-      It_minimizer& operator = ( const It_minimizer& that )
-	{
-	  iteration_      = that.iteration_;
-	  max_iterations_ = that.max_iterations_;
-	  //
-	  return *this;
-	};
+      EEG_simulation& operator = (const EEG_simulation& ){return *this;};
+      
+    public:
+      /*!
+       *  \brief Load population file
+       *
+       *  This method load the input XML file of population setting.
+       *
+       * \param In_population_file_XML: input population file in XML format.
+       */
+      void load_population_file( std::string );
+      /*!
+       *  \brief Get the number of populations
+       *
+       *  This method return the number of populations. This methode is needed for the multi-threading dispatching.
+       *
+       */
+      inline int get_number_of_physical_events(){return number_samples_;};
+
 
     public:
       /*!
-       *  \brief initialization function
-       *
-       *  This method initialize the minimizer
        */
-      virtual void initialization( Function,  
-				   const std::vector< Estimation_tuple >&,
-				   const std::vector< std::tuple<double, double> >& ) = 0;
+      virtual void operator ()(){};
       /*!
-       *  \brief minimize function
+       *  \brief Output XML
        *
-       *  This method launch the minimization algorithm
+       *  This member function create the XML output
+       *
        */
-      virtual void minimize() = 0;
+      virtual void output_XML();
+      /*!
+       */
+      virtual void Make_analysis();
     };
   }
 }
