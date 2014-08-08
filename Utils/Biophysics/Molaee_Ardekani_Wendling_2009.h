@@ -198,7 +198,7 @@ namespace Utils
 	/*!
 	 *  \brief  Brain rhythm modelization
 	 *
-	 *  This member function build an alpha rhythm based on Jansen Rit (1995) mathematical model.
+	 *  This member function build an alpha rhythm based on Wendling (2009) mathematical model.
  	 *
 	 */
       virtual void modelization();

@@ -254,4 +254,4 @@ Utils::Biophysics::operator << ( std::ostream& stream,
   //
   //
   return stream;
-};
+}

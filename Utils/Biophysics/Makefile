@@ -9,7 +9,7 @@ LIBS    = -lgsl #-pthread
 #
 # Sources
 #
-SRC        = Population.cxx Brain_rhythm.cxx Jansen_Rit_1995.cxx Molaee_Ardekani_Wendling_2009.cxx Wendling_2002.cxx EEG_simulation.cxx
+SRC        = Population.cxx Leadfield_matrix.cxx Brain_rhythm.cxx Jansen_Rit_1995.cxx Molaee_Ardekani_Wendling_2009.cxx Wendling_2002.cxx EEG_simulation.cxx 
 OBJ        = $(SRC:.cxx=.o)
 #
 #

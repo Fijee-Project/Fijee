@@ -26,10 +26,11 @@
 //  either expressed or implied, of the FreeBSD Project.  
 #ifndef KMEANS_CLUSTERING_H
 #define KMEANS_CLUSTERING_H
+#include <random>
 //
 // UCSF project
 //
-
+#include "Utils/Fijee_log_management.h"
 /*! \namespace Utils
  * 
  * Name space for our new package
@@ -41,52 +42,118 @@ namespace Utils
   {
     namespace Kmeans_clustering
     {
-      template < typename T > void Lloyd_algorythm( const int N, const T& Points, int T& Clusters,
-						    const int n, double& Mu, double& Sigme)
-      {
-	// 
-	// Determin Max and Min from Points
+      /*
+       * \brief Lloyd algorythm for k-means clustering
+       *
+       * This fonction compute the k-means clustering following Lloyd algorithm. 
+       * Note: the algorithm can be optimized and transfer on GPU. 
+       *
+       */
+      template < typename T > void Lloyd_algorythm( const int N, const T* Points, int* Clusters,
+						    const int n, double* Mu, double* Variance,
+						    double Epsilon = 1.e-01 )
+	{
+	  // 
+	  // Time log
+	  FIJEE_TIME_PROFILER("Utils::Minimizers::Kmeans_clustering::Lloyd_algorythm");
+	  // 
+	  // Convergence criteria
+	  double L_kmeans_old = 1.e+06;
+	  double L_kmeans     = 0.;
+	  int    iteration    = 0;
+	  
+	  // 
+	  // Determin Max and Min from Points
+	  int 
+	    max = 0,
+	    min = 255;
+	  // 
+	  for ( int i = 0 ; i < N ; i++ )
+	    if( Points[i] > max ) max = static_cast<int>( Points[i] );
+	    else if( Points[i] < min ) min = static_cast<int>( Points[i] );
+	
+	  // 
+	  // Uniformly random generation of n of type T between [Min, Max] (Mu)
+	  std::default_random_engine generator;
+	  std::uniform_int_distribution<int> distribution( min, max );
+	  // 
+	  for( int i = 0 ; i < n ; i++ ){
+	    Mu[i] = distribution( generator );
+	    std::cout << Mu[i] << " ";}
+	  std::cout << std::endl;
 
-	// 
-	// Uniformly random generation of n of type T between [Min, Max] (Mu)
-
-	// 
-	// Determin r_ik (Clusters)
-	for( int i = 0 ; i < N ; i++ )
-	  {
-	    double min_dist = 1.e+09;
-	    // 
-	    for ( int j = 0 ; j < n ; j++)
-	      if( abs( Points[i] - Mu[j]) < min_dist )
+	  // 
+	  // Minimization loop
+	  while( fabs(L_kmeans - L_kmeans_old) > Epsilon )
+	    {
+	      // 
+	      L_kmeans_old = L_kmeans;
+	      L_kmeans = 0;
+	      // 
+	      // Determin r_ik (Clusters)
+	      for( int i = 0 ; i < N ; i++ )
 		{
-		  Clusters[i] = j;
-		  min_dist = abs( Points[i] - Mu[j]);
+		  double min_dist = 1.e+09;
+		  // 
+		  for ( int j = 0 ; j < n ; j++)
+		    if( fabs(Points[i] - Mu[j]) < min_dist )
+		      {
+			Clusters[i] = j;
+			min_dist = fabs( Points[i] - Mu[j] );
+		      }
 		}
-	  }
 
-	// 
-	// Recompute Mu
-	double 
-	  Num = 0., 
-	  Den = 0.;
-	for( int j = 0 ; j < n ; j++ )
-	  {
-	    Num = 0.;
-	    Den = 0.;
-	    //	    
-	    for( int i = 0 ; i < N ; i++ )
-	      if( Clusters[i] == j )
+	      // 
+	      // Recompute Mu
+	      double 
+		Num = 0., 
+		Den = 0.;
+	      for( int j = 0 ; j < n ; j++ )
 		{
-		  Num += Points[i];
-		  Den += 1.;
+		  iteration++;
+		  Num = 0.;
+		  Den = 0.;
+		  //	    
+		  for( int i = 0 ; i < N ; i++ )
+		    if( Clusters[i] == j )
+		      {
+			Num += Points[i];
+			Den += 1.;
+		      }
+		  //
+		  Mu[j] = Num / Den;
 		}
-	    //
-	    Mu[j] = Num / Den;
-	  }
 
-	// 
-	// Compute the Lagrangien
-      }
+	      // 
+	      // Compute the Lagrangien
+	      for( int j = 0 ; j < n ; j++ )
+		for( int i = 0 ; i < N ; i++ )
+		  if( Clusters[i] == j )
+		    L_kmeans += (Points[i]-Mu[j])*(Points[i]-Mu[j]);
+	    }
+
+
+	  // 
+	  // Empirical variance
+	  int element_per_cluster[n];
+	  // 
+	  for( int i = 0 ; i < N ; i++ )
+	    {
+	      Variance[Clusters[i]] += ( Points[i] - Mu[Clusters[i]] )*( Points[i] - Mu[Clusters[i]] );
+	      element_per_cluster[Clusters[i]]++;
+	    }
+	  // 
+	  for( int j = 0 ; j < n ; j ++ )
+	    Variance[j] /= (double) element_per_cluster[j] + 1;
+
+	  //
+	  //
+	  std::cout << std::endl;
+	  std::cout << iteration << std::endl;
+	  for( int j = 0 ; j < n ; j++ ){
+	    std::cout << Mu[j] << " " << sqrt(Variance[j]) << std::endl;}
+	  std::cout << std::endl;
+	}
     }
   }
 }

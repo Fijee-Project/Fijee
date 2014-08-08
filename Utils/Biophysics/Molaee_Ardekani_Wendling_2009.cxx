@@ -52,9 +52,9 @@ Utils::Biophysics::Molaee_Ardekani_Wendling_2009::Molaee_Ardekani_Wendling_2009(
   e0P_( 10. /*s^{-1}*/), e0I1_( 10. /*s^{-1}*/), e0I2_( 10. /*s^{-1}*/), 
   rP_( 0.7 /*(mV)^{-1}*/), rI1_( 0.7 /*(mV)^{-1}*/), rI2_( 0.7 /*(mV)^{-1}*/), 
   v0P_( 1. /*(mV)*/), v0I1_( 4. /*(mV)*/), v0I2_( 4. /*(mV)*/),
-  CPP_ ( 55. ),   CI1P_( 20. ),   CI2P_( 25. ),  /* Number of synaptic connections */
-  CPI1_( 80. ),  CI1I1_( 15. ),  CI2I1_( 20. ),  /* Number of synaptic connections */
-  CPI2_( 90. ),                  CI2I2_( 40. ),  /* Number of synaptic connections */  
+  CPP_ ( 55. ),   CPI1_( 80. ),   CPI2_( 90. ),  /* Number of synaptic connections */
+  CI1P_( 20. ),  CI1I1_( 15. ),   CI2P_( 25. ),  /* Number of synaptic connections */
+  CI2I1_( 20. ),                  CI2I2_( 40. ),  /* Number of synaptic connections */  
   a_(  40. /*s^{-1}*/), A_( 5.5 /*(mV)*/), 
   b_(  20. /*s^{-1}*/), B_( 8.  /*(mV)*/),
   g_( 150. /*s^{-1}*/), G_( 10.  /*(mV)*/),

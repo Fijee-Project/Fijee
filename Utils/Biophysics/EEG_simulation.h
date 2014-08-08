@@ -37,21 +37,26 @@
 #include <string>
 #include <vector>
 #include <list>
-//// 
-//// GSL
-//// 
-//#include <gsl/gsl_errno.h>
+#include <map>
+#include <tuple>
+#include <memory>
+#include <mutex>
+#include <stdexcept>      // std::logic_error
+// 
+// GSL
+// 
+#include <gsl/gsl_errno.h>
 //#include <gsl/gsl_matrix.h>
-//#include <gsl/gsl_odeiv2.h>
-//#include <gsl/gsl_fft_complex.h>
-//// GSL macros
-//#define REAL(z,i) ((z)[2*(i)])
-//#define IMAG(z,i) ((z)[2*(i)+1])
+#include <gsl/gsl_fft_complex.h>
+// GSL macros
+#define REAL(z,i) ((z)[2*(i)])
+#define IMAG(z,i) ((z)[2*(i)+1])
 //
 // UCSF
 //
 #include "Utils/pugi/pugixml.hpp"
 #include "Utils/Biophysics/Population.h"
+#include "Utils/Biophysics/Leadfield_matrix.h"
 #include "Utils/Statistical_analysis.h"
 #include "Utils/XML_writer.h"
 // 
@@ -81,16 +86,26 @@ namespace Utils
     {
     private:
       //! Vector of populations
-      std::vector< Utils::Biophysics::Population > populations_;
-      //! Number 
+      std::vector< Population/*dipole*/ > populations_;
+      //! Vector of electrodes holding the dipole influence
+      std::vector< Leadfield_matrix > leadfield_matrix_;
+      //! For each electrode (vector) we have a list of alpha rhythm
+      std::vector< std::vector< std::tuple< double/*time*/, double/*V*/ > > > 
+	brain_rhythm_at_electrodes_;
+      //! Number of electrodes
       int number_samples_;
-
+     
       // 
-      // Output file
+      // Multi-threading
       // 
+      //! Critical zone
+      std::mutex critical_zone_;
+      //! electrode treated
+      int electrode_;
+      // #! Electrode treated localy in the thread
+      // Untill gcc fix the bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55800
+      // static thread_local int local_population_;
 
-      //! XML output file: dipoles node
-      pugi::xml_node dipoles_node_;
 
 
     public:
@@ -101,13 +116,6 @@ namespace Utils
        *
        */
       EEG_simulation();
-      /*!
-       *  \brief Default Constructor
-       *
-       *  Constructor of the class EEG_simulation
-       *
-       */
-      EEG_simulation( std::string );
       /*!
        *  \brief Copy Constructor
        *
@@ -132,13 +140,21 @@ namespace Utils
       
     public:
       /*!
-       *  \brief Load population file
+       *  \brief Load stimulation files
        *
-       *  This method load the input XML file of population setting.
+       *  This method load the input XML files of alpha_rhythm per population (dipole) and the leadfield matrix.
        *
-       * \param In_population_file_XML: input population file in XML format.
+       * \param In_population_file_XML: input files in XML format.
        */
-      void load_population_file( std::string );
+      void load_files( const std::string );
+      /*!
+       *  \brief Load transcranial stimulation file
+       *
+       *  This method load the input XML file of transcranial simulation setting.
+       *
+       * \param In_population_file_XML: input transcranial stimulation file in XML format.
+       */
+      void load_tCS_file( const std::string );
       /*!
        *  \brief Get the number of populations
        *
@@ -151,7 +167,14 @@ namespace Utils
     public:
       /*!
        */
-      virtual void operator ()(){};
+      virtual void operator ()();
+      /*!
+       *  \brief  Brain rhythm modelization at the electrodes
+       *
+       *  This member function build an alpha rhythm at the electrodes.
+       *
+       */
+      virtual void modelization();
       /*!
        *  \brief Output XML
        *

@@ -89,8 +89,8 @@ DE::Electrode( int Index, std::string Label,
 DE::Electrode( const DE& that ):
   Domains::Point_vector(that),
   index_(that.index_),label_(that.label_), 
-  intensity_(that.intensity_), impedance_(that.impedance_),
-  potential_(that.potential_), shape_(that.shape_)
+  intensity_(that.intensity_), potential_(that.potential_),
+  impedance_(that.impedance_), shape_(that.shape_)
 {}
 //
 //

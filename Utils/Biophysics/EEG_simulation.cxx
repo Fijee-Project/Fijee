@@ -26,27 +26,37 @@
 //  either expressed or implied, of the FreeBSD Project.  
 #include "EEG_simulation.h"
 // 
+// WARNING
+// Untill gcc fix the bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55800
+// Afterward, it should be a class member!!
+// 
+static thread_local int local_electrode_;
+// 
 // 
 // 
 Utils::Biophysics::EEG_simulation::EEG_simulation():
-  Utils::XML_writer("eeg_alpha_rhythm.xml")
+  Utils::XML_writer("eeg_alpha_rhythm.xml"),
+  number_samples_(0), electrode_(0)
 {
 }
 // 
 // 
 // 
-Utils::Biophysics::EEG_simulation::EEG_simulation( std::string Output_path ):
-  Utils::XML_writer("eeg_alpha_rhythm.xml")
+void
+Utils::Biophysics::EEG_simulation::load_files( std::string Output_path )
 {
+  // 
+  // Load file population's alpha rhythm
+  // 
+
+  // XML output
+  set_file_name_( Output_path + "eeg_alpha_rhythm.xml" );
+
   //
   // Read the populations xml file
   std::cout << "Load populations file for alpha generation" << std::endl;
-
-  // 
-  // Load file
-  std::string In_population_file_XML = Output_path + "alpha_rhythm.xml";
-
   //
+  std::string In_population_file_XML = Output_path + "alpha_rhythm.xml";
   pugi::xml_document     xml_file;
   pugi::xml_parse_result result = xml_file.load_file( In_population_file_XML.c_str() );
   //
@@ -106,7 +116,7 @@ Utils::Biophysics::EEG_simulation::EEG_simulation( std::string Output_path ):
 	      v_time_series.push_back( std::make_tuple( time_step.attribute("time").as_double(),
 							time_step.attribute("V").as_double() ));
 	    // Check
-	    if( v_time_series.size() != dipole.attribute("size").as_int() )
+	    if( static_cast<int>(v_time_series.size()) != dipole.attribute("size").as_int() )
 	      {
 		std::cerr << "The potential time series list size does not match the "
 			  << In_population_file_XML
@@ -131,93 +141,168 @@ Utils::Biophysics::EEG_simulation::EEG_simulation( std::string Output_path ):
 	exit(1);
       }
     }
+
+
+  // 
+  // Load leadfield matrix file
+  // 
+
+  //
+  // Read the populations xml file
+  std::cout << "Load leadfield matrix" << std::endl;
+  //
+  std::string In_leadfield_matrix_file_XML = Output_path + "../result/leadfield_matrix.xml";
+  pugi::xml_document     xml_leadfield_matrix_file;
+  pugi::xml_parse_result result_leadfield_matrix = 
+    xml_leadfield_matrix_file.load_file( In_leadfield_matrix_file_XML.c_str() );
+  //
+  switch( result_leadfield_matrix.status )
+    {
+    case pugi::status_ok:
+      {
+	//
+	// Check that we have a FIJEE XML file
+	const pugi::xml_node fijee_node = xml_leadfield_matrix_file.child("fijee");
+	if (!fijee_node)
+	  {
+	    std::cerr << "Read data from XML: Not a FIJEE XML file" << std::endl;
+	    exit(1);
+	  }
+
+	// 
+	// Get sampling
+	const pugi::xml_node setup_node = fijee_node.child("setup");
+	if (!setup_node)
+	  {
+	    std::cerr << "Read data from XML: no setup node" << std::endl;
+	    exit(1);
+	  }
+	// 
+	std::map< int/*index*/, std::list< std::tuple< std::string /*lavel*/, 
+						       int /*dipole*/, 
+						       double /*V*/, 
+						       double/*I*/ > > > ld_matrix;
+	// load the file information in a map
+	for ( auto electrodes : setup_node )
+	  for ( auto electrode : electrodes )
+	    ld_matrix[electrode.attribute("index").as_int()].
+	      push_back( std::make_tuple( electrode.attribute("label").as_string(),
+					  electrodes.attribute("dipole").as_int(),
+					  electrode.attribute("V").as_double(),
+					  electrode.attribute("I").as_double() ) );
+	
+	
+	// 
+	// Load the map information in the leadfield matrix contenair
+	number_samples_ = ld_matrix.size();
+	leadfield_matrix_.resize( number_samples_ );
+	brain_rhythm_at_electrodes_.resize( number_samples_ );
+	// 
+	for( auto electrod : ld_matrix )
+	  {
+	    // 
+	    int index_electrode = electrod.first;
+	    leadfield_matrix_[index_electrode] =
+	      Leadfield_matrix( index_electrode, std::get<0>(*electrod.second.begin()) );
+	    // 
+	    std::vector< double > v_dipole(electrod.second.size());
+	    // 
+	    for ( auto v : electrod.second )
+	      v_dipole[std::get<1>(v)] = std::get<2>(v);
+	    // 
+	    leadfield_matrix_[index_electrode].set_V_dipole(std::move(v_dipole));
+	  }
+
+	//
+	break;
+      };
+    default:
+      {
+	std::cerr << "Error reading XML file: " << result_leadfield_matrix.description() 
+		  << std::endl;
+	exit(1);
+      }
+    }
 }
 // 
 // 
 // 
 void
-Utils::Biophysics::EEG_simulation::load_population_file( std::string Output_path )
+Utils::Biophysics::EEG_simulation::load_tCS_file( std::string Output_path )
 {
-//  //
-//  // Read the populations xml file
-//  std::cout << "Load populations file for alpha generation" << std::endl;
+}
 //
-//  // 
-//  // Load file
-//  std::string In_population_file_XML = Output_path + "parcellation.xml";
-//  // XML output
-//  set_file_name_( Output_path + "alpha_rhythm.xml" );
 //
-//  //
-//  pugi::xml_document     xml_file;
-//  pugi::xml_parse_result result = xml_file.load_file( In_population_file_XML.c_str() );
-//  //
-//  switch( result.status )
-//    {
-//    case pugi::status_ok:
-//      {
-//	//
-//	// Check that we have a FIJEE XML file
-//	const pugi::xml_node fijee_node = xml_file.child("fijee");
-//	if (!fijee_node)
-//	  {
-//	    std::cerr << "Read data from XML: Not a FIJEE XML file" << std::endl;
-//	    exit(1);
-//	  }
 //
-//	// 
-//	// Get sampling
-//	const pugi::xml_node dipoles_node = fijee_node.child("dipoles");
-//	if (!dipoles_node)
-//	  {
-//	    std::cerr << "Read data from XML: no dipoles node" << std::endl;
-//	    exit(1);
-//	  }
-//	// Get the number of samples
-//	number_samples_ = dipoles_node.attribute("size").as_int();
-//	populations_.resize(number_samples_);
-//	// loop over the samples
-//	for ( auto dipole : dipoles_node )
-//	  {
-//	    //
-//	    // Get the number of populations
-//	    int dipole_number = dipole.attribute("index").as_int();
+void 
+Utils::Biophysics::EEG_simulation::operator () ()
+{
+  //
+  // Mutex the population poping process
+  //
+  try 
+    {
+      // lock the population
+      std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
+      // 
+      local_electrode_ = electrode_++;
+    }
+  catch (std::logic_error&) 
+    {
+      std::cerr << "[exception caught]\n" << std::endl;
+    }
+
+  // 
+  // Generate alpha rhythm for population local_population_
+  modelization();
+}
+// 
+// 
 //
-//	    // 
-//	    // load dipole information
-//	    // Position
-//	    populations_[dipole_number].position_[0] = dipole.attribute("x").as_double();
-//	    populations_[dipole_number].position_[1] = dipole.attribute("y").as_double();
-//	    populations_[dipole_number].position_[2] = dipole.attribute("z").as_double();
-//	    // Direction
-//	    populations_[dipole_number].direction_[0] = dipole.attribute("vx").as_double();
-//	    populations_[dipole_number].direction_[1] = dipole.attribute("vy").as_double();
-//	    populations_[dipole_number].direction_[2] = dipole.attribute("vz").as_double();
-//	    // Current and potential
-//	    populations_[dipole_number].I_ = dipole.attribute("I").as_double();
-//	    // cell index and parcel
-//	    populations_[dipole_number].index_cell_ = dipole.attribute("index_cell").as_int();
-//	    populations_[dipole_number].parcel_     = 0;//dipole.attribute("").as_int();
-//	    // Lambda
-//	    populations_[dipole_number].lambda_[0] = dipole.attribute("lambda1").as_double();
-//	    populations_[dipole_number].lambda_[1] = dipole.attribute("lambda2").as_double();
-//	    populations_[dipole_number].lambda_[2] = dipole.attribute("lambda3").as_double();
-//	    
-//
-//	    //
-//	    //
-//	    population_rhythm_.resize(number_samples_);
-//	    population_V_shift_.resize(number_samples_);
-//	  }
-//	//
-//	break;
-//      };
-//    default:
-//      {
-//	std::cerr << "Error reading XML file: " << result.description() << std::endl;
-//	exit(1);
-//      }
-//    }
+void
+Utils::Biophysics::EEG_simulation::modelization()
+{
+  // 
+  // initialization of vector of vector (must be all the same size)
+  brain_rhythm_at_electrodes_[local_electrode_].resize( populations_[0].get_V_time_series_().size() );
+  // 
+  for( auto time_series : brain_rhythm_at_electrodes_[local_electrode_] )
+    time_series = std::make_tuple(0.,0.);
+  
+  
+  // 
+  // 
+  for( int dipole = 0 ; dipole < static_cast<int>(populations_.size()) ; dipole++ )
+    {
+      int time_step = 0;
+      for( auto time_series : populations_[dipole].get_V_time_series_() )
+	{
+	  // 
+	  // Partial check
+	  if ( std::get<0>(brain_rhythm_at_electrodes_[local_electrode_][time_step]) == 0 )
+	    {
+	      std::get<0>(brain_rhythm_at_electrodes_[local_electrode_][time_step]) = 
+		std::get<0>(time_series);
+	      //
+	      std::get<1>(brain_rhythm_at_electrodes_[local_electrode_][time_step++]) += 
+		(leadfield_matrix_[local_electrode_].get_V_dipole_())[dipole]*std::get<1>(time_series);
+	    }
+	  else if( std::get<0>(brain_rhythm_at_electrodes_[local_electrode_][time_step]) == std::get<0>(time_series) )
+	    {
+	      std::get<1>(brain_rhythm_at_electrodes_[local_electrode_][time_step++]) += 
+		(leadfield_matrix_[local_electrode_].get_V_dipole_())[dipole]*std::get<1>(time_series);
+	    }
+	  else
+	    {
+	      std::cerr << "Problem on the time step: "
+			<< "time step read: " << std::get<0>(time_series)
+			<< "s, and it should be: " << std::get<0>(brain_rhythm_at_electrodes_[local_electrode_][time_step])
+			<< "s."
+			<< std::endl;
+	      abort();
+	    }
+	}
+    }
 }
 // 
 // 
@@ -227,130 +312,130 @@ Utils::Biophysics::EEG_simulation::Make_analysis()
 {
 #ifdef TRACE
 #if TRACE == 100
-//  // 
-//  // 
-//
-//  //
-//  // R header: alpha rhythm
-//  // 
-//  output_stream_
-//    << "time ";
-//  // 
-//  for (int population = 0 ; population < number_samples_ ; population++)
-//    output_stream_ <<  population << " ";
-//  // 
-//  output_stream_ << std::endl;
-//
-//  // 
-//  // R values: alpha rhythm
-//  // 
-//  std::vector< std::list< std::tuple< double, double > >::const_iterator > 
-//    it(number_samples_);
-//  // 
-//  for( int population = 0 ; population < number_samples_ ; population++ )
-//    it[population] = population_rhythm_[population].begin();
-//  // 
-//  while( it[0] !=  population_rhythm_[0].end())
-//    {
-//      // get the time
-//      output_stream_ <<  std::get<0>( *(it[0]) ) << " ";
-//      // 
-//     for (int population = 0 ; population < number_samples_ ; population++)
-//       output_stream_ <<  std::get<1>( *(it[population]++) ) - population_V_shift_[population] << " ";
-//      // 
-//      output_stream_ << std::endl;
-//    }
-//
-//  //
-//  //
-//  Make_output_file("alpha_rhythm.frame");
-//
-//
-//  // 
-//  // FFT
-//  // 
-//
-//  //
-//  // R header: Power spectral density
-//  // 
-//  output_stream_
-//    << "Hz ";
-//  // 
-//  for (int population = 0 ; population < number_samples_ ; population++)
-//    output_stream_ <<  population << " ";
-//  // 
-//  output_stream_ << "power" << std::endl;
-//
-//
-//  // 
-//  // R values: Power spectral density
-//  // 
-//  int 
-//    N = 2048, /* N is a power of 2 */
-//    n = 0;
-//  // real and imaginary
-//  std::vector< double* > data_vector(number_samples_);
-//  // 
-//  for ( int population = 0 ; population < number_samples_ ; population++ )
-//    {
-//      n = 0;
-//      data_vector[population] = new double[2*2048/*N*/];
-//      for( auto time_potential : population_rhythm_[population] )
-//	{
-//	  if ( n < N )
-//	    {
-//	      REAL(data_vector[population],n)   = std::get<1>(time_potential);
-//	      IMAG(data_vector[population],n++) = 0.0;
-//	    }
-//	  else
-//	    break;
-//	}
-//    }
-//
-//  // 
-//  // Forward FFT
-//  // A stride of 1 accesses the array without any additional spacing between elements. 
-//  for ( auto population : data_vector )
-//    gsl_fft_complex_radix2_forward (population, 1/*stride*/, 2048);
-//
-//  // 
-//  // Average the power signal
-//  std::vector< double > average_power(N);
-// 
-//  // 
-//  for ( int i = 0 ; i < N ; i++ )
-//    {
-//      // 
-//      for ( auto population : data_vector )
-//	{
-//	  average_power[i]  = REAL(population,i)*REAL(population,i);
-//	  average_power[i] += IMAG(population,i)*IMAG(population,i);
-//	  average_power[i] /= N;
-//	}
-//      // 
-//      average_power[i] /= number_samples_;
-//    }
-// 
-//
-//  //
-//  // 
-//  for ( int i = 0 ; i < N ; i++ )
-//    {
-//      output_stream_ 
-//	<< i << " ";
-//      // 
-//      for ( auto population : data_vector )
-//	output_stream_ 
-//	  << (REAL(population,i)*REAL(population,i) + IMAG(population,i)*IMAG(population,i)) / N
-//	  << " ";
-//	  
-//      // 
-//      output_stream_ << average_power[i] << std::endl;
-//    }
-//
-//  //
-//  //
-//  Make_output_file("PSD.frame");
+  // 
+  // 
+
+  //
+  // R header: alpha rhythm
+  // 
+  output_stream_
+    << "time ";
+  // 
+  for ( auto electrode : leadfield_matrix_)
+    output_stream_ <<  electrode.get_label_() << " ";
+  // 
+  output_stream_ << std::endl;
+
+  // 
+  // R values: alpha rhythm
+  // 
+  std::vector< std::vector< std::tuple< double, double > >::const_iterator > 
+    it( number_samples_ );
+  // 
+  for( int electrode = 0 ; electrode < number_samples_ ; electrode++ )
+    it[electrode] = brain_rhythm_at_electrodes_[electrode].begin();
+  // 
+  while( it[0] !=  brain_rhythm_at_electrodes_[0].end())
+    {
+      // get the time
+      output_stream_ <<  std::get<0>( *(it[0]) ) << " ";
+      // 
+     for (int electrode = 0 ; electrode < number_samples_ ; electrode++)
+       output_stream_ <<  std::get<1>( *(it[electrode]++) )  << " ";
+      // 
+      output_stream_ << std::endl;
+    }
+
+  //
+  //
+  Make_output_file("eeg_alpha_rhythm.frame");
+
+
+  // 
+  // FFT
+  // 
+
+  //
+  // R header: Power spectral density
+  // 
+  output_stream_
+    << "Hz ";
+  // 
+  for ( auto electrode : leadfield_matrix_)
+    output_stream_ <<  electrode.get_label_() << " ";
+  // 
+  output_stream_ << "power" << std::endl;
+
+
+  // 
+  // R values: Power spectral density
+  // 
+  int 
+    N = 2048, /* N is a power of 2 */
+    n = 0;
+  // real and imaginary
+  std::vector< double* > data_vector(number_samples_);
+  // 
+  for ( int electrode = 0 ; electrode < number_samples_ ; electrode++ )
+    {
+      n = 0;
+      data_vector[electrode] = new double[2*2048/*N*/];
+      for( auto time_potential : brain_rhythm_at_electrodes_[electrode] )
+	{
+	  if ( n < N )
+	    {
+	      REAL(data_vector[electrode],n)   = std::get<1>(time_potential);
+	      IMAG(data_vector[electrode],n++) = 0.0;
+	    }
+	  else
+	    break;
+	}
+    }
+
+  // 
+  // Forward FFT
+  // A stride of 1 accesses the array without any additional spacing between elements. 
+  for ( auto electrode : data_vector )
+    gsl_fft_complex_radix2_forward (electrode, 1/*stride*/, 2048);
+
+  // 
+  // Average the power signal
+  std::vector< double > average_power(N);
+ 
+  // 
+  for ( int i = 0 ; i < N ; i++ )
+    {
+      // 
+      for ( auto electrode : data_vector )
+	{
+	  average_power[i]  = REAL(electrode,i)*REAL(electrode,i);
+	  average_power[i] += IMAG(electrode,i)*IMAG(electrode,i);
+	  average_power[i] /= N;
+	}
+      // 
+      average_power[i] /= number_samples_;
+    }
+ 
+
+  //
+  // 
+  for ( int i = 0 ; i < N ; i++ )
+    {
+      output_stream_ 
+	<< i << " ";
+      // 
+      for ( auto electrode : data_vector )
+	output_stream_ 
+	  << (REAL(electrode,i)*REAL(electrode,i) + IMAG(electrode,i)*IMAG(electrode,i)) / N
+	  << " ";
+	  
+      // 
+      output_stream_ << average_power[i] << std::endl;
+    }
+
+  //
+  //
+  Make_output_file("eeg_PSD.frame");
 #endif
 #endif      
 }
@@ -360,70 +445,53 @@ Utils::Biophysics::EEG_simulation::Make_analysis()
 void 
 Utils::Biophysics::EEG_simulation::output_XML()
 {
+  // 
+  // Build XML output 
+  // 
+  
+  // 
+  // Output XML file initialization
+  auto setup_node = fijee_.append_child("setup");
+  setup_node.append_attribute("size") = static_cast<int>(brain_rhythm_at_electrodes_[0].size());
+
+  // WARNING
+  // NOTA: XML are too huge, adviced to produice only R project output (-DTRACE=100)
 //  // 
-//  // Build XML output 
 //  // 
+//  std::vector< std::vector< std::tuple< double, double > >::const_iterator > 
+//    it( number_samples_ );
+//  // 
+//  for( int electrode = 0 ; electrode < number_samples_ ; electrode++ )
+//    it[electrode] = brain_rhythm_at_electrodes_[electrode].begin();
 //  
 //  // 
-//  // Output XML file initialization
-//  dipoles_node_ = fijee_.append_child("dipoles");
-//  dipoles_node_.append_attribute("size") = static_cast<int>( populations_.size() );
-//  
 //  // 
-//  std::vector< std::list< std::tuple< double, double > >::const_iterator > 
-//    it(number_samples_);
-//  
-//  // 
-//  // loop over the time series
 //  int index = 0;
 //  // 
-//  for( int population = 0 ; population < number_samples_ ; population++ )
+//  while( it[0] != brain_rhythm_at_electrodes_[0].end() )
 //    {
+//      auto electrodes_node = setup_node.append_child("electrodes");
+//      electrodes_node.append_attribute("index")  = index++;
+//      electrodes_node.append_attribute("dipole") = 0;
+//      electrodes_node.append_attribute("time")   = std::get<0>(*it[0]);
+//      electrodes_node.append_attribute("size")   = number_samples_;
+// 
 //      // 
-//      // 
-//      dipole_node_ = dipoles_node_.append_child("dipole");
-//      // 
-//      dipole_node_.append_attribute("index")  = index++;
-//      // 
-//      dipole_node_.append_attribute("x") = populations_[population].position_[0];
-//      dipole_node_.append_attribute("y") = populations_[population].position_[1];
-//      dipole_node_.append_attribute("z") = populations_[population].position_[2];
-//      // 
-//      dipole_node_.append_attribute("vx") = populations_[population].direction_[0];
-//      dipole_node_.append_attribute("vy") = populations_[population].direction_[1];
-//      dipole_node_.append_attribute("vz") = populations_[population].direction_[2];
-//      // 
-//      dipole_node_.append_attribute("I") = populations_[population].I_;
-//      // 
-//      dipole_node_.append_attribute("index_cell") = populations_[population].index_cell_;
-//      dipole_node_.append_attribute("parcel") = populations_[population].parcel_;
-//      // 
-//      dipole_node_.append_attribute("lambda1") = populations_[population].lambda_[0];
-//      dipole_node_.append_attribute("lambda2") = populations_[population].lambda_[1];
-//      dipole_node_.append_attribute("lambda3") = populations_[population].lambda_[2];
-//      //
-//      dipole_node_.append_attribute("size") = static_cast<int>( population_rhythm_[0].size() );
-//
-//      // 
-//      // Time series
-//      it[population] = population_rhythm_[population].begin();
-//      // 
-//      int index_time_step = 0;
-//      while( it[population] !=  population_rhythm_[population].end() )
+//      for( int electrode = 0 ; electrode < number_samples_ ; electrode++ )
 //	{
-//	  //       
-//	  time_series_node_ = dipole_node_.append_child("time_step");
 //	  // 
-//	  time_series_node_.append_attribute("index") = index_time_step++;
-//	  time_series_node_.append_attribute("time")  = std::get<0>( *(it[population]) );
-//	  // conversion mV -> V
-//	  double V = std::get<1>( *(it[population]++) ) - population_V_shift_[population];
-//	  time_series_node_.append_attribute("V")     = V * 1.e-03;
+//	  // 
+//	  auto electrode_node = electrodes_node.append_child("electrode");
+//	  // 
+//	  electrode_node.append_attribute("index")  = electrode;
+//	  electrode_node.append_attribute("label")  = leadfield_matrix_[electrode].get_label_().c_str();
+//	  electrode_node.append_attribute("V")  = std::get<1>(*it[electrode]);
+//	  electrode_node.append_attribute("I")  = 0.;
+//	  // 
 //	}
 //    }
-//
-//  
-//  // 
-//  // Statistical analysise
-//  Make_analysis();
+
+  // 
+  // Statistical analysise
+  Make_analysis();
 }

@@ -24,8 +24,8 @@
 //  The views and conclusions contained in the software and documentation are those   
 //  of the authors and should not be interpreted as representing official policies,    
 //  either expressed or implied, of the FreeBSD Project.  
-#ifndef BRAIN_RHYTHM_MODELS_H
-#define BRAIN_RHYTHM_MODELS_H
+#ifndef DEVICE_MODEL_H
+#define DEVICE_MODEL_H
 #include <string>
 //
 // UCSF project
@@ -34,7 +34,7 @@
 //
 //
 /*!
- * \file Brain_rhythm_models.h
+ * \file Device_model.h
  * \brief brief describe 
  * \author Yann Cobigo
  * \version 0.1
@@ -49,43 +49,43 @@ namespace Utils
 {
   namespace Biophysics
   {
-   /*! \class Brain_rhythm_models
+   /*! \class Device_model
      * \brief classe representing the dipoles distribution
      *
      *  This class is an example of class I will have to use
      */
-    template < typename  Membrane_potential, int num_of_threads = 1 >
-      class Brain_rhythm_models
+    template < typename  Device_simulation, int num_of_threads = 1 >
+      class Device_model
       {
       private:
-	Membrane_potential neural_polpulation_activity_;
+      Device_simulation device_activity_;//neural_polpulation_activity_;
 
       public:
 	/*!
 	 *  \brief Default Constructor
 	 *
-	 *  Constructor of the class Brain_rhythm_models
+	 *  Constructor of the class Device_model
 	 *
 	 */
-	Brain_rhythm_models(){};
+	Device_model(){};
 	/*!
 	 *  \brief Copy Constructor
 	 *
 	 *  Constructor is a copy constructor
 	 *
 	 */
-	Brain_rhythm_models( const Brain_rhythm_models& ){};
+	Device_model( const Device_model& ){};
 	/*!
 	 *  \brief Operator =
 	 *
-	 *  Operator = of the class Brain_rhythm_models
+	 *  Operator = of the class Device_model
 	 *
 	 */
-	Brain_rhythm_models& operator = ( const Brain_rhythm_models& ){};
+	Device_model& operator = ( const Device_model& ){};
 	//    /*!
 	//     *  \brief Operator ()
 	//     *
-	//     *  Operator () of the class Brain_rhythm_models
+	//     *  Operator () of the class Device_model
 	//     *
 	//     */
 	//    void operator () ();
@@ -96,15 +96,12 @@ namespace Utils
 	 *
 	 *  This method launch the minimization algorithm
 	 */
-      void modelization( std::string Output_File )
+      void alpha_rhythm_at_electrodes( std::string Output_File )
 	{
-	  //
-	  // load populations file
-	  neural_polpulation_activity_.load_population_file( Output_File );
-	  // Init containers
-	  neural_polpulation_activity_.init();
+ 	  //
+	  // load populations file and initialize the number of samples
+	  device_activity_.load_files( Output_File );
 
-      
 	  //
 	  // Define the number of threads in the pool of threads
 	  Utils::Thread_dispatching pool( num_of_threads );
@@ -112,10 +109,10 @@ namespace Utils
 	  //
 	  //
 	  for( int physical_event = 0 ;
-	       physical_event != neural_polpulation_activity_.get_number_of_physical_events() ; 
+	       physical_event != device_activity_.get_number_of_physical_events() ; 
 	       physical_event++ )
 	    // Enqueue tasks
-	    pool.enqueue( std::ref(neural_polpulation_activity_) );
+	    pool.enqueue( std::ref(device_activity_) );
 	};
 	/*!
 	 *  \brief minimize function
@@ -126,7 +123,7 @@ namespace Utils
 	{
 	  // 
 	  // Generation of output
-	  neural_polpulation_activity_.output_XML();
+	  device_activity_.output_XML();
 	};
       };
   }

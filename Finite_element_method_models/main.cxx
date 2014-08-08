@@ -36,6 +36,8 @@
 #include "tCS_tACS.h"
 #include "tCS_tDCS_local_conductivity.h"
 #include "Model_solver.h"
+#include "Utils/Biophysics/EEG_simulation.h"
+#include "Utils/Biophysics/Device_model.h"
 
 int main()
 {
@@ -45,23 +47,31 @@ int main()
   // 
   solver_parameters->init();
   
-  //
-  // Physical models:
-  //  - Source localization
-  //    - Solver::SL_subtraction
-  //    - Solver::SL_direct
-  //  - Transcranial current stimulation
-  //    - Solver::tCS_tDCS
-  //    - Solver::tCS_tACS
-  //  - Local conductivity estimation
-  //    - Solver::tCS_tDCS_local_conductivity
-  //
-  // export OMP_NUM_THREADS=2
-  Solver::Model_solver< /* physical model */ Solver::SL_subtraction,
-		        /*solver_parameters->get_number_of_threads_()*/ 4 >  model;
-  //
-  std::cout << "Loop over solvers" << std::endl;
-  model.solver_loop();
+//  //
+//  // Physical models:
+//  //  - Source localization
+//  //    - Solver::SL_subtraction
+//  //    - Solver::SL_direct
+//  //  - Transcranial current stimulation
+//  //    - Solver::tCS_tDCS
+//  //    - Solver::tCS_tACS
+//  //  - Local conductivity estimation
+//  //    - Solver::tCS_tDCS_local_conductivity
+//  //
+//  // export OMP_NUM_THREADS=2
+//  Solver::Model_solver< /* physical model */ Solver::SL_subtraction,
+//		        /*solver_parameters->get_number_of_threads_()*/ 4 >  model;
+//  //
+//  std::cout << "Loop over solvers" << std::endl;
+//  model.solver_loop();
+
+  // 
+  // Simulation of alpha rhythm at the electrodes
+  // 
+  Utils::Biophysics::Device_model< Utils::Biophysics::EEG_simulation, 4 > eeg_simulation;
+  eeg_simulation.alpha_rhythm_at_electrodes( solver_parameters->get_files_path_output_() );
+  eeg_simulation.output();
+
 
   //
   //
