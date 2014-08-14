@@ -137,9 +137,10 @@ namespace Utils
     Exit_handler( const std::string& Exception_message,
 		  const int Line, const std::string& File )
     {
-      exception_message_ = std::string("Fijee exit handler:\n");
-      exception_message_ += std::string("Message: ") + Exception_message;
-      exception_message_ += std::string("\nat line: ")+ std::to_string(Line);
+      exception_message_ = std::string("\n\n=== Fijee exit handler called ===\n");
+      exception_message_ += std::string("Message: \n");
+      exception_message_ += Exception_message;
+      exception_message_ += std::string("\nAt line: ")+ std::to_string(Line);
       exception_message_ += std::string(" in source: ") + File;
       exception_message_ += std::string("\n");
     };
@@ -196,11 +197,12 @@ namespace Utils
      *
      */
     Error_handler( const std::string& Exception_message,
-		  const std::string& Line, const std::string& File )
+		  const int Line, const std::string& File )
     {
-      exception_message_ = std::string("Fijee exit handler:\n");
-      exception_message_ += std::string("Message: ") + Exception_message;
-      exception_message_ += std::string("\nat line: ") + Line;
+      exception_message_ = std::string("\n\n=== Fijee error handler called ===\n");
+      exception_message_ += std::string("Message: \n");
+      exception_message_ += Exception_message;
+      exception_message_ += std::string("\nAt line: ") + std::to_string(Line);
       exception_message_ += std::string(" in source: ") + File;
       exception_message_ += std::string("\n");
     };

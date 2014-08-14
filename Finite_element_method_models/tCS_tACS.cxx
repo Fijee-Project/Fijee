@@ -67,7 +67,7 @@ Solver::tCS_tACS::tCS_tACS():
   // 
   // Parcellation information
   // 
-  tCS_E_parcel_.reset( new Parcellation_information< Field< -1 > >("Electric_field") );
+  tCS_E_parcel_.reset( new Parcellation_information< Field< 3 > >("Electric_field") );
 }
 //
 //

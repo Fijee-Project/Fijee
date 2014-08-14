@@ -105,7 +105,7 @@ namespace Solver
     // Time series electrical field output file
     std::shared_ptr< File > file_E_time_series_;
     //! Parcellation information
-    std::shared_ptr< Parcellation_information< Field<-1> > > tCS_E_parcel_;
+    std::shared_ptr< Parcellation_information< Field<3> > > tCS_E_parcel_;
     
     
     
