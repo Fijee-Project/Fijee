@@ -26,9 +26,7 @@
 //  either expressed or implied, of the FreeBSD Project.  
 #ifndef _MODEL_SOLVER_H
 #define _MODEL_SOLVER_H
-#include <list>
 #include <memory>
-#include <string>
 #include <thread>         // std::this_thread::sleep_for
 #include <chrono>         // std::chrono::seconds
 //
@@ -71,9 +69,9 @@ typedef Solver::PDE_solver_parameters SDEsp;
 namespace Solver
 {
   /*! \class Model_solver
-   * \brief classe representing the dipoles distribution
+   * \brief class representing the model used in the study
    *
-   *  This class is an example of class I will have to use
+   *  This class is a template for models used in a finite element study.
    */
   template < typename Physical_model, int num_of_threads = 1 >
   class Model_solver
@@ -95,14 +93,14 @@ namespace Solver
      *  Constructor is a copy constructor
      *
      */
-    Model_solver( const Model_solver& ){};
+    Model_solver( const Model_solver& ) = delete;
     /*!
      *  \brief Operator =
      *
      *  Operator = of the class Model_solver
      *
      */
-  Model_solver& operator = ( const Model_solver& ){return *this;};
+  Model_solver& operator = ( const Model_solver& ) = delete;
 
   public:
     /*!
@@ -117,7 +115,7 @@ namespace Solver
       
       //
       //
-      int tempo = 0;
+//      int tempo = 0;
       for( int physical_event = 0 ;
 	   physical_event != model_.get_number_of_physical_events() ; 
 	   physical_event++ )

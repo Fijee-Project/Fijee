@@ -24,56 +24,76 @@
 //  The views and conclusions contained in the software and documentation are those   
 //  of the authors and should not be interpreted as representing official policies,    
 //  either expressed or implied, of the FreeBSD Project.  
-#include <vector>
-#include <memory>
+#ifndef Electrodes_H
+#define Electrodes_H
 //
-// UCSF
+// UCSF project
 //
-#include "PDE_solver_parameters.h"
-#include "SL_subtraction.h"
-#include "SL_direct.h"
-#include "tCS_tDCS.h"
-#include "tCS_tACS.h"
-#include "tCS_tDCS_local_conductivity.h"
-#include "Model_solver.h"
-#include "Utils/Biophysics/EEG_simulation.h"
-#include "Utils/Biophysics/Device_model.h"
+//
+//
+//
+/*!
+ * \file Electrodes_setup.h
+ * \brief brief describe 
+ * \author Yann Cobigo
+ * \version 0.1
+ */
 
-int main()
+/*! \namespace Electrodes
+ * 
+ * Name space for our new package
+ *
+ */
+namespace Electrodes
 {
-  //
-  //
-  Solver::PDE_solver_parameters* solver_parameters = Solver::PDE_solver_parameters::get_instance();
-  // 
-  solver_parameters->init();
-  
-  //
-  // Physical models:
-  //  - Source localization
-  //    - Solver::SL_subtraction
-  //    - Solver::SL_direct
-  //  - Transcranial current stimulation
-  //    - Solver::tCS_tDCS
-  //    - Solver::tCS_tACS
-  //  - Local conductivity estimation
-  //    - Solver::tCS_tDCS_local_conductivity
-  //
-  // export OMP_NUM_THREADS=2
-  Solver::Model_solver< /* physical model */ Solver::tCS_tACS,
-		        /*solver_parameters->get_number_of_threads_()*/ 2 >  model;
-  //
-  std::cout << "Loop over solvers" << std::endl;
-  model.solver_loop();
+  /*! \class Electrodes_setup
+   * \brief classe representing 
+   *
+   *  This class is an example of class I will have to use
+   */
+  template < typename  Setup >
+    class Electrodes_setup
+    {
 
-//  // 
-//  // Simulation of alpha rhythm at the electrodes
-//  // 
-//  Utils::Biophysics::Device_model< Utils::Biophysics::EEG_simulation, 4 > eeg_simulation;
-//  eeg_simulation.alpha_rhythm_at_electrodes( solver_parameters->get_files_path_output_() );
-//  eeg_simulation.output();
+    public:
+      /*!
+       *  \brief Default Constructor
+       *
+       *  Constructor of the class Electrodes_setup
+       *
+       */
+      Electrodes_setup(){};
+      /*!
+       *  \brief Copy Constructor
+       *
+       *  Constructor is a copy constructor
+       *
+       */
+      Electrodes_setup( const Electrodes_setup& ){};
+      /*!
+       *  \brief Operator =
+       *
+       *  Operator = of the class Electrodes_setup
+       *
+       */
+      Electrodes_setup& operator = ( const Electrodes_setup& ){};
+      //    /*!
+      //     *  \brief Operator ()
+      //     *
+      //     *  Operator () of the class Electrodes_setup
+      //     *
+      //     */
+      //    void operator () ();
 
-
-  //
-  //
-  return EXIT_SUCCESS;
+    public:
+      /*!
+       *  \brief Output
+       *
+       *  This method l
+       */
+      void output()
+      {
+      }
+    };
 }
+#endif

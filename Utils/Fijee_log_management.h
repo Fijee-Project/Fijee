@@ -28,8 +28,8 @@
 #define FIJEE_LOG_MANAGEMENT_H
 //http://franckh.developpez.com/tutoriels/outils/doxygen/
 /*!
- * \file Fijee_environment.h
- * \brief brief describe 
+ * \file Fijee_log_management.h
+ * \brief Log management 
  * \author Yann Cobigo
  * \version 0.1
  */
@@ -57,9 +57,9 @@
 namespace Utils
 {
   /*! \class Time_profiler
-   * \brief classe representing whatever
+   * \brief classe representing time profiling
    *
-   *  This class is an example of class I will have to use
+   *  This class is the time profiling class.
    */
   class Time_profiler
   {
@@ -124,5 +124,5 @@ namespace Utils
 #else
 #  define FIJEE_TIME_PROFILER(NAME)
 #endif
-};
+}
 #endif

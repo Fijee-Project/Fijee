@@ -24,8 +24,8 @@
 //  The views and conclusions contained in the software and documentation are those   
 //  of the authors and should not be interpreted as representing official policies,    
 //  either expressed or implied, of the FreeBSD Project.  
-#ifndef POINT_H_
-#define POINT_H_
+#ifndef POINT_H
+#define POINT_H
 //http://franckh.developpez.com/tutoriels/outils/doxygen/
 /*!
  * \file Point.h

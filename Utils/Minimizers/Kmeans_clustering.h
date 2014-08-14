@@ -40,7 +40,7 @@ namespace Utils
 {
   namespace Minimizers
   {
-    namespace Kmeans_clustering
+    namespace Clustering
     {
       /*
        * \brief Lloyd algorythm for k-means clustering
@@ -49,9 +49,10 @@ namespace Utils
        * Note: the algorithm can be optimized and transfer on GPU. 
        *
        */
-      template < typename T > void Lloyd_algorythm( const int N, const T* Points, int* Clusters,
-						    const int n, double* Mu, double* Variance,
-						    double Epsilon = 1.e-01 )
+      template < typename T, typename U > void Lloyd_algorythm( const int N, const T* Points, int* Clusters,
+								const int n, double* Mu, double* Variance,
+								int* Element_per_cluster,
+								double Epsilon = 1.e-01 )
 	{
 	  // 
 	  // Time log
@@ -64,18 +65,18 @@ namespace Utils
 	  
 	  // 
 	  // Determin Max and Min from Points
-	  int 
+	  U 
 	    max = 0,
 	    min = 255;
 	  // 
 	  for ( int i = 0 ; i < N ; i++ )
-	    if( Points[i] > max ) max = static_cast<int>( Points[i] );
-	    else if( Points[i] < min ) min = static_cast<int>( Points[i] );
+	    if( Points[i] > max ) max = static_cast<U>( Points[i] );
+	    else if( Points[i] < min ) min = static_cast<U>( Points[i] );
 	
 	  // 
 	  // Uniformly random generation of n of type T between [Min, Max] (Mu)
 	  std::default_random_engine generator;
-	  std::uniform_int_distribution<int> distribution( min, max );
+	  std::uniform_int_distribution<U> distribution( min, max );
 	  // 
 	  for( int i = 0 ; i < n ; i++ ){
 	    Mu[i] = distribution( generator );
@@ -86,6 +87,7 @@ namespace Utils
 	  // Minimization loop
 	  while( fabs(L_kmeans - L_kmeans_old) > Epsilon )
 	    {
+	      iteration++;
 	      // 
 	      L_kmeans_old = L_kmeans;
 	      L_kmeans = 0;
@@ -110,7 +112,6 @@ namespace Utils
 		Den = 0.;
 	      for( int j = 0 ; j < n ; j++ )
 		{
-		  iteration++;
 		  Num = 0.;
 		  Den = 0.;
 		  //	    
@@ -121,7 +122,7 @@ namespace Utils
 			Den += 1.;
 		      }
 		  //
-		  Mu[j] = Num / Den;
+		  Mu[j] = static_cast<double>(Num) / static_cast<double>(Den);
 		}
 
 	      // 
@@ -135,16 +136,14 @@ namespace Utils
 
 	  // 
 	  // Empirical variance
-	  int element_per_cluster[n];
-	  // 
 	  for( int i = 0 ; i < N ; i++ )
 	    {
 	      Variance[Clusters[i]] += ( Points[i] - Mu[Clusters[i]] )*( Points[i] - Mu[Clusters[i]] );
-	      element_per_cluster[Clusters[i]]++;
+	      Element_per_cluster[Clusters[i]]++;
 	    }
 	  // 
 	  for( int j = 0 ; j < n ; j ++ )
-	    Variance[j] /= (double) element_per_cluster[j] + 1;
+	    Variance[j] /= (double) Element_per_cluster[j] + 1;
 
 	  //
 	  //

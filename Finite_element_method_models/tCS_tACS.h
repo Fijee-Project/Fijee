@@ -40,6 +40,7 @@
 // transcranial current stimulation
 #include "tCS_model.h"
 #include "tCS_current_density_model.h"
+#include "tCS_electrical_field_model.h"
 //
 // pugixml
 // same resources than Dolfin
@@ -53,6 +54,8 @@
 #include "Boundaries.h"
 #include "Sub_domaines.h"
 #include "PDE_solver_parameters.h"
+#include "Parcellation_information.h"
+#include "Field.h"
 //#include "Utils/Thread_dispatching.h"
 // Validation
 #include "Spheres_electric_monopole.h"
@@ -87,8 +90,10 @@ namespace Solver
   private:
     //! Function space
     std::shared_ptr< tCS_model::FunctionSpace > V_;
-    //! Function space
-    std::shared_ptr< tCS_current_density_model::FunctionSpace > V_field_;
+    //! Function space for current density
+    std::shared_ptr< tCS_current_density_model::FunctionSpace > V_current_density_;
+    //! Function space for electrical field
+    std::shared_ptr< tCS_electrical_field_model::FunctionSpace > V_E_;
     //! Sample studied
     int sample_;
     // Head time series potential output file
@@ -97,9 +102,12 @@ namespace Solver
     std::shared_ptr< File > file_brain_potential_time_series_;
     // Time series potential field output file
     std::shared_ptr< File > file_current_density_time_series_;
-
-    // std::map< std::size_t, std::size_t > map_index_cell_;
-
+    // Time series electrical field output file
+    std::shared_ptr< File > file_E_time_series_;
+    //! Parcellation information
+    std::shared_ptr< Parcellation_information< Field<-1> > > tCS_E_parcel_;
+    
+    
     
   private:
     std::mutex critical_zone_;
