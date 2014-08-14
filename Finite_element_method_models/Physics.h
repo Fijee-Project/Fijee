@@ -127,6 +127,13 @@ namespace Solver
      */
     virtual void operator ()() = 0;
     /*!
+     *  \brief XML output
+     *
+     *  This method generates XML output.
+     *
+     */
+    virtual void XML_output() = 0;
+    /*!
      *  \brief Get number of physical events
      *
      *  This method return the number of parallel process for the Physics solver. 

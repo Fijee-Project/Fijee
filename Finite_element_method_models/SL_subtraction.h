@@ -138,6 +138,13 @@ namespace Solver
      */
     virtual inline
       int get_number_of_physical_events(){return number_dipoles_;};
+    /*!
+     *  \brief XML output
+     *
+     *  This method generates XML output.
+     *
+     */
+    virtual void XML_output(){};
   };
 }
 #endif

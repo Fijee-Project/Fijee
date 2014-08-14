@@ -64,6 +64,7 @@ int main()
   //
   std::cout << "Loop over solvers" << std::endl;
   model.solver_loop();
+  model.XML_output();
 
 //  // 
 //  // Simulation of alpha rhythm at the electrodes

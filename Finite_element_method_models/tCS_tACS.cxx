@@ -25,10 +25,12 @@
 //  of the authors and should not be interpreted as representing official policies,    
 //  either expressed or implied, of the FreeBSD Project.  
 #include <iostream>
+#include <chrono>
 #include "tCS_tACS.h"
-
+// 
+// 
+//
 typedef Solver::PDE_solver_parameters SDEsp;
-
 //
 //
 //
@@ -145,6 +147,20 @@ Solver::tCS_tACS::operator () ( /*Solver::Phi& source,
   solver.parameters["preconditioner"] 
     = (SDEsp::get_instance())->get_preconditioner_();
   //
+  try
+    {
+      // lock the electrode list
+      std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
+      // 
+      // WARNING
+      // Dolfin timer is not thread safe: we pospone the next launch for threads desynchronization
+      std::this_thread::sleep_for( std::chrono::microseconds(50) );
+    }
+  catch (std::logic_error&)
+    {
+      std::cerr << "[exception caught]\n" << std::endl;
+    }
+  // 
   solver.solve();
 
 
@@ -172,10 +188,10 @@ Solver::tCS_tACS::operator () ( /*Solver::Phi& source,
   // 
   std::cout << "int u dx = " << Sum << std::endl;
  
-  //
-  // Filter function over a subdomain
-  std::list<std::size_t> test_sub_domains{4,5};
-  solution_domain_extraction(u, test_sub_domains, file_brain_potential_time_series_);
+// mutex  //
+// mutex  // Filter function over a subdomain
+// mutex  std::list<std::size_t> test_sub_domains{4,5};
+// mutex  solution_domain_extraction(u, test_sub_domains, file_brain_potential_time_series_);
 
   //
   // tACS electric potential
@@ -189,7 +205,7 @@ Solver::tCS_tACS::operator () ( /*Solver::Phi& source,
       std::cout << "time av record: " << electrodes_->get_current(local_sample)->get_time_() << std::endl;
       electrodes_->get_current(local_sample)->surface_potential_evaluation(u, mesh_);
       electrodes_->record_potential( /*dipole idx*/ 0,
-				     electrodes_->get_current(local_sample)->get_time_() );
+				     /*time idx*/ local_sample );
       std::cout << "time ap record: " << electrodes_->get_current(local_sample)->get_time_() << std::endl;
     }
   catch (std::logic_error&)
@@ -250,6 +266,20 @@ Solver::tCS_tACS::operator () ( /*Solver::Phi& source,
 	= (SDEsp::get_instance())->get_relative_tolerance_();
       solver_field.parameters["preconditioner"] 
 	= (SDEsp::get_instance())->get_preconditioner_();
+      //
+      try
+	{
+	  // lock the electrode list
+	  std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
+	  // 
+	  // WARNING
+	  // Dolfin timer is not thread safe: we pospone the next launch for threads desynchronization
+	  std::this_thread::sleep_for( std::chrono::microseconds(50) );
+	}
+      catch (std::logic_error&)
+	{
+	  std::cerr << "[exception caught]\n" << std::endl;
+	}
       //
       solver_field.solve();
 
@@ -314,6 +344,20 @@ Solver::tCS_tACS::operator () ( /*Solver::Phi& source,
       solver_E.parameters["preconditioner"] 
 	= (SDEsp::get_instance())->get_preconditioner_();
       //
+      try
+	{
+	  // lock the electrode list
+	  std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
+	  // 
+	  // WARNING
+	  // Dolfin timer is not thread safe: we pospone the next launch for threads desynchronization
+	  std::this_thread::sleep_for( std::chrono::microseconds(50) );
+	}
+      catch (std::logic_error&)
+	{
+	  std::cerr << "[exception caught]\n" << std::endl;
+	}
+      //
       solver_E.solve();
       
 
@@ -327,17 +371,17 @@ Solver::tCS_tACS::operator () ( /*Solver::Phi& source,
 	{
 	  // lock the electrode list
 	  std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
+
 	  // 
-	  // Evaluation
+	  // Evaluation of the electric field for each parcels
+	  tCS_E_parcel_->record(E, electrodes_->get_current(local_sample)->get_time_());
+
 	  Array<double> position(3);
 	  Array<double> val_1(3);
-	  Array<double> val_2(3);
 	  position[0] = -0.0450098;
 	  position[1] =  0.0170047;
 	  position[2] =  0.0353029;
-	  int cell = 1740037;
 	  E.eval(val_1, position);
-	  //       E.eval(val_2, position, cell)
 	  
 	  std::cout << "val at (" << -0.0450098 << "," << 0.0170047 << "," << 0.0353029 << ") = " 
 		    << val_1[0] << " " 

@@ -104,6 +104,10 @@ namespace Solver
 
   public:
     /*!
+     *   \brief Solver loop
+     * 
+     * This method loops over time series, leadfield matrix, ... files and process the specified model
+     * 
      */
     void solver_loop()
     {
@@ -129,7 +133,17 @@ namespace Solver
 	    std::this_thread::sleep_for( std::chrono::microseconds(5000) );
 	  }
 //	else {break;}
-    };
+    }
+    /*!
+     *   \brief XML output
+     * 
+     * This method generates XML output.
+     *
+     */
+    void XML_output()
+    {
+      model_.XML_output();
+    }
   };
 }
 #endif

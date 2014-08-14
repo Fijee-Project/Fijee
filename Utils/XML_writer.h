@@ -52,12 +52,12 @@ namespace Utils
   class XML_writer
   {
   protected:
-    //! XML document
+    //! XML file name
+    std::string file_name_;
+   //! XML document
     pugi::xml_document document_;
     //! Root of the XML tree
     pugi::xml_node fijee_;
-    //! XML file name
-    std::string file_name_;
 
   public:
     /*!
@@ -87,7 +87,7 @@ namespace Utils
      *  Constructor is a copy constructor
      *
      */
-    XML_writer( const XML_writer& ){};
+  XML_writer( const XML_writer& ){};
     /*!
      *  \brief Destructeur
      *

@@ -30,7 +30,6 @@
 #include <queue>
 #include <memory>
 #include <thread>
-#include <chrono>
 #include <mutex>
 #include <condition_variable>
 #include <future>
@@ -154,12 +153,7 @@ namespace Utils
     }
     condition.notify_all();
     for( size_t i = 0 ; i < workers.size() ; ++i )
-      {
-	workers[i].join();
-	// pospone the next launch 0.05 second
-	std::this_thread::sleep_for( std::chrono::microseconds(50) );
-
-      }
+      workers[i].join();
   }
 }
 #endif

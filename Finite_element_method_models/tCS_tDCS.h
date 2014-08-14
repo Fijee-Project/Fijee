@@ -154,6 +154,13 @@ namespace Solver
      */
     virtual inline
       int get_number_of_physical_events(){return 1;};
+    /*!
+     *  \brief XML output
+     *
+     *  This method generates XML output.
+     *
+     */
+    virtual void XML_output(){};
    /*!
      *  \brief Solution domain extraction
      *

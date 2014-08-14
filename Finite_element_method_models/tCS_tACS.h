@@ -158,7 +158,17 @@ namespace Solver
      */
     virtual inline
       int get_number_of_physical_events(){return electrodes_->get_number_samples_();};
-    /*!
+     /*!
+     *  \brief XML output
+     *
+     *  This method generates XML output.
+     *
+     */
+    virtual void XML_output()
+    {
+      tCS_E_parcel_->XML_output();
+    };
+   /*!
      *  \brief Solution domain extraction
      *
      *  This method extract from the Function solution U the sub solution covering the sub-domains Sub_domains.
