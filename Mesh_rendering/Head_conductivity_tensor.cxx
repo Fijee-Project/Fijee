@@ -34,6 +34,7 @@
 #include "Head_conductivity_tensor.h"
 #include "Access_parameters.h"
 #include "Parcellation.h"
+#include "Parcellation_method.h"
 #include "Parcellation_METIS.h"
 #include "Parcellation_Scotch.h"
 // 
@@ -596,8 +597,12 @@ DHct::make_conductivity( const C3t3& Mesh )
     lh_region = 0,
     rh_region = 0,
     region_numbers = (Domains::Access_parameters::get_instance())->get_number_of_parcels_();
-  Parcellation_METIS parcellation_lh( Mesh, cell_pmap, LEFT_GRAY_MATTER,  region_numbers );
-  Parcellation_METIS parcellation_rh( Mesh, cell_pmap, RIGHT_GRAY_MATTER, region_numbers );
+  Parcellation_method <Parcellation_METIS> 
+    parcellation_lh( Mesh, cell_pmap, LEFT_GRAY_MATTER,  region_numbers );
+  Parcellation_method <Parcellation_METIS> 
+    parcellation_rh( Mesh, cell_pmap, RIGHT_GRAY_MATTER, region_numbers );
+//  Parcellation_METIS parcellation_lh( Mesh, cell_pmap, LEFT_GRAY_MATTER,  region_numbers );
+//  Parcellation_METIS parcellation_rh( Mesh, cell_pmap, RIGHT_GRAY_MATTER, region_numbers );
   // 
   std::thread left_gray_matter_thread (std::ref(parcellation_lh));
   std::thread right_gray_matter_thread(std::ref(parcellation_rh));

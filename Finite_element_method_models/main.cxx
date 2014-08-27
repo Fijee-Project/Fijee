@@ -59,8 +59,8 @@ int main()
   //    - Solver::tCS_tDCS_local_conductivity
   //
   // export OMP_NUM_THREADS=2
-  Solver::Model_solver< /* physical model */ Solver::tCS_tACS,
-		        /*solver_parameters->get_number_of_threads_()*/ 2 >  model;
+  Solver::Model_solver< /* physical model */ Solver::SL_subtraction,
+		        /*solver_parameters->get_number_of_threads_()*/ 4 >  model;
   //
   std::cout << "Loop over solvers" << std::endl;
   model.solver_loop();

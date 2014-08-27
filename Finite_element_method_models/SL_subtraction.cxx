@@ -56,8 +56,8 @@ Solver::SL_subtraction::SL_subtraction():Physics()
   std::cout << "Load dipoles file" << std::endl;
   //
   std::string dipoles_xml = (SDEsp::get_instance())->get_files_path_output_();
-  //  dipoles_xml += "dipoles.xml";
-  dipoles_xml += "parcellation.xml";
+  dipoles_xml += "dipoles.xml";
+  //dipoles_xml += "parcellation.xml";
   //
   pugi::xml_document     xml_file;
   pugi::xml_parse_result result = xml_file.load_file( dipoles_xml.c_str() );

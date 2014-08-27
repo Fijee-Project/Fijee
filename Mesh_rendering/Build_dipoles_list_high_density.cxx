@@ -47,7 +47,7 @@ Domains::get( Domains::Point_vector_parcellation_map, Domains::Point_vector_parc
 //
 //
 DBdlhd::Build_dipoles_list_high_density():
-  add_gray_matter_(true), cell_size_(2. /*mm*/), layer_(1)
+  add_gray_matter_(false), cell_size_(3. /*mm*/), layer_(1)
 {
   //
   // Get the white and gray matter point_vectors

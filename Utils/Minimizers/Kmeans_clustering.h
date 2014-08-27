@@ -50,13 +50,13 @@ namespace Utils
        *
        */
       template < typename T, typename U > void Lloyd_algorythm( const int N, const T* Points, int* Clusters,
-								const int n, double* Mu, double* Variance,
-								int* Element_per_cluster,
+								const int n, double* Mu,
 								double Epsilon = 1.e-01 )
 	{
 	  // 
 	  // Time log
 	  FIJEE_TIME_PROFILER("Utils::Minimizers::Kmeans_clustering::Lloyd_algorythm");
+
 	  // 
 	  // Convergence criteria
 	  double L_kmeans_old = 1.e+06;
@@ -87,10 +87,13 @@ namespace Utils
 	  // Minimization loop
 	  while( fabs(L_kmeans - L_kmeans_old) > Epsilon )
 	    {
+	      // 
+	      // 
 	      iteration++;
 	      // 
 	      L_kmeans_old = L_kmeans;
 	      L_kmeans = 0;
+
 	      // 
 	      // Determin r_ik (Clusters)
 	      for( int i = 0 ; i < N ; i++ )
@@ -112,17 +115,18 @@ namespace Utils
 		Den = 0.;
 	      for( int j = 0 ; j < n ; j++ )
 		{
-		  Num = 0.;
-		  Den = 0.;
+		  Num = 0;
+		  Den = 0;
 		  //	    
 		  for( int i = 0 ; i < N ; i++ )
 		    if( Clusters[i] == j )
 		      {
 			Num += Points[i];
-			Den += 1.;
+			Den++;
 		      }
 		  //
-		  Mu[j] = static_cast<double>(Num) / static_cast<double>(Den);
+		  Mu[j]  = static_cast<double>( Num );
+		  Mu[j] /= static_cast<double>( Den );
 		}
 
 	      // 
@@ -134,23 +138,12 @@ namespace Utils
 	    }
 
 
-	  // 
-	  // Empirical variance
-	  for( int i = 0 ; i < N ; i++ )
-	    {
-	      Variance[Clusters[i]] += ( Points[i] - Mu[Clusters[i]] )*( Points[i] - Mu[Clusters[i]] );
-	      Element_per_cluster[Clusters[i]]++;
-	    }
-	  // 
-	  for( int j = 0 ; j < n ; j ++ )
-	    Variance[j] /= (double) Element_per_cluster[j] + 1;
-
 	  //
 	  //
 	  std::cout << std::endl;
 	  std::cout << iteration << std::endl;
 	  for( int j = 0 ; j < n ; j++ ){
-	    std::cout << Mu[j] << " " << sqrt(Variance[j]) << std::endl;}
+	    std::cout << Mu[j] << std::endl;}
 	  std::cout << std::endl;
 	}
     }
