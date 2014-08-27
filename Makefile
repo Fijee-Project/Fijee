@@ -84,9 +84,9 @@ $(EXEC):
 	( cd $(UTILS_DIR)/pugi/ && $(MAKE) )
 	( cd $(UTILS_DIR)/Minimizers/ && $(MAKE) )
 	( cd $(UTILS_DIR)/Biophysics/ && $(MAKE) )
+	( cd $(ELECTRODES_DIR) && $(MAKE) )
 	( cd $(FEM_MODELS_DIR) && $(MAKE) )
 	( cd $(MESH_RENDERING_DIR) && $(MAKE) )
-	( cd $(ELECTRODES_DIR) && $(MAKE) )
 	@echo""
 	@echo "export LD_LIBRARY_PATH=$(FIJEE)/$(UTILS_DIR)/pugi/:$(FIJEE)/$(UTILS_DIR)/Minimizers/:$(FIJEE)/$(UTILS_DIR)/Biophysics/:$(CUDA_LIB):$(VTK)/lib/vtk-5.10:$(CGAL)/lib:$(LD_LIBRARY_PATH)"
 	@echo""

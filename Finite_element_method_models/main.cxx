@@ -26,6 +26,9 @@
 //  either expressed or implied, of the FreeBSD Project.  
 #include <vector>
 #include <memory>
+#include<vector>
+#include<string>
+#include<tuple>
 //
 // UCSF
 //
@@ -38,7 +41,12 @@
 #include "Model_solver.h"
 #include "Utils/Biophysics/EEG_simulation.h"
 #include "Utils/Biophysics/Device_model.h"
-
+// Electrodes
+#include"Electrodes/Electrodes_setup.h"
+#include"Electrodes/Electrodes_tACS.h"
+//
+//
+//
 int main()
 {
   //
@@ -46,32 +54,50 @@ int main()
   Solver::PDE_solver_parameters* solver_parameters = Solver::PDE_solver_parameters::get_instance();
   // 
   solver_parameters->init();
-  
-  //
-  // Physical models:
-  //  - Source localization
-  //    - Solver::SL_subtraction
-  //    - Solver::SL_direct
-  //  - Transcranial current stimulation
-  //    - Solver::tCS_tDCS
-  //    - Solver::tCS_tACS
-  //  - Local conductivity estimation
-  //    - Solver::tCS_tDCS_local_conductivity
-  //
-  // export OMP_NUM_THREADS=2
-  Solver::Model_solver< /* physical model */ Solver::SL_subtraction,
-		        /*solver_parameters->get_number_of_threads_()*/ 4 >  model;
-  //
-  std::cout << "Loop over solvers" << std::endl;
-  model.solver_loop();
-  model.XML_output();
 
-//  // 
-//  // Simulation of alpha rhythm at the electrodes
-//  // 
-//  Utils::Biophysics::Device_model< Utils::Biophysics::EEG_simulation, 4 > eeg_simulation;
-//  eeg_simulation.alpha_rhythm_at_electrodes( solver_parameters->get_files_path_output_() );
-//  eeg_simulation.output();
+  // 
+  // tACS electrodes' setup
+  std::vector< std::tuple<std::string, double> > positive_electrodes;
+  positive_electrodes.push_back( std::make_tuple("T7", 0.00112 /*[A]*/) );
+  //  positive_electrodes.push_back( std::make_tuple("FT7", 0.00112 /*[A]*/) );
+  std::vector< std::tuple<std::string, double> > negative_electrodes;
+  negative_electrodes.push_back( std::make_tuple("T8", -0.00112 / 4. /*[A]*/) );
+  negative_electrodes.push_back( std::make_tuple("F8", -0.00112 / 4. /*[A]*/) );
+  negative_electrodes.push_back( std::make_tuple("C4", -0.00112 / 4. /*[A]*/) );
+  negative_electrodes.push_back( std::make_tuple("P8", -0.00112 / 4. /*[A]*/) );
+  //  Electrodes::Electrodes_setup< Electrodes::Electrodes_tACS >
+  Electrodes::Electrodes_tACS test_electrodes( positive_electrodes, negative_electrodes,
+					       10 /*[Hz]*/, 0.0005 /*[A] Amplitude*/,
+					       0.1 /*[s] elapse time*/, 
+					       1. /*[s] starting time*/ );
+  // 
+  test_electrodes.output_XML("/home/cobigo/subjects/GazzDCS0004mgh_GPU4/fem/output/");
+  
+//  //
+//  // Physical models:
+//  //  - Source localization
+//  //    - Solver::SL_subtraction
+//  //    - Solver::SL_direct
+//  //  - Transcranial current stimulation
+//  //    - Solver::tCS_tDCS
+//  //    - Solver::tCS_tACS
+//  //  - Local conductivity estimation
+//  //    - Solver::tCS_tDCS_local_conductivity
+//  //
+//  // export OMP_NUM_THREADS=2
+//  Solver::Model_solver< /* physical model */ Solver::tCS_tACS,
+//		        /*solver_parameters->get_number_of_threads_()*/ 4 >  model;
+//  //
+//  std::cout << "Loop over solvers" << std::endl;
+//  model.solver_loop();
+//  model.XML_output();
+
+  // 
+  // Simulation of alpha rhythm at the electrodes
+  // 
+  Utils::Biophysics::Device_model< Utils::Biophysics::EEG_simulation, 4 > eeg_simulation;
+  eeg_simulation.alpha_rhythm_at_electrodes( solver_parameters->get_files_path_output_() );
+  eeg_simulation.output();
 
 
   //

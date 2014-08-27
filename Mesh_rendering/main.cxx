@@ -45,7 +45,6 @@
 #include "Utils/Biophysics/Jansen_Rit_1995.h"
 #include "Utils/Biophysics/Wendling_2002.h"
 #include "Utils/Biophysics/Molaee_Ardekani_Wendling_2009.h"
-
 //
 // VTK
 //
@@ -75,33 +74,34 @@ main()
   // Access parameters
   Domains::Access_parameters* parameters = Domains::Access_parameters::get_instance();
   parameters->init();
+
   
-  // 
-  // Head simulation:    
-  //   - Domains::Head_labeled_domain 
-  //   - Domains::Head_conductivity_tensor
-  //   - Domains::Build_mesh
-  //   - Dipole generation
-  //     - Domains::Build_dipoles_list_high_density
-  //     - Build_dipoles_list_knn
-  //
-  // Spheres simulation: 
-  //   - Domains::Spheres_labeled_domain 
-  //   - Domains::Spheres_conductivity_tensor
-  //   - Domains::Build_mesh
-  //   - Dipole generation
-  //     - Domains::Build_dipoles_list_high_density
-  //     - Build_dipoles_list_knn
-  // 
-  Domains::Mesh_generator< Domains::Head_labeled_domain, 
-			   Domains::Head_conductivity_tensor,
-			   Domains::Build_mesh,
-			   Domains::Build_dipoles_list_high_density > generator;
-  //
-  generator.make_inrimage();
-  generator.make_conductivity();
-  // 
-  generator.make_output();
+//  // 
+//  // Head simulation:    
+//  //   - Domains::Head_labeled_domain 
+//  //   - Domains::Head_conductivity_tensor
+//  //   - Domains::Build_mesh
+//  //   - Dipole generation
+//  //     - Domains::Build_dipoles_list_high_density
+//  //     - Build_dipoles_list_knn
+//  //
+//  // Spheres simulation: 
+//  //   - Domains::Spheres_labeled_domain 
+//  //   - Domains::Spheres_conductivity_tensor
+//  //   - Domains::Build_mesh
+//  //   - Dipole generation
+//  //     - Domains::Build_dipoles_list_high_density
+//  //     - Build_dipoles_list_knn
+//  // 
+//  Domains::Mesh_generator< Domains::Head_labeled_domain, 
+//			   Domains::Head_conductivity_tensor,
+//			   Domains::Build_mesh,
+//			   Domains::Build_dipoles_list_high_density > generator;
+//  //
+//  generator.make_inrimage();
+//  generator.make_conductivity();
+//  // 
+//  generator.make_output();
 
   // 
   // Modelisation of alpha rhythm

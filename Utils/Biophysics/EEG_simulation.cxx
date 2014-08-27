@@ -181,7 +181,7 @@ Utils::Biophysics::EEG_simulation::load_files( std::string Output_path )
 	std::map< int/*index*/, std::list< std::tuple< std::string /*lavel*/, 
 						       int /*dipole*/, 
 						       double /*V*/, 
-						       double/*I*/ > > > ld_matrix;
+						       double /*I*/ > > > ld_matrix;
 	// load the file information in a map
 	for ( auto electrodes : setup_node )
 	  for ( auto electrode : electrodes )

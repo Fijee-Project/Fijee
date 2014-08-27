@@ -43,7 +43,7 @@ Utils::Biophysics::Brain_rhythm::load_population_file( std::string Output_path )
 
   // 
   // Load file
-  std::string In_population_file_XML = Output_path + "parcellation.xml";
+  std::string In_population_file_XML = Output_path + "dipoles.xml";
   // XML output
   set_file_name_( Output_path + "alpha_rhythm.xml" );
 
