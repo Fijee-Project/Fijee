@@ -109,7 +109,7 @@ main()
   //  - Utils::Biophysics::Wendling_2002
   //  - Utils::Biophysics::Molaee_Ardekani_Wendling_2009
   // 
-  Utils::Biophysics::Brain_rhythm_models< Utils::Biophysics::Molaee_Ardekani_Wendling_2009, 
+  Utils::Biophysics::Brain_rhythm_models< Utils::Biophysics::Jansen_Rit_1995, 
 					  /*solver_parameters->get_number_of_threads_()*/ 4 > 
     alpha;
   //

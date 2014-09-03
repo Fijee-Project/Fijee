@@ -48,7 +48,8 @@ extern "C" int ode_system_W02(double t, const double y[], double dydt[], void *p
 // 
 // 
 Utils::Biophysics::Wendling_2002::Wendling_2002():
-  duration_(20000. /*ms*/), pulse_(90./*pulses per second*/),
+  Brain_rhythm( 20000 /*ms*/ ),
+  pulse_(90./*pulses per second*/),
   e0_( 2.5 /*s^{-1}*/), r_( 0.56 /*(mV)^{-1}*/), v0_( 6. /*(mV)*/),
   C_( 135. ),
   a_( 100. /*s^{-1}*/), A_( 3.25 /*(mV)*/), b_( 50. /*s^{-1}*/), B_( 22. /*(mV)*/),
@@ -114,8 +115,13 @@ Utils::Biophysics::Wendling_2002::modelization()
 	  abort();
 	}
     }
+  
+  //
   // 
   std::cout << "population: " << local_population_ << std::endl;
+  std::string* local_population_rhythm = new std::string[2*(duration_-1)];
+  int          char_array_size = 0;
+  //
   for ( int i = 1 ; i < duration_ ; i++ )
     {
       // every second change the noise influence
@@ -132,15 +138,37 @@ Utils::Biophysics::Wendling_2002::modelization()
 	  abort();
 	}
       // record statistics, after the transient state
-      population_rhythm_[local_population_].push_back(std::make_tuple(ti - MAX_TRANSIENT * delta_t,
-								      /*V=*/ y[1] - y[2] - y[3]));
+      local_population_rhythm[2*(i-1)]   = std::to_string(ti - MAX_TRANSIENT * delta_t);
+      local_population_rhythm[2*(i-1)]  += std::string(" ");
+      local_population_rhythm[2*(i-1)+1] = std::to_string(y[1] - y[2] - y[3]) + std::string(" ");
+      // 
+      char_array_size += local_population_rhythm[2*(i-1)].size();
+      char_array_size += local_population_rhythm[2*(i-1)+1].size();
       // shift
       population_V_shift_[local_population_] += y[1] - y[2] - y[3];
     }
   // average the shift
-  population_V_shift_[local_population_] /= duration_;
+  population_V_shift_[local_population_] /= static_cast<double>(duration_);
 
   // 
+  // Convert strings into an array of char
+  char* array_to_compress = (char*)malloc( char_array_size*sizeof(char) );
+  // first occurence
+  strcpy( array_to_compress, local_population_rhythm[0].c_str() );
+  //
+  for( int str_idx = 1 ; str_idx < 2*(duration_ - 1) ; str_idx++ )
+    strcat(array_to_compress, local_population_rhythm[str_idx].c_str());
+  //
+  Utils::Zlib::Compression deflate;
+  deflate.in_memory_compression( array_to_compress, char_array_size, 
+				 population_rhythm_[local_population_] );
+
+  // 
+  // Clean area
+  delete[] local_population_rhythm;
+  local_population_rhythm = nullptr;
+  delete[] array_to_compress;
+  array_to_compress = nullptr;
   // 
   gsl_odeiv2_driver_free (driver);
 }

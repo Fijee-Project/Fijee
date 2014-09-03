@@ -82,7 +82,7 @@ namespace Utils
       //! Excitatory inpulses already drawn from the neighbours
       std::vector< std::vector<bool> > drawn_; 
       //! Duration of the simulation (ms)
-      double duration_;
+      int duration_;
       //! Number of impulse per second (random noise)
       double pulse_;
 
@@ -162,14 +162,14 @@ namespace Utils
 	 *  Constructor is a copy constructor
 	 *
 	 */
-	Wendling_2002( const Wendling_2002& ){};
+	Wendling_2002( const Wendling_2002& ) = default;
 	/*!
 	 *  \brief Operator =
 	 *
 	 *  Operator = of the class Wendling_2002
 	 *
 	 */
-	Wendling_2002& operator = ( const Wendling_2002& ){return *this;};
+	Wendling_2002& operator = ( const Wendling_2002& ) = default;
 	/*!
 	 *  \brief Destructor
 	 *

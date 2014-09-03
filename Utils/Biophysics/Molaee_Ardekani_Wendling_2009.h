@@ -80,7 +80,7 @@ namespace Utils
       //! Normal distribution
       std::normal_distribution<double> distribution_;
       //! Duration of the simulation (ms)
-      double duration_;
+      int duration_;
       //! Number of impulse per second (random noise)
       double pulse_;
 
@@ -163,15 +163,14 @@ namespace Utils
 	 *  Constructor is a copy constructor
 	 *
 	 */
-	Molaee_Ardekani_Wendling_2009( const Molaee_Ardekani_Wendling_2009& ){};
+	Molaee_Ardekani_Wendling_2009( const Molaee_Ardekani_Wendling_2009& ) = default;
 	/*!
 	 *  \brief Operator =
 	 *
 	 *  Operator = of the class Molaee_Ardekani_Wendling_2009
 	 *
 	 */
-	Molaee_Ardekani_Wendling_2009& operator = ( const Molaee_Ardekani_Wendling_2009& )
-	  {return *this;};
+	Molaee_Ardekani_Wendling_2009& operator = ( const Molaee_Ardekani_Wendling_2009& ) = default;
 	/*!
 	 *  \brief Destructor
 	 *

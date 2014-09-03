@@ -77,8 +77,6 @@ namespace Utils
       std::default_random_engine generator_;
       //! Normal distribution
       std::normal_distribution<double> distribution_;
-      //! Duration of the simulation (ms)
-      double duration_;
       //! Number of pulse per second (random noise)
       double pulse_;
 
@@ -148,14 +146,14 @@ namespace Utils
 	 *  Constructor is a copy constructor
 	 *
 	 */
-	Jansen_Rit_1995( const Jansen_Rit_1995& ){};
+	Jansen_Rit_1995( const Jansen_Rit_1995& ) = default;
 	/*!
 	 *  \brief Operator =
 	 *
 	 *  Operator = of the class Jansen_Rit_1995
 	 *
 	 */
-	Jansen_Rit_1995& operator = ( const Jansen_Rit_1995& ){return *this;};
+	Jansen_Rit_1995& operator = ( const Jansen_Rit_1995& ) = default;
 	/*!
 	 *  \brief Destructor
 	 *

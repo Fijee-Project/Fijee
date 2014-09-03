@@ -82,6 +82,7 @@ all: models $(EXEC)
 
 $(EXEC):
 	( cd $(UTILS_DIR)/pugi/ && $(MAKE) )
+	( cd $(UTILS_DIR)/Compression/ && $(MAKE) )
 	( cd $(UTILS_DIR)/Minimizers/ && $(MAKE) )
 	( cd $(UTILS_DIR)/Biophysics/ && $(MAKE) )
 	( cd $(ELECTRODES_DIR) && $(MAKE) )
@@ -98,6 +99,7 @@ models:
 
 clean:
 	( cd $(UTILS_DIR)/pugi/ && $(MAKE) $@ )
+	( cd $(UTILS_DIR)/Compression/ && $(MAKE) $@ )
 	( cd $(UTILS_DIR)/Minimizers/ && $(MAKE) $@ )
 	( cd $(UTILS_DIR)/Biophysics/ && $(MAKE) $@ )
 	( cd $(FEM_MODELS_DIR) && $(MAKE) $@ )

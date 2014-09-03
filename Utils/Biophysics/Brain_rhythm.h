@@ -38,6 +38,7 @@
 #include <list>
 #include <vector>
 #include <tuple>
+#include<cstring>
 // 
 // GSL
 // 
@@ -51,9 +52,11 @@
 //
 // UCSF
 //
+#include "Utils/XML_writer.h"
+#include "Utils/Fijee_exception_handler.h"
+#include "Utils/Compression/Fijee_compression.h"
 #include "Utils/pugi/pugixml.hpp"
 #include "Utils/Statistical_analysis.h"
-#include "Utils/XML_writer.h"
 #include "Utils/Biophysics/Population.h"
 // 
 // 
@@ -81,9 +84,10 @@ namespace Utils
     class Brain_rhythm: public Utils::Statistical_analysis, public Utils::XML_writer
     {
     protected:
+      //! Duration of the simulation (ms)
+      int duration_;
       //! Vector of analyse time v.s. potential
-      std::vector< std::list< std::tuple< double/*time*/, double/*V*/ > > >
-	population_rhythm_;
+      std::vector< std::vector< Bytef > > population_rhythm_;
       //! Vector of analyse time v.s. potential
       std::vector< double > population_V_shift_;
       //! Vector neural population
@@ -110,7 +114,7 @@ namespace Utils
        *  Constructor of the class Brain_rhythm
        *
        */
-      Brain_rhythm();
+      Brain_rhythm( const int );
       /*!
        *  \brief Copy Constructor
        *

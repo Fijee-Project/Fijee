@@ -28,8 +28,9 @@
 // 
 // 
 // 
-Utils::Biophysics::Brain_rhythm::Brain_rhythm():
-  Utils::XML_writer("alpha_rhythm.xml")
+Utils::Biophysics::Brain_rhythm::Brain_rhythm( const int Duration ):
+  Utils::XML_writer("alpha_rhythm.xml"),
+  duration_(Duration)
 {}
 // 
 // 
@@ -138,115 +139,174 @@ Utils::Biophysics::Brain_rhythm::Make_analysis()
   output_stream_ << std::endl;
 
   // 
-  // R values: alpha rhythm
   // 
-  std::vector< std::list< std::tuple< double, double > >::const_iterator > 
-    it(number_samples_);
-  // 
-  for( int population = 0 ; population < number_samples_ ; population++ )
-    it[population] = population_rhythm_[population].begin();
-  // 
-  while( it[0] !=  population_rhythm_[0].end())
-    {
-      // get the time
-      output_stream_ <<  std::get<0>( *(it[0]) ) << " ";
-      // 
-     for (int population = 0 ; population < number_samples_ ; population++)
-       output_stream_ <<  std::get<1>( *(it[population]++) ) - population_V_shift_[population] << " ";
-      // 
-      output_stream_ << std::endl;
-    }
+  try{
+    // 
+    // R values: alpha rhythm
+    // 
 
-  //
-  //
-  Make_output_file("alpha_rhythm.frame");
+    // 
+    // Inflation of data
+    std::vector< std::vector< Bytef > > ts_word(number_samples_);
+    std::vector< std::vector< std::string > > ts_values(number_samples_);
+    //
+    char*  pch;
+    Bytef* ts_data;
+    // 
+    Utils::Zlib::Compression deflate;
+    // 
+    for (int population = 0 ; population < number_samples_ ; population++)
+      {
+	deflate.in_memory_decompression( population_rhythm_[population], ts_word[population] );
+	// Copy of data
+	int size_of_word = ts_word[population].size();
+	ts_data = (Bytef*) malloc( size_of_word * sizeof(Bytef) );
+	std::copy ( ts_word[population].begin(), ts_word[population].end(), ts_data );
+	// Cut of data
+	pch = strtok(reinterpret_cast<char*>(ts_data)," ");
+	//
+	while ( pch != nullptr && size_of_word != 0 )
+	  {
+	    size_of_word -= strlen(pch) + 1;
+	    ts_values[population].push_back( std::string(pch) );
+	    pch = strtok (nullptr, " ");
+	  }
+	// 
+	if( static_cast<int>(ts_values[population].size()) != 2*(duration_-1) )
+	  {
+	    std::string message = std::string("The size of the inflated data structure is: ")
+	      + std::to_string(ts_values[population].size()) 
+	      + std::string(". It should be: ") + std::to_string(2*(duration_-1))
+	      + std::string(".");
+	    //
+	    throw Utils::Error_handler( message,  __LINE__, __FILE__ );
+	  }
+	
+	// 
+	//
+	delete[] ts_data;
+	ts_data = nullptr;
+	// 
+	pch = nullptr;
+     }
 
 
-  // 
-  // FFT
-  // 
+    // 
+    // Loop over the time series
+    for( int i = 1 ; i < duration_ ; i++ )
+      {
+	// get the time
+	output_stream_ <<  ts_values[0][2*(i-1)] << " ";
+	// get the potential
+	for (int population = 0 ; population < number_samples_ ; population++)
+	  {
+	    // 
+	    double V = std::stod( ts_values[population][2*(i-1) + 1] );
+	    V -= population_V_shift_[population];
+	    // 
+	    output_stream_  << V << " ";
+	  }
+	// End the stream
+	output_stream_ << std::endl;
+      }
+    //
+    //
+    Make_output_file("alpha_rhythm.frame");
 
-  //
-  // R header: Power spectral density
-  // 
-  output_stream_
-    << "Hz ";
-  // 
-  for (int population = 0 ; population < number_samples_ ; population++)
-    output_stream_ <<  population << " ";
-  // 
-  output_stream_ << "power" << std::endl;
+
+    // 
+    // FFT
+    // 
+
+    //
+    // R header: Power spectral density
+    // 
+    output_stream_
+      << "Hz ";
+    // 
+    for (int population = 0 ; population < number_samples_ ; population++)
+      output_stream_ <<  population << " ";
+    // 
+    output_stream_ << "power" << std::endl;
 
 
-  // 
-  // R values: Power spectral density
-  // 
-  int 
-    N = 2048, /* N is a power of 2 */
-    n = 0;
-  // real and imaginary
-  std::vector< double* > data_vector(number_samples_);
-  // 
-  for ( int population = 0 ; population < number_samples_ ; population++ )
-    {
+    // 
+    // R values: Power spectral density
+    // 
+    int 
+      N = 2048, /* N is a power of 2 */
       n = 0;
-      data_vector[population] = new double[2*2048/*N*/];
-      for( auto time_potential : population_rhythm_[population] )
-	{
-	  if ( n < N )
-	    {
-	      REAL(data_vector[population],n)   = std::get<1>(time_potential);
-	      IMAG(data_vector[population],n++) = 0.0;
-	    }
-	  else
-	    break;
-	}
-    }
+    // real and imaginary
+    std::vector< double* > data_vector(number_samples_);
+    // 
+    for ( int population = 0 ; population < number_samples_ ; population++ )
+      {
+	n = 0;
+	data_vector[population] = new double[2*2048/*N*/];
+	for( int i = 1 ; i < duration_ ; i++ )
+	  {
+	    if ( n < N )
+	      {
+		// 
+		double V = std::stod(std::string(ts_values[population][2*(i-1) + 1]));
+		//
+		REAL(data_vector[population],n) = V;
+		IMAG(data_vector[population],n++) = 0.0;
+	      }
+	    else
+	      break;
+	  }
+      }
 
-  // 
-  // Forward FFT
-  // A stride of 1 accesses the array without any additional spacing between elements. 
-  for ( auto population : data_vector )
-    gsl_fft_complex_radix2_forward (population, 1/*stride*/, 2048);
+    // 
+    // Forward FFT
+    // A stride of 1 accesses the array without any additional spacing between elements. 
+    for ( auto population : data_vector )
+      gsl_fft_complex_radix2_forward (population, 1/*stride*/, 2048);
 
-  // 
-  // Average the power signal
-  std::vector< double > average_power(N);
+    // 
+    // Average the power signal
+    std::vector< double > average_power(N);
  
-  // 
-  for ( int i = 0 ; i < N ; i++ )
-    {
-      // 
-      for ( auto population : data_vector )
-	{
-	  average_power[i]  = REAL(population,i)*REAL(population,i);
-	  average_power[i] += IMAG(population,i)*IMAG(population,i);
-	  average_power[i] /= N;
-	}
-      // 
-      average_power[i] /= number_samples_;
-    }
+    // 
+    for ( int i = 0 ; i < N ; i++ )
+      {
+	// 
+	for ( auto population : data_vector )
+	  {
+	    average_power[i]  = REAL(population,i)*REAL(population,i);
+	    average_power[i] += IMAG(population,i)*IMAG(population,i);
+	    average_power[i] /= N;
+	  }
+	// 
+	average_power[i] /= number_samples_;
+      }
  
 
-  //
-  // 
-  for ( int i = 0 ; i < N ; i++ )
-    {
-      output_stream_ 
-	<< i << " ";
-      // 
-      for ( auto population : data_vector )
+    //
+    // 
+    for ( int i = 0 ; i < N ; i++ )
+      {
 	output_stream_ 
-	  << (REAL(population,i)*REAL(population,i) + IMAG(population,i)*IMAG(population,i)) / N
-	  << " ";
+	  << i << " ";
+	// 
+	for ( auto population : data_vector )
+	  output_stream_ 
+	    << (REAL(population,i)*REAL(population,i) + IMAG(population,i)*IMAG(population,i)) / N
+	    << " ";
 	  
-      // 
-      output_stream_ << average_power[i] << std::endl;
-    }
+	// 
+	output_stream_ << average_power[i] << std::endl;
+      }
 
-  //
-  //
-  Make_output_file("PSD.frame");
+    //
+    //
+    Make_output_file("PSD.frame");
+  }
+  catch( Utils::Exception_handler& err )
+    {
+      std::cerr << err.what() << std::endl;
+    }
 #endif
 #endif      
 }
@@ -257,67 +317,119 @@ void
 Utils::Biophysics::Brain_rhythm::output_XML()
 {
   // 
-  // Build XML output 
-  // 
-  
-  // 
-  // Output XML file initialization
-  dipoles_node_ = fijee_.append_child("dipoles");
-  dipoles_node_.append_attribute("size") = static_cast<int>( populations_.size() );
-  
-  // 
-  std::vector< std::list< std::tuple< double, double > >::const_iterator > 
-    it(number_samples_);
-  
-  // 
-  // loop over the time series
-  for( int population = 0 ; population < number_samples_ ; population++ )
-    {
-      // 
-      // 
-      dipole_node_ = dipoles_node_.append_child("dipole");
-      // 
-      dipole_node_.append_attribute("index")  = populations_[population].get_index_();
-      // 
-      dipole_node_.append_attribute("x") = (populations_[population].get_position_())[0];
-      dipole_node_.append_attribute("y") = (populations_[population].get_position_())[1];
-      dipole_node_.append_attribute("z") = (populations_[population].get_position_())[2];
-      // 
-      dipole_node_.append_attribute("vx") = (populations_[population].get_direction_())[0];
-      dipole_node_.append_attribute("vy") = (populations_[population].get_direction_())[1];
-      dipole_node_.append_attribute("vz") = (populations_[population].get_direction_())[2];
-      // 
-      dipole_node_.append_attribute("I") = populations_[population].get_I_();
-      // 
-      dipole_node_.append_attribute("index_cell") = populations_[population].get_index_cell_();
-      dipole_node_.append_attribute("index_parcel") = populations_[population].get_index_parcel_();
-      // 
-      dipole_node_.append_attribute("lambda1") = (populations_[population].get_lambda_())[0];
-      dipole_node_.append_attribute("lambda2") = (populations_[population].get_lambda_())[1];
-      dipole_node_.append_attribute("lambda3") = (populations_[population].get_lambda_())[2];
-      //
-      dipole_node_.append_attribute("size") = static_cast<int>( population_rhythm_[0].size() );
-
-      // 
-      // Time series
-      it[population] = population_rhythm_[population].begin();
-      // 
-      int index_time_step = 0;
-      while( it[population] !=  population_rhythm_[population].end() )
-	{
-	  //       
-	  time_series_node_ = dipole_node_.append_child("time_step");
-	  // 
-	  time_series_node_.append_attribute("index") = index_time_step++;
-	  time_series_node_.append_attribute("time")  = std::get<0>( *(it[population]) );
-	  // conversion mV -> V
-	  double V = std::get<1>( *(it[population]++) ) - population_V_shift_[population];
-	  time_series_node_.append_attribute("V")     = V * 1.e-03;
-	}
-    }
-
-  
-  // 
   // Statistical analysise
   Make_analysis();
+
+  //
+  //
+  try
+    {  // 
+      // Build XML output 
+      // 
+  
+      // 
+      // Output XML file initialization
+      dipoles_node_ = fijee_.append_child("dipoles");
+      dipoles_node_.append_attribute("size") = static_cast<int>( populations_.size() );
+
+      // 
+      // loop over the time series
+      for( int population = 0 ; population < number_samples_ ; population++ )
+	{
+	  // 
+	  // 
+	  dipole_node_ = dipoles_node_.append_child("dipole");
+	  // 
+	  dipole_node_.append_attribute("index")  = populations_[population].get_index_();
+	  // 
+	  dipole_node_.append_attribute("x") = (populations_[population].get_position_())[0];
+	  dipole_node_.append_attribute("y") = (populations_[population].get_position_())[1];
+	  dipole_node_.append_attribute("z") = (populations_[population].get_position_())[2];
+	  // 
+	  dipole_node_.append_attribute("vx") = (populations_[population].get_direction_())[0];
+	  dipole_node_.append_attribute("vy") = (populations_[population].get_direction_())[1];
+	  dipole_node_.append_attribute("vz") = (populations_[population].get_direction_())[2];
+	  // 
+	  dipole_node_.append_attribute("I") = populations_[population].get_I_();
+	  // 
+	  dipole_node_.append_attribute("index_cell") = populations_[population].get_index_cell_();
+	  dipole_node_.append_attribute("index_parcel") = populations_[population].get_index_parcel_();
+	  // 
+	  dipole_node_.append_attribute("lambda1") = (populations_[population].get_lambda_())[0];
+	  dipole_node_.append_attribute("lambda2") = (populations_[population].get_lambda_())[1];
+	  dipole_node_.append_attribute("lambda3") = (populations_[population].get_lambda_())[2];
+	  //
+	  dipole_node_.append_attribute("size") = static_cast<int>( duration_ - 1 );
+
+	  // 
+	  // Time series
+	  // 
+
+	  // 
+	  // Inflation of data
+	  std::vector< std::vector< Bytef > > ts_word(number_samples_);
+	  std::vector< std::vector< std::string > > ts_values(number_samples_);
+	  //
+	  char*  pch;
+	  Bytef* ts_data;
+	  // 
+	  Utils::Zlib::Compression deflate;
+	  deflate.in_memory_decompression( population_rhythm_[population], ts_word[population] );
+	  // Copy of data
+	  int size_of_word = ts_word[population].size();
+	  ts_data = (Bytef*) malloc( size_of_word * sizeof(Bytef) );
+	  std::copy ( ts_word[population].begin(), ts_word[population].end(), ts_data );
+	  //  Cut of data
+	  pch = strtok(reinterpret_cast<char*>(ts_data)," ");
+	  //
+	  while ( pch != nullptr && size_of_word != 0 )
+	    {
+	      size_of_word -= strlen(pch) + 1;
+	      ts_values[population].push_back(std::string(pch));
+	      pch = strtok (nullptr, " ");
+	    }
+	  // 
+	  if( static_cast<int>(ts_values[population].size()) != 2*(duration_-1) )
+	    {
+	      std::string message = std::string("The size of the inflated data structure is: ")
+		+ std::to_string(ts_values[population].size()) 
+		+ std::string(". It should be: ") + std::to_string(2*(duration_-1))
+		+ std::string(".");
+	      //
+	      throw Utils::Error_handler( message,  __LINE__, __FILE__ );
+	    }
+
+	  // 
+	  // Loop over the time series
+	  int index_time_step = 0;
+	  //      while( it[population] !=  population_rhythm_[population].end() )
+	  for( int i = 1 ; i < duration_ ; i++ )
+	    {
+	      //       
+	      time_series_node_ = dipole_node_.append_child("time_step");
+	      // 
+	      time_series_node_.append_attribute("index") = index_time_step++;
+	      time_series_node_.append_attribute("time")  = ts_values[population][2*(i-1)].c_str();
+	      // conversion mV -> V
+	      double V  = std::stod(ts_values[population][2*(i-1) + 1]);
+	      V        -= population_V_shift_[population];
+	      // 
+	      time_series_node_.append_attribute("V")     = V * 1.e-03;
+	    }
+
+	  //
+	  // clear the data
+	  delete[] ts_data;
+	  ts_data = nullptr;
+//	  // 
+//	  delete[] pch;
+	  pch = nullptr;
+	  //
+	  population_rhythm_[population].clear();
+	}
+    }
+  catch( Utils::Exception_handler& err )
+    {
+      std::cerr << err.what() << std::endl;
+    }
 }

@@ -5,7 +5,7 @@ LDFLAGS   =  -shared
 #
 INC     = -I$(FIJEE)/ 
 LIB_DIR = 
-LIBS    = -lgsl #-pthread 
+LIBS    = #-lgsl #-pthread 
 #
 # Sources
 #
