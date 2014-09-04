@@ -34,7 +34,6 @@
  * \version 0.1
  */
 #include <iostream>
-#include <fstream>      // std::ifstream, std::ofstream
 #include <sstream>
 #include "Utils/pugi/pugixml.hpp"
 /*! \namespace Utils
@@ -51,6 +50,10 @@ namespace Utils
    */
   class XML_writer
   {
+  private:
+    //! Memory managment member. This member is paired with out_XML_file_ in heavy load managment.
+    bool memory_heavy_load_;
+
   protected:
     //! XML file name
     std::string file_name_;
@@ -59,22 +62,30 @@ namespace Utils
     //! Root of the XML tree
     pugi::xml_node fijee_;
 
-  public:
+    // 
+    // Other treatment for heavy load managment
+    // 
+
+    //! XML output stream
+    FILE* out_XML_file_;
+    
+    
+ public:
     /*!
      *  \brief Default Constructor
      *
      *  Constructor of the class XML_writer
      *
      */
-    XML_writer(){};
+  XML_writer():memory_heavy_load_(false){};
     /*!
      *  \brief Default Constructor
      *
      *  Constructor of the class XML_writer
      *
      */
-  XML_writer( std::string File_name ):
-    file_name_( File_name )
+  XML_writer( std::string File_name, bool Memory_heavy_load = false ):
+    memory_heavy_load_(Memory_heavy_load), file_name_( File_name )
       {
  	// Main node fijee
 	fijee_ = document_.append_child("fijee");
@@ -95,7 +106,8 @@ namespace Utils
      */
     virtual ~XML_writer()
       {
-	document_.save_file( file_name_.c_str() ); 
+	if( !memory_heavy_load_ )
+	  document_.save_file( file_name_.c_str() ); 
       };
     /*!
      *  \brief Operator =

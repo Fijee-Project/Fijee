@@ -29,7 +29,7 @@
 // 
 // 
 Utils::Biophysics::Brain_rhythm::Brain_rhythm( const int Duration ):
-  Utils::XML_writer("alpha_rhythm.xml"),
+  Utils::XML_writer( "alpha_rhythm.xml", /*heavy XML*/ true ),
   duration_(Duration)
 {}
 // 
@@ -46,7 +46,9 @@ Utils::Biophysics::Brain_rhythm::load_population_file( std::string Output_path )
   // Load file
   std::string In_population_file_XML = Output_path + "dipoles.xml";
   // XML output
-  set_file_name_( Output_path + "alpha_rhythm.xml" );
+  //set_file_name_( Output_path + "alpha_rhythm.xml" );
+  std::string file = Output_path + std::string("alpha_rhythm.xml");
+  out_XML_file_ = fopen( file.c_str(), "w" );
 
   //
   pugi::xml_document     xml_file;
@@ -323,43 +325,67 @@ Utils::Biophysics::Brain_rhythm::output_XML()
   //
   //
   try
-    {  // 
+    {  
+      // 
+      // XML header
+      // 
+
+      // 
+      // A lot of populations of neurones overload the RAM. We process chunk by chunk to output the 
+      // XML.
+      // Thanks to Arseny Kapoulkine: 
+      // The approach that Arseny usually recommends in this case is as follows:
+      // 
+      //   1. Manually write the XML declaration and the root tag to the stream (<root>)
+      //   2. For each chunk of data, repeat:
+      //   2.1. Append all necessary children to the document
+      //   2.2. Save them to the stream - you can use xml_node::output/xml_node::print for this
+      //   2.3. Remove all children from the document, or just reset() the document.
+      //   3. Write the closing root tag to the stream (</root>)
+      // 
+      std::string text("<?xml version=\"1.0\"?>\n");
+      text += std::string("<fijee xmlns:fijee=\"https://github.com/Fijee-Project/Fijee\">\n");
+      // 
+      fwrite ( text.c_str(), sizeof(char), static_cast<int>( text.size() ), out_XML_file_ );
+      // 
+      pugi::xml_writer_file writer_file( out_XML_file_ );
+
+      
+      // 
       // Build XML output 
       // 
   
       // 
       // Output XML file initialization
-      dipoles_node_ = fijee_.append_child("dipoles");
-      dipoles_node_.append_attribute("size") = static_cast<int>( populations_.size() );
+      pugi::xml_node dipoles_node = fijee_.append_child("dipoles");
+      dipoles_node.append_attribute("size") = static_cast<int>( populations_.size() );
 
       // 
       // loop over the time series
       for( int population = 0 ; population < number_samples_ ; population++ )
 	{
+	  pugi::xml_node dipole_node = dipoles_node.append_child("dipole");
 	  // 
+	  dipole_node.append_attribute("index")  = populations_[population].get_index_();
 	  // 
-	  dipole_node_ = dipoles_node_.append_child("dipole");
+	  dipole_node.append_attribute("x") = (populations_[population].get_position_())[0];
+	  dipole_node.append_attribute("y") = (populations_[population].get_position_())[1];
+	  dipole_node.append_attribute("z") = (populations_[population].get_position_())[2];
 	  // 
-	  dipole_node_.append_attribute("index")  = populations_[population].get_index_();
+	  dipole_node.append_attribute("vx") = (populations_[population].get_direction_())[0];
+	  dipole_node.append_attribute("vy") = (populations_[population].get_direction_())[1];
+	  dipole_node.append_attribute("vz") = (populations_[population].get_direction_())[2];
 	  // 
-	  dipole_node_.append_attribute("x") = (populations_[population].get_position_())[0];
-	  dipole_node_.append_attribute("y") = (populations_[population].get_position_())[1];
-	  dipole_node_.append_attribute("z") = (populations_[population].get_position_())[2];
+	  dipole_node.append_attribute("I") = populations_[population].get_I_();
 	  // 
-	  dipole_node_.append_attribute("vx") = (populations_[population].get_direction_())[0];
-	  dipole_node_.append_attribute("vy") = (populations_[population].get_direction_())[1];
-	  dipole_node_.append_attribute("vz") = (populations_[population].get_direction_())[2];
+	  dipole_node.append_attribute("index_cell") = populations_[population].get_index_cell_();
+	  dipole_node.append_attribute("index_parcel") = populations_[population].get_index_parcel_();
 	  // 
-	  dipole_node_.append_attribute("I") = populations_[population].get_I_();
-	  // 
-	  dipole_node_.append_attribute("index_cell") = populations_[population].get_index_cell_();
-	  dipole_node_.append_attribute("index_parcel") = populations_[population].get_index_parcel_();
-	  // 
-	  dipole_node_.append_attribute("lambda1") = (populations_[population].get_lambda_())[0];
-	  dipole_node_.append_attribute("lambda2") = (populations_[population].get_lambda_())[1];
-	  dipole_node_.append_attribute("lambda3") = (populations_[population].get_lambda_())[2];
+	  dipole_node.append_attribute("lambda1") = (populations_[population].get_lambda_())[0];
+	  dipole_node.append_attribute("lambda2") = (populations_[population].get_lambda_())[1];
+	  dipole_node.append_attribute("lambda3") = (populations_[population].get_lambda_())[2];
 	  //
-	  dipole_node_.append_attribute("size") = static_cast<int>( duration_ - 1 );
+	  dipole_node.append_attribute("size") = static_cast<int>( duration_ - 1 );
 
 	  // 
 	  // Time series
@@ -399,34 +425,56 @@ Utils::Biophysics::Brain_rhythm::output_XML()
 	      throw Utils::Error_handler( message,  __LINE__, __FILE__ );
 	    }
 
+
 	  // 
 	  // Loop over the time series
 	  int index_time_step = 0;
-	  //      while( it[population] !=  population_rhythm_[population].end() )
+	  //
 	  for( int i = 1 ; i < duration_ ; i++ )
 	    {
 	      //       
-	      time_series_node_ = dipole_node_.append_child("time_step");
+	      pugi::xml_node time_series_node = dipole_node.append_child("time_step");
 	      // 
-	      time_series_node_.append_attribute("index") = index_time_step++;
-	      time_series_node_.append_attribute("time")  = ts_values[population][2*(i-1)].c_str();
+	      time_series_node.append_attribute("index") = index_time_step++;
+	      time_series_node.append_attribute("time")  = ts_values[population][2*(i-1)].c_str();
 	      // conversion mV -> V
 	      double V  = std::stod(ts_values[population][2*(i-1) + 1]);
 	      V        -= population_V_shift_[population];
 	      // 
-	      time_series_node_.append_attribute("V")     = V * 1.e-03;
+	      time_series_node.append_attribute("V")     = V * 1.e-03;
 	    }
+	  
 
 	  //
 	  // clear the data
 	  delete[] ts_data;
 	  ts_data = nullptr;
-//	  // 
-//	  delete[] pch;
+	  // 
 	  pch = nullptr;
 	  //
 	  population_rhythm_[population].clear();
-	}
+
+	  // 
+	  // Flush the population in the output file (memory regulation)
+	  if( ( population % 100 == 0 && population != 0 ) || population == number_samples_ - 1 )
+	    {
+	      // Flush the XML file
+	      dipoles_node.print(writer_file, "\t", pugi::format_default, pugi::encoding_auto, 1);
+	      // Reset for the next load
+	      document_.reset();
+	      fijee_ = document_.append_child("fijee");
+	      dipoles_node = fijee_.append_child("dipoles");
+ 	    }
+	} // end of for( int population = 0 ; population < number_samples_ ; population++ )
+
+
+      // 
+      // XML tail
+      fwrite ( "</fijee>\n", sizeof(char), 9, out_XML_file_ );
+
+      // 
+      // close the file
+      fclose (out_XML_file_);
     }
   catch( Utils::Exception_handler& err )
     {

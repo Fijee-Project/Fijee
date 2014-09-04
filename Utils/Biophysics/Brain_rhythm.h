@@ -38,7 +38,8 @@
 #include <list>
 #include <vector>
 #include <tuple>
-#include<cstring>
+#include <cstring>
+#include <stdio.h>
 // 
 // GSL
 // 
@@ -94,17 +95,6 @@ namespace Utils
       std::vector< Population > populations_;
       //! Number of neural populations
       int number_samples_;
-
-      // 
-      // Output file
-      // 
-
-      //! XML output file: dipoles node
-      pugi::xml_node dipoles_node_;
-      //! XML output file: populations node
-      pugi::xml_node dipole_node_;
-      //! XML output file: populations node
-      pugi::xml_node time_series_node_;
 
 
     public:
