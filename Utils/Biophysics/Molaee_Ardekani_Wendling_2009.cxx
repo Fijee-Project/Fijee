@@ -218,25 +218,25 @@ Utils::Biophysics::Molaee_Ardekani_Wendling_2009::modelization_at_electrodes()
       // 
       bool tCS_activated = !parcellation_.empty();
       std::list< std::tuple< double/*time*/, double/*V*/ > >::const_iterator it_tCS_V_ts;
-      std::cout << "Je passe 1 " << number_samples_ << std::endl;
 
       // 
       // Inflation of data
       std::vector< Bytef >  ts_word;
       std::vector< std::string > ts_values;
-      std::cout << "Je passe 3 " << number_samples_ << std::endl;
       //
       char*  pch     = nullptr;
       Bytef* ts_data = nullptr;
       // 
       Utils::Zlib::Compression inflate;
-      std::cout << "Je passe 3 " << number_samples_ << std::endl;
       for ( int population = 0 ; population < number_samples_ ; population++)
 	{
 	  // 
 	  // 
-	  ts_word.clear();
-	  ts_values.clear();
+	  if( !ts_word.empty() )
+	    {
+	      ts_word.clear();
+	      //	      ts_values.clear();
+	    }
 
 	  // 
 	  // Inflation of data
@@ -245,9 +245,8 @@ Utils::Biophysics::Molaee_Ardekani_Wendling_2009::modelization_at_electrodes()
 	  int size_of_word = ts_word.size();
 	  ts_data = new Bytef[size_of_word];
 	  std::copy ( ts_word.begin(), ts_word.end(), ts_data );
-	  std::cout << ts_data << std::endl;
 	  // 
-	  // We lock because of thread collisions
+	  // We lock because of thread collisions (bug C++11?)
 	  {
 	    // lock the population
 	    std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
@@ -306,11 +305,10 @@ Utils::Biophysics::Molaee_Ardekani_Wendling_2009::modelization_at_electrodes()
 	    }
 
 	  // 
-	  //
+	  // 
 	  delete[] ts_data;
-	  ts_data = nullptr;
-	}
-    }
+	  ts_data = nullptr;}
+   }
   catch( Utils::Exception_handler& err )
     {
       std::cerr << err.what() << std::endl;
@@ -324,8 +322,8 @@ Utils::Biophysics::Molaee_Ardekani_Wendling_2009::init()
 {
   // 
   // Initializations
-  //
-  
+  // 
+
   // 
   //
   p_.resize( get_number_of_physical_events() );

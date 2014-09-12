@@ -89,8 +89,6 @@ namespace Utils
     class Brain_rhythm: public Utils::Statistical_analysis, public Utils::XML_writer
     {
     protected:
-      //! Duration of the simulation (ms)
-      int duration_;
       //! Vector of analyse time v.s. potential for each population
       std::vector< std::vector< Bytef > > population_rhythm_;
       //! Vector hoding the offset of a time series regarding the time axes
@@ -101,6 +99,8 @@ namespace Utils
       std::vector< Leadfield_matrix > leadfield_matrix_;
       //! For each electrode (vector) we have a list of alpha rhythm
       std::vector< double* > brain_rhythm_at_electrodes_;
+      //! Duration of the simulation (ms)
+      int duration_;
       //! Number of neural populations
       int number_samples_;
       //! Number of electrodes
@@ -145,7 +145,7 @@ namespace Utils
        *  Constructor of the class Brain_rhythm
        *
        */
-      Brain_rhythm(const Brain_rhythm& ) = delete;
+      Brain_rhythm(const Brain_rhythm& ) = default;
       /*!
        *  \brief Destructor
        *
@@ -159,7 +159,7 @@ namespace Utils
        *  Operator = of the class Brain_rhythm
        *
        */
-      Brain_rhythm& operator = (const Brain_rhythm& ) = delete;
+      Brain_rhythm& operator = (const Brain_rhythm& ) = default;
       
     public:
       /*!

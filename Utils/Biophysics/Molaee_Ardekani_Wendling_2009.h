@@ -79,8 +79,6 @@ namespace Utils
       std::default_random_engine generator_;
       //! Normal distribution
       std::normal_distribution<double> distribution_;
-      //! Duration of the simulation (ms)
-      int duration_;
       //! Number of impulse per second (random noise)
       double pulse_;
 

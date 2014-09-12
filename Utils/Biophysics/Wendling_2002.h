@@ -81,8 +81,6 @@ namespace Utils
       std::normal_distribution< double > gaussian_distribution_;
       //! Excitatory inpulses already drawn from the neighbours
       std::vector< std::vector<bool> > drawn_; 
-      //! Duration of the simulation (ms)
-      int duration_;
       //! Number of impulse per second (random noise)
       double pulse_;
 

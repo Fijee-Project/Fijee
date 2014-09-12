@@ -234,7 +234,7 @@ Utils::Biophysics::Jansen_Rit_1995::modelization_at_electrodes()
 	  ts_data = new Bytef[size_of_word];
 	  std::copy ( ts_word.begin(), ts_word.end(), ts_data );
 	  // 
-	  // We lock because of thread collisions
+	  // We lock because of thread collisions (bug C++11?)
 	  {
 	    // lock the population
 	    std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
@@ -293,7 +293,7 @@ Utils::Biophysics::Jansen_Rit_1995::modelization_at_electrodes()
 	    }
 
 	  // 
-	  //
+	  // 
 	  delete[] ts_data;
 	  ts_data = nullptr;
 	}
