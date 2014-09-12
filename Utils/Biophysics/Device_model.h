@@ -96,11 +96,11 @@ namespace Utils
 	 *
 	 *  This method launch the minimization algorithm
 	 */
-      void alpha_rhythm_at_electrodes( std::string Output_File )
+      void alpha_rhythm_at_electrodes( std::string Output_File, const int Number_of_alpha_files=1 )
 	{
  	  //
 	  // load populations file and initialize the number of samples
-	  device_activity_.load_files( Output_File );
+	  device_activity_.load_files( Output_File, Number_of_alpha_files );
 
 	  //
 	  // Define the number of threads in the pool of threads

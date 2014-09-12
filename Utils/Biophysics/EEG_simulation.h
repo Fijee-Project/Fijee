@@ -26,7 +26,6 @@
 //  either expressed or implied, of the FreeBSD Project.  
 #ifndef EEG_SIMULATION_H
 #define EEG_SIMULATION_H
-//http://franckh.developpez.com/tutoriels/outils/doxygen/
 /*!
  * \file EEG_simulation.h
  * \brief brief describe 
@@ -35,6 +34,7 @@
  */
 #include <iostream>
 #include <string>
+#include <cstring>
 #include <vector>
 #include <list>
 #include <map>
@@ -55,6 +55,7 @@
 // UCSF
 //
 #include "Utils/pugi/pugixml.hpp"
+#include "Utils/Compression/Fijee_compression.h"
 #include "Utils/Biophysics/Population.h"
 #include "Utils/Biophysics/Leadfield_matrix.h"
 #include "Utils/Statistical_analysis.h"
@@ -85,9 +86,11 @@ namespace Utils
     class EEG_simulation: public Utils::Statistical_analysis, public Utils::XML_writer
     {
     private:
+      //! Vector of analyse time v.s. potential for each population
+      std::vector< std::vector< Bytef > > population_rhythm_;
       //! Vector of populations
       std::vector< Population/*dipole*/ > populations_;
-      //! Vector of electrodes holding the dipole influence
+      //! Vector of electrodes holding dipoles influence
       std::vector< Leadfield_matrix > leadfield_matrix_;
       //! For each electrode (vector) we have a list of alpha rhythm
       std::vector< std::vector< std::tuple< double/*time*/, double/*V*/ > > > 
@@ -122,7 +125,7 @@ namespace Utils
        *  Constructor of the class EEG_simulation
        *
        */
-      EEG_simulation(const EEG_simulation& ){};
+      EEG_simulation(const EEG_simulation& ) = delete;
       /*!
        *  \brief Destructor
        *
@@ -136,7 +139,7 @@ namespace Utils
        *  Operator = of the class EEG_simulation
        *
        */
-      EEG_simulation& operator = (const EEG_simulation& ){return *this;};
+      EEG_simulation& operator = (const EEG_simulation& ) = delete;
       
     public:
       /*!
@@ -146,7 +149,7 @@ namespace Utils
        *
        * \param In_population_file_XML: input files in XML format.
        */
-      void load_files( const std::string );
+      void load_files( const std::string, const int Number_of_alpha_files = 1 );
       /*!
        *  \brief Load transcranial stimulation file
        *

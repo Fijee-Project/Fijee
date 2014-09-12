@@ -31,6 +31,7 @@
 // Afterward, it should be a class member!!
 // 
 static thread_local int local_population_;
+static thread_local int local_electrode_;
 // 
 // 
 // 
@@ -167,10 +168,122 @@ Utils::Biophysics::Wendling_2002::modelization()
   // Clean area
   delete[] local_population_rhythm;
   local_population_rhythm = nullptr;
-  delete[] array_to_compress;
+  free(array_to_compress);
   array_to_compress = nullptr;
   // 
   gsl_odeiv2_driver_free (driver);
+}
+// 
+// 
+//
+void
+Utils::Biophysics::Wendling_2002::modelization_at_electrodes()
+{
+  try
+    {
+      // 
+      // 
+      std::cout << "Electrode: " << local_electrode_ << std::endl;
+      
+      // 
+      // initialization of vector of vector (must be all the same size)
+      brain_rhythm_at_electrodes_[local_electrode_] = new double[ 2*(duration_-1) ];
+      // 
+      bool tCS_activated = !parcellation_.empty();
+      std::list< std::tuple< double/*time*/, double/*V*/ > >::const_iterator it_tCS_V_ts;
+
+      // 
+      // Inflation of data
+      std::vector< Bytef >  ts_word;
+      std::vector< std::string > ts_values;
+      //
+      char*  pch     = nullptr;
+      Bytef* ts_data = nullptr;
+      // 
+      Utils::Zlib::Compression inflate;
+      for ( int population = 0 ; population < number_samples_ ; population++)
+	{
+	  // 
+	  // 
+	  ts_word.clear();
+	  ts_values.clear();
+
+	  // 
+	  // Inflation of data
+	  inflate.in_memory_decompression( population_rhythm_[population], ts_word );
+	  // Copy of data
+	  int size_of_word = ts_word.size();
+	  ts_data = new Bytef[size_of_word];
+	  std::copy ( ts_word.begin(), ts_word.end(), ts_data );
+	  // 
+	  // We lock because of thread collisions
+	  {
+	    // lock the population
+	    std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
+	    // Cut of data
+	    pch = strtok(reinterpret_cast<char*>(ts_data)," ");
+	    //
+	    while ( pch != nullptr && size_of_word != 0 )
+	      {
+		size_of_word -= strlen(pch) + 1;
+		ts_values.push_back( std::string(pch) );
+		pch = strtok (nullptr, " ");
+	      }
+	  }
+	  // 
+	  if( static_cast<int>(ts_values.size()) != 2*(duration_-1) )
+	    {
+	      std::string message = std::string("The size of the inflated data structure is: ")
+		+ std::to_string(ts_values.size()) 
+		+ std::string(". It should be: ") + std::to_string(2*(duration_-1))
+		+ std::string(".");
+	      //
+	      throw Utils::Error_handler( message,  __LINE__, __FILE__ );
+	    }
+
+	  // 
+	  // Which parcel belong the population
+	  int parcel = populations_[population].get_index_parcel_();
+	  if( tCS_activated ) // index parcel starts at 1
+	    it_tCS_V_ts = parcellation_[parcel-1].get_V_time_series_().begin(); 
+
+
+	  // 
+	  // Loop over the time series
+	  
+	  for( int i = 1 ; i < duration_ ; i++ )
+	    {
+	      // get the time
+	      double time = std::stod( ts_values[2*(i-1)] );
+	      brain_rhythm_at_electrodes_[local_electrode_][2*(i-1)] = time;
+	      // get the potential
+	      double V = std::stod( ts_values[2*(i-1) + 1] ) - population_V_shift_[population];
+	      V *= 1.e-03; // mv -> V
+	      V *= (leadfield_matrix_[local_electrode_].get_V_dipole_())[population];
+	      // tCS
+	      if( tCS_activated )
+		if( it_tCS_V_ts != parcellation_[parcel-1].get_V_time_series_().end() )
+		  if( std::get<0>(*it_tCS_V_ts) == time)
+		    {
+		      V += std::get<1>(*it_tCS_V_ts);
+		      it_tCS_V_ts++;
+		    }
+
+	      //
+	      // 
+	      brain_rhythm_at_electrodes_[local_electrode_][2*(i-1) + 1] += V;
+	    }
+
+	  // 
+	  //
+	  delete[] ts_data;
+	  ts_data = nullptr;
+	}
+    }
+  catch( Utils::Exception_handler& err )
+    {
+      std::cerr << err.what() << std::endl;
+    }
 }
 // 
 // 
@@ -221,24 +334,63 @@ Utils::Biophysics::Wendling_2002::init()
 //
 //
 void 
-Utils::Biophysics::Wendling_2002::operator () ()
+Utils::Biophysics::Wendling_2002::operator () ( const Pop_to_elec_type Threading )
 {
   //
   // Mutex the population poping process
   //
   try 
     {
-      // lock the population
-      std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
-      // 
-      local_population_ = population_++;
+      switch(Threading)
+	{
+	case POP:
+	  {
+	    // Block for the lock guard
+	    {
+	      // lock the population
+	      std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
+	      // 
+	      local_population_ = population_++;
+	    }
+
+	    // 
+	    // Generate alpha rhythm for population local_population_
+	    modelization();
+
+	    // 
+	    break;
+	  };
+	case ELEC:
+	  {
+	    // Block for the lock guard
+	    {
+	      // lock the population
+	      std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
+	      // 
+	      local_electrode_ = electrode_++;
+	    }
+
+	    // 
+	    // Generate alpha rhythm for electrode local_electrode_
+	    modelization_at_electrodes();
+
+	    // 
+	    break;
+	  };
+	default:
+	    {
+	      std::string message = std::string("You are asking for the wrong Threading type: ");
+	      throw Utils::Exit_handler( message, 
+					 __LINE__, __FILE__ );
+	    };
+	}
     }
   catch (std::logic_error&) 
     {
       std::cerr << "[exception caught]\n" << std::endl;
     }
-
-  // 
-  // Generate alpha rhythm for population local_population_
-  modelization();
+  catch( Utils::Exception_handler& err )
+    {
+      std::cerr << err.what() << std::endl;
+    }
 }

@@ -184,7 +184,7 @@ namespace Utils
 	 *  Operator () of the class SL_subtraction
 	 *
 	 */
-	virtual void operator () ();
+	virtual void operator () ( const Pop_to_elec_type );
      
     public:
 	/*!
@@ -200,7 +200,14 @@ namespace Utils
 	 *  This member function build an alpha rhythm based on Wendling (2009) mathematical model.
  	 *
 	 */
-      virtual void modelization();
+	virtual void modelization();
+	/*!
+	 *  \brief  Brain rhythm modelization at electrodes
+	 *
+	 *  This member function build an alpha rhythm at electrodes based on Wendling (2009) mathematical model.
+ 	 *
+	 */
+	virtual void modelization_at_electrodes();
 
     private:
       /*!

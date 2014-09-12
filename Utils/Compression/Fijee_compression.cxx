@@ -99,7 +99,8 @@ Utils::Zlib::Compression::in_memory_decompression( const std::vector<Bytef>& Dat
 
   // 
   // Copy the data in a simple strcture
-  Bytef* data_in = (Bytef*) malloc( Data_in.size() * sizeof(Bytef) );
+  //  Bytef* data_in = (Bytef*) malloc( Data_in.size() * sizeof(Bytef) );
+  Bytef* data_in = new Bytef[Data_in.size()];
   std::copy ( Data_in.begin(), Data_in.end(), data_in );
 
   // 
@@ -145,5 +146,8 @@ Utils::Zlib::Compression::in_memory_decompression( const std::vector<Bytef>& Dat
   
   // 
   // clean up
+  delete[] data_in;
+  data_in = nullptr;
+  //
   (void)inflateEnd(&strm);
 }

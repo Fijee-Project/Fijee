@@ -93,9 +93,24 @@ namespace Utils
      */
     void Make_output_file( const char* file_name)
     {
-      file_.open( file_name );
+      file_.open( file_name, std::ofstream::out );
       file_ << output_stream_.rdbuf();
       file_.close();  
+    };
+    /*!
+     */
+    void Append_output_file( const char* file_name)
+    {
+      file_.open( file_name, std::ofstream::app );
+      if ( file_.is_open() )
+	{
+	  file_ << output_stream_.rdbuf();
+	  file_.close();  
+	}
+      else
+	{
+	  std::cerr << "Error opening file:" << file_name << std::endl;
+	}
     };
 
   private:

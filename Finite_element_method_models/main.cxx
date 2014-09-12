@@ -55,49 +55,50 @@ int main()
   // 
   solver_parameters->init();
 
-  // 
-  // tACS electrodes' setup
-  std::vector< std::tuple<std::string, double> > positive_electrodes;
-  positive_electrodes.push_back( std::make_tuple("T7", 0.00112 /*[A]*/) );
-  //  positive_electrodes.push_back( std::make_tuple("FT7", 0.00112 /*[A]*/) );
-  std::vector< std::tuple<std::string, double> > negative_electrodes;
-  negative_electrodes.push_back( std::make_tuple("T8", -0.00112 / 4. /*[A]*/) );
-  negative_electrodes.push_back( std::make_tuple("F8", -0.00112 / 4. /*[A]*/) );
-  negative_electrodes.push_back( std::make_tuple("C4", -0.00112 / 4. /*[A]*/) );
-  negative_electrodes.push_back( std::make_tuple("P8", -0.00112 / 4. /*[A]*/) );
-  //  Electrodes::Electrodes_setup< Electrodes::Electrodes_tACS >
-  Electrodes::Electrodes_tACS test_electrodes( positive_electrodes, negative_electrodes,
-					       10 /*[Hz]*/, 0.0005 /*[A] Amplitude*/,
-					       0.1 /*[s] elapse time*/, 
-					       1. /*[s] starting time*/ );
-  // 
-  test_electrodes.output_XML("/home/cobigo/subjects/GazzDCS0004mgh_GPU4/fem/output/");
+//  // 
+//  // tACS electrodes' setup
+//  std::vector< std::tuple<std::string, double> > positive_electrodes;
+//  positive_electrodes.push_back( std::make_tuple("T7", 0.00112 /*[A]*/) );
+//  //  positive_electrodes.push_back( std::make_tuple("FT7", 0.00112 /*[A]*/) );
+//  std::vector< std::tuple<std::string, double> > negative_electrodes;
+//  negative_electrodes.push_back( std::make_tuple("T8", -0.00112 / 4. /*[A]*/) );
+//  negative_electrodes.push_back( std::make_tuple("F8", -0.00112 / 4. /*[A]*/) );
+//  negative_electrodes.push_back( std::make_tuple("C4", -0.00112 / 4. /*[A]*/) );
+//  negative_electrodes.push_back( std::make_tuple("P8", -0.00112 / 4. /*[A]*/) );
+//  //  Electrodes::Electrodes_setup< Electrodes::Electrodes_tACS >
+//  Electrodes::Electrodes_tACS electrodes_setting( positive_electrodes, negative_electrodes,
+//					            10 /*[Hz]*/, 0.0005 /*[A] Amplitude*/,
+//					            0.1 /*[s] elapse time*/, 
+//					            1. /*[s] starting time*/ );
+//  // 
+//  electrodes_setting.output_XML( solver_parameters->get_files_path_output_() );
   
-//  //
-//  // Physical models:
-//  //  - Source localization
-//  //    - Solver::SL_subtraction
-//  //    - Solver::SL_direct
-//  //  - Transcranial current stimulation
-//  //    - Solver::tCS_tDCS
-//  //    - Solver::tCS_tACS
-//  //  - Local conductivity estimation
-//  //    - Solver::tCS_tDCS_local_conductivity
-//  //
-//  // export OMP_NUM_THREADS=2
-//  Solver::Model_solver< /* physical model */ Solver::tCS_tACS,
-//		        /*solver_parameters->get_number_of_threads_()*/ 4 >  model;
-//  //
-//  std::cout << "Loop over solvers" << std::endl;
-//  model.solver_loop();
-//  model.XML_output();
+  //
+  // Physical models:
+  //  - Source localization
+  //    - Solver::SL_subtraction
+  //    - Solver::SL_direct
+  //  - Transcranial current stimulation
+  //    - Solver::tCS_tDCS
+  //    - Solver::tCS_tACS
+  //  - Local conductivity estimation
+  //    - Solver::tCS_tDCS_local_conductivity
+  //
+  // export OMP_NUM_THREADS=2
+  Solver::Model_solver< /* physical model */ Solver::tCS_tACS,
+		        /*solver_parameters->get_number_of_threads_()*/ 1 >  model;
+  //
+  std::cout << "Loop over solvers" << std::endl;
+  model.solver_loop();
+  model.XML_output();
 
-  // 
-  // Simulation of alpha rhythm at the electrodes
-  // 
-  Utils::Biophysics::Device_model< Utils::Biophysics::EEG_simulation, 4 > eeg_simulation;
-  eeg_simulation.alpha_rhythm_at_electrodes( solver_parameters->get_files_path_output_() );
-  eeg_simulation.output();
+//  // 
+//  // Simulation of alpha rhythm at the electrodes
+//  // 
+//  Utils::Biophysics::Device_model< Utils::Biophysics::EEG_simulation, 4 > eeg_simulation;
+//  // 
+//  eeg_simulation.alpha_rhythm_at_electrodes( solver_parameters->get_files_path_output_() );
+//  eeg_simulation.output();
 
 
   //

@@ -63,7 +63,7 @@ Solver::tCS_tACS::tCS_tACS():
   file_current_density_time_series_.reset( new File( file_filed_potential_ts_name.c_str() ) );
   // 
   std::string file_E_ts_name = (SDEsp::get_instance())->get_files_path_result_() + 
-    std::string("tDCS_E_time_series.pvd");
+    std::string("tACS_E_time_series.pvd");
   file_E_time_series_.reset(new File(file_E_ts_name.c_str()));
   
   // 

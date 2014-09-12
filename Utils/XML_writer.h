@@ -62,12 +62,12 @@ namespace Utils
     //! Root of the XML tree
     pugi::xml_node fijee_;
 
-    // 
-    // Other treatment for heavy load managment
-    // 
-
-    //! XML output stream
-    FILE* out_XML_file_;
+//    // 
+//    // Other treatment for heavy load managment
+//    // 
+//
+//    //! XML output stream
+//    FILE* out_XML_file_;
     
     
  public:

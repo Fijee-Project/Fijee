@@ -43,103 +43,152 @@ Utils::Biophysics::EEG_simulation::EEG_simulation():
 // 
 // 
 void
-Utils::Biophysics::EEG_simulation::load_files( std::string Output_path )
+Utils::Biophysics::EEG_simulation::load_files( std::string Output_path, const int Number_of_alpha_files )
 {
   // 
   // Load file population's alpha rhythm
   // 
 
-  // XML output
-  set_file_name_( Output_path + "eeg_alpha_rhythm.xml" );
-
   //
   // Read the populations xml file
   std::cout << "Load populations file for alpha generation" << std::endl;
-  //
-  std::string In_population_file_XML = Output_path + "alpha_rhythm.xml";
-  pugi::xml_document     xml_file;
-  pugi::xml_parse_result result = xml_file.load_file( In_population_file_XML.c_str() );
-  //
-  switch( result.status )
-    {
-    case pugi::status_ok:
-      {
-	//
-	// Check that we have a FIJEE XML file
-	const pugi::xml_node fijee_node = xml_file.child("fijee");
-	if (!fijee_node)
-	  {
-	    std::cerr << "Read data from XML: Not a FIJEE XML file" << std::endl;
-	    exit(1);
-	  }
+  // XML output
+  set_file_name_( Output_path + "eeg_alpha_rhythm.xml" );
 
-	// 
-	// Get sampling
-	const pugi::xml_node dipoles_node = fijee_node.child("dipoles");
-	if (!dipoles_node)
-	  {
-	    std::cerr << "Read data from XML: no dipoles node" << std::endl;
-	    exit(1);
-	  }
-	// Get the number of samples
-	populations_.resize( dipoles_node.attribute("size").as_int() );
-	// loop over the samples
-	for ( auto dipole : dipoles_node )
+  for( int sub_file = 0 ; sub_file < Number_of_alpha_files ; sub_file++ )
+    {
+      //
+      std::string In_population_file_XML = Output_path + std::string("alpha_rhythm_");
+      In_population_file_XML            += std::to_string( sub_file ) + std::string(".xml");
+      std::cout << In_population_file_XML << std::endl;
+      pugi::xml_document     xml_file;
+      pugi::xml_parse_result result = xml_file.load_file( In_population_file_XML.c_str() );
+      //
+      switch( result.status )
+	{
+	case pugi::status_ok:
 	  {
 	    //
-	    // Get the number of populations
-	    int dipole_number = dipole.attribute("index").as_int();
-
-	    // 
-	    // load dipole information in populations vector
-	    Population neurons( dipole_number,
-				dipole.attribute("x").as_double(),
-				dipole.attribute("y").as_double(),
-				dipole.attribute("z").as_double(),
-				dipole.attribute("vx").as_double(),
-				dipole.attribute("vy").as_double(),
-				dipole.attribute("vz").as_double(),
-				dipole.attribute("I").as_double(),
-				dipole.attribute("index_cell").as_int(),
-				dipole.attribute("index_parcel").as_int(),
-				dipole.attribute("lambda1").as_double(),
-				dipole.attribute("lambda2").as_double(),
-				dipole.attribute("lambda3").as_double() );
-	    // 
-	    populations_[dipole_number] = std::move( neurons );
-
-	    // 
-	    // Get time step sampling
-	    std::list< std::tuple<double,double> > v_time_series;
-	    // loop over the time series
-	    for ( auto time_step : dipole )
-	      v_time_series.push_back( std::make_tuple( time_step.attribute("time").as_double(),
-							time_step.attribute("V").as_double() ));
-	    // Check
-	    if( static_cast<int>(v_time_series.size()) != dipole.attribute("size").as_int() )
+	    // Check that we have a FIJEE XML file
+	    const pugi::xml_node fijee_node = xml_file.child("fijee");
+	    if (!fijee_node)
 	      {
-		std::cerr << "The potential time series list size does not match the "
-			  << In_population_file_XML
-			  << " file."
-			  << std::endl;
-		std::cerr << "Potential time series list size: " << v_time_series.size() 
-			  << std::endl;
-		std::cerr << In_population_file_XML
-			  << " file: " <<  dipole.attribute("size").as_int()
-			  << std::endl;
-		abort();
+		std::cerr << "Read data from XML: Not a FIJEE XML file" << std::endl;
+		exit(1);
 	      }
+
 	    // 
-	    populations_[dipole_number].set_V_time_series( std::move(v_time_series) );
+	    // Get sampling
+	    const pugi::xml_node dipoles_node = fijee_node.child("dipoles");
+	    if (!dipoles_node)
+	      {
+		std::cerr << "Read data from XML: no dipoles node" << std::endl;
+		exit(1);
+	      }
+	    // Get the number of samples
+	    if( sub_file == 0 )
+	      {
+		populations_.resize( dipoles_node.attribute("size").as_int() );
+		population_rhythm_.resize( dipoles_node.attribute("size").as_int() );
+	      }
+	    // loop over the samples
+	    for ( auto dipole : dipoles_node )
+	      {
+		//
+		// Get the number of populations
+		int dipole_number = dipole.attribute("index").as_int();
+
+		// 
+		// load dipole information in populations vector
+		Population neurons( dipole_number,
+				    dipole.attribute("x").as_double(),
+				    dipole.attribute("y").as_double(),
+				    dipole.attribute("z").as_double(),
+				    dipole.attribute("vx").as_double(),
+				    dipole.attribute("vy").as_double(),
+				    dipole.attribute("vz").as_double(),
+				    dipole.attribute("I").as_double(),
+				    dipole.attribute("index_cell").as_int(),
+				    dipole.attribute("index_parcel").as_int(),
+				    dipole.attribute("lambda1").as_double(),
+				    dipole.attribute("lambda2").as_double(),
+				    dipole.attribute("lambda3").as_double() );
+		// 
+		populations_[dipole_number] = std::move( neurons );
+
+		// 
+		// Get time step sampling
+		std::list< std::string > v_time_series;
+		int char_array_size = 0;
+		// loop over the time series
+		for ( auto time_step : dipole )
+		  {
+		    std::string 
+		      ts_time = std::string(time_step.attribute("time").as_string())+std::string(" "),
+		      ts_V    = std::string(time_step.attribute("V").as_string())+std::string(" ");
+		    // 
+		    char_array_size += ts_time.size() + ts_V.size();
+		    // 
+		    v_time_series.push_back( ts_time );
+		    v_time_series.push_back( ts_V );
+		  }
+		// Check
+		if( static_cast<int>(v_time_series.size()) != 2*dipole.attribute("size").as_int() )
+		  {
+		    std::cerr << "The potential time series list size does not match the "
+			      << In_population_file_XML
+			      << " file."
+			      << std::endl;
+		    std::cerr << "Potential time series list size: " << v_time_series.size() 
+			      << std::endl;
+		    std::cerr << In_population_file_XML
+			      << " file: " <<  dipole.attribute("size").as_int()
+			      << std::endl;
+		    abort();
+		  }
+
+		// 
+		// Convert strings into an array of char
+		char* array_to_compress = (char*)malloc( char_array_size*sizeof(char) );
+		std::list< std::string >::iterator it_ts = v_time_series.begin();
+		// first occurence
+		strcpy( array_to_compress, (*it_ts).c_str() );
+		it_ts++;
+		//
+		//		while ( it_ts != v_time_series.end() )
+		for ( ; it_ts != v_time_series.end() ; it_ts++ )
+		  strcat(array_to_compress, (*it_ts).c_str());
+		//
+		Utils::Zlib::Compression deflate;
+		deflate.in_memory_compression( array_to_compress, char_array_size, 
+					       population_rhythm_[dipole_number] );
+		
+		// 
+		// Clean area
+		delete[] array_to_compress;
+		array_to_compress = nullptr;
+
+		// 
+		// 
+		// 
+		//populations_[dipole_number].set_V_time_series( std::move(v_time_series) );
+	      }
+	    //
+	    break;
+	  };
+	case pugi::status_out_of_memory:
+	  {
+	    std::cout << "We will use SAX2 libxml2" << std::endl;
+	    xml_file.reset();
+	    exit(1);
+	    break;
+	  };
+	default:
+	  {
+	    std::cerr << "Error reading XML file: " << result.description() << std::endl;
+	    exit(1);
 	  }
-	//
-	break;
-      };
-    default:
-      {
-	std::cerr << "Error reading XML file: " << result.description() << std::endl;
-	exit(1);
-      }
+	}
     }
 
 

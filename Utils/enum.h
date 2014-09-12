@@ -331,6 +331,15 @@ enum Electrode_type
     SPHERE      = 1,
     CYLINDER    = 2,
   };
+//
+//
+//
+enum Pop_to_elec_type
+  {
+    NO_POP_TYPE = 0,
+    POP         = 1,
+    ELEC        = 2
+  };
 
 
 #endif

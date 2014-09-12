@@ -31,6 +31,7 @@
 // UCSF project
 //
 #include "Utils/Thread_dispatching.h"
+#include "Utils/enum.h"
 //
 //
 /*!
@@ -92,9 +93,9 @@ namespace Utils
 
       public:
 	/*!
-	 *  \brief minimize function
+	 *  \brief Modelization
 	 *
-	 *  This method launch the minimization algorithm
+	 *  This method process the modellization of neural population alpha rhythm. 
 	 */
       void modelization( std::string Output_File )
 	{
@@ -115,7 +116,34 @@ namespace Utils
 	       physical_event != neural_polpulation_activity_.get_number_of_physical_events() ; 
 	       physical_event++ )
 	    // Enqueue tasks
-	    pool.enqueue( std::ref(neural_polpulation_activity_) );
+	    pool.enqueue( std::ref(neural_polpulation_activity_), POP );
+	};
+	/*!
+	 *  \brief Modelization at electrodes
+	 *
+	 *  This method 
+	 */
+      void modelization_at_electrodes( std::string Output_File, const double Lambda = 0 )
+	{
+	  //
+	  // load leadfield matrix file
+	  neural_polpulation_activity_.load_leadfield_matrix_file( Output_File );
+	  // 
+	  if( Lambda != 0 )
+	    neural_polpulation_activity_.load_electric_field_file( Output_File, Lambda );
+	    
+      
+	  //
+	  // Define the number of threads in the pool of threads
+	  Utils::Thread_dispatching pool( num_of_threads );
+	  
+	  //
+	  //
+	  for( int physical_event = 0 ;
+	       physical_event != neural_polpulation_activity_.get_number_of_electrodes_() ; 
+	       physical_event++ )
+	    // Enqueue tasks
+	    pool.enqueue( std::ref(neural_polpulation_activity_), ELEC );
 	};
 	/*!
 	 *  \brief minimize function
@@ -127,6 +155,7 @@ namespace Utils
 	  // 
 	  // Generation of output
 	  neural_polpulation_activity_.output_XML();
+	  neural_polpulation_activity_.output_electrodes_XML();
 	};
       };
   }
