@@ -58,6 +58,7 @@
 namespace Biophysics
 {
   /*! \class Jansen_Rit_1995
+   *
    * \brief class representing the first cortical activity model
    *
    *  This class implement the Jansen and Rit model. It is the first mathematical cortical activity model, representing alpha waves. 

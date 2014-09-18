@@ -24,4 +24,4 @@ add_library( FijeeBiophysics ${Fijee_H} ${HEADERS} ${SOURCES} )
 # Add FijeeUtils target libraries
 target_link_libraries( FijeeBiophysics ${Fijee_TARGET_LINK_LIBRARIES} )
 # Install
-install( TARGETS FijeeBiophysics LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib )
+install( TARGETS FijeeBiophysics EXPORT FijeeTargets LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib )

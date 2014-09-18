@@ -50,7 +50,6 @@ if(DOLFIN_FOUND)
   message("DOLFIN FOUND at ${DOLFIN_INCLUDE_DIRS} ${DOLFIN_3D_PARTY_LIBRARIES}")
   include(${DOLFIN_USE_FILE})
   list (APPEND LIBS ${DOLFIN_3RD_PARTY_LIBRARIES} ${DOLFIN_LIBRARIES})
-  message (${LIBS})
 #  add_definitions(${DOLFIN_CXX_DEFINITIONS})
 #  include_directories(${DOLFIN_INCLUDE_DIRS})
 #  list (APPEND LIBS ${DOLFIN_3D_PARTY_LIBRARIES})
@@ -119,9 +118,12 @@ message("\n== Generating build files ==\n")
 
 #
 # Env
-set(Fijee_LIBRARY_DIR ${CMAKE_BINARY_DIR}/lib)
-set(Fijee_INCLUDE_DIR ${CMAKE_BINARY_DIR}/include)
-set(Fijee_BIN_DIR ${CMAKE_BINARY_DIR}/bin)
+set(Fijee_LIBRARY_DIR ${CMAKE_INSTALL_PREFIX}/lib)
+set(Fijee_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include)
+set(Fijee_BIN_DIR ${CMAKE_INSTALL_PREFIX}/bin)
+set(Fijee_CMAKE_DIR ${CMAKE_INSTALL_PREFIX}/lib/cmake/Fijee-${Fijee_VERSION})
+
+
 #
 include_directories( SYSTEM )
 
@@ -130,10 +132,53 @@ include_directories( SYSTEM )
 set(Fijee_CXX_DEFINITIONS "")
 set(Fijee_LINK_FLAGS "")
 set(Fijee_TARGET_LINK_LIBRARIES "")
+#
+IF (NOT DEFINED Fijee_TRACE)
+    SET(Fijee_TRACE 0)
+ENDIF()
+#
+ADD_DEFINITIONS(-DTRACE=${Fijee_TRACE})
+#
 
 
 #
 # Import all the source 
 add_subdirectory(Fijee)
 
+#
+# Fijee configuration
+#
+
+#set( Find_Fijee ${Fijee_SOURCE_DIR}/cmake/modules/FindFijee.cmake )
+#install( FILES ${Find_Fijee} DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/cmake/Fijee.${Fijee_VERSION} )
+
+# Add all targets to the build-tree export set
+export( TARGETS FijeeUtils FijeeBiophysics
+  FILE "${PROJECT_BINARY_DIR}/FijeeTargets.cmake" )
+#
+include_directories( "${Fijee_INCLUDE_DIR}" )
+message("${INCLUDE_DIRECTORIES}")
+message("${}")
+# Create the FijeeConfig.cmake and FijeeConfigVersion files
+file( RELATIVE_PATH REL_INCLUDE_DIR 
+  "${Fijee_CMAKE_DIR}" 
+  "${Fijee_INCLUDE_DIR}" )
+# ... for the build tree
+set( CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}" )
+configure_file( FijeeConfig.cmake.in "${PROJECT_BINARY_DIR}/FijeeConfig.cmake" @ONLY )
+# ... for the install tree
+set( CONF_INCLUDE_DIRS "\${Fijee_CMAKE_DIR}/${REL_INCLUDE_DIR}" )
+configure_file( FijeeConfig.cmake.in 
+  "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/FijeeConfig.cmake" @ONLY )
+# ... for both
+configure_file( FijeeConfigVersion.cmake.in 
+  "${PROJECT_BINARY_DIR}/FijeeConfigVersion.cmake" @ONLY)
+# Install the FijeeConfig.cmake and FijeeConfigVersion.cmake
+install(FILES
+  "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/FijeeConfig.cmake"
+  "${PROJECT_BINARY_DIR}/FijeeConfigVersion.cmake"
+  DESTINATION "${Fijee_CMAKE_DIR}" COMPONENT dev)
+# Install the export set for use with the install-tree
+install(EXPORT FijeeTargets DESTINATION
+  "${Fijee_CMAKE_DIR}" COMPONENT dev)
 

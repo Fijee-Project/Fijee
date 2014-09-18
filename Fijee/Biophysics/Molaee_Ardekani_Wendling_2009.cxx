@@ -230,11 +230,8 @@ Biophysics::Molaee_Ardekani_Wendling_2009::modelization_at_electrodes()
 	{
 	  // 
 	  // 
-	  if( !ts_word.empty() )
-	    {
-	      ts_word.clear();
-	      //	      ts_values.clear();
-	    }
+	  ts_word.clear();
+	  ts_values.clear();
 
 	  // 
 	  // Inflation of data
@@ -305,7 +302,8 @@ Biophysics::Molaee_Ardekani_Wendling_2009::modelization_at_electrodes()
 	  // 
 	  // 
 	  delete[] ts_data;
-	  ts_data = nullptr;}
+	  ts_data = nullptr;
+	}
     }
   catch( Fijee::Exception_handler& err )
     {

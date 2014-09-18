@@ -40,7 +40,6 @@
 #include <random>
 #include <vector>
 #include <list>
-#include <map>
 #include <memory>
 #include <mutex>
 #include <stdexcept>      // std::logic_error
@@ -72,7 +71,7 @@ namespace Biophysics
     std::default_random_engine generator_;
     //! Normal distribution
     std::normal_distribution<double> distribution_;
-    //! Number of impulse per second (random noise)
+    //! Number of pulse per second (random noise)
     double pulse_;
 
     // 
@@ -125,9 +124,6 @@ namespace Biophysics
     //! White noise
     std::vector< double > p_;
 
-    //! White noise
-    std::vector< std::map<double,double> > time_;
-     
     // 
     // Multi-threading
     // 

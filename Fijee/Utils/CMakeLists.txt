@@ -27,4 +27,4 @@ add_library( FijeeUtils ${Fijee_H} ${HEADERS} ${SOURCES} )
 # Add FijeeUtils target libraries
 #target_link_libraries( FijeeUtils ${Fijee_TARGET_LINK_LIBRARIES} )
 # Install
-install( TARGETS FijeeUtils LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib )
+install( TARGETS FijeeUtils EXPORT FijeeTargets LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib )
