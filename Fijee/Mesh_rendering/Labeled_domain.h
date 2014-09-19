@@ -32,7 +32,7 @@
 //
 // UCSF
 //
-#include "Utils/enum.h"
+#include "Fijee/Fijee_enum.h"
 //
 // Project
 //

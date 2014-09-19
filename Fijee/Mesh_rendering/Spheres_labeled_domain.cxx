@@ -31,7 +31,7 @@
 // UCSF
 //
 #include "Spheres_labeled_domain.h"
-#include "Utils/enum.h"
+#include "Fijee/Fijee_enum.h"
 #include "Labeled_domain.h"
 #include "Spheres_implicite_domain.h"
 #include "Access_parameters.h"

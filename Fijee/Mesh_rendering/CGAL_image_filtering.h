@@ -42,7 +42,7 @@
 //
 // UCSF
 //
-#include "Utils/Statistical_analysis.h"
+#include "Fijee/Fijee_statistical_analysis.h"
 
 //#include <Eigen/Dense>
 
@@ -54,7 +54,7 @@ namespace Domains
   template<class Image_,
     class BGT,
     typename word_type = unsigned char>
-    class CGAL_image_filtering : public Utils::Statistical_analysis
+    class CGAL_image_filtering : public Fijee::Statistical_analysis
     {
     // Types
     typedef typename BGT::Point_3   Point_3;

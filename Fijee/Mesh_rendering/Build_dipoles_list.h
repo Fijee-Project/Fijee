@@ -38,11 +38,11 @@
 //
 // UCSF
 //
-#include "Utils/enum.h"
+#include "Fijee/Fijee_enum.h"
 #include "Point_vector.h"
 #include "Dipole.h"
 #include "Cell_conductivity.h"
-#include "Utils/Statistical_analysis.h"
+#include "Fijee/Fijee_statistical_analysis.h"
 /*! \namespace Domains
  * 
  * Name space for our new package
@@ -55,7 +55,7 @@ namespace Domains
    *
    *  This class is an example of class I will have to use
    */
-  class Build_dipoles_list : public Utils::Statistical_analysis
+  class Build_dipoles_list : public Fijee::Statistical_analysis
   {
   private:
 

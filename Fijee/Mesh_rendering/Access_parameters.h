@@ -42,10 +42,13 @@
 //
 // UCSF
 //
-#include "Utils/Fijee_environment.h"
-#include "Utils/Fijee_log_management.h"
+#include "Fijee/Fijee_environment.h"
+#include "Fijee/Fijee_log_management.h"
+#include "Fijee/Fijee_XML_writer.h"
+#include "Fijee/Fijee_exception_handler.h"
 #include "Point_vector.h"
 #include "Distance.h"
+//
 #define PI 3.14159265359
 //
 // CGAL
@@ -96,7 +99,7 @@ namespace Domains
    *
    *  This class provides for encapsulation of persistent state information. It also avoids the issue of which code segment should "own" the static persistent object instance. It further guarantees what mechanism is used to allocate memory for the underlying object and allows for better control over its destruction.
    */
-  class Access_parameters
+  class Access_parameters : public Fijee::XML_writer
   {
   private:
     //! unique instance
@@ -104,6 +107,9 @@ namespace Domains
     //! Freesurfer path. This path allow the program to reach all files we will need during the execution.
     std::string files_path_;
     std::string files_path_output_;
+
+    //! Fijee installation directory
+    std::string install_directory_;
 
     //
     // Surface files

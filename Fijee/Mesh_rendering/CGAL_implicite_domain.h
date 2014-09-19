@@ -42,8 +42,8 @@
 #include <CGAL/Implicit_surface_3.h>
 //
 // default triangulation for Surface_mesher
-typedef CGAL::Surface_mesh_default_triangulation_3 Tr;
-typedef Tr::Geom_traits GT;
+typedef CGAL::Surface_mesh_default_triangulation_3 Trs;
+typedef Trs::Geom_traits GT;
 typedef CGAL::Gray_level_image_3<GT::FT, GT::Point_3> Gray_level_image;
 
 //

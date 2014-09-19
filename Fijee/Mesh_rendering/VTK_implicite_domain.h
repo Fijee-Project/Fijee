@@ -40,7 +40,7 @@
 //
 #include "Access_parameters.h"
 #include "Point_vector.h"
-#include "Utils/enum.h"
+#include "Fijee/Fijee_enum.h"
 #include "Implicite_domain.h"
 //
 // CGAL

@@ -39,11 +39,12 @@
 #include <Fijee/Fijee_enum.h>
 
 // 
-// Package Utils 
+// Package utils 
 #include <Utils/Fijee_utils.h>
 // 
-// Package Biophysics 
+// Package biophysics 
 #include <Biophysics/Fijee_biophysics.h>
-
-
+// 
+// Package mesh rendering 
+#include <Mesh_rendering/Fijee_mesh_rendering.h>
 #endif

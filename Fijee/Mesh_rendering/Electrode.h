@@ -39,7 +39,7 @@
 //
 // UCSF
 //
-#include "Utils/enum.h"
+#include "Fijee/Fijee_enum.h"
 #include "Point.h"
 #include "Point_vector.h"
 #include "Access_parameters.h"

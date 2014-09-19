@@ -24,19 +24,52 @@
 //  The views and conclusions contained in the software and documentation are those   
 //  of the authors and should not be interpreted as representing official policies,    
 //  either expressed or implied, of the FreeBSD Project.  
-#ifndef FIJEE_BIOPHYSICS_H
-#define FIJEE_BIOPHYSICS_H
+#ifndef FIJEE_MESH_RENDERING_H
+#define FIJEE_MESH_RENDERING_H
 /*!
- * \file Fijee_biophysics.h
+ * \file Fijee_mesh_rendering.h
  * \brief brief describe 
  * \author Yann Cobigo
  * \version 0.1
  */
-#include <Biophysics/Population.h>
-#include <Biophysics/Leadfield_matrix.h>
-#include <Biophysics/Brain_rhythm_models.h>
-#include <Biophysics/Brain_rhythm.h>
-#include <Biophysics/Jansen_Rit_1995.h>
-#include <Biophysics/Molaee_Ardekani_Wendling_2009.h>
-#include <Biophysics/Wendling_2002.h>
+#include <Mesh_rendering/Access_parameters.h>
+//
+#include <Mesh_rendering/Point.h>
+#include <Mesh_rendering/Point_vector.h>
+#include <Mesh_rendering/Distance.h>
+#include <Mesh_rendering/Dipole.h>
+#include <Mesh_rendering/Cell_conductivity.h>
+#include <Mesh_rendering/CUDA_Conductivity_matching.h>
+#include <Mesh_rendering/CUDA_Conductivity_matching_functions.h>
+#include <Mesh_rendering/Build_dipoles_list.h>
+#include <Mesh_rendering/Build_dipoles_list_knn.h>
+#include <Mesh_rendering/Build_dipoles_list_high_density.h>
+//
+#include <Mesh_rendering/CGAL_tools.h>
+//
+#include <Mesh_rendering/Conductivity_tensor.h>
+#include <Mesh_rendering/Head_conductivity_tensor.h>
+#include <Mesh_rendering/Spheres_conductivity_tensor.h>
+//
+#include <Mesh_rendering/Electrode.h>
+#include <Mesh_rendering/Electrode_shape.h>
+#include <Mesh_rendering/Electrode_shape_sphere.h>
+#include <Mesh_rendering/Electrode_shape_cylinder.h>
+#include <Mesh_rendering/Build_electrodes_list.h>
+//
+#include <Mesh_rendering/Parcellation.h>
+#include <Mesh_rendering/Parcellation_method.h>
+#include <Mesh_rendering/Parcellation_METIS.h>
+#include <Mesh_rendering/Parcellation_Scotch.h>
+//
+#include <Mesh_rendering/CGAL_image_filtering.h>
+#include <Mesh_rendering/CGAL_implicite_domain.h>
+#include <Mesh_rendering/VTK_implicite_domain.h>
+#include <Mesh_rendering/Implicite_domain.h>
+#include <Mesh_rendering/Spheres_implicite_domain.h>
+#include <Mesh_rendering/Labeled_domain.h>
+#include <Mesh_rendering/Head_labeled_domain.h>
+#include <Mesh_rendering/Spheres_labeled_domain.h>
+#include <Mesh_rendering/Mesh_generator.h>
+#include <Mesh_rendering/Build_mesh.h>
 #endif

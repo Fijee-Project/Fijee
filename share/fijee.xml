@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<fijee xmlns:fijee="https://github.com/Fijee-Project/Fijee">
+  <setup install_dir="/home/cobigo/devel/C++/UCSF/install/"
+	 />
+  <mesh number_of_parcels="32"
+	 />
+</fijee>

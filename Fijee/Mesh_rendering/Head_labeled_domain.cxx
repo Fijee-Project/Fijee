@@ -30,7 +30,7 @@
 //
 // UCSF
 //
-#include "Utils/enum.h"
+#include "Fijee/Fijee_enum.h"
 #include "Head_labeled_domain.h"
 #include "CGAL_image_filtering.h"
 #include "Labeled_domain.h"

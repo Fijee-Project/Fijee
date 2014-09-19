@@ -37,7 +37,7 @@
 //
 // UCSF
 //
-#include "Utils/Fijee_environment.h"
+#include "Fijee/Fijee_environment.h"
 #include "Conductivity_tensor.h"
 #include "Cell_conductivity.h"
 //

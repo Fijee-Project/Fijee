@@ -37,7 +37,7 @@
 //
 // UCSF
 //
-#include "Utils/enum.h"
+#include "Fijee/Fijee_enum.h"
 #include "Parcellation.h"
 #include "Parcellation_METIS.h"
 #include "Parcellation_Scotch.h"

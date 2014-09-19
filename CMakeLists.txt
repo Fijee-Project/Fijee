@@ -21,10 +21,53 @@ set(Fijee_VERSION "${Fijee_VERSION_MAJOR}.${Fijee_VERSION_MINOR}.${Fijee_VERSION
 set( LIBRARY_VERSION "0.0.1" )
 set( LIBRARY_SOVERSION "0" )
 
+
 #
-# This needs to be changed to use cmake scripts to determine correct flag
-# c standard and remove deprecation warnings (caused by vtk) that clutter compile output
+#
+set( Fijee_CXX_DEFINITIONS "" )
+set( Fijee_LINK_FLAGS "" )
+set( Fijee_Utils_TARGET_LINK_LIBRARIES "" )
+set( Fijee_Biophysics_TARGET_LINK_LIBRARIES "" )
+set( Fijee_Mesh_TARGET_LINK_LIBRARIES "" )
+set( Fijee_FEM_TARGET_LINK_LIBRARIES "" )
+#
+# TRACE:
+# 1, 2, 3, ... printout
+# 100 R statistical software studies
+# 200 VTK visualization
+if( NOT DEFINED Fijee_TRACE )
+    set( Fijee_TRACE 0 )
+endif()
+#
+add_definitions( -DTRACE=${Fijee_TRACE} )
+#
+# CUDA:
+if( NOT DEFINED Fijee_CUDA )
+    set( Fijee_CUDA "OFF" )
+else()
+  if(Fijee_CUDA)
+    add_definitions( -DCUDA )
+  endif()
+endif()
+#
+#
 add_definitions( -std=c++0x -Wno-deprecated )  
+
+#
+# Setup files
+#
+
+#
+# Fijee data set
+set( Fijee_DATA_SET ${Fijee_SOURCE_DIR}/share/fijee.xml )
+#
+install( FILES ${Fijee_DATA_SET} DESTINATION ${CMAKE_INSTALL_PREFIX}/share )
+
+#
+# Electrodes
+set( Fijee_ELECTRODES_STANDARD_10_20_CAP81 ${Fijee_SOURCE_DIR}/share/electrodes/electrodes-Standard-10-20-Cap81.xml )
+#
+install( FILES ${Fijee_ELECTRODES_STANDARD_10_20_CAP81} DESTINATION ${CMAKE_INSTALL_PREFIX}/share/electrodes/ )
 
 
 #
@@ -44,6 +87,16 @@ set(LIBS)
 #set(DOLFIN_DIR "/usr/share/dolfin/cmake") # Dolfin installs UseDolfin.cmake scripts, dummy findDolfin script in cmake/modules doesn't look here properly yet
 
 #
+# General libraries
+find_package( PkgConfig REQUIRED)
+# CUDA
+#pkg_check_modules( CUDA REQUIRED CUDA )
+#
+#pkg_check_modules( gsl REQUIRED gsl )
+#pkg_check_modules( zlib REQUIRED zlib )
+
+
+#
 # FEniCS
 find_package(DOLFIN REQUIRED CONFIG)
 if(DOLFIN_FOUND)
@@ -57,10 +110,20 @@ endif()
 
 #
 # VTK
-find_package(VTK REQUIRED NO_MODULE)
+find_package(VTK 5.10 REQUIRED NO_MODULE)
 if(VTK_FOUND)
+  message(STATUS "VTK found")
   include(${VTK_USE_FILE})
-  list(APPEND LIBS ${VTK_LIBRARIES})
+#  list(APPEND LIBS ${VTK_LIBRARIES})
+endif()
+
+#
+# CUDA
+if( Fijee_CUDA )
+  find_package( CUDA REQUIRED )
+  if(CUDA_FOUND)
+    set( CUDA_NVCC_FLAGS "-O3 -gencode arch=compute_20,code=sm_20" )
+  endif()
 endif()
 
 
@@ -92,14 +155,14 @@ if(MPI_FOUND)
   include_directories(${MPI_INCLUDE_PATH})
 endif()
 
-##
-## NIFTI
-#find_package(NIFTI REQUIRED)
-##
-#if(NIFTI_FOUND)
-#  message(STATUS "FOUND NIFTI")
-#  include_directories(${NIFTI_INCLUDE_DIR})
-#endif()
+#
+# NIFTI
+find_package(NIFTI REQUIRED)
+#
+if(NIFTI_FOUND)
+  message(STATUS "nifti found")
+  include_directories(${NIFTI_INCLUDE_DIR})
+endif()
 
 #
 # CGAL
@@ -112,9 +175,12 @@ if(CGAL_FOUND)
 endif()
 
 #
+include_directories( SYSTEM )
+
+#
 # Build 
 #
-message("\n== Generating build files ==\n")
+message( "\n== Generating build files ==\n" )
 
 #
 # Env
@@ -123,24 +189,6 @@ set(Fijee_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include)
 set(Fijee_BIN_DIR ${CMAKE_INSTALL_PREFIX}/bin)
 set(Fijee_CMAKE_DIR ${CMAKE_INSTALL_PREFIX}/lib/cmake/Fijee-${Fijee_VERSION})
 
-
-#
-include_directories( SYSTEM )
-
-#
-#
-set(Fijee_CXX_DEFINITIONS "")
-set(Fijee_LINK_FLAGS "")
-set(Fijee_TARGET_LINK_LIBRARIES "")
-#
-IF (NOT DEFINED Fijee_TRACE)
-    SET(Fijee_TRACE 0)
-ENDIF()
-#
-ADD_DEFINITIONS(-DTRACE=${Fijee_TRACE})
-#
-
-
 #
 # Import all the source 
 add_subdirectory(Fijee)
@@ -148,17 +196,16 @@ add_subdirectory(Fijee)
 #
 # Fijee configuration
 #
+message( "\n== Configuration files ==\n" )
 
 #set( Find_Fijee ${Fijee_SOURCE_DIR}/cmake/modules/FindFijee.cmake )
 #install( FILES ${Find_Fijee} DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/cmake/Fijee.${Fijee_VERSION} )
 
 # Add all targets to the build-tree export set
-export( TARGETS FijeeUtils FijeeBiophysics
+export( TARGETS FijeeUtils FijeeBiophysics FijeeMesh
   FILE "${PROJECT_BINARY_DIR}/FijeeTargets.cmake" )
 #
 include_directories( "${Fijee_INCLUDE_DIR}" )
-message("${INCLUDE_DIRECTORIES}")
-message("${}")
 # Create the FijeeConfig.cmake and FijeeConfigVersion files
 file( RELATIVE_PATH REL_INCLUDE_DIR 
   "${Fijee_CMAKE_DIR}" 

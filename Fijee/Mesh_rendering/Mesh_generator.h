@@ -34,12 +34,12 @@
 // pugixml
 // same resources than Dolfin
 //
-#include "Utils/pugi/pugixml.hpp"
+#include "Utils/Third_party/pugi/pugixml.hpp"
 //
 // UCSF project
 //
 #include "Access_parameters.h"
-#include "Utils/enum.h"
+#include "Fijee/Fijee_enum.h"
 #include "Cell_conductivity.h"
 //
 //

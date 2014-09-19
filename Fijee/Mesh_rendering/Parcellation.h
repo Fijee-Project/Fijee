@@ -37,8 +37,8 @@
 //
 // UCSF
 //
-#include "Utils/enum.h"
-#include "Utils/Statistical_analysis.h"
+#include "Fijee/Fijee_enum.h"
+#include "Fijee/Fijee_statistical_analysis.h"
 /*! \namespace Domains
  * 
  * Name space for our new package
@@ -51,7 +51,7 @@ namespace Domains
    *
    *  This class is the mother class for head parcellation process.
    */
-  class Parcellation : public Utils::Statistical_analysis
+  class Parcellation : public Fijee::Statistical_analysis
   {
   public:
     /*!

@@ -32,7 +32,7 @@ typedef Domains::Parcellation DP;
 //
 //
 //
-DP::Parcellation():Utils::Statistical_analysis()
+DP::Parcellation():Fijee::Statistical_analysis()
 {
 }
 //

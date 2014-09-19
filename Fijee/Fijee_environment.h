@@ -38,20 +38,26 @@
 #include <sys/stat.h>   /* mkdir */
 #include <cstring>      /* strerror */
 #include <exception>
+
+// the configured options and settings for Tutorial
+#define Fijee_VERSION_MAJOR @${Fijee_VERSION_MAJOR}@
+#define Fijee_VERSION_MINOR @${Fijee_VERSION_MINOR}@
+#define Fijee_VERSION_PATCH @${Fijee_VERSION_PATCH}@
+
 //
 // Get built-in type.  Creates member get_"name"() (e.g., get_visibility());
 //
-#define ucsf_get_macro(name,type) \
-  inline type get_##name()const { \
-    return this->name;		  \
+#define ucsf_get_macro(name,type)		\
+  inline type get_##name()const {		\
+    return this->name;				\
   } 
 //
 // Get character string.  Creates member get_"name"() 
 // (e.g., char *GetFilename());
 //
-#define ucsf_get_string_macro(name) \
-  const char* get_##name() const {  \
-    return this->name.c_str();	    \
+#define ucsf_get_string_macro(name)		\
+  const char* get_##name() const {		\
+    return this->name.c_str();			\
   } 
 //
 //
@@ -241,7 +247,7 @@ namespace Fijee
      *
      */
     ucsf_get_macro(subject_, std::string);
-   /*!
+    /*!
      *  \brief Get subjects_dir_
      *
      *  This method return the subjects directory
@@ -255,21 +261,21 @@ namespace Fijee
      *
      */
     ucsf_get_macro(fem_path_, std::string);
-   /*!
+    /*!
      *  \brief Get fem_output_path_
      *
      *  This method return the finite element method output directory path.
      *
      */
     ucsf_get_macro(fem_output_path_, std::string);
-   /*!
+    /*!
      *  \brief Get fem_result_path_
      *
      *  This method return the finite element method result directory path.
      *
      */
     ucsf_get_macro(fem_result_path_, std::string);
-   /*!
+    /*!
      *  \brief Get fem_measure_path_
      *
      *  This method return the finite element method measure directory path.

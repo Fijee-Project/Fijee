@@ -28,7 +28,7 @@
 //
 // UCSF
 //
-#include "Utils/enum.h"
+#include "Fijee/Fijee_enum.h"
 #include "Labeled_domain.h"
 #include "VTK_implicite_domain.h"
 //
@@ -164,7 +164,7 @@ DBel::Build_electrodes_list()
 //
 void
 DBel::adjust_cap_positions_on( Labeled_domain< Spheres_implicite_domain, 
-					       GT::Point_3, std::list< Point_vector > >&  Scalp )
+					       GTs::Point_3, std::list< Point_vector > >&  Scalp )
 {
   //
   // k nearest neighbor data structure
@@ -187,7 +187,7 @@ DBel::adjust_cap_positions_on( Labeled_domain< Spheres_implicite_domain,
 
       //
       //
-      while( Scalp.inside_domain(GT::Point_3( electrode->x(),
+      while( Scalp.inside_domain(GTs::Point_3( electrode->x(),
 					      electrode->y(),
 					      electrode->z() )) )
 	{
@@ -211,9 +211,9 @@ DBel::adjust_cap_positions_on( Labeled_domain< Spheres_implicite_domain,
 //
 void
 DBel::adjust_cap_positions_on( Labeled_domain< VTK_implicite_domain, 
-					       GT::Point_3, std::list< Point_vector > >&  Scalp,
+					       GTs::Point_3, std::list< Point_vector > >&  Scalp,
 			       Labeled_domain< VTK_implicite_domain, 
-					       GT::Point_3, std::list< Point_vector > >&  Skull
+					       GTs::Point_3, std::list< Point_vector > >&  Skull
 			       )
 {
   //
@@ -260,7 +260,7 @@ DBel::adjust_cap_positions_on( Labeled_domain< VTK_implicite_domain,
 
       //
       //
-      while( Scalp.inside_domain(GT::Point_3( electrode->x(),
+      while( Scalp.inside_domain(GTs::Point_3( electrode->x(),
 					      electrode->y(),
 					      electrode->z() )) )
 	{
@@ -283,7 +283,7 @@ DBel::adjust_cap_positions_on( Labeled_domain< VTK_implicite_domain,
 //
 //
 bool
-DBel::inside_domain( GT::Point_3 Point )
+DBel::inside_domain( GTs::Point_3 Point )
 {
   for( auto electrode : electrodes_ )
     {

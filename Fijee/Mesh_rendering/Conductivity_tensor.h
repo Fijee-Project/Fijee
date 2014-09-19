@@ -29,9 +29,9 @@
 //
 // UCSF
 //
-#include "Utils/Statistical_analysis.h"
-#include "Utils/Fijee_environment.h"
-#include "Utils/enum.h"
+#include "Fijee/Fijee_statistical_analysis.h"
+#include "Fijee/Fijee_environment.h"
+#include "Fijee/Fijee_enum.h"
 #include "CGAL_tools.h"
 /*!
  * \file Conductivity_tensor.h
@@ -51,7 +51,7 @@ namespace Domains
    *
    *  This class is an example of class I will have to use
    */
-  class Conductivity_tensor : public Utils::Statistical_analysis
+  class Conductivity_tensor : public Fijee::Statistical_analysis
   {
   public:
     virtual ~Conductivity_tensor(){/* Do nothing */};

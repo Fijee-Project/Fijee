@@ -11,3 +11,4 @@ install( FILES ${HEADERS_} DESTINATION ${CMAKE_INSTALL_PREFIX}/include/Fijee/ )
 #
 add_subdirectory( Utils )
 add_subdirectory( Biophysics )
+add_subdirectory( Mesh_rendering )

@@ -24,14 +24,11 @@
 //  The views and conclusions contained in the software and documentation are those   
 //  of the authors and should not be interpreted as representing official policies,    
 //  either expressed or implied, of the FreeBSD Project.  
-#ifndef CUDA_CONDUCTIVITY_MATCHING_H_
-#define CUDA_CONDUCTIVITY_MATCHING_H_
+#ifndef CUDA_CONDUCTIVITY_MATCHING_H
+#define CUDA_CONDUCTIVITY_MATCHING_H
 #include <iostream>
 #include <stdio.h>
-//
-// UCSF
-//
-//#include "Utils/enum.h"
+#ifdef CUDA
 //
 // CUDA runtime
 //
@@ -112,4 +109,5 @@ namespace Domains
    */
   std::ostream& operator << ( std::ostream&, const CUDA_Conductivity_matching& );
 };
+#endif
 #endif

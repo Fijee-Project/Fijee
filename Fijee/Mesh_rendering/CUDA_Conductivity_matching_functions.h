@@ -26,8 +26,8 @@
 //  either expressed or implied, of the FreeBSD Project.  
 #ifndef _CUDA_CONDUCTIVITY_MATCHING_FUNCTIONS_
 #define _CUDA_CONDUCTIVITY_MATCHING_FUNCTIONS_
+#ifdef CUDA
 #include <stdio.h>
-#include "Utils/enum.h"
 //
 //
 //
@@ -342,4 +342,5 @@ namespace Domains
   //    }
   //};
 };
+#endif
 #endif

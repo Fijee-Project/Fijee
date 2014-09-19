@@ -38,19 +38,18 @@
 //
 // UCSF
 //
-#include "Utils/enum.h"
+#include "Fijee/Fijee_enum.h"
 #include "Access_parameters.h"
 #include "Electrode.h"
 #include "Labeled_domain.h"
 #include "VTK_implicite_domain.h"
 #include "Spheres_implicite_domain.h"
 //#include "Point_vector.h"
-#include "Utils/Statistical_analysis.h"
+#include "Fijee/Fijee_statistical_analysis.h"
 //
 // pugixml
-// same resources than Dolfin
 //
-#include "Utils/pugi/pugixml.hpp"
+#include "Utils/Third_party/pugi/pugixml.hpp"
 ////
 //// VTK
 ////
@@ -69,7 +68,7 @@
 typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
 typedef CGAL::Point_with_normal_3<Kernel> Point_with_normal;
 typedef CGAL::Surface_mesh_default_triangulation_3 Triangle_surface;
-typedef Triangle_surface::Geom_traits GT;
+typedef Triangle_surface::Geom_traits GTs;
 typedef CGAL::Mesh_3::Image_to_labeled_function_wrapper<CGAL::Image_3, Kernel > Image_wrapper;//
 //
 //
@@ -128,7 +127,7 @@ namespace Domains
      *
      */
     void adjust_cap_positions_on( Labeled_domain< Spheres_implicite_domain, 
-				                  GT::Point_3, 
+				                  GTs::Point_3, 
 				                  std::list< Point_vector > >&  Surf );    
     /*!
      *  \brief adjust the electrod position on a surface
@@ -137,10 +136,10 @@ namespace Domains
      *
      */
     void adjust_cap_positions_on( Labeled_domain< VTK_implicite_domain, 
-				                  GT::Point_3, 
+				                  GTs::Point_3, 
 				                  std::list< Point_vector > >&  Surf1,
 				  Labeled_domain< VTK_implicite_domain, 
-				                  GT::Point_3, 
+				                  GTs::Point_3, 
 				                  std::list< Point_vector > >&  Surf2 );
     /*!
      *  \brief inside the domaine
@@ -150,7 +149,7 @@ namespace Domains
      * \param Point: check point.
      *
      */
-    bool inside_domain( GT::Point_3 Point );
+    bool inside_domain( GTs::Point_3 Point );
     /*!
      *  \brief Output the XML of the electrodes' list
      *

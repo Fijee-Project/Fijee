@@ -36,8 +36,8 @@
 //
 // UCSF
 //
-#include "Utils/enum.h"
-#include "Utils/Fijee_environment.h"
+#include "Fijee/Fijee_enum.h"
+#include "Fijee/Fijee_environment.h"
 #include "CUDA_Conductivity_matching.h"
 #include "Dipole.h"
 //#include "Cell_conductivity.h"
