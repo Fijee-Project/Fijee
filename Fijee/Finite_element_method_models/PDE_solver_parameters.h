@@ -40,8 +40,8 @@
 //
 // UCSF
 //
-#include "Utils/Fijee_environment.h"
-#include "Utils/enum.h"
+#include "Fijee/Fijee_environment.h"
+#include "Fijee/Fijee_enum.h"
 //
 // Dolfin (FEniCS-project)
 //

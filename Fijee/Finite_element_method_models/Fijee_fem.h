@@ -24,30 +24,35 @@
 //  The views and conclusions contained in the software and documentation are those   
 //  of the authors and should not be interpreted as representing official policies,    
 //  either expressed or implied, of the FreeBSD Project.  
-#ifndef FIJEE_H
-#define FIJEE_H
-#include <iostream>
-// 
-// Package Fijee
-#include <Fijee/Fijee_compression.h>
-#include <Fijee/Fijee_environment.h>
-#include <Fijee/Fijee_exception_handler.h>
-#include <Fijee/Fijee_log_management.h>
-#include <Fijee/Fijee_statistical_analysis.h>
-#include <Fijee/Fijee_thread_dispatching.h>
-#include <Fijee/Fijee_XML_writer.h>
-#include <Fijee/Fijee_enum.h>
-
-// 
-// Package utils 
-#include <Utils/Fijee_utils.h>
-// 
-// Package biophysics 
-#include <Biophysics/Fijee_biophysics.h>
-// 
-// Package mesh rendering 
-#include <Mesh_rendering/Fijee_mesh_rendering.h>
-// 
-// Package mesh rendering 
-#include <Finite_element_method_models/Fijee_fem.h>
+#ifndef FIJEE_FEM_H
+#define FIJEE_FEM_H
+/*!
+ * \file Fijee_fem.h
+ * \brief brief describe 
+ * \author Yann Cobigo
+ * \version 0.1
+ */
+#include <Finite_element_method_models/PDE_solver_parameters.h>
+// Geometry and physics
+#include <Finite_element_method_models/Source.h>
+#include <Finite_element_method_models/Intensity.h>
+#include <Finite_element_method_models/Field.h>
+#include <Finite_element_method_models/Boundaries.h>
+#include <Finite_element_method_models/Conductivity.h>
+#include <Finite_element_method_models/Sub_domaines.h>
+#include <Finite_element_method_models/Parcellation_information.h>
+#include <Finite_element_method_models/Spheres_electric_monopole.h>
+// Source localization and tCS
+#include <Finite_element_method_models/Model_solver.h>
+#include <Finite_element_method_models/Physics.h>
+#include <Finite_element_method_models/SL_subtraction.h>
+#include <Finite_element_method_models/SL_direct.h>
+#include <Finite_element_method_models/tCS_tDCS.h>
+#include <Finite_element_method_models/tCS_tACS.h>
+#include <Finite_element_method_models/tCS_tDCS_local_conductivity.h>
+// Electrodes
+#include <Finite_element_method_models/Electrodes_setup.h>
+#include <Finite_element_method_models/Electrodes_surface.h>
+#include <Finite_element_method_models/Electrodes_injection.h>
+// UFL
 #endif

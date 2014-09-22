@@ -41,7 +41,7 @@
 // pugixml
 // same resources than Dolfin
 //
-#include "Utils/pugi/pugixml.hpp"
+#include "Utils/Third_party/pugi/pugixml.hpp"
 //
 // UCSF project
 //
@@ -50,7 +50,6 @@
 #include "Boundaries.h"
 #include "Sub_domaines.h"
 #include "PDE_solver_parameters.h"
-//#include "Utils/Thread_dispatching.h"
 //
 //
 //

@@ -1,6 +1,7 @@
 #
 # Utils library
 #
+message(STATUS "Utils")
 
 #
 # Header files

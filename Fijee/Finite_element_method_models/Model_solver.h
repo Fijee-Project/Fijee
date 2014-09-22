@@ -33,18 +33,12 @@
 // FEniCS
 //
 #include <dolfin.h>
-// Source localization subtraction model
-//#include "SLS_model.h"
 //
-// pugixml
-// same resources as Dolfin
-//
-#include "Utils/pugi/pugixml.hpp"
 //
 // UCSF project
 //
 #include "PDE_solver_parameters.h"
-#include "Utils/Thread_dispatching.h"
+#include "Fijee/Fijee_thread_dispatching.h"
 //
 //
 //
@@ -114,7 +108,7 @@ namespace Solver
       
       //
       // Define the number of threads in the pool of threads
-      Utils::Thread_dispatching pool( num_of_threads );
+      Fijee::Thread_dispatching pool( num_of_threads );
       
       
       //

@@ -23,12 +23,14 @@ set( Fijee_INCLUDE_DIRS
   "@NIFTI_INCLUDE_DIR@"
   "@CGAL_INCLUDE_DIRS@"
   "@VTK_INCLUDE_DIRS@" 
+  "@DOLFIN_INCLUDE_DIRS@" 
   )
 #
 set( Fijee_LIBRARY_DIRS 
   "@Fijee_LIBRARY_DIR@" 
   "@CGAL_DIR@"
   "@VTK_LIBRARY_DIRS@" 
+  "@DOLFIN_LIBRARY_DIRS@" 
   )
 #
 set( VTK_LIBRARIES "@VTK_LIBRARIES@" )
@@ -38,4 +40,4 @@ set( VTK_LIBRARIES "@VTK_LIBRARIES@" )
 #include("@Fijee_CMAKE_DIR@/FijeeLibraryDepends.cmake")
 
 # These are IMPORTED targets created by FijeeLibraryDepends.cmake
-set( Fijee_LIBRARIES FijeeUtils FijeeBiophysics FijeeMesh )
+set( Fijee_LIBRARIES FijeeUtils FijeeBiophysics FijeeMesh FijeeFEM )

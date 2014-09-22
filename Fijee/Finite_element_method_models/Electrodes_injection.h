@@ -34,7 +34,7 @@
 //
 // UCSF project
 //
-#include "Utils/Fijee_environment.h"
+#include "Fijee/Fijee_environment.h"
 #include "Intensity.h"
 //
 //

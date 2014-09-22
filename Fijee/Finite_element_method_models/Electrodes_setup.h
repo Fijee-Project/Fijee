@@ -29,18 +29,14 @@
 #include <dolfin.h>
 #include <vector>
 //
-// FEniCS
 //
 //
-// pugixml
-// same resources than Dolfin
-//
-#include "Utils/pugi/pugixml.hpp"
-#include "Utils/XML_writer.h"
+#include "Utils/Third_party/pugi/pugixml.hpp"
+#include "Fijee/Fijee_XML_writer.h"
 //
 // UCSF project
 //
-#include "Utils/Fijee_environment.h"
+#include "Fijee/Fijee_environment.h"
 #include "Electrodes_injection.h"
 #include "Conductivity.h"
 #include "Intensity.h"
@@ -66,7 +62,7 @@ namespace Solver
    *
    *  This class holds the set of electrodes for each time's setp of the electrodes measure. Electrodes_setup is the interface between the electrodes and the Physical models. 
    */
-  class Electrodes_setup: public Utils::XML_writer
+  class Electrodes_setup: public Fijee::XML_writer
   {
   private:
     //! Electrodes list for current injected

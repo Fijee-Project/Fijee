@@ -32,14 +32,11 @@
 //
 #include <dolfin.h>
 //
-//
-//
-#include "Utils/pugi/pugixml.hpp"
-//
 // UCSF project
 //
 #include "PDE_solver_parameters.h"
-#include "Utils/Fijee_exception_handler.h"
+#include "Fijee/Fijee_exception_handler.h"
+#include "Utils/Third_party/pugi/pugixml.hpp"
 //
 //
 //
@@ -208,11 +205,11 @@ namespace Solver
 	{
 	  std::string message = "You are asking for the dimension: " + std::to_string(Dimension);
 	  message += std::string(". \nDimension for a field must be between 1 and 3.");
-	  throw Utils::Exit_handler( message, 
+	  throw Fijee::Exit_handler( message, 
 				     __LINE__, __FILE__ );
 	}
     }
-    catch( Utils::Exception_handler& err )
+    catch( Fijee::Exception_handler& err )
       {
 	std::cerr << err.what() << std::endl;
       }

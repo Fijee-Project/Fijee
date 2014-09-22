@@ -33,7 +33,7 @@ typedef Solver::PDE_solver_parameters SDEsp;
 //
 //
 Solver::Electrodes_setup::Electrodes_setup(): 
-  Utils::XML_writer((SDEsp::get_instance())->get_files_path_result_()+std::string("eeg_forward.xml"))
+  Fijee::XML_writer((SDEsp::get_instance())->get_files_path_result_()+std::string("eeg_forward.xml"))
 {
   //
   // Read the electrodes xml file

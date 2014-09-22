@@ -30,28 +30,28 @@ set( Fijee_Utils_TARGET_LINK_LIBRARIES "" )
 set( Fijee_Biophysics_TARGET_LINK_LIBRARIES "" )
 set( Fijee_Mesh_TARGET_LINK_LIBRARIES "" )
 set( Fijee_FEM_TARGET_LINK_LIBRARIES "" )
+# DOLFIN INCOMPATIBILITY #
+# DOLFIN INCOMPATIBILITY # TRACE:
+# DOLFIN INCOMPATIBILITY # 1, 2, 3, ... printout
+# DOLFIN INCOMPATIBILITY # 100 R statistical software studies
+# DOLFIN INCOMPATIBILITY # 200 VTK visualization
+# DOLFIN INCOMPATIBILITY if( NOT DEFINED Fijee_TRACE )
+# DOLFIN INCOMPATIBILITY     set( Fijee_TRACE 0 )
+# DOLFIN INCOMPATIBILITY endif()
+# DOLFIN INCOMPATIBILITY #
+# DOLFIN INCOMPATIBILITY add_definitions( -DTRACE=${Fijee_TRACE} )
+# DOLFIN INCOMPATIBILITY #
+# DOLFIN INCOMPATIBILITY # CUDA:
+# DOLFIN INCOMPATIBILITY if( NOT DEFINED Fijee_CUDA )
+# DOLFIN INCOMPATIBILITY     set( Fijee_CUDA "OFF" )
+# DOLFIN INCOMPATIBILITY else()
+# DOLFIN INCOMPATIBILITY   if(Fijee_CUDA)
+# DOLFIN INCOMPATIBILITY     add_definitions( -DCUDA )
+# DOLFIN INCOMPATIBILITY   endif()
+# DOLFIN INCOMPATIBILITY endif()
 #
-# TRACE:
-# 1, 2, 3, ... printout
-# 100 R statistical software studies
-# 200 VTK visualization
-if( NOT DEFINED Fijee_TRACE )
-    set( Fijee_TRACE 0 )
-endif()
 #
-add_definitions( -DTRACE=${Fijee_TRACE} )
-#
-# CUDA:
-if( NOT DEFINED Fijee_CUDA )
-    set( Fijee_CUDA "OFF" )
-else()
-  if(Fijee_CUDA)
-    add_definitions( -DCUDA )
-  endif()
-endif()
-#
-#
-add_definitions( -std=c++0x -Wno-deprecated )  
+add_definitions( -std=c++0x -Wno-deprecated -DVERSION_OF_FIJEE="${Fijee_VERSION}" )  
 
 #
 # Setup files
@@ -81,31 +81,19 @@ set(CMAKE_MODULE_PATH
   "${CMAKE_SOURCE_DIR}/cmake/modules;${CMAKE_MODULE_PATH}"
 )
 
-# include(FijeeDefaults)
-set(LIBS)
-
-#set(DOLFIN_DIR "/usr/share/dolfin/cmake") # Dolfin installs UseDolfin.cmake scripts, dummy findDolfin script in cmake/modules doesn't look here properly yet
 
 #
 # General libraries
 find_package( PkgConfig REQUIRED)
-# CUDA
-#pkg_check_modules( CUDA REQUIRED CUDA )
-#
-#pkg_check_modules( gsl REQUIRED gsl )
-#pkg_check_modules( zlib REQUIRED zlib )
 
 
 #
 # FEniCS
 find_package(DOLFIN REQUIRED CONFIG)
 if(DOLFIN_FOUND)
-  message("DOLFIN FOUND at ${DOLFIN_INCLUDE_DIRS} ${DOLFIN_3D_PARTY_LIBRARIES}")
+  message( STATUS "FEniCS found at ${DOLFIN_INCLUDE_DIRS}" )
   include(${DOLFIN_USE_FILE})
-  list (APPEND LIBS ${DOLFIN_3RD_PARTY_LIBRARIES} ${DOLFIN_LIBRARIES})
-#  add_definitions(${DOLFIN_CXX_DEFINITIONS})
-#  include_directories(${DOLFIN_INCLUDE_DIRS})
-#  list (APPEND LIBS ${DOLFIN_3D_PARTY_LIBRARIES})
+  get_filename_component( DOLFIN_LIBRARY_DIRS ${DOLFIN_LIBRARIES} DIRECTORY )
 endif()
 
 #
@@ -114,7 +102,6 @@ find_package(VTK 5.10 REQUIRED NO_MODULE)
 if(VTK_FOUND)
   message(STATUS "VTK found")
   include(${VTK_USE_FILE})
-#  list(APPEND LIBS ${VTK_LIBRARIES})
 endif()
 
 #
@@ -197,9 +184,6 @@ add_subdirectory(Fijee)
 # Fijee configuration
 #
 message( "\n== Configuration files ==\n" )
-
-#set( Find_Fijee ${Fijee_SOURCE_DIR}/cmake/modules/FindFijee.cmake )
-#install( FILES ${Find_Fijee} DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/cmake/Fijee.${Fijee_VERSION} )
 
 # Add all targets to the build-tree export set
 export( TARGETS FijeeUtils FijeeBiophysics FijeeMesh

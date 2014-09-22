@@ -40,9 +40,7 @@
 #include <exception>
 
 // the configured options and settings for Tutorial
-#define Fijee_VERSION_MAJOR @${Fijee_VERSION_MAJOR}@
-#define Fijee_VERSION_MINOR @${Fijee_VERSION_MINOR}@
-#define Fijee_VERSION_PATCH @${Fijee_VERSION_PATCH}@
+//#define VERSION_OF_FIJEE @Fijee_VERSION@
 
 //
 // Get built-in type.  Creates member get_"name"() (e.g., get_visibility());

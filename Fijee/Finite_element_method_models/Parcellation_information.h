@@ -34,12 +34,12 @@
 //
 //
 //
-#include "Utils/pugi/pugixml.hpp"
+#include "Utils/Third_party/pugi/pugixml.hpp"
 //
 // UCSF project
 //
 #include "PDE_solver_parameters.h"
-#include "Utils/XML_writer.h"
+#include "Fijee/Fijee_XML_writer.h"
 //
 //
 //
@@ -67,7 +67,7 @@ namespace Solver
    *  This class is an example of class I will have to use
    */
   template < typename Physical_value >
-    class Parcellation_information : public Utils::XML_writer
+    class Parcellation_information : public Fijee::XML_writer
     {
     private:
       //! List of parcels
@@ -124,7 +124,7 @@ namespace Solver
   // 
   template < typename Physical_value > 
     Parcellation_information< Physical_value >::Parcellation_information( const std::string& Phys_value ):
-  Utils::XML_writer("")
+  Fijee::XML_writer("")
     {
       // 
       // Output file

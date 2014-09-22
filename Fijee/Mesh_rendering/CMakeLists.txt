@@ -1,6 +1,7 @@
 #
-# Biophysics library
+# Mesh rendering library
 #
+message(STATUS "Mesh_rendering")
 
 #
 # Header files

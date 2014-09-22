@@ -1,6 +1,7 @@
 #
 # Biophysics library
 #
+message(STATUS "Biophysics")
 
 #
 # Header files

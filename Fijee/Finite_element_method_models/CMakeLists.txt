@@ -1,37 +1,52 @@
-set(UFL_SOURCES SLS_model.ufl SLD_model.ufl tCS_model.ufl tCS_current_density_model.ufl tCS_electrical_field_model.ufl)
-set(UFL_FLAG -l dolfin)
-set(UFL_COMPILER ffc)
+#
+# fem library
+#
+message(STATUS "Finite_element_method_models")
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+#
+# Production of FEniCS headers
+file( GLOB UFL_SOURCES_ *.ufl )
+# FFC: '-s' silence
+set( UFL_COMPILER ffc )
+set( UFL_FLAG -l dolfin -s )
 
-set(UFL_HEADERS)
-foreach(_file ${UFL_SOURCES}) 
-  string(REPLACE ".ufl" ".h" ufl_header ${_file})
+#
+#
+set( UFL_HEADERS )
+foreach( file_ ${UFL_SOURCES_} ) 
+  get_filename_component( FILE_UFL_ ${file_} NAME )
+  string( REPLACE ".ufl" ".h" UFL_HEADER_ ${FILE_UFL_} )
   add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/${ufl_header}
-    COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMAND ffc ${UFL_FLAG}  ${CMAKE_CURRENT_SOURCE_DIR}/${_file} 
-    COMMAND cd ${CMAKE_CURRENT_BINARY_DIR}
+    OUTPUT ${UFL_HEADER_}
+    PRE_BUILD
+    COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/${FILE_UFL_} . 
+    COMMAND ${UFL_COMPILER} ${UFL_FLAG} ${FILE_UFL_}
   )
-  list(APPEND UFL_HEADERS ${ufl_header})
+  list( APPEND UFL_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/${UFL_HEADER_} )
 endforeach()
-add_custom_target(ufl_headers DEPENDS ${UFL_HEADERS})
 
 
+#
+# Header files
+file( GLOB HEADERS_ *.h )
+list( APPEND HEADERS ${HEADERS_} ${UFL_HEADERS} )
+install( FILES ${HEADERS_} ${UFL_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/include/Finite_element_method_models )
+#
+file( GLOB SOURCES_ *.cxx )
+list( APPEND SOURCES ${SOURCES_} )
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-  
-
-
-
-set(POISSON_SOURCES main.cxx  Conductivity.cxx Source.cxx Electrodes_injection.cxx Intensity.cxx Physics.cxx SL_subtraction.cxx SL_direct.cxx tCS_tDCS.cxx PDE_solver_parameters.cxx Spheres_electric_monopole.cxx Electrodes_setup.cxx Electrodes_surface.cxx) #Spheres_electric_dipole.cxx
-
-add_executable(poisson ${POISSON_SOURCES})
-add_dependencies(poisson ufl_headers)
-
-target_link_libraries(poisson ${LIBS} pugi)
-
-message(STATUS ${LIBS})
-
-
-
+#
+# Set compiler flags, include directories and library dependencies
+include_directories( ${Fijee_SOURCE_DIR}  ${Fijee_SOURCE_DIR}/Fijee ${CMAKE_CURRENT_BINARY_DIR} )
+# Add CXX definitions
+add_definitions( ${Fijee_CXX_DEFINITIONS} )
+# Add flags
+set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${DOLFIN_CXX_FLAGS}" )
+set( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${Fijee_LINK_FLAGS}" )
+# Define libraries
+add_library( FijeeFEM ${Fijee_H} ${HEADERS} ${UFL_HEADERS} ${SOURCES} )
+#add_dependencies( FijeeFEM ufl_processing )
+# Add FijeeUtils target libraries
+target_link_libraries( FijeeFEM ${Fijee_TARGET_LINK_LIBRARIES} ${DOLFIN_LIBRARIES} )
+# Install
+install( TARGETS FijeeFEM EXPORT FijeeTargets LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib )

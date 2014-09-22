@@ -45,7 +45,7 @@
 // pugixml
 // same resources than Dolfin
 //
-#include "Utils/pugi/pugixml.hpp"
+#include "Utils/Third_party/pugi/pugixml.hpp"
 //
 // UCSF project
 //
@@ -56,7 +56,6 @@
 #include "PDE_solver_parameters.h"
 #include "Parcellation_information.h"
 #include "Field.h"
-//#include "Utils/Thread_dispatching.h"
 // Validation
 #include "Spheres_electric_monopole.h"
 //

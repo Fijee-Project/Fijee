@@ -42,7 +42,7 @@ SDEsp::PDE_solver_parameters()
 {
   //
   // Check on ENV variables
-  Utils::Fijee_environment fijee;
+  Fijee::Fijee_environment fijee;
   //
   files_path_         = fijee.get_fem_path_();
   files_path_output_  = fijee.get_fem_output_path_();
