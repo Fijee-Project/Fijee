@@ -96,51 +96,148 @@ SDEsp::kill_instance()
 void 
 SDEsp::init()
 {
-  //
-  //  dolfin::parameters["num_threads"] = 4;
+  try{
+    // 
+    // Read data set
+    // 
+    std::cout << "Load Fijee data set file" << std::endl;
 
-  //
-  // Back end parameters
-  // Allowed values are: [PETSc, STL, uBLAS, Epetra, MTL4, ViennaCL].
-  // Epetra in Trilinos
-  // uBLAS needs UMFPACK
-  dolfin::parameters["linear_algebra_backend"] = "ViennaCL";
-  //  info(solver.parameters,true) ;
-  //  info(parameters,true) ;
+    // 
+    //
+    pugi::xml_document     xml_file;
+    pugi::xml_parse_result result = xml_file.load_file( "fijee.xml" );
+    //
+    switch( result.status )
+      {
+      case pugi::status_ok:
+	{
+	  //
+	  // Check that we have a FIJEE XML file
+	  const pugi::xml_node fijee_node = xml_file.child("fijee");
+	  if (!fijee_node)
+	    {
+	      std::cerr << "Read data from XML: Not a FIJEE XML file" << std::endl;
+	      exit(1);
+	    }
+	  
+	  //
+	  // Get setup node
+	  const pugi::xml_node setup_node = fijee_node.child("setup");
+	  if (!setup_node)
+	    {
+	      std::cerr << "Read data from XML: no setup node" << std::endl;
+	      exit(1);
+	    }
+	  // Get install directory
+	  number_of_threads_ = setup_node.attribute("number_of_threads").as_int();
+	  // 
+	  if( number_of_threads_ < 1 )
+	    {
+	      std::string message = std::string("Error reading fijee.xml file.")
+		+ std::string("The flag number_of_threads must be > 1.");
+	      //
+	      throw Fijee::Error_handler( message,  __LINE__, __FILE__ );
+	    }
 
-  //
-  // Cholesky: umfpack
+	  
+	  //
+	  // Get FEM node
+	  const pugi::xml_node fem_node = fijee_node.child("fem");
+	  if (!fem_node)
+	    {
+	      std::cerr << "Read data from XML: no fem node." << std::endl;
+	      exit(1);
+	    }
+
+	  // 
+	  // Get Solver node
+	  const pugi::xml_node solver_node = fem_node.child("solver");
+	  if (!solver_node)
+	    {
+	      std::cerr << "Read data from XML: no solver node." << std::endl;
+	      exit(1);
+	    }
+
+	  // 
+	  // Get linear algebra node
+	  const pugi::xml_node linear_algebra_node = solver_node.child("la");
+	  if (!linear_algebra_node)
+	    {
+	      std::cerr << "Read data from XML: no la node." << std::endl;
+	      exit(1);
+	    }
+	  if(linear_algebra_node.attribute("iterative"))
+	    {
+	      // Back end parameters
+	      dolfin::parameters["linear_algebra_backend"] = 
+		linear_algebra_node.attribute("linear_algebra_backend").as_string();
+	      // 
+	      //
+	      //    krylov_solver            |    type  value          range  access  change
+	      //    ------------------------------------------------------------------------
+	      //    absolute_tolerance       |  double  1e-15             []       0       0
+	      //    divergence_limit         |  double  10000             []       0       0
+	      //    error_on_nonconvergence  |    bool   true  {true, false}       0       0
+	      //    maximum_iterations       |     int  10000             []       0       0
+	      //    monitor_convergence      |    bool  false  {true, false}       0       0
+	      //    nonzero_initial_guess    |    bool  false  {true, false}       0       0
+	      //    relative_tolerance       |  double  1e-06             []       0       0
+	      //    report                   |    bool   true  {true, false}       0       0
+	      //    use_petsc_cusp_hack      |    bool  false  {true, false}       0       0
+	      //
+	      // cg - bicgstab - gmres
+	      linear_solver_ = 
+		std::string( linear_algebra_node.attribute("linear_solver").as_string() );
+	      // ilut - ilu0 - block_ilu{t,0} - jacobi - row_scaling
+	      preconditioner_ = 
+		std::string( linear_algebra_node.attribute("preconditioner").as_string() );
+	      //
+	      maximum_iterations_ = linear_algebra_node.attribute("maximum_iterations").as_int();
+	      // 
+	      relative_tolerance_ = linear_algebra_node.attribute("relative_tolerance").as_double();
+	    }
+	  else
+	    {
+	      std::string message = std::string("Error reading fijee.xml file.")
+		+ std::string(" Fijee is not yet prepared for Cholesky decomposition methods.");
+	      //
+	      throw Fijee::Error_handler( message,  __LINE__, __FILE__ );
+	    }
 
 
-  //
-  //    krylov_solver            |    type  value          range  access  change
-  //    ------------------------------------------------------------------------
-  //    absolute_tolerance       |  double  1e-15             []       0       0
-  //    divergence_limit         |  double  10000             []       0       0
-  //    error_on_nonconvergence  |    bool   true  {true, false}       0       0
-  //    maximum_iterations       |     int  10000             []       0       0
-  //    monitor_convergence      |    bool  false  {true, false}       0       0
-  //    nonzero_initial_guess    |    bool  false  {true, false}       0       0
-  //    relative_tolerance       |  double  1e-06             []       0       0
-  //    report                   |    bool   true  {true, false}       0       0
-  //    use_petsc_cusp_hack      |    bool  false  {true, false}       0       0
-  //
-  // cg - bicgstab - gmres
-  linear_solver_ = std::string("cg");
-  // ilut - ilu0 - block_ilu{t,0} - jacobi - row_scaling
-  preconditioner_ = std::string("row_scaling");
-  //
-  maximum_iterations_ = 10000000;
-  //
-  //  relative_tolerance_ = 1.e-8 /*1.e-8*/;
-//  relative_tolerance_ = 7.e-4 /*tDCS_spheres*/;
-//  relative_tolerance_ = 1.e-8 /*tDCS_spheres*/;
-//  relative_tolerance_ = 5.e-3 /*tDCS_head*/;
-  relative_tolerance_ = 1.e-8 /*tDCS_head*/;
+	  // 
+	  // Get Output node
+	  const pugi::xml_node output_node = fem_node.child("output");
+	  if (!output_node)
+	    {
+	      std::cerr << "Read data from XML: no output node." << std::endl;
+	      exit(1);
+	    }
+	  // 
+	  electric_current_density_field_ = 
+	    output_node.attribute("electric_current_density_field").as_bool();
+	  // 
+	  electrical_field_ = 
+	    output_node.attribute("electrical_field").as_bool();
 
-  //
-  // Dispatching information
-  number_of_threads_ = 2;
+
+	  //
+	  //
+	  break;
+	};
+      default:
+	{
+	  std::string message = std::string("Error reading fijee.xml file.")
+	    + std::string(" You should look for an example in the 'share' directory located in the Fijee's install directory.");
+	  //
+	  throw Fijee::Error_handler( message,  __LINE__, __FILE__ );
+	}
+      }
+  }
+  catch( Fijee::Exception_handler& err )
+    {
+      std::cerr << err.what() << std::endl;
+    }
 }
 //
 //

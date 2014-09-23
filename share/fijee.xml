@@ -1,7 +1,18 @@
 <?xml version="1.0"?>
 <fijee xmlns:fijee="https://github.com/Fijee-Project/Fijee">
   <setup install_dir="/home/cobigo/devel/C++/UCSF/install/"
+	 number_of_threads="2"
 	 />
   <mesh number_of_parcels="32"
 	 />
+  <fem >
+    <!-- [PETSc, STL, uBLAS, Epetra, MTL4, ViennaCL] -->
+    <solver> 
+      <!-- iterative: true or false (Cholesky decomposition) -->
+      <!-- linear_solver: cg - bicgstab - gmres -->
+      <!-- preconditioner: ilut - ilu0 - block_ilu{t,0} - jacobi - row_scaling -->
+      <la iterative="true" linear_algebra_backend="ViennaCL" linear_solver="cg" preconditioner="row_scaling" maximum_iterations="10000000" relative_tolerance="1.e-8" />
+    </solver>
+    <output electric_current_density_field="true" electrical_field="true"/>
+  </fem>
 </fijee>

@@ -169,7 +169,7 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
  
   //
   // Filter function over a subdomain
-  std::list<std::size_t> test_sub_domains{4,5};
+  std::list<std::size_t> test_sub_domains{4,5,6};
   solution_domain_extraction(u, test_sub_domains, "tDCS_potential");
 
   //
@@ -209,7 +209,7 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
   // tDCS electric current density field \vec{J}
   // 
   
-  if (true)
+  if ( (SDEsp::get_instance())->get_electric_current_density_field_() )
     {
       //
       // Define variational forms
@@ -260,7 +260,7 @@ Solver::tCS_tDCS::operator () ( /*Solver::Phi& source,
   // tDCS electrical field \vec{E}
   // 
   
-  if (true)
+  if ( (SDEsp::get_instance())->get_electrical_field_() )
     {
       //
       // Define variational forms

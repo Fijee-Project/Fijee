@@ -35,7 +35,7 @@
 // 
 // 
 Electrodes::Electrodes_tACS::Electrodes_tACS():
-  Utils::XML_writer("electrodes_tACS.xml"),
+  Fijee::XML_writer("electrodes_tACS.xml"),
   I_tot_plus_(0.), I_tot_minus_(0.), time_step_(0.001 /*s*/), time_start_(0.)
 {
 }
@@ -46,7 +46,7 @@ Electrodes::Electrodes_tACS::Electrodes_tACS( const std::vector< std::tuple< std
 					      const std::vector< std::tuple< std::string/*label*/, double/*injection*/ > > Electrodes_minus,
 					      const double Frequency, const double Amplitude, 
 					      const double Elapse_time, const double Starting_time):
-  Utils::XML_writer("electrodes_tACS.xml"),
+  Fijee::XML_writer("electrodes_tACS.xml"),
   I_tot_plus_(0.), I_tot_minus_(0.), time_step_(0.001 /*s*/), time_start_(Starting_time)
 {
   // 

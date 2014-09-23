@@ -24,8 +24,8 @@
 //  The views and conclusions contained in the software and documentation are those   
 //  of the authors and should not be interpreted as representing official policies,    
 //  either expressed or implied, of the FreeBSD Project.  
-#ifndef PDE_SOLVER_PARAMETERS_H_
-#define PDE_SOLVER_PARAMETERS_H_
+#ifndef PDE_SOLVER_PARAMETERS_H
+#define PDE_SOLVER_PARAMETERS_H
 //http://franckh.developpez.com/tutoriels/outils/doxygen/
 /*!
  * \file PDE_solver_parameters.hh
@@ -42,6 +42,9 @@
 //
 #include "Fijee/Fijee_environment.h"
 #include "Fijee/Fijee_enum.h"
+#include "Fijee/Fijee_log_management.h"
+#include "Fijee/Fijee_XML_writer.h"
+#include "Fijee/Fijee_exception_handler.h"
 //
 // Dolfin (FEniCS-project)
 //
@@ -88,6 +91,11 @@ namespace Solver
     // Dispatching information
     //! Number of threads in the dispatching pool
     int number_of_threads_;
+
+    // 
+    // Ouput managment
+    bool electric_current_density_field_;
+    bool electrical_field_;
 
   protected:
     /*!
@@ -185,6 +193,20 @@ namespace Solver
      *
      */
     ucsf_get_macro(number_of_threads_, int);
+    /*!
+     *  \brief Get electric_current_density_field_
+     *
+     *  This method return true if the user wants the electric current density field output
+     *
+     */
+    ucsf_get_macro(electric_current_density_field_, bool);
+    /*!
+     *  \brief Get electrical_field_
+     *
+     *  This method return true  if the user wants the  electrical field output. False otherwise.
+     *
+     */
+    ucsf_get_macro(electrical_field_, bool);
     /*!
      *  \brief Kill the singleton instance
      *

@@ -41,14 +41,14 @@
 //
 // UCSF
 //
-#include "Utils/pugi/pugixml.hpp"
-#include "Utils/Statistical_analysis.h"
-#include "Utils/XML_writer.h"
-#include "Utils/enum.h"
+#include "Utils/Third_party/pugi/pugixml.hpp"
+#include "Fijee/Fijee_statistical_analysis.h"
+#include "Fijee/Fijee_XML_writer.h"
+#include "Fijee/Fijee_enum.h"
 // 
 // 
 // 
-/*! \namespace Utils
+/*! \namespace Electrodes
  * 
  * Name space for our new package
  *
@@ -92,7 +92,7 @@ namespace Electrodes
    *  This class is an example of class 
    * 
    */
-  class Electrodes_tACS: public Utils::Statistical_analysis, public Utils::XML_writer
+  class Electrodes_tACS: public Fijee::Statistical_analysis, public Fijee::XML_writer
   {
   private:
     //! Set of electrodes 

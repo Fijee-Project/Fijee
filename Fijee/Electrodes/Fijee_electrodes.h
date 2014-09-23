@@ -24,33 +24,14 @@
 //  The views and conclusions contained in the software and documentation are those   
 //  of the authors and should not be interpreted as representing official policies,    
 //  either expressed or implied, of the FreeBSD Project.  
-#ifndef FIJEE_H
-#define FIJEE_H
-#include <iostream>
-// 
-// Package Fijee
-#include <Fijee/Fijee_compression.h>
-#include <Fijee/Fijee_environment.h>
-#include <Fijee/Fijee_exception_handler.h>
-#include <Fijee/Fijee_log_management.h>
-#include <Fijee/Fijee_statistical_analysis.h>
-#include <Fijee/Fijee_thread_dispatching.h>
-#include <Fijee/Fijee_XML_writer.h>
-#include <Fijee/Fijee_enum.h>
-
-// 
-// Package utils 
-#include <Utils/Fijee_utils.h>
-// 
-// Package utils 
-#include <Electrodes/Fijee_electrodes.h>
-// 
-// Package biophysics 
-#include <Biophysics/Fijee_biophysics.h>
-// 
-// Package mesh rendering 
-#include <Mesh_rendering/Fijee_mesh_rendering.h>
-// 
-// Package mesh rendering 
-#include <Finite_element_method_models/Fijee_fem.h>
+#ifndef FIJEE_ELECTRODES_H
+#define FIJEE_ELECTRODES_H
+/*!
+ * \file Fijee_electrodes.h
+ * \brief brief describe 
+ * \author Yann Cobigo
+ * \version 0.1
+ */
+#include <Electrodes/Electrodes_setup.h>
+#include <Electrodes/Electrodes_tACS.h>
 #endif

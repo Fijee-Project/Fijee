@@ -40,4 +40,4 @@ set( VTK_LIBRARIES "@VTK_LIBRARIES@" )
 #include("@Fijee_CMAKE_DIR@/FijeeLibraryDepends.cmake")
 
 # These are IMPORTED targets created by FijeeLibraryDepends.cmake
-set( Fijee_LIBRARIES FijeeUtils FijeeBiophysics FijeeMesh FijeeFEM )
+set( Fijee_LIBRARIES FijeeUtils FijeeElectrodes FijeeBiophysics FijeeMesh FijeeFEM )
