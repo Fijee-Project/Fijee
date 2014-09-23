@@ -28,8 +28,7 @@
 // 
 // 
 // 
-extern "C"
-{
+extern "C" {
 #include <stdlib.h>     /* calloc, exit, free */
 #include <metis.h>
 }

@@ -85,6 +85,7 @@ set(CMAKE_MODULE_PATH
 #
 # General libraries
 find_package( PkgConfig REQUIRED)
+#pkg_check_modules( metis REQUIRED metis )
 
 
 #
@@ -93,7 +94,7 @@ find_package(DOLFIN REQUIRED CONFIG)
 if(DOLFIN_FOUND)
   message( STATUS "FEniCS found at ${DOLFIN_INCLUDE_DIRS}" )
   include(${DOLFIN_USE_FILE})
-  get_filename_component( DOLFIN_LIBRARY_DIRS ${DOLFIN_LIBRARIES} DIRECTORY )
+  get_filename_component( DOLFIN_LIBRARY_DIRS ${DOLFIN_LIBRARIES} PATH )
 endif()
 
 #
@@ -133,13 +134,23 @@ if(EIGEN_FOUND)
   include_directories(${EIGEN_INCLUDE_DIR})
 endif()
 
+##
+## MPI (FEniCS)
+#find_package(MPI REQUIRED)
+##
+#if( MPI_FOUND )
+#  message(STATUS "MPI found" )# @ ${MPI_INCLUDE_PATH} : ")
+#  include_directories(${MPI_INCLUDE_PATH})
+#endif()
+
+
 #
-# MPI (FEniCS)
-find_package(MPI REQUIRED)
+# Metis
+find_package( METIS REQUIRED )
 #
-if(MPI_FOUND)
-  message(STATUS "MPI found @ ${MPI_INCLUDE_PATH} : ")
-  include_directories(${MPI_INCLUDE_PATH})
+if( METIS_FOUND )
+  message( STATUS "Metis found" )
+  include_directories( ${METIS_INCLUDE_DIR} )
 endif()
 
 #
@@ -156,7 +167,7 @@ endif()
 find_package(CGAL 4.3 REQUIRED)
 #
 if(CGAL_FOUND)
-  message( STATUS "CGAL FOUND ${CGAL_DIR}" )
+  message( STATUS "CGAL found ${CGAL_DIR}" )
   add_definitions( -DCGAL_EIGEN3_ENABLED )
   include( ${CGAL_USE_FILE} )
 endif()

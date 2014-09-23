@@ -43,8 +43,6 @@
 #include "Conductivity_tensor.h"
 #include "CGAL_tools.h"
 #include "Cell_conductivity.h"
-
-#include <metis.h>
 //
 // Eigen
 //
@@ -52,8 +50,6 @@
 // VTK
 #include <vtkSmartPointer.h>
 #include <vtkMatrix3x3.h>
-//#include <vtkMath.h>
-
 /*! \namespace Domains
  * 
  * Name space for our new package
