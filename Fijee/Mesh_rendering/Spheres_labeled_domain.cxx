@@ -233,16 +233,25 @@ Domains_Spheres_labeled::operator()()
 void
 Domains_Spheres_labeled::model_segmentation()
 {
+  // 
+  // 
+  std::string install_dir = (Domains::Access_parameters::get_instance())->get_install_directory_();
+  // 
+  std::string sphere_scalp = install_dir + std::string("/share/spheres/sphere_scalp.xyz");
+  std::string sphere_skull = install_dir + std::string("/share/spheres/sphere_skull.xyz");
+  std::string sphere_CSF   = install_dir + std::string("/share/spheres/sphere_CSF.xyz");
+  std::string sphere_brain = install_dir + std::string("/share/spheres/sphere_brain.xyz");
+  
   //
   // brain, CSF, scalp and skull
   Labeled_domain< Spheres_implicite_domain, GT::Point_3, std::list< Point_vector > > 
-    scalp( "../share/sphere_scalp.xyz" );
+    scalp( sphere_scalp.c_str() );
   Labeled_domain< Spheres_implicite_domain, GT::Point_3, std::list< Point_vector > > 
-    skull( "../share/sphere_skull.xyz" );
+    skull( sphere_skull.c_str() );
   Labeled_domain< Spheres_implicite_domain, GT::Point_3, std::list< Point_vector > > 
-    CSF( "../share/sphere_CSF.xyz"  );
+    CSF( sphere_CSF.c_str() );
   Labeled_domain< Spheres_implicite_domain, GT::Point_3, std::list< Point_vector > > 
-    brain( "../share/sphere_brain.xyz" );
+    brain( sphere_brain.c_str() );
   //  
 //    scalp( data_position_ );
 //    skull( data_position_ );

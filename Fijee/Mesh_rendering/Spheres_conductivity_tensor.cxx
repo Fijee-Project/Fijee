@@ -211,8 +211,8 @@ DSct::make_conductivity( const C3t3& Mesh )
       int cell_id        = inum++;
       int cell_subdomain = cell_pmap.subdomain_index( cit );
 
-//#ifdef TRACE
-//#if TRACE == 4
+//#ifdef FIJEE_TRACE
+//#if FIJEE_TRACE == 4
       if ( inum % 100000 == 0 )
 	std::cout << "cell: " << inum << std::endl;
 //#endif
@@ -461,8 +461,8 @@ DSct::make_conductivity( const C3t3& Mesh )
 void
 DSct::Make_analysis()
 {
-#ifdef TRACE
-#if TRACE == 100
+#ifdef FIJEE_TRACE
+#if FIJEE_TRACE == 100
   //
   //
   output_stream_

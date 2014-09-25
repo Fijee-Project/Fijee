@@ -325,6 +325,13 @@ namespace Domains
      */
     ucsf_get_macro(delta_translation_, Vector_f_3X1);
    /*!
+     *  \brief Get install_directory_
+     *
+     *  This method return the Fijee install directory path
+     *
+     */
+    ucsf_get_string_macro(install_directory_);
+   /*!
      *  \brief Get files_path_output_
      *
      *  This method return the output path

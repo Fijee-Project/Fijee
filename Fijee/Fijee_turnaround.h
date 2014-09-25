@@ -24,34 +24,50 @@
 //  The views and conclusions contained in the software and documentation are those   
 //  of the authors and should not be interpreted as representing official policies,    
 //  either expressed or implied, of the FreeBSD Project.  
-#ifndef FIJEE_H
-#define FIJEE_H
-#include <iostream>
-// 
-// Package Fijee
-#include <Fijee/Fijee_compression.h>
-#include <Fijee/Fijee_environment.h>
-#include <Fijee/Fijee_exception_handler.h>
-#include <Fijee/Fijee_log_management.h>
-#include <Fijee/Fijee_turnaround.h>
-#include <Fijee/Fijee_statistical_analysis.h>
-#include <Fijee/Fijee_thread_dispatching.h>
-#include <Fijee/Fijee_XML_writer.h>
-#include <Fijee/Fijee_enum.h>
+#ifndef FIJEE_TURNAROUND_H
+#define FIJEE_TURNAROUND_H
+/*!
+ * \file Fijee_turnaround.h
+ * \brief Log management 
+ * \author Yann Cobigo
+ * \version 0.1
+ */
+//
+//
+//
+/*! \namespace Fijee
+ * 
+ * Name space for our new package
+ *
+ */
+namespace Fijee
+{
+  /*
+   * This source is a turnaround to access private members from an other class from a library mostlikely unreachable.
+   * The turnaround is due to:
+   * http://bloglitb.blogspot.com/2010/07/access-to-private-members-thats-easy.html
+   *
+   */
+  template<typename Tag>
+    struct result {
+      /* export it ... */
+      typedef typename Tag::type type;
+      static type ptr;
+    };
 
-// 
-// Package utils 
-#include <Utils/Fijee_utils.h>
-// 
-// Package utils 
-#include <Electrodes/Fijee_electrodes.h>
-// 
-// Package biophysics 
-#include <Biophysics/Fijee_biophysics.h>
-// 
-// Package mesh rendering 
-#include <Mesh_rendering/Fijee_mesh_rendering.h>
-// 
-// Package mesh rendering 
-#include <Finite_element_method_models/Fijee_fem.h>
+  template<typename Tag>
+    typename result<Tag>::type result<Tag>::ptr;
+  
+  template<typename Tag, typename Tag::type p>
+    struct rob : result<Tag> {
+    /* fill it ... */
+    struct filler {
+      filler() { result<Tag>::ptr = p; }
+    };
+    static filler filler_obj;
+  };
+  
+  template<typename Tag, typename Tag::type p>
+    typename rob<Tag, p>::filler rob<Tag, p>::filler_obj;
+}
 #endif

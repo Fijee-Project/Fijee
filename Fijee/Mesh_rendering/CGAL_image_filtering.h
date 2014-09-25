@@ -238,8 +238,8 @@ namespace Domains
      */
     virtual void Make_analysis()
     {
-#ifdef TRACE
-#if TRACE == 100
+#ifdef FIJEE_TRACE
+#if FIJEE_TRACE == 100
       //
       //
       output_stream_

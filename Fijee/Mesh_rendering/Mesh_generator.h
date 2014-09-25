@@ -109,9 +109,9 @@ namespace Domains
 
   public:
     /*!
-     *  \brief construct
+     *  \brief Make inrimage
      *
-     *  
+     *  This member function performs the model segmentation of T1, T2 images and write the labeled image in inrimage format.
      *
      */
     void make_inrimage()
@@ -125,9 +125,9 @@ namespace Domains
       domains_.write_inrimage_file();
     }
     /*!
-     *  \brief 
+     *  \brief Make conductivity
      *
-     *  
+     *  This member function performs labeled image tetrahedrization and matches the Density Image Tensors with mesh's centroids. 
      *
      */
     void make_conductivity()
@@ -141,9 +141,9 @@ namespace Domains
       tensors_.make_conductivity( mesher_.get_mesh_() );
     }
     /*!
-     *  \brief 
+     *  \brief Make output
      *
-     *  
+     *  This member function produces the output.
      *
      */
     void make_output()
@@ -160,8 +160,8 @@ namespace Domains
       mesher_.Output_FEniCS_xml();
       tensors_.Output_mesh_conductivity_xml();
       dipoles_.Output_dipoles_list_xml();
-      //#ifdef TRACE
-      //#if ( TRACE == 200 )
+      //#ifdef FIJEE_TRACE
+      //#if ( FIJEE_TRACE == 200 )
       //  mesher_.Output_VTU_xml();
       //#endif
       //#endif
@@ -174,8 +174,8 @@ namespace Domains
       std::thread conductivity(std::ref(tensors_));
       std::thread dipoles(std::ref(dipoles_));
       //
-      //#ifdef TRACE
-      //#if ( TRACE == 200 )
+      //#ifdef FIJEE_TRACE
+      //#if ( FIJEE_TRACE == 200 )
       //  std::thread vtu(std::ref(mesher_), MESH_VTU);
       //  vtu.join();
       //#endif

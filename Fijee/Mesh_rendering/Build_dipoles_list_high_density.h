@@ -138,8 +138,8 @@ namespace Domains
     double cell_size_;
     //! Gray matter layer populated by the dipole distribution. If layer_ = 1, only the first layer of gray matter centroids will be populated. This variable allow to control the density of the dipole distribution
     int layer_;
-#ifdef TRACE
-#if TRACE == 100
+#ifdef FIJEE_TRACE
+#if FIJEE_TRACE == 100
     //! Mesh centroid and white matter point-vector tuples list
     std::list< std::tuple< Point_vector, Point_vector, Cell_conductivity > > centroid_vertex_;
 #endif

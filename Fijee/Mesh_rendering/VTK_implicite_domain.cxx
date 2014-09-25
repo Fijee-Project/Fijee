@@ -393,7 +393,10 @@ Domain::operator ()( double** Space_Points )
     exit(-1);
   // Check if the surface is inside out
   if( inside_domain( CGAL::Point_3< Kernel > (256., 256., 256.) ) )
-    function_->flip_f();
+    {
+      // function_->flip_f();
+      ((*function_).*Fijee::result<Poisson_recon_func_head>::ptr)();
+    }
 }
 //
 //

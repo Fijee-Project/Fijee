@@ -205,8 +205,8 @@ DHct::Head_conductivity_tensor()
   
   //
   // Output for R analysis
-#ifdef TRACE
-#if ( TRACE == 100 )
+#ifdef FIJEE_TRACE
+#if ( FIJEE_TRACE == 100 )
   std::stringstream err;
   err << "l1 true \t l2 true \t l3 true \t l1 \t l2 \t l3 \t delta12 \t delta13 \t delta23 \n";
 #endif
@@ -332,8 +332,8 @@ DHct::Head_conductivity_tensor()
 	  //
 	  conductivity_tensors_array_[ index_val ] = conductivity_tensor;
 
-#ifdef TRACE
-#if ( TRACE == 2 )
+#ifdef FIJEE_TRACE
+#if ( FIJEE_TRACE == 2 )
 	  // 
 	  // Print some results
 	  //
@@ -395,8 +395,8 @@ DHct::Head_conductivity_tensor()
 
 	  //
 	  // Output for R analysis
-#ifdef TRACE
-#if ( TRACE == 100 )
+#ifdef FIJEE_TRACE
+#if ( FIJEE_TRACE == 100 )
 	  //
 	  // Check the solution
 	  Eigen::Matrix<float, 3, 3> tensor = 
@@ -420,8 +420,8 @@ DHct::Head_conductivity_tensor()
 	    }
 #endif
 #endif
-#ifdef TRACE
-#if ( TRACE == 3 )
+#ifdef FIJEE_TRACE
+#if ( FIJEE_TRACE == 3 )
 	  //
 	  // Recreate the ascii output from dt_recon -> 
 	  if( dim1 == 0 )
@@ -451,8 +451,8 @@ DHct::Head_conductivity_tensor()
 
   //
   // Output for R analysis 
-#ifdef TRACE
-#if ( TRACE == 100 )
+#ifdef FIJEE_TRACE
+#if ( FIJEE_TRACE == 100 )
   std::ofstream outFile;
   outFile.open("Data.frame");
   outFile << err.rdbuf();
@@ -665,8 +665,8 @@ DHct::make_conductivity( const C3t3& Mesh )
       int cell_id        = inum++;
       int cell_subdomain = cell_pmap.subdomain_index( cit );
 
-//#ifdef TRACE
-//#if TRACE == 4
+//#ifdef FIJEE_TRACE
+//#if FIJEE_TRACE == 4
       if ( inum % 100000 == 0 )
 	std::cout << "cell: " << inum << std::endl;
 //#endif
@@ -1030,8 +1030,8 @@ DHct::make_conductivity( const C3t3& Mesh )
 void
 DHct::Make_analysis()
 {
-#ifdef TRACE
-#if TRACE == 100
+#ifdef FIJEE_TRACE
+#if FIJEE_TRACE == 100
   //
   //
   output_stream_

@@ -227,8 +227,8 @@ DAp::Access_parameters(): Fijee::XML_writer("")
     // Some print out
     //
 
-#ifdef TRACE
-#if ( TRACE == 1 )
+#ifdef FIJEE_TRACE
+#if ( FIJEE_TRACE == 1 )
     /********** print a little header information */
     fprintf(stderr, "\n %s header information for:", check_header.c_str() );
     fprintf(stderr, "\n XYZT dimensions: %d %d %d %d", 
@@ -341,8 +341,8 @@ DAp::Access_parameters(): Fijee::XML_writer("")
       header_eigenvalues.srow_y[3], 
       header_eigenvalues.srow_z[3];
 
-#ifdef TRACE
-#if ( TRACE == 1 )
+#ifdef FIJEE_TRACE
+#if ( FIJEE_TRACE == 1 )
     /********** print a little header information */
     fprintf(stderr, "\n%s header information for eigen values:", nifti_eigen_values.c_str() );
     fprintf(stderr, "\nXYZT dimensions: %d %d %d %d",

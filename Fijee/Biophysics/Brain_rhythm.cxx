@@ -328,8 +328,8 @@ Biophysics::Brain_rhythm::load_electric_field_file( std::string Output_path, con
 void
 Biophysics::Brain_rhythm::Make_analysis()
 {
-#ifdef TRACE
-#if TRACE == 100
+#ifdef FIJEE_TRACE
+#if FIJEE_TRACE == 100
   // 
   // 
 

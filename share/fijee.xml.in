@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fijee xmlns:fijee="https://github.com/Fijee-Project/Fijee">
-  <setup install_dir="/home/cobigo/devel/C++/UCSF/install/"
+  <setup install_dir="@CMAKE_INSTALL_PREFIX@"
 	 number_of_threads="2"
 	 />
   <mesh number_of_parcels="32"
@@ -13,6 +13,11 @@
       <!-- preconditioner: ilut - ilu0 - block_ilu{t,0} - jacobi - row_scaling -->
       <la iterative="true" linear_algebra_backend="ViennaCL" linear_solver="cg" preconditioner="row_scaling" maximum_iterations="10000000" relative_tolerance="1.e-8" />
     </solver>
-    <output electric_current_density_field="true" electrical_field="true"/>
+    <output 
+	electric_current_density_field="true" 
+	electrical_field="true" 
+	electric_potential_subdomains="true" 
+	dipoles_electric_potential="true"
+	/>
   </fem>
 </fijee>

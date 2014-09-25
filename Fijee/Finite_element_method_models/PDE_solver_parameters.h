@@ -96,6 +96,8 @@ namespace Solver
     // Ouput managment
     bool electric_current_density_field_;
     bool electrical_field_;
+    bool electric_potential_subdomains_;
+    bool dipoles_electric_potential_;
 
   protected:
     /*!
@@ -203,10 +205,24 @@ namespace Solver
     /*!
      *  \brief Get electrical_field_
      *
-     *  This method return true  if the user wants the  electrical field output. False otherwise.
+     *  This method return true if the user wants the electrical field output. False otherwise.
      *
      */
     ucsf_get_macro(electrical_field_, bool);
+    /*!
+     *  \brief Get electric_potential_subdomains_
+     *
+     *  This method return true if the user wants the electric potential at subdomain level output. False otherwise.
+     *
+     */
+    ucsf_get_macro(electric_potential_subdomains_, bool);
+    /*!
+     *  \brief Get dipoles_electric_potential_
+     *
+     *  This method return true if the user wants the dipoles electric potential output. False otherwise.
+     *
+     */
+    ucsf_get_macro(dipoles_electric_potential_, bool);
     /*!
      *  \brief Kill the singleton instance
      *

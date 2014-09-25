@@ -356,8 +356,8 @@ namespace Domains
       // 5 -> C22
       float conductivity_coefficients[6];
 
-#ifdef TRACE
-#if TRACE == 100
+#ifdef FIJEE_TRACE
+#if FIJEE_TRACE == 100
       //
       // R studies
       //

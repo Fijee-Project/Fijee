@@ -276,9 +276,9 @@ Solver::SL_subtraction::operator () ( /*Solver::Phi& source,
 
   //
   // Filter function over a subdomain
-  if ( false )
+  if ( (SDEsp::get_instance())->get_electric_potential_subdomains_() )
     {
-      std::list<std::size_t> test_sub_domains{4,5};
+      std::list<std::size_t> test_sub_domains{4,5,6};
       solution_domain_extraction(Phi_tot, test_sub_domains, source.get_name_().c_str());
       
     }
@@ -300,7 +300,7 @@ Solver::SL_subtraction::operator () ( /*Solver::Phi& source,
       std::cerr << "[exception caught]\n" << std::endl;
     }
 
-  if( false )
+  if( (SDEsp::get_instance())->get_dipoles_electric_potential_() )
     {
       //
       // Save solution in VTK format

@@ -253,8 +253,8 @@ DBdlknn::Select_dipole( Dipoles_tree& Tree, Domains::Point_vector& Centroid )
 
       //
       // Output for R analysis
-#ifdef TRACE
-#if TRACE == 100
+#ifdef FIJEE_TRACE
+#if FIJEE_TRACE == 100
   //
   // Record the tuple for the centroid
   if ( record )
@@ -272,8 +272,8 @@ DBdlknn::Select_dipole( Dipoles_tree& Tree, Domains::Point_vector& Centroid )
 void 
 DBdlknn::Make_analysis()
 {
-#ifdef TRACE
-#if TRACE == 100
+#ifdef FIJEE_TRACE
+#if FIJEE_TRACE == 100
   //
   //
   output_stream_

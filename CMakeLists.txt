@@ -30,25 +30,25 @@ set( Fijee_Utils_TARGET_LINK_LIBRARIES "" )
 set( Fijee_Biophysics_TARGET_LINK_LIBRARIES "" )
 set( Fijee_Mesh_TARGET_LINK_LIBRARIES "" )
 set( Fijee_FEM_TARGET_LINK_LIBRARIES "" )
-# DOLFIN INCOMPATIBILITY #
-# DOLFIN INCOMPATIBILITY # TRACE:
-# DOLFIN INCOMPATIBILITY # 1, 2, 3, ... printout
-# DOLFIN INCOMPATIBILITY # 100 R statistical software studies
-# DOLFIN INCOMPATIBILITY # 200 VTK visualization
-# DOLFIN INCOMPATIBILITY if( NOT DEFINED Fijee_TRACE )
-# DOLFIN INCOMPATIBILITY     set( Fijee_TRACE 0 )
-# DOLFIN INCOMPATIBILITY endif()
-# DOLFIN INCOMPATIBILITY #
-# DOLFIN INCOMPATIBILITY add_definitions( -DTRACE=${Fijee_TRACE} )
-# DOLFIN INCOMPATIBILITY #
-# DOLFIN INCOMPATIBILITY # CUDA:
-# DOLFIN INCOMPATIBILITY if( NOT DEFINED Fijee_CUDA )
-# DOLFIN INCOMPATIBILITY     set( Fijee_CUDA "OFF" )
-# DOLFIN INCOMPATIBILITY else()
-# DOLFIN INCOMPATIBILITY   if(Fijee_CUDA)
-# DOLFIN INCOMPATIBILITY     add_definitions( -DCUDA )
-# DOLFIN INCOMPATIBILITY   endif()
-# DOLFIN INCOMPATIBILITY endif()
+#
+# TRACE:
+# 1, 2, 3, ... printout
+# 100 R statistical software studies
+# 200 VTK visualization
+if( NOT DEFINED Fijee_TRACE )
+  set( Fijee_TRACE 0 )
+endif()
+#
+add_definitions( -DFIJEE_TRACE=${Fijee_TRACE} )
+#
+# CUDA:
+if( NOT DEFINED Fijee_CUDA )
+  set( Fijee_CUDA "OFF" )
+else()
+  if(Fijee_CUDA)
+    add_definitions( -DCUDA )
+  endif()
+endif()
 #
 #
 add_definitions( -std=c++0x -Wno-deprecated -DVERSION_OF_FIJEE="${Fijee_VERSION}" )  
@@ -59,15 +59,16 @@ add_definitions( -std=c++0x -Wno-deprecated -DVERSION_OF_FIJEE="${Fijee_VERSION}
 
 #
 # Fijee data set
-set( Fijee_DATA_SET ${Fijee_SOURCE_DIR}/share/fijee.xml )
-#
+set( Fijee_DATA_SET_IN ${Fijee_SOURCE_DIR}/share/fijee.xml.in )
+set( Fijee_DATA_SET ${CMAKE_CURRENT_BINARY_DIR}/fijee.xml )
+configure_file( ${Fijee_DATA_SET_IN} ${Fijee_DATA_SET} @ONLY )
 install( FILES ${Fijee_DATA_SET} DESTINATION ${CMAKE_INSTALL_PREFIX}/share )
-
-#
 # Electrodes
 set( Fijee_ELECTRODES_STANDARD_10_20_CAP81 ${Fijee_SOURCE_DIR}/share/electrodes/electrodes-Standard-10-20-Cap81.xml )
-#
 install( FILES ${Fijee_ELECTRODES_STANDARD_10_20_CAP81} DESTINATION ${CMAKE_INSTALL_PREFIX}/share/electrodes/ )
+# Spheres
+file( GLOB Fijee_SPHERES ${Fijee_SOURCE_DIR}/share/spheres/*.xyz )
+install( FILES ${Fijee_SPHERES} DESTINATION ${CMAKE_INSTALL_PREFIX}/share/spheres/ )
 
 
 #
@@ -168,8 +169,9 @@ find_package(CGAL 4.3 REQUIRED)
 #
 if(CGAL_FOUND)
   message( STATUS "CGAL found ${CGAL_DIR}" )
-  add_definitions( -DCGAL_EIGEN3_ENABLED )
-  include( ${CGAL_USE_FILE} )
+  add_definitions( -DCGAL_EIGEN3_ENABLED -frounding-math )
+  include_directories( ${CGAL_INCLUDE_DIRS} )
+#  include( ${CGAL_USE_FILE} )
 endif()
 
 #

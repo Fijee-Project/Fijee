@@ -153,8 +153,8 @@ Electrodes::Electrodes_tACS::Electrodes_tACS( const std::vector< std::tuple< std
 void
 Electrodes::Electrodes_tACS::Make_analysis()
 {
-#ifdef TRACE
-#if TRACE == 100
+#ifdef FIJEE_TRACE
+#if FIJEE_TRACE == 100
   // 
   // 
   output_stream_.precision(10);

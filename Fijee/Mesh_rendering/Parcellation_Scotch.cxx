@@ -294,7 +294,7 @@ DPS::Mesh_partitioning(  )
 //    }
 //
 //
-//#ifdef TRACE
+//#ifdef FIJEE_TRACE
 //  // 
 //  // At least in the development phase, it is recommended to check the Scotch mesh
 //  // SCOTCH_meshCheck
@@ -366,8 +366,8 @@ DPS::Mesh_partitioning(  )
 void 
 DPS::Make_analysis()
 {
-#ifdef TRACE
-#if TRACE == 100
+#ifdef FIJEE_TRACE
+#if FIJEE_TRACE == 100
   //
   // Warning: output are raw output from the data framework. To be in the good framework 
   // its needs the usual transformation from Access_parameters

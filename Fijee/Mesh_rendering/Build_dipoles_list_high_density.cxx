@@ -279,8 +279,8 @@ DBdlhd::Select_dipole( const High_density_tree& Tree,
 						       std::get<1>(dipole_position->first)) );
 	      //
 	      // R study
-#ifdef TRACE
-#if TRACE == 100
+#ifdef FIJEE_TRACE
+#if FIJEE_TRACE == 100
 	      centroid_vertex_.push_back(std::make_tuple(((std::get<1>(dipole_position->first)).get_centroid_lambda_())[0],
 							 vertex.get<2>(), 
 							 std::get<1>(dipole_position->first)));
@@ -354,8 +354,8 @@ DBdlhd::Parcellation_list()
 void 
 DBdlhd::Make_analysis()
 {
-#ifdef TRACE
-#if TRACE == 100
+#ifdef FIJEE_TRACE
+#if FIJEE_TRACE == 100
   //
   //
   output_stream_

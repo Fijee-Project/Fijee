@@ -41,6 +41,7 @@
 #include "Access_parameters.h"
 #include "Point_vector.h"
 #include "Fijee/Fijee_enum.h"
+#include "Fijee/Fijee_turnaround.h"
 #include "Implicite_domain.h"
 //
 // CGAL
@@ -57,9 +58,10 @@ typedef CGAL::Point_with_normal_3<Kernel> Point_with_normal;
 typedef CGAL::Poisson_reconstruction_function<Kernel> Poisson_reconstruction_function;
 typedef Kernel::FT FT;
 //
+// CGAL turnaround
 //
-//
-//http://franckh.developpez.com/tutoriels/outils/doxygen/
+struct Poisson_recon_func_spheres { typedef void(Poisson_reconstruction_function::*type)(); };
+template class Fijee::rob<Poisson_recon_func_spheres, &Poisson_reconstruction_function::flip_f>;
 /*!
  * \file Spheres_implicite_domain.h
  * \brief brief explaination 

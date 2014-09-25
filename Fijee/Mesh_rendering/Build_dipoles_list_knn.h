@@ -108,8 +108,8 @@ namespace Domains
     std::list< Domains::Dipole > dipoles_list_;
     //! Parcellation list
     std::list< Domains::Dipole > parcellation_list_;
-#ifdef TRACE
-#if TRACE == 100
+#ifdef FIJEE_TRACE
+#if FIJEE_TRACE == 100
     //! 
     std::list< std::tuple< Domains::Point_vector, std::tuple< Domains::Point_vector, Domains::Point_vector > > > match_centroid_wm_gm_;
 #endif

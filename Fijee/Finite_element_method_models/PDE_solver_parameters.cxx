@@ -219,6 +219,12 @@ SDEsp::init()
 	  // 
 	  electrical_field_ = 
 	    output_node.attribute("electrical_field").as_bool();
+	  // 
+	  electric_potential_subdomains_ =
+	    output_node.attribute("electric_potential_subdomains").as_bool();
+	  // 
+	  dipoles_electric_potential_ =
+	    output_node.attribute("dipoles_electric_potential").as_bool();
 
 
 	  //

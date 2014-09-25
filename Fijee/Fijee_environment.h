@@ -101,8 +101,17 @@ namespace Fijee
 	// Check on ENV variables
 	// ToDo: replace getenv ...
 	// getenv never throws exceptions
-	subjects_dir_ = getenv ("SUBJECTS_DIR");
-	subject_      = getenv ("SUBJECT");
+	if ( getenv ("SUBJECTS_DIR") && getenv ("SUBJECT") )
+	  {
+	    subjects_dir_ = getenv ("SUBJECTS_DIR");
+	    subject_      = getenv ("SUBJECT");
+	  }
+	else
+	  {
+	    std::cerr << "FreeSurfer Env variables $SUBJECTS_DIR and $SUBJECT must be defined" 
+		      << std::endl;
+	    exit(1);
+	  }
 	//
 	if( subjects_dir_.empty() || subject_.empty() )
 	  {

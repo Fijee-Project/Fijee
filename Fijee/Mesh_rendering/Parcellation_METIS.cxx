@@ -125,7 +125,7 @@ DPM::Mesh_partitioning()
   // Metis data structure
   // 
 
-#ifdef TRACE
+#ifdef FIJEE_TRACE
   printf("If not compliance, you are adviced to change IDXTYPEWIDTH metis.h\n.");
   printf("Size of idx_t: %zubits, real_t: %zubits, idx_t *: %zubits\n", 
 	 8*sizeof(idx_t), 8*sizeof(real_t), 8*sizeof(idx_t *));
@@ -305,8 +305,8 @@ DPM::Mesh_partitioning()
 void 
 DPM::Make_analysis()
 {
-#ifdef TRACE
-#if TRACE == 100
+#ifdef FIJEE_TRACE
+#if FIJEE_TRACE == 100
   //
   // Warning: output are raw output from the data framework. To be in the good framework 
   // its needs the usual transformation from Access_parameters
