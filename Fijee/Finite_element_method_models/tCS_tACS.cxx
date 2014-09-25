@@ -202,11 +202,9 @@ Solver::tCS_tACS::operator () ( /*Solver::Phi& source,
       std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
       // 
       // electrodes_->get_current(local_sample)->punctual_potential_evaluation(u, mesh_);
-      std::cout << "time av record: " << electrodes_->get_current(local_sample)->get_time_() << std::endl;
       electrodes_->get_current(local_sample)->surface_potential_evaluation(u, mesh_);
       electrodes_->record_potential( /*dipole idx*/ 0,
 				     /*time idx*/ local_sample );
-      std::cout << "time ap record: " << electrodes_->get_current(local_sample)->get_time_() << std::endl;
     }
   catch (std::logic_error&)
     {
@@ -214,7 +212,7 @@ Solver::tCS_tACS::operator () ( /*Solver::Phi& source,
     }
   
   // output
-  if(false)
+  if(true)
     {
       try
 	{
@@ -234,7 +232,7 @@ Solver::tCS_tACS::operator () ( /*Solver::Phi& source,
   // tACS electric current density field \vec{J}
   // 
 
-  if (false)
+  if ( (SDEsp::get_instance())->get_electric_current_density_field_() )
     {
       //
       // Define variational forms
@@ -310,7 +308,7 @@ Solver::tCS_tACS::operator () ( /*Solver::Phi& source,
   // tACS electrical field \vec{E}
   // 
   
-  if (true)
+  if ( (SDEsp::get_instance())->get_electrical_field_() )
     {
       //
       // Define variational forms
@@ -376,18 +374,18 @@ Solver::tCS_tACS::operator () ( /*Solver::Phi& source,
 	  // Evaluation of the electric field for each parcels
 	  tCS_E_parcel_->record(E, electrodes_->get_current(local_sample)->get_time_());
 
-	  Array<double> position(3);
-	  Array<double> val_1(3);
-	  position[0] = -0.0450098;
-	  position[1] =  0.0170047;
-	  position[2] =  0.0353029;
-	  E.eval(val_1, position);
-	  
-	  std::cout << "val at (" << -0.0450098 << "," << 0.0170047 << "," << 0.0353029 << ") = " 
-		    << val_1[0] << " " 
-		    << val_1[1] << " " 
-		    << val_1[2] << " " 
-		    << std::endl;
+//	  Array<double> position(3);
+//	  Array<double> val_1(3);
+//	  position[0] = -0.0450098;
+//	  position[1] =  0.0170047;
+//	  position[2] =  0.0353029;
+//	  E.eval(val_1, position);
+//	  
+//	  std::cout << "val at (" << -0.0450098 << "," << 0.0170047 << "," << 0.0353029 << ") = " 
+//		    << val_1[0] << " " 
+//		    << val_1[1] << " " 
+//		    << val_1[2] << " " 
+//		    << std::endl;
 
 
 	  *file_E_time_series_  
