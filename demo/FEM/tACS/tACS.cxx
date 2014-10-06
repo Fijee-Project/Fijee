@@ -24,22 +24,47 @@
 //  The views and conclusions contained in the software and documentation are those   
 //  of the authors and should not be interpreted as representing official policies,    
 //  either expressed or implied, of the FreeBSD Project.  
-#ifndef FIJEE_UTILS_H
-#define FIJEE_UTILS_H
-#include <iostream>
-// 
-// Package Utils
-#include <Utils/Minimizers/Minimizer.h>
-#include <Utils/Minimizers/Iterative_minimizer.h>
-#include <Utils/Minimizers/Downhill_simplex.h>
-#include <Utils/Minimizers/Kmeans_clustering.h>
-#include <Utils/Minimizers/Kmeans_clustering.h>
-#include <Utils/Data_structure/Basic_point.h>
-#include <Utils/Data_structure/Vertex.h>
-#include <Utils/Data_structure/Edge.h>
-#include <Utils/Data_structure/Graph_abstract_data_type.h>
-#include <Utils/Data_structure/Binary_search_tree_leaf.h>
-#include <Utils/Data_structure/Gray_level_binary_search_tree.h>
-#include <Utils/Third_party/pugi/pugixml.hpp>
-#include <Utils/Third_party/pugi/pugiconfig.hpp>
-#endif
+#include<fijee.h>
+//
+//
+//
+int main()
+{
+  //
+  //
+  Solver::PDE_solver_parameters* solver_parameters = Solver::PDE_solver_parameters::get_instance();
+  // 
+  solver_parameters->init();
+
+//  // 
+//  // tACS electrodes' setup
+//  std::vector< std::tuple<std::string, double> > positive_electrodes;
+//  positive_electrodes.push_back( std::make_tuple("C6", 0.00112 /*[A]*/) );
+//  //  positive_electrodes.push_back( std::make_tuple("FT7", 0.00112 /*[A]*/) );
+//  std::vector< std::tuple<std::string, double> > negative_electrodes;
+//  negative_electrodes.push_back( std::make_tuple("T8", -0.00112 / 4. /*[A]*/) );
+//  negative_electrodes.push_back( std::make_tuple("F8", -0.00112 / 4. /*[A]*/) );
+//  negative_electrodes.push_back( std::make_tuple("C4", -0.00112 / 4. /*[A]*/) );
+//  negative_electrodes.push_back( std::make_tuple("P8", -0.00112 / 4. /*[A]*/) );
+//  //  Electrodes::Electrodes_setup< Electrodes::Electrodes_tACS >
+//  Electrodes::Electrodes_tACS electrodes_setting( positive_electrodes, negative_electrodes,
+//					            10  /* [Hz]*/, 0.0005 /* [A] Amplitude */,
+//					            0.1 /* [s] elapse time */, 
+//					            1.  /* [s] starting time */ );
+//  // 
+//  electrodes_setting.output_XML( solver_parameters->get_files_path_output_() );
+
+  //
+  // Physical models:
+  // export OMP_NUM_THREADS=2
+  Solver::Model_solver< /* physical model */ Solver::tCS_tACS,
+		        /* number_of_threads_ */ 4 >  model;
+  //
+  std::cout << "Loop over solvers" << std::endl;
+  model.solver_loop();
+  model.XML_output();
+
+  //
+  //
+  return EXIT_SUCCESS;
+}

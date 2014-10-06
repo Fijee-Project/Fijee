@@ -58,6 +58,9 @@ add_definitions( -std=c++0x -Wno-deprecated -DVERSION_OF_FIJEE="${Fijee_VERSION}
 #
 
 #
+# Fijee pipeline
+set( Fijee_PIPELINE ${Fijee_SOURCE_DIR}/scripts/fijee.sh )
+install( FILES  ${Fijee_PIPELINE} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin )
 # Fijee data set
 set( Fijee_DATA_SET_IN ${Fijee_SOURCE_DIR}/share/fijee.xml.in )
 set( Fijee_DATA_SET ${CMAKE_CURRENT_BINARY_DIR}/fijee.xml )
@@ -192,6 +195,8 @@ set(Fijee_CMAKE_DIR ${CMAKE_INSTALL_PREFIX}/lib/cmake/Fijee-${Fijee_VERSION})
 #
 # Import all the source 
 add_subdirectory(Fijee)
+#
+install( DIRECTORY demo DESTINATION ${CMAKE_INSTALL_PREFIX}/share/ )
 
 #
 # Fijee configuration
