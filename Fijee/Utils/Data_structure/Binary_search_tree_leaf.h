@@ -236,48 +236,83 @@ namespace Utils
 	  }
       };
       /*!
-       *  \brief 
+       *  \brief Mark clusters
        *
-       *  This method .
+       *  This method marks clusters when the reache 1% of the total signal.
+       *
+       */
+      void clusterization( std::map<int, Binary_search_tree_leaf*>& Cardinal_map )
+      {
+	for( int level = 8 ; level > 0 ; level-- )
+	  mark_clusters(level, Cardinal_map);
+      };
+      /*!
+       *  \brief Mark clusters
+       *
+       *  This method marks clusters when the reache 1% of the total signal.
        *
        */
       void mark_clusters( const int Num_level, std::map<int, Binary_search_tree_leaf*>& Cardinal_map )
       {
 	if( leaf_level_ == Num_level )
 	  {
+	    // 
 	    double signal_percentage = ((double)cardinal_ / (256.*256.*256.)) * 100;
-	    if ( signal_percentage > 1. )
-	      Cardinal_map[cardinal_] = this;
+	    // 
+	    if ( signal_percentage > 1. /* % */)
+	      if ( !belongs_to_cluster() )
+		{ 
+		  cluster_number_ = -2; // temporary cluster number
+		  Cardinal_map[cardinal_] = this;
+		}
 	  }
 	else
 	  {
-	    // and keep going
+	    // and keep going to the required level
 	    left_-> mark_clusters(Num_level, Cardinal_map);
 	    right_->mark_clusters(Num_level, Cardinal_map);	
 	  }
       };
-      
-      };
       /*!
-       *  \brief Dump values for Binary_search_tree_leaf
+       *  \brief Mark clusters
        *
-       *  This method overload "<<" operator for a customuzed output.
+       *  This method marks clusters when the reache 1% of the total signal.
        *
-       *  \param Binary_search_tree_leaf : new position to add in the list
        */
-      std::ostream& operator << ( std::ostream& stream, const Binary_search_tree_leaf& that )
-	{
-	  stream 
-	    << "leaf_level_: "  << that.get_leaf_level_()
-	    << " cumulative_: " << that.get_cumulative_() 
-	    << " cardinal_: "   << that.get_cardinal_() 
-	    << " cluster_number_: " << that.get_cluster_number_()
-	    << std::endl;
+      bool belongs_to_cluster()
+      {
+	if( leaf_level_ == 8 )
+	  if( cluster_number_ != -1 ) return true;
+	  else return false;
+	else
+	  if( cluster_number_ != -1 ) return true;
+	  else
+	    if( !left_-> belongs_to_cluster() )
+	      right_->belongs_to_cluster();
+	    else return true;
+      };
+      
+    };
+    /*!
+     *  \brief Dump values for Binary_search_tree_leaf
+     *
+     *  This method overload "<<" operator for a customuzed output.
+     *
+     *  \param Binary_search_tree_leaf : new position to add in the list
+     */
+    std::ostream& operator << ( std::ostream& stream, const Binary_search_tree_leaf& that )
+      {
+	stream 
+	  << "leaf_level_: "  << that.get_leaf_level_()
+	  << " cumulative_: " << that.get_cumulative_() 
+	  << " cardinal_: "   << that.get_cardinal_() 
+	  << " cluster_number_: " << that.get_cluster_number_()
+	  << std::endl;
 
-	  // 
-	  // 
-	  return stream;
-	};
+	// 
+	// 
+	return stream;
+      };
   }
 }
 #endif

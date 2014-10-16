@@ -65,6 +65,7 @@ namespace Utils
       private:
       //! Binary tree data structure      
       Binary_search_tree_leaf tree_;
+      //! Cluster map
       std::map< int, Binary_search_tree_leaf* > clustering_;
 
       public:
@@ -138,7 +139,11 @@ namespace Utils
        *  
        *
        */
-      void mark_clusters( const int );
+      void mark_clusters( /*const int*/ );
+
+      public:
+      std::map< int, Binary_search_tree_leaf* >& get_clustering_(){return clustering_;};
+
       };
     // 
     // 
@@ -237,11 +242,13 @@ namespace Utils
     // 
     // 
     template <  typename Type, int num_of_level > void
-      Gray_level_binary_search_tree<Type, num_of_level>::mark_clusters( const int Level )
+      Gray_level_binary_search_tree<Type, num_of_level>::mark_clusters( /*const int Level*/ )
     { 
+      
       // 
       // Enumeration of potential clusters
-      tree_.mark_clusters(Level, clustering_);
+      tree_.clusterization(clustering_);
+//      tree_.mark_clusters(Level, clustering_);
       
       // 
       //

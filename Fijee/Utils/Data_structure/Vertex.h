@@ -150,7 +150,7 @@ namespace Utils
 	 *  This method inserts an edge to this vertex edges' list
 	 *
 	 */
-	bool insert_edge( Edge<Type_point>& E )
+	bool insert_edge( const Edge<Type_point>& E )
 	{
 	  bool edge_defined = false;
 	  // 
@@ -235,7 +235,7 @@ namespace Utils
 
 	if( this != &that )
 	  {
-	    index_ = that.index_;
+	    index_      = that.index_;
 	    that.index_ = 0;
 	  }
 	//
@@ -270,7 +270,12 @@ namespace Utils
       {
 	//
 	//
-	stream << "x=\"" << that.x() << "\" y=\"" << that.y() << "\" z=\"" << that.z() << "\" ";
+	stream 
+	  << "x= " << that.x() 
+	  << " y= " << that.y() 
+	  << " z= " << that.z()
+	  << " index= " << that.get_index_()
+	  << " weight= " << that.weight();
 	
 	//
 	//

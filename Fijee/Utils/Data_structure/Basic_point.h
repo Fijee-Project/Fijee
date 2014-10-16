@@ -148,6 +148,21 @@ namespace Utils
 	    (position_[1]-P.y())*(position_[1]-P.y()) + 
 	    (position_[2]-P.z())*(position_[2]-P.z()); 
 	};
+	/*!
+	 *  \brief Print XML format
+	 *
+	 *  This member print out in XML format
+	 *
+	 */
+	std::ostream& print_XML( std::ostream& stream ) const 
+	{ 
+	  //
+	  //
+	  stream 
+	    << "x=\"" << x() 
+	    << "\" y=\"" << y() 
+	    << "\" z=\"" << z() << "\" ";
+	};
       };
     //
     //
@@ -292,7 +307,12 @@ namespace Utils
       {
 	//
 	//
-	stream << "x=\"" << that.x() << "\" y=\"" << that.y() << "\" z=\"" << that.z() << "\" ";
+	stream 
+	  << "x= " << that.x() 
+	  << " y= " << that.y() 
+	  << " z= " << that.z()
+	  << " weight= " << that.weight();
+	  
 	
 	//
 	//

@@ -63,8 +63,6 @@ namespace Utils
       class Graph_abstract_data_type
       {
       private:
-	//! Number of vertices
-	int num_vertices_;
 	//! Vertices list
 	std::list< Vertex<Type_point> > vertices_;
 	//! Edge list
@@ -123,10 +121,18 @@ namespace Utils
 	 *
 	 */
 	Graph_abstract_data_type& operator = ( Graph_abstract_data_type&& );
+	/*!
+	 *  \brief Move Operator ()
+	 *
+	 *  operator () of the class Graph_abstract_data_type
+	 *
+	 */
+	bool operator () ( std::shared_ptr< Edge<Type_point> >& );
 
       public:
-	const std::list< Vertex<Type_point> >& get_vertices_() const {return vertices_; }
-	const std::list< Edge<Type_point> >&   get_edges_()    const {return edges_; }
+	const std::list< Vertex<Type_point> >& get_vertices_()         const {return vertices_; }
+	const std::list< Edge<Type_point> >&   get_edges_()            const {return edges_; }
+	std::shared_ptr< Edge<Type_point> >**  get_adjacency_matrix_() const {return adjacency_matrix_; }
 
       public:
 	/*!
@@ -249,6 +255,14 @@ namespace Utils
     //
     //
     template< typename Type_point > bool
+      Graph_abstract_data_type<Type_point>::operator () ( std::shared_ptr< Edge<Type_point> >& that )
+      {
+	
+      }
+    //
+    //
+    //
+    template< typename Type_point > bool
       Graph_abstract_data_type<Type_point>::insert_edge( const Vertex<Type_point>& V1, 
 							 const Vertex<Type_point>& V2 )
       {
@@ -277,25 +291,25 @@ namespace Utils
 	    // 
 	    if( !edge_defined )
 	      {
-		edges_.push_back( Edge<Type_point>(V1, V2) );
+		edges_.push_back( Edge<Type_point>(*v1, *v2) );
 		// up date of the adjacency_matrix_
 		if( adjacency_matrix_ )
 		  {
-		    auto it_edges = edges_.end(); it_edges--;
-		    adjacency_matrix_[V1.get_index_()][V2.get_index_()].reset(&(*it_edges));
-		    adjacency_matrix_[V2.get_index_()][V1.get_index_()].reset(&(*it_edges));
+//		    auto last_edge = edges_.back();
+		    adjacency_matrix_[V1.get_index_()][V2.get_index_()].reset( new Edge<Type_point>(*v1, *v2) );
+		    adjacency_matrix_[V2.get_index_()][V1.get_index_()] = adjacency_matrix_[V1.get_index_()][V2.get_index_()];
 		    // add the edge in the vertices' edges list
-		    v1->insert_edge(*it_edges);
-		    v2->insert_edge(*it_edges);
+//		    v1->insert_edge(last_edge);
+//		    v2->insert_edge(last_edge);
 
 
-		    std::cout << "Make Edge" << std::endl;
-		    std::cout << V1 << " " << V2 << std::endl;
-		    std::cout << V1.get_index_() << " " << V2.get_index_() << std::endl;
-		    std::cout << (adjacency_matrix_[V1.get_index_()][V2.get_index_()]->get_vertices_())[0].get_index_()
-			      << " "
-			      << (adjacency_matrix_[V1.get_index_()][V2.get_index_()]->get_vertices_())[1].get_index_()
-			      << std::endl;
+//		    std::cout << "Make Edge" << std::endl;
+//		    std::cout << V1 << " " << V2 << std::endl;
+//		    std::cout << V1.get_index_() << " " << V2.get_index_() << std::endl;
+//		    std::cout << (adjacency_matrix_[V1.get_index_()][V2.get_index_()]->get_vertices_())[0].get_index_()
+//			      << " "
+//			      << (adjacency_matrix_[V1.get_index_()][V2.get_index_()]->get_vertices_())[1].get_index_()
+//			      << std::endl;
 
 
 		  }
@@ -328,14 +342,15 @@ namespace Utils
     template< typename Type_point > 
       std::ostream& operator << ( std::ostream& stream, const Graph_abstract_data_type<Type_point>& that )
       {
-//	//
-//	//
-//	stream << "Vertices of the edge V1=" << that.V1() << "\n"
-//	       << "\" V2=" << that.V2() << "\n"
-//	       << "\" edge weight=\"" << that.weight() << std::endl;
-//	
-//	//
-//	//
+	//
+	//
+	for ( int i = 0 ; i < that.get_vertices_().size() ; i++ )
+	  for ( int j = i+1 ; j < that.get_vertices_().size() ; j++ )
+	    if( (that.get_adjacency_matrix_())[i][j] )
+	      stream << *(that.get_adjacency_matrix_())[i][j] << std::endl;
+	
+	//
+	//
 	return stream;
       };
   }
