@@ -96,17 +96,21 @@ find_package( PkgConfig REQUIRED)
 # FEniCS
 find_package(DOLFIN REQUIRED CONFIG)
 if(DOLFIN_FOUND)
-  message( STATUS "FEniCS found at ${DOLFIN_INCLUDE_DIRS}" )
+  message( STATUS "FEniCS found ${DOLFIN_INCLUDE_DIRS}" )
   include(${DOLFIN_USE_FILE})
   get_filename_component( DOLFIN_LIBRARY_DIRS ${DOLFIN_LIBRARIES} PATH )
+  else()
+  message( STATUS "FEniCS not found" )    
 endif()
 
 #
 # VTK
 find_package(VTK 5.10 REQUIRED NO_MODULE)
 if(VTK_FOUND)
-  message(STATUS "VTK found")
+  message(STATUS "VTK found ${VTK_DIR}")
   include(${VTK_USE_FILE})
+else()
+  message(STATUS "VTK not found")
 endif()
 
 #
@@ -134,8 +138,10 @@ endif()
 find_package(EIGEN 3.0 REQUIRED)
 #
 if(EIGEN_FOUND)
-  message(STATUS "eigen found @ ${EIGEN_DIR} ${EIGEN_INCLUDE_DIR}")
+  message(STATUS "eigen found ${EIGEN_DIR} ${EIGEN_INCLUDE_DIR}")
   include_directories(${EIGEN_INCLUDE_DIR})
+else()
+   message(STATUS "eigen not found")
 endif()
 
 ##
@@ -143,7 +149,7 @@ endif()
 #find_package(MPI REQUIRED)
 ##
 #if( MPI_FOUND )
-#  message(STATUS "MPI found" )# @ ${MPI_INCLUDE_PATH} : ")
+#  message(STATUS "MPI found" )# ${MPI_INCLUDE_PATH} : ")
 #  include_directories(${MPI_INCLUDE_PATH})
 #endif()
 
@@ -153,8 +159,10 @@ endif()
 find_package( METIS REQUIRED )
 #
 if( METIS_FOUND )
-  message( STATUS "Metis found" )
+  message( STATUS "Metis found ${METIS_DIR} " )
   include_directories( ${METIS_INCLUDE_DIR} )
+else()
+  message( STATUS "Metis not found" )
 endif()
 
 #
@@ -162,8 +170,10 @@ endif()
 find_package(NIFTI REQUIRED)
 #
 if(NIFTI_FOUND)
-  message(STATUS "nifti found")
+  message(STATUS "nifti found ${NIFTI_DIR} ")
   include_directories(${NIFTI_INCLUDE_DIR})
+else()
+  message(STATUS "nifti not found")
 endif()
 
 #
@@ -175,6 +185,8 @@ if(CGAL_FOUND)
   add_definitions( -DCGAL_EIGEN3_ENABLED -frounding-math )
   include_directories( ${CGAL_INCLUDE_DIRS} )
 #  include( ${CGAL_USE_FILE} )
+else()
+  message( STATUS "CGAL not found" )
 endif()
 
 #
