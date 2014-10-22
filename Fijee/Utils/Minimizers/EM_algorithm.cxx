@@ -24,23 +24,25 @@
 //  The views and conclusions contained in the software and documentation are those   
 //  of the authors and should not be interpreted as representing official policies,    
 //  either expressed or implied, of the FreeBSD Project.  
-#ifndef FIJEE_UTILS_H
-#define FIJEE_UTILS_H
-#include <iostream>
+#include "EM_algorithm.h"
 // 
-// Package Utils
-#include <Utils/Minimizers/Minimizer.h>
-#include <Utils/Minimizers/Iterative_minimizer.h>
-#include <Utils/Minimizers/Downhill_simplex.h>
-#include <Utils/Minimizers/EM_algorithm.h>
-#include <Utils/Minimizers/Kmeans_clustering.h>
-#include <Utils/Minimizers/Kmeans_clustering.h>
-#include <Utils/Data_structure/Basic_point.h>
-#include <Utils/Data_structure/Vertex.h>
-#include <Utils/Data_structure/Edge.h>
-#include <Utils/Data_structure/Graph_abstract_data_type.h>
-#include <Utils/Data_structure/Binary_search_tree_leaf.h>
-#include <Utils/Data_structure/Gray_level_binary_search_tree.h>
-#include <Utils/Third_party/pugi/pugixml.hpp>
-#include <Utils/Third_party/pugi/pugiconfig.hpp>
-#endif
+// 
+// 
+Utils::Minimizers::Expectation_maximization::Expectation_maximization():
+  It_minimizer()
+{}
+// 
+// 
+// 
+void
+Utils::Minimizers::Expectation_maximization::minimize()
+{
+}
+//// 
+//// 
+//// 
+//void
+//Utils::Minimizers::Expectation_maximization::initialization( Function Func, 
+//							     const std::vector< Estimation_tuple >& Simplex,
+//							     const std::vector< std::tuple<double, double> >& Boundaries )
+//{ }
