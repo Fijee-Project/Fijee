@@ -57,7 +57,7 @@ namespace Utils
    */
   namespace Minimizers
   {
-    /*! \class Shape
+    /*! \class Downhill_simplex
      * \brief classe representing whatever
      *
      *  This class is an example of class 

@@ -33,7 +33,7 @@
 #include <Utils/Minimizers/Iterative_minimizer.h>
 #include <Utils/Minimizers/Downhill_simplex.h>
 #include <Utils/Minimizers/EM_algorithm.h>
-#include <Utils/Minimizers/Kmeans_clustering.h>
+#include <Utils/Minimizers/Active_contour_model.h>
 #include <Utils/Minimizers/Kmeans_clustering.h>
 #include <Utils/Data_structure/Basic_point.h>
 #include <Utils/Data_structure/Vertex.h>

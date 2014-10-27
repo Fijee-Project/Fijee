@@ -56,7 +56,7 @@ namespace Utils
    */
   namespace Minimizers
   {
-    /*! \class Shape
+    /*! \class Expectation_maximization
      * \brief classe expectation–maximization (EM) algorithm.
      *
      *  This class is an expectation–maximization (EM) algorithm. EM is an iterative method for finding maximum likelihood or maximum a posteriori (MAP) estimates of parameters in statistical models, where the model depends on unobserved latent variables. The EM iteration alternates between performing an expectation (E) step, which creates a function for the expectation of the log-likelihood evaluated using the current estimate for the parameters, and a maximization (M) step, which computes parameters maximizing the expected log-likelihood found on the E step. These parameter-estimates are then used to determine the distribution of the latent variables in the next E step.(wiki).
