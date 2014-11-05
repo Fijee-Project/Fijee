@@ -117,7 +117,7 @@ Electrodes::Electrodes_tACS::Electrodes_tACS( const std::vector< std::tuple< std
 	  //
 	  abort();
 	}
-    }    
+    }
   // 
   if( I_tot_plus_ != - I_tot_minus_ )
     {
@@ -127,10 +127,13 @@ Electrodes::Electrodes_tACS::Electrodes_tACS( const std::vector< std::tuple< std
       //
       abort();
     }
-  // Initialze the electrodes contribution
-  for( auto electrode : electrodes_ )
-    electrode.second.I_ /= I_tot_plus_;
-
+//  // Initialze the electrodes contribution
+//  for( auto electrode : electrodes_ )
+//    {
+//      std::cout << "av electrode.second.I_ " << electrode.second.I_ << std::endl;
+//      electrode.second.I_ /= I_tot_plus_;
+//      std::cout << "ap electrode.second.I_ " << electrode.second.I_ << std::endl;
+//    }
 
   // 
   // Production of the AC time series injection
@@ -144,7 +147,7 @@ Electrodes::Electrodes_tACS::Electrodes_tACS( const std::vector< std::tuple< std
     {
       // s -> ms
       intensity_time_series_.push_back( std::make_tuple( time_start_ + time * time_step_,
-							 I_tot_plus_ + Amplitude * sin(2 * PI * Frequency * time  * time_step_) ) );
+							 /*I_tot_plus_ +*/ Amplitude * sin(2 * PI * Frequency * time  * time_step_) ) );
     }
 }
 // 
@@ -358,7 +361,10 @@ Electrodes::Electrodes_tACS::output_XML( const std::string files_path_output )
 	  electrode_node.append_attribute("vy")      = electrode.second.direction_vy_;
 	  electrode_node.append_attribute("vz")      = electrode.second.direction_vz_;
 	  electrode_node.append_attribute("label")   = electrode.second.label_.c_str();
-	  electrode_node.append_attribute("I")       = electrode.second.I_ * std::get<1>(time);
+	  if( electrode.second.I_ != 0. )
+	    electrode_node.append_attribute("I")       = electrode.second.I_ + std::get<1>(time);
+	  else
+	    electrode_node.append_attribute("I")       = 0.;
 	  electrode_node.append_attribute("V")       = electrode.second.V_;
 	  electrode_node.append_attribute("Re_z_l")  = electrode.second.Re_z_l_;;
 	  electrode_node.append_attribute("Im_z_l")  = electrode.second.Im_z_l_;

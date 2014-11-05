@@ -17,7 +17,7 @@ endforeach()
 
 #
 # Set compiler flags, include directories and library dependencies
-include_directories( ${Fijee_SOURCE_DIR} )
+include_directories( ${Fijee_SOURCE_DIR} ${Fijee_SOURCE_DIR}/Fijee )
 # Add CXX definitions
 add_definitions( ${Fijee_CXX_DEFINITIONS} )
 # Add flags

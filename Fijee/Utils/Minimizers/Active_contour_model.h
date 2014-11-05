@@ -41,11 +41,11 @@
 // UCSF
 //
 #include "Minimizer.h"
-#include <Fijee/Utils/Data_structure/Basic_point.h>
+#include <Utils/Data_structure/Basic_point.h>
 // 
 // 
 // 
-typedef Utils::Data_structure::Basic_point<int> Point;
+typedef Utils::Data_structure::Basic_point<int> BPoint;
 //
 //
 //
@@ -76,7 +76,7 @@ namespace Utils
     {
     private:
       //! Points of the snake
-      std::list< Point > snake_;
+      std::list< BPoint > snake_;
       //! Length of the snake (euclidean distance)
       double snakelength_;
       //! Size of the image X 
@@ -239,7 +239,7 @@ namespace Utils
        *
        *  This method 
        */
-      double f_uniformity( const Point& prev, const Point& next, const Point& p ) 
+      double f_uniformity( const BPoint& prev, const BPoint& next, const BPoint& p ) 
       {
 	//
 	// length of previous segment
@@ -257,7 +257,7 @@ namespace Utils
        *
        *  This method 
        */
-      double f_curvature( const Point& prev, const Point& p, const Point& next) 
+      double f_curvature( const BPoint& prev, const BPoint& p, const BPoint& next) 
       {
 	// 
 	// 
@@ -292,7 +292,7 @@ namespace Utils
        *
        *  This method 
        */
-     double f_gflow( const Point& cur, const Point& p) 
+     double f_gflow( const BPoint& cur, const BPoint& p) 
      {
        // 
        // gradient flow
@@ -309,7 +309,7 @@ namespace Utils
       *
       *  This method 
       */
-     double f_inertia( const Point& cur, const Point& p) 
+     double f_inertia( const BPoint& cur, const BPoint& p) 
      {
        double d = sqrt( cur.squared_distance( p ) );
        double g = gradient_[cur.x() + height_*cur.y()];

@@ -53,13 +53,13 @@ Utils::Minimizers::Active_contour_model::Active_contour_model( const int Number_
   // 
   // Build the snake
   for( int j = 1 ; j < Number_of_pixels_y-1 ; j++)
-    snake_.push_back(Point( 1, j, K ));
+    snake_.push_back(BPoint( 1, j, K ));
   for( int i = 1 ; i < Number_of_pixels_x-1 ; i++)
-    snake_.push_back(Point( i, Number_of_pixels_y-2, K ));
+    snake_.push_back(BPoint( i, Number_of_pixels_y-2, K ));
   for( int j = 0 ; j < Number_of_pixels_y-2 ; j++)
-    snake_.push_back(Point( Number_of_pixels_x-2, Number_of_pixels_y-2 - j, K ));
+    snake_.push_back(BPoint( Number_of_pixels_x-2, Number_of_pixels_y-2 - j, K ));
 //  for( int i = 0 ; i < Number_of_pixels_x - 1 ; i++)
-//    snake_.push_back(Point( Number_of_pixels_x-1 - i, 0, K ));
+//    snake_.push_back(BPoint( Number_of_pixels_x-1 - i, 0, K ));
   
   // 
   // Build the gradiant map
@@ -246,13 +246,13 @@ Utils::Minimizers::Active_contour_model::iteration_step()
   //
   //
   bool changed = false;
-  Point p( 0, 0, slice_z_ );
+  BPoint p( 0, 0, slice_z_ );
  
   // compute length of original snake (used by method: f_uniformity)
   get_snakelength_();
  
   // compute the new snake
-  std::list<Point> newsnake;
+  std::list<BPoint> newsnake;
  
   // 
   // for each point of the previous snake
@@ -262,9 +262,9 @@ Utils::Minimizers::Active_contour_model::iteration_step()
     {
       // 
       // 
-      Point prev = *(std::next(point,-1));
-      Point cur  = *(point);
-      Point next = *(std::next(point,+1));
+      BPoint prev = *(std::next(point,-1));
+      BPoint cur  = *(point);
+      BPoint next = *(std::next(point,+1));
       // 3x3 neighborhood used to compute energies
       // - 0: e_uniformity: internal energy
       // - 1: e_curvature:  internal energy
@@ -286,7 +286,7 @@ Utils::Minimizers::Active_contour_model::iteration_step()
 	  {
 	    // 
 	    // 
-	    p = Point( cur.x()+dx, cur.y()+dy, slice_z_ );
+	    p = BPoint( cur.x()+dx, cur.y()+dy, slice_z_ );
 	    // 
 	    energy[0][1+dx][1+dy] = f_uniformity( prev, next, p );
 	    energy[1][1+dx][1+dy] = f_curvature( prev, p, next );
@@ -339,7 +339,7 @@ Utils::Minimizers::Active_contour_model::iteration_step()
 	changed = true;
       
       // create the point in the new snake
-      newsnake.push_back( Point(x,y, slice_z_) );
+      newsnake.push_back( BPoint(x,y, slice_z_) );
     }
   
   // new snake becomes current
@@ -376,10 +376,10 @@ Utils::Minimizers::Active_contour_model::add_missing_points()
     if( (std::next(point,1)) != snake_.end() )
       if( (std::next(point,2)) != snake_.end() )
 	{
-	  Point prev   = *(std::next(point,-1));
-	  Point cur    = *(point);
-	  Point next   = *(std::next(point,+1));
-	  Point next2  = *(std::next(point,+2));
+	  BPoint prev   = *(std::next(point,-1));
+	  BPoint cur    = *(point);
+	  BPoint next   = *(std::next(point,+1));
+	  BPoint next2  = *(std::next(point,+2));
 	  
 	  // if the next point is to far then add a new point
 	  if ( cur.squared_distance(next) > 8*8 ) 
@@ -395,7 +395,7 @@ Utils::Minimizers::Active_contour_model::add_missing_points()
 	      double 
 		x = prev.x()*c3 + cur.x()*c2 + next.x()* c1 + next2.x()*c0,
 		y = prev.y()*c3 + cur.y()*c2 + next.y()* c1 + next2.y()*c0;
-	      Point newpoint( static_cast<int>(0.5+x), static_cast<int>(0.5+y), slice_z_ );
+	      BPoint newpoint( static_cast<int>(0.5+x), static_cast<int>(0.5+y), slice_z_ );
 	      
 	      snake_.insert( (std::next(point,1)) , newpoint ); point--; // ??
 	    }
@@ -415,8 +415,8 @@ Utils::Minimizers::Active_contour_model::rebuild()
   for( int i = 0 ; point != snake_.end() ; point++, i++ ) 
     if( (std::next(point,1)) != snake_.end() )
     {
-      Point cur   = *(point);
-      Point next  = *(std::next(point,1));
+      BPoint cur   = *(point);
+      BPoint next  = *(std::next(point,1));
       // 
       clength[i+1] = clength[i] + sqrt(cur.squared_distance(next));
     }
@@ -428,7 +428,7 @@ Utils::Minimizers::Active_contour_model::rebuild()
  
   // 
   // build a new snake
-  std::list< Point > newsnake;
+  std::list< BPoint > newsnake;
   // 
   point = snake_.begin();
   int i = 0;
@@ -447,10 +447,10 @@ Utils::Minimizers::Active_contour_model::rebuild()
 	    }
 	  
 	  // get points (P-1,P,P+1,P+2) in the original snake
-	  Point prev   = *(std::next(point,-1));
-	  Point cur    = *(point);
-	  Point next   = *(std::next(point,+1));
-	  Point next2  = *(std::next(point,+2));
+	  BPoint prev   = *(std::next(point,-1));
+	  BPoint cur    = *(point);
+	  BPoint next   = *(std::next(point,+1));
+	  BPoint next2  = *(std::next(point,+2));
       
 	  // do cubic spline interpolation
 	  double t =   (dist-clength[i])/(clength[i+1]-clength[i]);
@@ -461,7 +461,7 @@ Utils::Minimizers::Active_contour_model::rebuild()
 	  double c3 = -1*t3 +3*t2 -3*t + 1;
 	  double x  =  prev.x()*c3 + cur.x()*c2 + next.x()* c1 + next2.x()*c0;
 	  double y  =  prev.y()*c3 + cur.y()*c2 + next.y()* c1 + next2.y()*c0;
-	  Point newpoint( static_cast<int>(0.5+x/6), static_cast<int>(0.5+y/6), slice_z_ );
+	  BPoint newpoint( static_cast<int>(0.5+x/6), static_cast<int>(0.5+y/6), slice_z_ );
       
 	  // add computed point to the new snake
 	  newsnake.push_back( newpoint );

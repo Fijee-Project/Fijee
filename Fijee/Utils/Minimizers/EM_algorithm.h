@@ -34,11 +34,17 @@
  */
 #include <iostream>
 #include <vector>
+#include <memory>
 #include <algorithm>    // std::sort
+#include <cmath> 
+#include <ctgmath>
 //
 // UCSF
 //
 #include "Minimizer.h"
+#include "Fijee/Fijee_log_management.h"
+#include "Fijee/Fijee_exception_handler.h"
+#include "Utils/Data_structure/Graph_abstract_data_type.h"
 //
 //
 //
@@ -65,6 +71,39 @@ namespace Utils
     class Expectation_maximization : public It_minimizer
     {
     private:
+      //! Number of sites
+      int num_sites_;
+       //! Number of sub sites
+      int num_sub_sites_;
+      //! Measure
+      const unsigned char* measure_;
+      //! Measure
+      const int* bg_mask_;
+      //! Clusters
+       int* clusters_;
+
+
+      //
+      // Sufficient statistics
+      // 
+
+      //! Number of clusters
+      int num_clusters_;
+      //! Mu
+      double* mu_;
+      //! Sigma squared
+      double* sigma_2_;
+      //! Number of sites per cluster
+      int* nk_;
+      
+
+      // 
+      // Graph neigborhood system
+      // 
+      
+      //! Graph neigborhood system
+      Utils::Data_structure::Graph_abstract_data_type<int> neighborhood_system_;
+    
       
     public:
       /*!
@@ -73,31 +112,33 @@ namespace Utils
        *  Constructor of the class Expectation_maximization_sphere
        *
        */
-      Expectation_maximization();
+      Expectation_maximization( const int, const unsigned char*, const int*, int*,
+				const int, double*,
+				const Utils::Data_structure::Graph_abstract_data_type<int>& );
       /*!
        *  \brief Destructeur
        *
        *  Destructor of the class Expectation_maximization_sphere
        */
       virtual ~Expectation_maximization(){/* Do nothing*/};
-      /*!
-       *  \brief Copy Constructor
-       *
-       *  Constructor is a copy constructor
-       *
-       */
-    Expectation_maximization( const Expectation_maximization& that):It_minimizer(that){};
-      /*!
-       *  \brief Operator =
-       *
-       *  Operator = of the class Expectation_maximization_sphere
-       *
-       */
-      Expectation_maximization& operator = ( const Expectation_maximization& that)
-	{
-	  It_minimizer::operator=(that);
-	  return *this;
-	};
+//      /*!
+//       *  \brief Copy Constructor
+//       *
+//       *  Constructor is a copy constructor
+//       *
+//       */
+//    Expectation_maximization( const Expectation_maximization& that):It_minimizer(that){};
+//      /*!
+//       *  \brief Operator =
+//       *
+//       *  Operator = of the class Expectation_maximization_sphere
+//       *
+//       */
+//      Expectation_maximization& operator = ( const Expectation_maximization& that)
+//	{
+//	  It_minimizer::operator=(that);
+//	  return *this;
+//	};
 
       
     public:
@@ -116,6 +157,20 @@ namespace Utils
        */
       virtual void minimize();
 
+    private:
+      /*!
+       *  \brief Expectation–maximization for Gaussian Mixture Model
+       *
+       *  This method for Expectation–maximization for Gaussian Mixture Model
+       */
+      void GMM_EM();
+      void GMM_EM2();
+      /*!
+       *  \brief Expectation–maximization for Hidden Markov Random Field Model
+       *
+       *  This method for Expectation–maximization for Hidden Markov Random Field Model
+       */
+      void HMRF_EM();
     };
     /*!
      *  \brief Dump values for Electrode

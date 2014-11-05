@@ -211,15 +211,20 @@ namespace Utils
       {
 	vertices_ = that.vertices_;
 	edges_    = that.edges_;
+	init_adjacency_matrix();
       }
     //
     //
     //
     template< typename Type_point >
-      Graph_abstract_data_type<Type_point>::Graph_abstract_data_type( Graph_abstract_data_type<Type_point>&& that )
+      Graph_abstract_data_type<Type_point>::Graph_abstract_data_type( Graph_abstract_data_type<Type_point>&& that ):
+    adjacency_matrix_(nullptr)
       {
-	vertices_ = std::move( that.vertices_ );
-	edges_    = std::move( that.edges_ );
+	vertices_         = std::move( that.vertices_ );
+	edges_            = std::move( that.edges_ );
+	adjacency_matrix_ = that.adjacency_matrix_;
+	// 
+	that.adjacency_matrix_ = nullptr;
       }
     //
     //
@@ -231,6 +236,7 @@ namespace Utils
 	  {
 	    vertices_ = that.vertices_;
 	    edges_    = that.edges_;
+	    init_adjacency_matrix();
 	  }
 	//
 	//
@@ -244,8 +250,12 @@ namespace Utils
       {
 	if( this != &that )
 	  {
-	    vertices_ = std::move( that.vertices_ );
-	    edges_    = std::move( that.edges_ );
+	    adjacency_matrix_ = nullptr;
+	    vertices_         = std::move( that.vertices_ );
+	    edges_            = std::move( that.edges_ );
+	    adjacency_matrix_ = that.adjacency_matrix_;
+	    // 
+	    that.adjacency_matrix_ = nullptr;
 	  }
 	//
 	//

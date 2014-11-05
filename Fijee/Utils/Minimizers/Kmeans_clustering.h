@@ -362,7 +362,7 @@ namespace Utils
 	std::cout << std::endl;
 	std::cout << iteration << std::endl;
 	for( int j = 0 ; j < n ; j++ ){
-	  std::cout << Mu[j] << std::endl;}
+	  std::cout << " " << Mu[j];}
 	std::cout << std::endl;
 
 
@@ -374,6 +374,169 @@ namespace Utils
 	    U_ji[j] = nullptr;
 	    delete[] H_ji[j];
 	    H_ji[j] = nullptr;
+	  }
+	// 
+	delete[] x;
+	x = nullptr;
+      }
+      /*
+       * \brief Fuzzy c-means clustering
+       *
+       * This fonction compute the fuzzy c-means clustering following accounting the neighbor system.
+       * In this algorithm we take the fuzzifier m = 2.
+       * Note: the algorithm can be optimized and transfer on GPU. 
+       *
+       */
+      template < typename T, typename U > void Fuzzy_c_means( const int N/*num of sites*/, const T* Points, const U* Bg_mask, U* Clusters, 
+							      const int n/*num od clust*/, double* Mu,
+							      double Epsilon = 1.e-01 )
+      {
+	// 
+	// Time log
+	FIJEE_TIME_PROFILER("Utils::Minimizers::Kmeans_clustering::Fuzzy_c_means");
+
+	// 
+	// Convergence criteria
+	double L_cmeans_old = 1.e+06;
+	double L_cmeans     = 0.;
+	int    iteration    = 0;
+	  
+	// 
+	// Membership matrix
+	double* U_ji[n];
+	//
+	double *x = new double[N];
+
+
+	// 
+	// Determin Max and Min from Points
+	U 
+	  max = 0,
+	  min = 255;
+	// 
+	for ( int i = 0 ; i < N ; i++ )
+	  if( Points[i] > max ) max = static_cast<U>( Points[i] );
+	  else if( Points[i] < min ) min = static_cast<U>( Points[i] );
+	
+	// 
+	// 
+	double set_size = max - min;
+	double domaine  = set_size / (double) n;
+	double min_max_cluster[n][2];
+	// positions Mu in the center of domaines
+	for( int j = 0 ; j < n ; j++ )
+	  {
+	    U_ji[j] = new double[N];
+	    // 
+	    Mu[j] = domaine/2. + j*domaine;
+	    // 
+	    std::cout << Mu[j] << " ";
+	  }
+	std::cout << std::endl;
+
+
+	// 
+	// Minimization loop
+	while( 100 * fabs(L_cmeans-L_cmeans_old) / L_cmeans > Epsilon )
+	  {
+	    // 
+	    // 
+	    iteration++;
+	    std::cout 
+	      << "it: " << iteration << " Cost function L - " 
+	      << "L_old: " << L_cmeans_old << " " 
+	      << "L_new: " << L_cmeans << " " 
+	      << 100 * fabs(L_cmeans-L_cmeans_old) / L_cmeans << "%"
+	      << std::endl;
+
+	    // 
+	    L_cmeans_old = L_cmeans;
+	    L_cmeans = 0;
+
+	    // 
+	    // Determins U_ji (Clusters)
+	    for( int i = 0 ; i < N ; i++ )
+	      if( Bg_mask[i] < 2 )
+	      {
+		double 
+		  x_i         = Points[i],
+		  Denominator = 0.;
+		// 
+		for( int k = 0 ; k < n ; k++ )
+		  {
+		    double deno  = fabs(x_i - Mu[k]);
+		    Denominator += 1./(deno*deno);
+		  }
+		// 
+		for( int j = 0 ; j < n ; j++ )
+		  {
+		    double numerator = fabs(x_i - Mu[j]);
+		    // 
+		    numerator *= numerator*Denominator;
+		    U_ji[j][i] = 1. / numerator;
+		  }
+	      }
+
+
+	    // 
+	    // Recompute Mu
+	    double 
+	      Num = 0., 
+	      Den = 0.;
+	    for( int j = 0 ; j < n ; j++ )
+	      {
+		Num = 0;
+		Den = 0;
+		//	    
+		for( int i = 0 ; i < N ; i++ )
+		  if( Bg_mask[i] < 2 )
+		  {
+		    // 
+		    // 
+		    Num += U_ji[j][i]*U_ji[j][i]*static_cast<double>(Points[i]);
+		    Den += U_ji[j][i]*U_ji[j][i];
+		  }
+		//
+		Mu[j]  = Num / Den;
+	      }
+
+	    // 
+	    // Compute the Lagrangien
+	    for( int i = 0 ; i < N ; i++ )
+	      if( Bg_mask[i] < 2 )
+	      {
+		double cluster_membership = 0.;
+		for( int j = 0 ; j < n ; j++ )
+		  {
+		    L_cmeans += U_ji[j][i]*U_ji[j][i]*(Points[i]-Mu[j])*(Points[i]-Mu[j]);
+		    //
+		    if( cluster_membership < U_ji[j][i] ) 
+		      {
+			cluster_membership = U_ji[j][i];
+			Clusters[i] = j;
+		      }
+		  }
+	      }
+	      else
+		Clusters[i] = 0;
+	  }
+
+
+	//
+	//
+	std::cout << std::endl;
+	std::cout << iteration << std::endl;
+	for( int j = 0 ; j < n ; j++ ){
+	  std::cout << " " << Mu[j];}
+	std::cout << std::endl;
+
+
+	// 
+	// 
+	for( int j = 0 ; j < n ; j++ )
+	  {
+	    delete[] U_ji[j];
+	    U_ji[j] = nullptr;
 	  }
 	// 
 	delete[] x;
