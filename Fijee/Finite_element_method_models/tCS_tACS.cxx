@@ -188,10 +188,21 @@ Solver::tCS_tACS::operator () ( /*Solver::Phi& source,
   // 
   std::cout << "int u dx = " << Sum << std::endl;
  
-// mutex  //
-// mutex  // Filter function over a subdomain
-// mutex  std::list<std::size_t> test_sub_domains{4,5};
-// mutex  solution_domain_extraction(u, test_sub_domains, file_brain_potential_time_series_);
+  //
+  // Filter function over a subdomain
+  if( (SDEsp::get_instance())->get_electric_potential_subdomains_() )
+    try
+      {
+	// lock the electrode list
+	std::lock_guard< std::mutex > lock_critical_zone ( critical_zone_ );
+	// 
+	std::list<std::size_t> test_sub_domains{4,5,6};
+	solution_domain_extraction(u, test_sub_domains, "tACS_potential");
+      }
+    catch (std::logic_error&)
+      {
+	std::cerr << "[exception caught]\n" << std::endl;
+      }
 
   //
   // tACS electric potential
@@ -554,14 +565,14 @@ Solver::tCS_tACS::regulation_factor(const Function& u, std::list<std::size_t>& S
   VTU_xml_file << "  </UnstructuredGrid>" << std::endl;
   VTU_xml_file << "</VTKFile>" << std::endl;
 }
-//
-// 
-//
-void 
-Solver::tCS_tACS::solution_domain_extraction( const dolfin::Function& U, 
-					      const std::list<std::size_t>& Sub_domains,
-					      std::shared_ptr<File> File )
-{
-  // TODO Build a new time series to extract domains
-  // Don't forget to call the mutex while writting the output file.
-}
+////
+//// 
+////
+//void 
+//Solver::tCS_tACS::solution_domain_extraction( const dolfin::Function& U, 
+//					      const std::list<std::size_t>& Sub_domains,
+//					      std::shared_ptr<File> File )
+//{
+//  // TODO Build a new time series to extract domains
+//  // Don't forget to call the mutex while writting the output file.
+//}

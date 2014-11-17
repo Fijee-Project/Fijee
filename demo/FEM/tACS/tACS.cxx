@@ -38,19 +38,29 @@ int main()
 
 //  // 
 //  // tACS electrodes' setup
-//  std::vector< std::tuple<std::string, double> > positive_electrodes;
-//  positive_electrodes.push_back( std::make_tuple("C6", 0.00112 /*[A]*/) );
-//  //  positive_electrodes.push_back( std::make_tuple("FT7", 0.00112 /*[A]*/) );
-//  std::vector< std::tuple<std::string, double> > negative_electrodes;
-//  negative_electrodes.push_back( std::make_tuple("T8", -0.00112 / 4. /*[A]*/) );
-//  negative_electrodes.push_back( std::make_tuple("F8", -0.00112 / 4. /*[A]*/) );
-//  negative_electrodes.push_back( std::make_tuple("C4", -0.00112 / 4. /*[A]*/) );
-//  negative_electrodes.push_back( std::make_tuple("P8", -0.00112 / 4. /*[A]*/) );
+//  std::vector< std::tuple< std::string, double, double, double, double> > positive_electrodes;
+//  positive_electrodes.push_back( std::make_tuple("C6"    /* label */,
+//						 10      /* [Hz]*/,
+//						 0.00112 /* [A] */, 
+//						 0.00050 /* [A] Amplitude */,
+//						 0.      /* phase */) ); 
+//  positive_electrodes.push_back( std::make_tuple("F4"    /* label */,
+//						 10      /* [Hz]*/,
+//						 0.00112 /* [A] */, 
+//						 0.00050 /* [A] Amplitude */,
+//						 3.14    /* Pi phase */) );
+//  //
+//  std::vector< std::tuple< std::string, double, double, double, double> > negative_electrodes;
+//  negative_electrodes.push_back( std::make_tuple("T8", 10., -0.00112 / 2., 0.0005, 0.) );
+//  negative_electrodes.push_back( std::make_tuple("F8", 10., -0.00112 / 2., 0.0005, 0.) );
+//  negative_electrodes.push_back( std::make_tuple("C4", 10., -0.00112 / 2., 0.0005, 0.) );
+//  negative_electrodes.push_back( std::make_tuple("P8", 10., -0.00112 / 2., 0.0005, 0.) );
 //  //  Electrodes::Electrodes_setup< Electrodes::Electrodes_tACS >
 //  Electrodes::Electrodes_tACS electrodes_setting( positive_electrodes, negative_electrodes,
-//					            10  /* [Hz]*/, 0.0005 /* [A] Amplitude */,
-//					            0.1 /* [s] elapse time */, 
-//					            1.  /* [s] starting time */ );
+//						  1.5 /* [s] elapse time */, 
+//						  1.  /* [s] starting time */,
+//						  0.5 /* [s] ramp up time */,
+//						  0.5 /* [s] ramp down time */);
 //  // 
 //  electrodes_setting.output_XML( solver_parameters->get_files_path_output_() );
 
@@ -58,7 +68,7 @@ int main()
   // Physical models:
   // export OMP_NUM_THREADS=2
   Solver::Model_solver< /* physical model */ Solver::tCS_tACS,
-		        /* number_of_threads_ */ 4 >  model;
+		        /* number_of_threads_ */ 1 >  model;
   //
   std::cout << "Loop over solvers" << std::endl;
   model.solver_loop();

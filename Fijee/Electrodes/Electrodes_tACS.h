@@ -64,8 +64,8 @@ namespace Electrodes
   {
     int index_;
     // position
-    double position_x_;
-    double position_y_;
+    double position_x_; /* m */
+    double position_y_; /* m */
     double position_z_; /* m */
     // Direction
     double direction_vx_; 
@@ -74,7 +74,10 @@ namespace Electrodes
     // Label
     std::string label_; 
     // Intensity
-    double I_; /* Ampere */
+    double I_;         /* Ampere */
+    double nu_;        /* Frequency */
+    double amplitude_; /* Oscillation amplitude */
+    double phase_;     /* injection phase */
     // Potential
     double V_; /* Volt */
     // Impedance
@@ -103,10 +106,19 @@ namespace Electrodes
     double I_tot_minus_;
     //! Time step of the time series
     double time_step_;
-    //! Time step of the time series
+    //! Time the proces starts
     double time_start_;
+    //! Time the process ends
+    double time_end_;
+    //! Time injection ramp up
+    double ramp_up_;
+    //! Time injection ramp down
+    double ramp_down_;
     //! Time series
-    std::list< std::tuple< double/*time*/, double/*intensity*/ > > intensity_time_series_;
+    std::map< 
+      std::string /* electrode label */, 
+      std::vector< std::tuple< double/* time */, double/* intensity */ > > 
+      > intensity_time_series_;
 
 
   public:
@@ -123,9 +135,9 @@ namespace Electrodes
      *  Constructor of the class Electrodes_tACS
      *
      */
-    Electrodes_tACS(const std::vector< std::tuple< std::string, double > >,
-		    const std::vector< std::tuple< std::string, double > >,
-		    const double, const double, const double,const double );
+    Electrodes_tACS(const std::vector< std::tuple< std::string, double, double, double, double >  >,
+		    const std::vector< std::tuple< std::string, double, double, double, double >  >,
+		    const double, const double, const double, const double );
     /*!
      *  \brief Copy Constructor
      *
@@ -148,7 +160,15 @@ namespace Electrodes
      */
     Electrodes_tACS& operator = (const Electrodes_tACS& ){return *this;};
       
-
+  private:
+    /*!
+     *  \brief Output XML
+     *
+     *  This member function create the XML output
+     *
+     */
+     double ramping_process( const double );
+   
 
   public:
     /*!
